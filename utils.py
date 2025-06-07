@@ -7,6 +7,7 @@ import tweepy
 from datetime import datetime, timedelta
 import hashlib
 from dotenv import load_dotenv
+from PIL import Image
 
 # .env dosyasını yükle
 load_dotenv()
@@ -508,7 +509,7 @@ def generate_smart_emojis(title, content):
     return emojis[:3]
 
 def generate_comprehensive_analysis(article_data, api_key):
-    """Makale için kapsamlı AI analizi - Ayrı ayrı çağrılar ile güvenilir sonuç"""
+    """Makale için kapsamlı AI analizi - Ayrı ayrı çağrılar ile güvenilir sonuç (İngilizce)"""
     title = article_data.get("title", "")
     content = article_data.get("content", "")
     
@@ -525,38 +526,20 @@ def generate_comprehensive_analysis(article_data, api_key):
     }
     
     try:
-        # 1. Ana yenilik/buluş analizi
-        innovation_prompt = f"""Bu AI/teknoloji haberindeki ana yenilik veya buluşu kısaca açıkla (maksimum 50 kelime):
-
-Başlık: {title}
-İçerik: {content[:800]}
-
-Ana yenilik:"""
-        
+        # 1. Main innovation/insight analysis (ENGLISH)
+        innovation_prompt = f"""Briefly explain the main innovation or breakthrough in this AI/tech news (max 50 words, in English):\n\nTitle: {title}\nContent: {content[:800]}\n\nMain innovation:"""
         innovation = gemini_call(innovation_prompt, api_key, max_tokens=80)
-        analysis_result["innovation"] = innovation.strip() if innovation != "API hatası" else "Teknoloji gelişimi"
+        analysis_result["innovation"] = innovation.strip() if innovation != "API hatası" else "Technology innovation"
         
-        # 2. Şirket analizi
-        company_prompt = f"""Bu haberde bahsedilen ana şirketleri listele (maksimum 3 şirket, virgülle ayır):
-
-Başlık: {title}
-İçerik: {content[:600]}
-
-Şirketler:"""
-        
+        # 2. Company analysis (ENGLISH)
+        company_prompt = f"""List the main companies mentioned in this news (max 3, comma separated, in English):\n\nTitle: {title}\nContent: {content[:600]}\n\nCompanies:"""
         companies_text = gemini_call(company_prompt, api_key, max_tokens=50)
         if companies_text != "API hatası":
             companies = [c.strip() for c in companies_text.split(",") if c.strip()]
             analysis_result["companies"] = companies[:3]
         
-        # 3. Etki seviyesi analizi
-        impact_prompt = f"""Bu haberin teknoloji sektöründeki etkisini 1-10 arasında değerlendir (sadece sayı):
-
-Başlık: {title}
-İçerik: {content[:600]}
-
-Etki skoru (1-10):"""
-        
+        # 3. Impact level analysis (ENGLISH)
+        impact_prompt = f"""Rate the impact of this news on the tech sector from 1 to 10 (just a number):\n\nTitle: {title}\nContent: {content[:600]}\n\nImpact score (1-10):"""
         impact_text = gemini_call(impact_prompt, api_key, max_tokens=10)
         try:
             impact_level = int(impact_text.strip().split()[0])
@@ -565,40 +548,20 @@ Etki skoru (1-10):"""
         except:
             analysis_result["impact_level"] = 5
         
-        # 4. Hedef kitle analizi
-        audience_prompt = f"""Bu haberin hedef kitlesini belirle (Developer/Investor/General):
-
-Başlık: {title}
-İçerik: {content[:500]}
-
-Hedef kitle:"""
-        
+        # 4. Audience analysis (ENGLISH)
+        audience_prompt = f"""Determine the target audience for this news (Developer/Investor/General):\n\nTitle: {title}\nContent: {content[:500]}\n\nAudience:"""
         audience = gemini_call(audience_prompt, api_key, max_tokens=15)
         if audience != "API hatası" and audience.strip() in ["Developer", "Investor", "General"]:
             analysis_result["audience"] = audience.strip()
         
-        # 5. Hashtag analizi - AI + akıllı sistem kombinasyonu
-        hashtag_prompt = f"""Bu haber için en alakalı 3 hashtag öner. Sadece hashtag'leri yaz, virgülle ayır:
-
-Başlık: {title}
-İçerik: {content[:800]}
-
-Örnek: #AI, #Technology, #Innovation
-
-Hashtag'ler:"""
-        
+        # 5. Hashtag analysis (ENGLISH)
+        hashtag_prompt = f"""Suggest the 3 most relevant hashtags for this news (in English, only hashtags, comma separated):\n\nTitle: {title}\nContent: {content[:800]}\n\nExample: #AI, #Technology, #Innovation\n\nHashtags:"""
         ai_hashtags_text = gemini_call(hashtag_prompt, api_key, max_tokens=50)
         ai_hashtags = []
-        
         if ai_hashtags_text != "API hatası":
-            # AI'den gelen hashtag'leri temizle ve parse et
-            clean_text = ai_hashtags_text.replace("Hashtag'ler:", "").replace("Hashtag'ler", "").strip()
-            
-            # Virgül veya boşlukla ayrılmış hashtag'leri bul
+            clean_text = ai_hashtags_text.replace("Hashtags:", "").replace("Hashtag'ler:", "").replace("Hashtag'ler", "").strip()
             import re
             hashtag_matches = re.findall(r'#\w+', clean_text)
-            
-            # Eğer # ile başlayan bulunamazsa, kelimeleri hashtag yap
             if not hashtag_matches:
                 words = re.findall(r'\b[A-Za-z][A-Za-z0-9]*\b', clean_text)
                 for word in words[:3]:
@@ -606,36 +569,21 @@ Hashtag'ler:"""
                         ai_hashtags.append(f"#{word}")
             else:
                 ai_hashtags = hashtag_matches[:3]
-        
-        # Akıllı hashtag sistemi ile birleştir
+        # Smart hashtag system (ENGLISH)
         smart_hashtags = generate_smart_hashtags(title, content)
-        
-        # AI ve akıllı hashtag'leri birleştir (AI öncelikli, 3 hashtag)
         combined_hashtags = []
-        for tag in ai_hashtags[:3]:  # AI'den en fazla 3
+        for tag in ai_hashtags[:3]:
             if tag not in combined_hashtags:
                 combined_hashtags.append(tag)
-        
-        # Eksik varsa akıllı sistemden tamamla
         for tag in smart_hashtags:
             if tag not in combined_hashtags and len(combined_hashtags) < 3:
                 combined_hashtags.append(tag)
-        
         analysis_result["hashtags"] = combined_hashtags[:3]
-        
-        # 6. Emoji analizi
-        emoji_prompt = f"""Bu haber için en uygun 3 emoji öner (sadece emojiler, boşluksuz):
-
-Başlık: {title}
-İçerik: {content[:500]}
-
-Emojiler:"""
-        
+        # 6. Emoji analysis (unchanged, universal)
+        emoji_prompt = f"""Suggest the 3 most suitable emojis for this news (just emojis, no spaces):\n\nTitle: {title}\nContent: {content[:500]}\n\nEmojis:"""
         ai_emojis_text = gemini_call(emoji_prompt, api_key, max_tokens=20)
         ai_emojis = []
-        
         if ai_emojis_text != "API hatası":
-            # Emoji'leri çıkar
             import re
             emoji_pattern = re.compile(r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF\U00002702-\U000027B0\U000024C2-\U0001F251]+')
             found_emojis = emoji_pattern.findall(ai_emojis_text)
@@ -643,32 +591,23 @@ Emojiler:"""
                 for single_emoji in emoji:
                     if single_emoji not in ai_emojis and len(ai_emojis) < 3:
                         ai_emojis.append(single_emoji)
-        
-        # Akıllı emoji sistemi ile birleştir
         smart_emojis = generate_smart_emojis(title, content)
-        
-        # AI ve akıllı emoji'leri birleştir
-        combined_emojis = ai_emojis[:2]  # AI'den en fazla 2
+        combined_emojis = ai_emojis[:2]
         for emoji in smart_emojis:
             if emoji not in combined_emojis and len(combined_emojis) < 3:
                 combined_emojis.append(emoji)
-        
         analysis_result["emojis"] = combined_emojis[:3]
-        
         print(f"✅ Kapsamlı analiz tamamlandı:")
-        print(f"🔬 Yenilik: {analysis_result['innovation'][:50]}...")
-        print(f"🏢 Şirketler: {', '.join(analysis_result['companies'])}")
-        print(f"🎯 Kitle: {analysis_result['audience']}")
-        print(f"🏷️ Hashtag'ler: {' '.join(analysis_result['hashtags'])}")
-        print(f"😊 Emojiler: {''.join(analysis_result['emojis'])}")
-        
+        print(f"🔬 Innovation: {analysis_result['innovation'][:50]}...")
+        print(f"🏢 Companies: {', '.join(analysis_result['companies'])}")
+        print(f"🎯 Audience: {analysis_result['audience']}")
+        print(f"🏷️ Hashtags: {' '.join(analysis_result['hashtags'])}")
+        print(f"😊 Emojis: {''.join(analysis_result['emojis'])}")
         return analysis_result
-        
     except Exception as e:
         print(f"❌ Kapsamlı analiz hatası: {e}")
-        # Fallback analiz
         return {
-            "innovation": "AI/teknoloji gelişimi",
+            "innovation": "AI/tech innovation",
             "companies": [],
             "impact_level": 5,
             "audience": "General",
@@ -1148,31 +1087,17 @@ def create_fallback_tweet(title, content, url=""):
             return simple_tweet
 
 def setup_twitter_api():
-    """X (Twitter) API kurulumu"""
-    try:
-        bearer_token = os.getenv("TWITTER_BEARER_TOKEN")
-        api_key = os.getenv("TWITTER_API_KEY")
-        api_secret = os.getenv("TWITTER_API_SECRET")
-        access_token = os.getenv("TWITTER_ACCESS_TOKEN")
-        access_token_secret = os.getenv("TWITTER_ACCESS_TOKEN_SECRET")
-        
-        if not all([bearer_token, api_key, api_secret, access_token, access_token_secret]):
-            raise ValueError("Twitter API anahtarları eksik. .env dosyasını kontrol edin.")
-        
-        # Twitter API v2 client
-        client = tweepy.Client(
-            bearer_token=bearer_token,
-            consumer_key=api_key,
-            consumer_secret=api_secret,
-            access_token=access_token,
-            access_token_secret=access_token_secret,
-            wait_on_rate_limit=True
-        )
-        
-        return client
-    except Exception as e:
-        print(f"Twitter API kurulum hatası: {e}")
-        return None
+    import tweepy
+    import os
+    # V1.1 API ile oturum aç
+    auth = tweepy.OAuth1UserHandler(
+        os.environ['TWITTER_API_KEY'],
+        os.environ['TWITTER_API_SECRET'],
+        os.environ['TWITTER_ACCESS_TOKEN'],
+        os.environ['TWITTER_ACCESS_TOKEN_SECRET']
+    )
+    api = tweepy.API(auth)
+    return api
 
 def post_tweet(tweet_text, article_title=""):
     """X platformunda tweet paylaşma ve Telegram bildirimi"""
@@ -1180,36 +1105,28 @@ def post_tweet(tweet_text, article_title=""):
         client = setup_twitter_api()
         if not client:
             return {"success": False, "error": "Twitter API kurulumu başarısız"}
-        
         # Tweet uzunluk kontrolü (280 karakter limiti)
         TWITTER_LIMIT = 280
         if len(tweet_text) > TWITTER_LIMIT:
             print(f"[WARNING] Tweet çok uzun ({len(tweet_text)} karakter), kısaltılıyor...")
-            
             # URL'yi koruyarak kısalt
             if "\n\n🔗" in tweet_text:
                 parts = tweet_text.split("\n\n🔗")
                 main_text = parts[0]
                 url_part = f"\n\n🔗{parts[1]}"
-                
                 # Ana metni kısalt
                 available_chars = TWITTER_LIMIT - len(url_part)
                 if len(main_text) > available_chars:
                     main_text = main_text[:available_chars-3] + "..."
-                
                 tweet_text = f"{main_text}{url_part}"
             else:
                 # URL yoksa direkt kısalt
                 tweet_text = tweet_text[:TWITTER_LIMIT-3] + "..."
-        
         print(f"[DEBUG] Final tweet uzunluğu: {len(tweet_text)} karakter")
-        
-        response = client.create_tweet(text=tweet_text)
-        
-        if response.data:
-            tweet_id = response.data['id']
+        tweet = client.update_status(status=tweet_text)
+        if tweet and hasattr(tweet, 'id'):
+            tweet_id = tweet.id
             tweet_url = f"https://twitter.com/user/status/{tweet_id}"
-            
             # Telegram bildirimi gönder
             try:
                 telegram_result = send_telegram_notification(
@@ -1217,24 +1134,20 @@ def post_tweet(tweet_text, article_title=""):
                     tweet_url=tweet_url,
                     article_title=article_title
                 )
-                
                 if telegram_result.get("success"):
                     print(f"[SUCCESS] Telegram bildirimi gönderildi")
                 else:
                     print(f"[WARNING] Telegram bildirimi gönderilemedi: {telegram_result.get('reason', 'unknown')}")
-                    
             except Exception as telegram_error:
                 print(f"[ERROR] Telegram bildirim hatası: {telegram_error}")
-            
             return {
-                "success": True, 
+                "success": True,
                 "tweet_id": tweet_id,
                 "url": tweet_url,
                 "telegram_sent": telegram_result.get("success", False) if 'telegram_result' in locals() else False
             }
         else:
             return {"success": False, "error": "Tweet oluşturulamadı"}
-            
     except Exception as e:
         return {"success": False, "error": f"Tweet paylaşım hatası: {str(e)}"}
 
@@ -2177,4 +2090,185 @@ def test_mcp_connection():
             "success": False,
             "message": f"❌ MCP test hatası: {e}",
             "details": "Bağlantı testi sırasında hata oluştu"
+        }
+
+def gemini_ocr_image(image_path):
+    import google.generativeai as genai
+    import os
+    from PIL import Image
+
+    api_key = os.environ.get('GOOGLE_API_KEY')
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel('gemini-2.0-flash')
+
+    # Resmi PIL ile aç
+    image = Image.open(image_path)
+    prompt = "Bu görseldeki tüm metni OCR ile çıkar ve sadece metni döndür."
+    response = model.generate_content([prompt, image])
+    return response.text.strip()
+
+def setup_twitter_v2_client():
+    """Tweepy v2 API Client ile kimlik doğrulama (sadece metinli tweet için)"""
+    import tweepy
+    import os
+    # v2 API Client
+    client = tweepy.Client(
+        bearer_token=os.environ.get('TWITTER_BEARER_TOKEN'),
+        consumer_key=os.environ.get('TWITTER_API_KEY'),
+        consumer_secret=os.environ.get('TWITTER_API_SECRET'),
+        access_token=os.environ.get('TWITTER_ACCESS_TOKEN'),
+        access_token_secret=os.environ.get('TWITTER_ACCESS_TOKEN_SECRET')
+    )
+    return client
+
+def post_text_tweet_v2(tweet_text):
+    """Sadece metinli tweet atmak için Tweepy v2 API kullanımı"""
+    try:
+        client = setup_twitter_v2_client()
+        TWITTER_LIMIT = 280
+        if len(tweet_text) > TWITTER_LIMIT:
+            tweet_text = tweet_text[:TWITTER_LIMIT-3] + "..."
+        print(f"[DEBUG][post_text_tweet_v2] Tweet uzunluğu: {len(tweet_text)}")
+        response = client.create_tweet(text=tweet_text)
+        if hasattr(response, 'data') and response.data and 'id' in response.data:
+            tweet_id = response.data['id']
+            tweet_url = f"https://twitter.com/user/status/{tweet_id}"
+            print(f"[SUCCESS][post_text_tweet_v2] Tweet gönderildi: {tweet_url}")
+            return {"success": True, "tweet_id": tweet_id, "url": tweet_url}
+        else:
+            print(f"[ERROR][post_text_tweet_v2] Tweet gönderilemedi: {response}")
+            return {"success": False, "error": "Tweet gönderilemedi"}
+    except Exception as e:
+        print(f"[ERROR][post_text_tweet_v2] Hata: {e}")
+        return {"success": False, "error": str(e)}
+
+def fetch_url_content_with_mcp(url):
+    """MCP ile URL içeriği çekme - Tweet oluşturma için"""
+    try:
+        print(f"🔍 MCP ile URL içeriği çekiliyor: {url}")
+        
+        # Firecrawl MCP scrape fonksiyonunu kullan
+        scrape_result = mcp_firecrawl_scrape({
+            "url": url,
+            "formats": ["markdown"],
+            "onlyMainContent": True,
+            "waitFor": 3000,
+            "removeBase64Images": True
+        })
+        
+        if not scrape_result.get("success", False):
+            print(f"⚠️ MCP başarısız, fallback deneniyor...")
+            return fetch_url_content_fallback(url)
+        
+        # Markdown içeriğini al
+        markdown_content = scrape_result.get("markdown", "")
+        
+        if not markdown_content or len(markdown_content) < 100:
+            print(f"⚠️ MCP'den yetersiz içerik, fallback deneniyor...")
+            return fetch_url_content_fallback(url)
+        
+        # Başlığı çıkar (genellikle ilk # ile başlar)
+        lines = markdown_content.split('\n')
+        title = ""
+        content_lines = []
+        
+        for line in lines:
+            line = line.strip()
+            if line.startswith('# ') and not title:
+                title = line[2:].strip()
+            elif line and not line.startswith('#') and len(line) > 20:
+                content_lines.append(line)
+        
+        # İçeriği birleştir ve temizle
+        content = '\n'.join(content_lines)
+        
+        # Gereksiz karakterleri temizle
+        content = content.replace('*', '').replace('**', '').replace('_', '')
+        content = ' '.join(content.split())  # Çoklu boşlukları tek boşluğa çevir
+        
+        # İçeriği sınırla
+        content = content[:2000]
+        
+        print(f"✅ MCP ile URL içeriği çekildi: {len(content)} karakter")
+        
+        return {
+            "title": title or "Başlık bulunamadı",
+            "content": content,
+            "url": url,
+            "source": "mcp"
+        }
+        
+    except Exception as e:
+        print(f"❌ MCP URL çekme hatası ({url}): {e}")
+        print("🔄 Fallback yönteme geçiliyor...")
+        return fetch_url_content_fallback(url)
+
+def fetch_url_content_fallback(url):
+    """Fallback URL içeriği çekme - BeautifulSoup ile"""
+    try:
+        print(f"🔄 Fallback ile URL içeriği çekiliyor: {url}")
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, "html.parser")
+        
+        # Başlığı bul
+        title = ""
+        title_selectors = ["h1", "h1.entry-title", "h1.post-title", ".article-title h1", "title"]
+        for selector in title_selectors:
+            title_elem = soup.select_one(selector)
+            if title_elem:
+                title = title_elem.text.strip()
+                break
+        
+        # İçeriği bul - çoklu selector deneme
+        content_selectors = [
+            "article p",
+            "div.article-content p",
+            "div.entry-content p", 
+            "div.post-content p",
+            "div.content p",
+            ".article-body p",
+            "main p",
+            ".post p"
+        ]
+        
+        content = ""
+        for selector in content_selectors:
+            paragraphs = soup.select(selector)
+            if paragraphs:
+                content = "\n".join([p.text.strip() for p in paragraphs if p.text.strip() and len(p.text.strip()) > 20])
+                if len(content) > 200:  # Yeterli içerik bulundu
+                    break
+        
+        # Eğer hala içerik bulunamadıysa, tüm p etiketlerini dene
+        if not content:
+            all_paragraphs = soup.find_all('p')
+            content = "\n".join([p.text.strip() for p in all_paragraphs if len(p.text.strip()) > 30])
+        
+        # İçeriği temizle ve sınırla
+        content = ' '.join(content.split())  # Çoklu boşlukları temizle
+        content = content[:2000]  # İçeriği sınırla
+        
+        print(f"✅ Fallback ile URL içeriği çekildi: {len(content)} karakter")
+        
+        return {
+            "title": title or "Başlık bulunamadı",
+            "content": content,
+            "url": url,
+            "source": "fallback"
+        }
+        
+    except Exception as e:
+        print(f"❌ Fallback URL çekme hatası ({url}): {e}")
+        return {
+            "title": "İçerik çekilemedi",
+            "content": f"URL: {url} - İçerik çekilemedi: {str(e)}",
+            "url": url,
+            "source": "error"
         }

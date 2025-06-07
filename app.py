@@ -5,6 +5,8 @@ import time
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from functools import wraps
+from werkzeug.utils import secure_filename
+import tweepy
 
 # .env dosyasını yükle
 load_dotenv()
@@ -14,7 +16,8 @@ from utils import (
     get_posted_articles_summary, reset_all_data, clear_pending_tweets,
     get_data_statistics, load_automation_settings, save_automation_settings,
     get_automation_status, send_telegram_notification, test_telegram_connection,
-    check_telegram_configuration, auto_detect_and_save_chat_id
+    check_telegram_configuration, auto_detect_and_save_chat_id,
+    setup_twitter_api
 )
 
 app = Flask(__name__)
@@ -645,6 +648,126 @@ def debug_stats():
         
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
+
+@app.route('/create_tweet', methods=['GET', 'POST'])
+@login_required
+def create_tweet():
+    if request.method == 'POST':
+        tweet_mode = request.form.get('tweet_mode', 'text')
+        tweet_text = request.form.get('tweet_text')
+        image_file = request.files.get('tweet_image')
+        tweet_url = request.form.get('tweet_url')
+        image_path = None
+        api_key = os.environ.get('GOOGLE_API_KEY')
+
+        if tweet_mode == 'image':
+            # Sadece resimden tweet
+            if image_file and image_file.filename:
+                filename = secure_filename(image_file.filename)
+                image_path = os.path.join('static', 'uploads', filename)
+                os.makedirs(os.path.dirname(image_path), exist_ok=True)
+                image_file.save(image_path)
+                try:
+                    from utils import gemini_ocr_image, generate_ai_tweet_with_content
+                    ocr_text = gemini_ocr_image(image_path)
+                    # AI ile konuya uygun tweet üret
+                    article_data = {
+                        'title': ocr_text[:100],
+                        'content': ocr_text,
+                        'url': '',
+                        'lang': 'en'
+                    }
+                    tweet_data = generate_ai_tweet_with_content(article_data, api_key)
+                    tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
+                except Exception as e:
+                    flash(f'Resimden tweet oluşturulamadı: {e}', 'error')
+                    return redirect(url_for('create_tweet'))
+            else:
+                flash('Resim yüklenmedi!', 'error')
+                return redirect(url_for('create_tweet'))
+        elif tweet_mode == 'link':
+            # Link'ten tweet
+            if not tweet_url or not tweet_url.strip():
+                flash('URL boş olamaz!', 'error')
+                return redirect(url_for('create_tweet'))
+            
+            try:
+                from utils import fetch_url_content_with_mcp, generate_ai_tweet_with_content
+                
+                # URL'den içerik çek
+                url_content = fetch_url_content_with_mcp(tweet_url.strip())
+                
+                if not url_content or not url_content.get('content'):
+                    flash('URL\'den içerik çekilemedi!', 'error')
+                    return redirect(url_for('create_tweet'))
+                
+                # AI ile tweet oluştur
+                article_data = {
+                    'title': url_content.get('title', ''),
+                    'content': url_content.get('content', ''),
+                    'url': url_content.get('url', ''),
+                    'lang': 'en'
+                }
+                tweet_data = generate_ai_tweet_with_content(article_data, api_key)
+                tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
+                
+            except Exception as e:
+                flash(f'Link\'ten tweet oluşturulamadı: {e}', 'error')
+                return redirect(url_for('create_tweet'))
+        else:
+            # Sadece metinden tweet
+            if not tweet_text or not tweet_text.strip():
+                flash('Tweet metni boş olamaz!', 'error')
+                return redirect(url_for('create_tweet'))
+            
+            try:
+                from utils import generate_ai_tweet_with_content
+                article_data = {
+                    'title': tweet_text[:100],
+                    'content': tweet_text,
+                    'url': '',
+                    'lang': 'en'
+                }
+                tweet_data = generate_ai_tweet_with_content(article_data, api_key)
+                tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
+            except Exception as e:
+                flash(f'AI ile tweet metni oluşturulamadı: {e}', 'error')
+                return redirect(url_for('create_tweet'))
+
+        # Tweet oluşturuldu - sadece önizleme göster, paylaşma
+        flash('✅ Tweet başarıyla oluşturuldu! Aşağıdaki metni kopyalayıp Twitter\'da manuel olarak paylaşabilirsiniz.', 'success')
+        return render_template('create_tweet.html', generated_tweet=tweet_text)
+
+    return render_template('create_tweet.html')
+
+@app.route('/ocr_image', methods=['POST'])
+@login_required
+def ocr_image():
+    image_file = request.files.get('image')
+    if not image_file or not image_file.filename:
+        return jsonify({'success': False, 'error': 'Resim bulunamadı.'}), 400
+
+    filename = secure_filename(image_file.filename)
+    image_path = os.path.join('static', 'uploads', filename)
+    os.makedirs(os.path.dirname(image_path), exist_ok=True)
+    image_file.save(image_path)
+
+    try:
+        from utils import gemini_ocr_image, generate_ai_tweet_with_content
+        ocr_text = gemini_ocr_image(image_path)
+        # AI ile konuya uygun tweet üret
+        api_key = os.environ.get('GOOGLE_API_KEY')
+        article_data = {
+            'title': ocr_text[:100],
+            'content': ocr_text,
+            'url': '',
+            'lang': 'en'
+        }
+        tweet_data = generate_ai_tweet_with_content(article_data, api_key)
+        tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
+        return jsonify({'success': True, 'text': tweet_text})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
     # Python Anywhere için production ayarları

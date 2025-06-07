@@ -100,6 +100,10 @@
                         <i class="fas fa-chart-bar"></i>
                         <span>İstatistikler</span>
                     </a>
+                    <a href="{{ url_for('create_tweet') }}" class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-150 hover:bg-green-50 hover:text-green-700 {% if request.endpoint == 'create_tweet' %}text-green-700 font-bold bg-green-100{% else %}text-gray-800{% endif %}">
+                        <i class="fas fa-pen-nib"></i>
+                        <span>Tweet Oluştur</span>
+                    </a>
                 </div>
 
                 <!-- Action Buttons -->
@@ -139,6 +143,10 @@
                 <a href="{{ url_for('statistics') }}" class="mobile-nav-link">
                     <i class="fas fa-chart-bar"></i>
                     <span>İstatistikler</span>
+                </a>
+                <a href="{{ url_for('create_tweet') }}" class="mobile-nav-link text-green-700">
+                    <i class="fas fa-pen-nib"></i>
+                    <span>Tweet Oluştur</span>
                 </a>
                 <a href="{{ url_for('check_articles') }}" class="mobile-nav-link text-green-600">
                     <i class="fas fa-sync-alt"></i>
