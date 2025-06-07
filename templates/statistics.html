@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}AI Tweet Bot - İstatistikler{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- İstatistik Kartları -->
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card text-center">
+            <div class="card-body">
+                <i class="fas fa-newspaper fa-2x mb-2"></i>
+                <h3>{{ stats.total_articles or 0 }}</h3>
+                <p class="mb-0">Toplam Makale</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card text-center">
+            <div class="card-body">
+                <i class="fab fa-twitter fa-2x mb-2"></i>
+                <h3>{{ stats.posted_tweets or 0 }}</h3>
+                <p class="mb-0">Paylaşılan Tweet</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card text-center">
+            <div class="card-body">
+                <i class="fas fa-clock fa-2x mb-2"></i>
+                <h3>{{ stats.pending_tweets or 0 }}</h3>
+                <p class="mb-0">Bekleyen Tweet</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card stats-card text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-2x mb-2"></i>
+                <h3>{{ "%.1f"|format(stats.average_score or 0) }}</h3>
+                <p class="mb-0">Ortalama Skor</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detaylı İstatistikler -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Günlük İstatistikler
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if stats %}
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Bugün:</span>
+                                <strong>{{ stats.today_articles or 0 }} makale</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Bu hafta:</span>
+                                <strong>{{ stats.week_articles or 0 }} makale</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Başarı oranı:</span>
+                                <strong>{{ "%.1f"|format(stats.success_rate or 0) }}%</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Son kontrol:</span>
+                                <strong>{{ stats.last_check_time or 'Henüz yok' }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-muted">İstatistik verisi bulunamadı</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-tags me-2"></i>Popüler Kategoriler
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if stats and stats.category_distribution %}
+                    {% for category, count in stats.category_distribution.items() %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>{{ category.title() }}</span>
+                        <div>
+                            <span class="badge bg-primary">{{ count }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">Kategori verisi bulunamadı</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Özet Bilgiler -->
+{% if summary %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-file-alt me-2"></i>Özet Rapor
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>En Yüksek Skorlu Makale:</h6>
+                {% if summary.highest_scored %}
+                    <p class="text-muted">{{ summary.highest_scored.title[:100] }}...</p>
+                    <small class="text-success">Skor: {{ summary.highest_scored.score }}/10</small>
+                {% else %}
+                    <p class="text-muted">Veri bulunamadı</p>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h6>En Son Paylaşılan:</h6>
+                {% if summary.latest_posted %}
+                    <p class="text-muted">{{ summary.latest_posted.title[:100] }}...</p>
+                    <small class="text-info">{{ summary.latest_posted.posted_date[:10] if summary.latest_posted.posted_date else 'Tarih yok' }}</small>
+                {% else %}
+                    <p class="text-muted">Henüz paylaşılan tweet yok</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Veri Yönetimi -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-database me-2"></i>Veri Yönetimi
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Dosya Boyutları:</h6>
+                {% if stats %}
+                    <ul class="list-unstyled">
+                        <li><strong>Makaleler:</strong> {{ stats.articles_file_size or 'N/A' }}</li>
+                        <li><strong>Bekleyen Tweet'ler:</strong> {{ stats.pending_file_size or 'N/A' }}</li>
+                        <li><strong>Ayarlar:</strong> {{ stats.settings_file_size or 'N/A' }}</li>
+                    </ul>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h6>Tehlikeli İşlemler:</h6>
+                <div class="d-grid gap-2">
+                    <form method="POST" action="{{ url_for('reset_data') }}" onsubmit="return confirm('Tüm veriler silinecek! Emin misiniz?')">
+                        <button type="submit" class="btn btn-danger btn-sm w-100">
+                            <i class="fas fa-trash-alt me-2"></i>Tüm Verileri Sıfırla
+                        </button>
+                    </form>
+                    <a href="{{ url_for('clear_pending') }}" class="btn btn-warning btn-sm" 
+                       onclick="return confirm('Bekleyen tweet\'ler silinecek! Emin misiniz?')">
+                        <i class="fas fa-broom me-2"></i>Bekleyenleri Temizle
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-warning mt-3">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Uyarı:</strong> Veri sıfırlama işlemi geri alınamaz. Lütfen dikkatli olun.
+        </div>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger mt-3">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    Hata: {{ error }}
+</div>
+{% endif %}
+{% endblock %} 

@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}AI Tweet Bot - Ana Sayfa{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sol Kolon - Durum ve Kontroller -->
+    <div class="col-lg-4 mb-4">
+        <!-- Otomasyon Durumu -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-robot me-2"></i>Otomasyon Durumu
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if automation_status %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Otomatik Mod:</span>
+                        <span class="automation-status {{ 'status-active' if automation_status.auto_mode else 'status-inactive' }}">
+                            {{ 'AÇIK' if automation_status.auto_mode else 'KAPALI' }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Kontrol Aralığı:</span>
+                        <span>{{ automation_status.check_interval_hours }} saat</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Minimum Skor:</span>
+                        <span>{{ automation_status.min_score_threshold }}/10</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Son Kontrol:</span>
+                        <span class="text-muted">
+                            {% if last_check %}
+                                {{ last_check.strftime('%H:%M') }}
+                            {% else %}
+                                Henüz yok
+                            {% endif %}
+                        </span>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Otomasyon ayarları yüklenemedi</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Hızlı İstatistikler -->
+        <div class="card stats-card mb-3">
+            <div class="card-body text-center">
+                <h5 class="card-title">Bugünkü İstatistikler</h5>
+                {% if stats %}
+                    <div class="row">
+                        <div class="col-6">
+                            <h3>{{ stats.total_articles or 0 }}</h3>
+                            <small>Toplam Makale</small>
+                        </div>
+                        <div class="col-6">
+                            <h3>{{ stats.pending_tweets or 0 }}</h3>
+                            <small>Bekleyen Tweet</small>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- API Durumu -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-key me-2"></i>API Durumu
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if api_check %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span><i class="fab fa-google me-1"></i>Gemini AI:</span>
+                        <span class="{{ 'text-success' if api_check.google_api_available else 'text-danger' }}">
+                            {{ '✅ Mevcut' if api_check.google_api_available else '❌ Eksik' }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span><i class="fab fa-twitter me-1"></i>Twitter API:</span>
+                        <span class="{{ 'text-success' if api_check.twitter_api_available else 'text-danger' }}">
+                            {{ '✅ Mevcut' if api_check.twitter_api_available else '❌ Eksik' }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fab fa-telegram me-1"></i>Telegram:</span>
+                        <span class="{{ 'text-success' if api_check.telegram_available else 'text-warning' }}">
+                            {{ '✅ Mevcut' if api_check.telegram_available else '⚠️ Opsiyonel' }}
+                        </span>
+                    </div>
+                {% else %}
+                    <p class="text-muted">API durumu kontrol edilemedi</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Hızlı Kontroller -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2"></i>Hızlı Kontroller
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('check_articles') }}" class="btn btn-primary">
+                        <i class="fas fa-sync-alt me-2"></i>Şimdi Kontrol Et
+                    </a>
+                    <a href="{{ url_for('settings') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-2"></i>Ayarları Düzenle
+                    </a>
+                    <a href="{{ url_for('clear_pending') }}" class="btn btn-outline-warning">
+                        <i class="fas fa-trash me-2"></i>Bekleyenleri Temizle
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sağ Kolon - Tweet'ler -->
+    <div class="col-lg-8">
+        <!-- Bekleyen Tweet'ler -->
+        {% if pending_tweets %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-clock me-2"></i>Onay Bekleyen Tweet'ler ({{ pending_tweets|length }})
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for tweet in pending_tweets %}
+                <div class="card pending-tweet mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="card-title">{{ tweet.article.title[:80] }}...</h6>
+                            <span class="badge bg-warning">Bekliyor</span>
+                        </div>
+                        
+                        <div class="tweet-preview bg-light p-3 rounded mb-3">
+                            <p class="mb-0">{{ tweet.tweet_data.tweet }}</p>
+                        </div>
+                        
+                        <div class="row text-muted small mb-3">
+                            <div class="col-md-6">
+                                <i class="fas fa-chart-line me-1"></i>
+                                Etki: {{ tweet.tweet_data.impact_score or 'N/A' }}/10
+                            </div>
+                            <div class="col-md-6">
+                                <i class="fas fa-users me-1"></i>
+                                Kitle: {{ tweet.tweet_data.target_audience or 'Genel' }}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success btn-sm" onclick="postTweet('{{ loop.index0 }}')">
+                                <i class="fas fa-share me-1"></i>Paylaş
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteTweet('{{ loop.index0 }}')">
+                                <i class="fas fa-trash me-1"></i>Sil
+                            </button>
+                            <a href="{{ tweet.article.url }}" target="_blank" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-external-link-alt me-1"></i>Makaleyi Oku
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Son Paylaşılan Tweet'ler -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-twitter me-2"></i>Son Paylaşılan Tweet'ler
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if articles %}
+                    {% for article in articles|reverse %}
+                    <div class="card tweet-card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title">{{ article.title[:80] }}...</h6>
+                                <span class="badge bg-success">Paylaşıldı</span>
+                            </div>
+                            
+                            {% if article.tweet_text %}
+                            <div class="tweet-preview bg-light p-3 rounded mb-3">
+                                <p class="mb-0">{{ article.tweet_text }}</p>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="row text-muted small mb-2">
+                                <div class="col-md-6">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ article.posted_date[:10] if article.posted_date else 'Tarih yok' }}
+                                </div>
+                                <div class="col-md-6">
+                                    <i class="fas fa-chart-line me-1"></i>
+                                    Etki: {{ article.impact_score or 'N/A' }}/10
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                {% if article.tweet_url %}
+                                <a href="{{ article.tweet_url }}" target="_blank" class="btn btn-primary btn-sm">
+                                    <i class="fab fa-twitter me-1"></i>Tweet'i Gör
+                                </a>
+                                {% endif %}
+                                <a href="{{ article.url }}" target="_blank" class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-external-link-alt me-1"></i>Makaleyi Oku
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Henüz paylaşılan tweet yok</h5>
+                        <p class="text-muted">İlk tweet'inizi paylaşmak için "Şimdi Kontrol Et" butonuna tıklayın.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger mt-3">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    Hata: {{ error }}
+</div>
+{% endif %}
+{% endblock %} 
