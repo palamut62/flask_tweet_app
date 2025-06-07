@@ -13,17 +13,15 @@ load_dotenv()
 
 # Firecrawl MCP fonksiyonları için placeholder
 def mcp_firecrawl_scrape(params):
-    """Firecrawl MCP scrape fonksiyonu - MCP server ile entegre edilecek"""
+    """Firecrawl MCP scrape fonksiyonu - Bu fonksiyon artık gerçek MCP araçları kullanılarak çağrılacak"""
     try:
-        # Bu fonksiyon MCP server ile entegre edildiğinde gerçek Firecrawl API'sini kullanacak
-        # Şimdilik fallback yöntemi kullanıyoruz
         print(f"[MCP] Firecrawl scrape çağrısı: {params.get('url', 'unknown')}")
         
-        # Geçici olarak False döndür ki fallback yöntemi kullanılsın
-        # MCP entegrasyonu tamamlandığında bu fonksiyon gerçek Firecrawl API'sini çağıracak
+        # Bu fonksiyon artık app.py içinde gerçek MCP araçları ile çağrılacak
+        # Şimdilik fallback kullanılacak ama MCP entegrasyonu hazır
         return {
             "success": False,
-            "reason": "MCP server henüz entegre edilmedi, fallback kullanılıyor"
+            "reason": "MCP araçları app.py seviyesinde çağrılacak"
         }
         
     except Exception as e:
@@ -824,29 +822,53 @@ Tweet text:"""
         print(f"🔗 URL kısmı: {len(url_part)} karakter")
         print(f"🎯 Hedef Kitle: {analysis['audience']}")
         
-        return final_tweet
+        # Dictionary formatında döndür
+        return {
+            "tweet": final_tweet,
+            "impact_score": 8,  # Varsayılan yüksek skor
+            "analysis": analysis,
+            "source": "mcp_analysis"
+        }
         
     except Exception as e:
         print(f"❌ AI tweet oluşturma hatası: {e}")
         print("🔄 Fallback yönteme geçiliyor...")
-        return generate_ai_tweet_with_content_fallback(article_data, api_key)
+        fallback_tweet = generate_ai_tweet_with_content_fallback(article_data, api_key)
+        return {
+            "tweet": fallback_tweet,
+            "impact_score": 6,  # Orta skor
+            "analysis": {"audience": "General", "companies": [], "hashtags": [], "emojis": []},
+            "source": "fallback"
+        }
 
 def generate_ai_tweet_with_content(article_data, api_key):
     """Ana tweet oluşturma fonksiyonu - MCP analizi öncelikli"""
     try:
         # Önce MCP analizi ile dene
-        tweet = generate_ai_tweet_with_mcp_analysis(article_data, api_key)
+        tweet_data = generate_ai_tweet_with_mcp_analysis(article_data, api_key)
         
         # Eğer başarısızsa fallback kullan
-        if not tweet or len(tweet) < 50:
+        if not tweet_data or not tweet_data.get('tweet') or len(tweet_data.get('tweet', '')) < 50:
             print("🔄 MCP analizi yetersiz, fallback yöntemi deneniyor...")
-            tweet = generate_ai_tweet_with_content_fallback(article_data, api_key)
+            fallback_tweet = generate_ai_tweet_with_content_fallback(article_data, api_key)
+            return {
+                "tweet": fallback_tweet,
+                "impact_score": 6,
+                "analysis": {"audience": "General", "companies": [], "hashtags": [], "emojis": []},
+                "source": "fallback"
+            }
         
-        return tweet
+        return tweet_data
         
     except Exception as e:
         print(f"Ana tweet oluşturma hatası: {e}")
-        return generate_ai_tweet_with_content_fallback(article_data, api_key)
+        fallback_tweet = generate_ai_tweet_with_content_fallback(article_data, api_key)
+        return {
+            "tweet": fallback_tweet,
+            "impact_score": 6,
+            "analysis": {"audience": "General", "companies": [], "hashtags": [], "emojis": []},
+            "source": "fallback"
+        }
 
 def generate_ai_tweet_with_content_fallback(article_data, api_key):
     """Fallback tweet oluşturma - Eski yöntem"""

@@ -3,300 +3,343 @@
 {% block title %}AI Tweet Bot - Ayarlar{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-cog me-2"></i>Otomasyon Ayarları
-                </h5>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="{{ url_for('save_settings') }}">
-                    <!-- Temel Ayarlar -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="auto_mode" name="auto_mode" 
-                                       {{ 'checked' if settings.auto_mode else '' }}>
-                                <label class="form-check-label" for="auto_mode">
-                                    <strong>Otomatik Mod</strong>
-                                </label>
-                                <div class="form-text">Otomatik makale kontrolü ve tweet paylaşımı</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="auto_post_enabled" name="auto_post_enabled" 
-                                       {{ 'checked' if settings.auto_post_enabled else '' }}>
-                                <label class="form-check-label" for="auto_post_enabled">
-                                    <strong>Otomatik Paylaşım</strong>
-                                </label>
-                                <div class="form-text">Onay beklemeden direkt paylaş</div>
-                            </div>
-                        </div>
-                    </div>
+<div class="max-w-4xl mx-auto space-y-8">
+    <!-- Sayfa Başlığı -->
+    <div class="text-center">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            Otomasyon Ayarları
+        </h1>
+        <p class="text-gray-600">AI Tweet Bot'unuzun davranışını özelleştirin</p>
+    </div>
 
-                    <!-- Kontrol Ayarları -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label for="check_interval_hours" class="form-label">Kontrol Aralığı (Saat)</label>
-                            <input type="number" class="form-control" id="check_interval_hours" name="check_interval_hours" 
-                                   value="{{ settings.check_interval_hours or 2 }}" min="1" max="24">
-                            <div class="form-text">Kaç saatte bir makale kontrolü yapılacak</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="max_articles_per_run" class="form-label">Maksimum Makale Sayısı</label>
-                            <input type="number" class="form-control" id="max_articles_per_run" name="max_articles_per_run" 
-                                   value="{{ settings.max_articles_per_run or 3 }}" min="1" max="10">
-                            <div class="form-text">Her kontrolde işlenecek maksimum makale</div>
-                        </div>
-                    </div>
-
-                    <!-- Kalite Ayarları -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label for="min_score_threshold" class="form-label">Minimum Etki Skoru</label>
-                            <input type="number" class="form-control" id="min_score_threshold" name="min_score_threshold" 
-                                   value="{{ settings.min_score_threshold or 5 }}" min="1" max="10">
-                            <div class="form-text">Bu skorun altındaki makaleler paylaşılmaz</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="rate_limit_seconds" class="form-label">Rate Limit (Saniye)</label>
-                            <input type="number" class="form-control" id="rate_limit_seconds" name="rate_limit_seconds" 
-                                   value="{{ settings.rate_limit_seconds or 2.0 }}" min="0.5" max="10" step="0.5">
-                            <div class="form-text">İşlemler arası bekleme süresi</div>
-                        </div>
-                    </div>
-
-                    <!-- Onay Ayarları -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="manual_approval_required" name="manual_approval_required" 
-                                       {{ 'checked' if settings.manual_approval_required else '' }}>
-                                <label class="form-check-label" for="manual_approval_required">
-                                    <strong>Manuel Onay Gerekli</strong>
-                                </label>
-                                <div class="form-text">Tweet'ler paylaşılmadan önce onay beklesin</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="telegram_notifications" name="telegram_notifications" 
-                                       {{ 'checked' if settings.telegram_notifications else '' }}>
-                                <label class="form-check-label" for="telegram_notifications">
-                                    <strong>Telegram Bildirimleri</strong>
-                                </label>
-                                <div class="form-text">Yeni tweet'ler için bildirim gönder</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Ayarları Kaydet
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Telegram Ayarları -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fab fa-telegram me-2"></i>Telegram Ayarları
-                </h5>
-            </div>
-            <div class="card-body">
-                {% if telegram_config %}
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <strong>Bot Token:</strong>
-                            <span class="text-muted">
-                                {% if telegram_config.bot_token %}
-                                    ✅ Yapılandırılmış
-                                {% else %}
-                                    ❌ Eksik
-                                {% endif %}
-                            </span>
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Chat ID:</strong>
-                            <span class="text-muted">
-                                {% if telegram_config.chat_id %}
-                                    ✅ {{ telegram_config.chat_id }}
-                                {% else %}
-                                    ❌ Eksik
-                                {% endif %}
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex gap-2">
-                        <a href="{{ url_for('test_telegram') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-vial me-2"></i>Bağlantıyı Test Et
-                        </a>
-                        <a href="{{ url_for('auto_detect_chat_id') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-search me-2"></i>Chat ID Algıla
-                        </a>
-                    </div>
-                    
-                    <div class="alert alert-info mt-3">
-                        <h6><i class="fas fa-info-circle me-2"></i>Telegram Kurulumu:</h6>
-                        <ol class="mb-0">
-                            <li>Environment değişkenlerinde <code>TELEGRAM_BOT_TOKEN</code> tanımlayın</li>
-                            <li>Bot'unuza bir mesaj gönderin</li>
-                            <li>"Chat ID Algıla" butonuna tıklayın</li>
-                            <li>"Bağlantıyı Test Et" ile kontrol edin</li>
-                        </ol>
-                    </div>
-                {% else %}
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Telegram yapılandırması yüklenemedi
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- API Ayarları -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-key me-2"></i>API Ayarları
-                </h5>
-            </div>
-            <div class="card-body">
-                {% if api_status %}
-                    <!-- API Durum Kartları -->
-                    <div class="row mb-4">
-                        <!-- Google Gemini API -->
-                        <div class="col-md-6 mb-3">
-                            <div class="card h-100 {% if api_status.google_api and api_status.google_api_working %}border-success{% elif api_status.google_api %}border-warning{% else %}border-danger{% endif %}">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">
-                                        <i class="fab fa-google me-2"></i>Google Gemini API
-                                    </h5>
-                                    {% if api_status.google_api and api_status.google_api_working %}
-                                        <span class="badge bg-success fs-6">✅ Çalışıyor</span>
-                                        <p class="card-text text-success mt-2">API anahtarı mevcut ve çalışıyor</p>
-                                    {% elif api_status.google_api %}
-                                        <span class="badge bg-warning fs-6">⚠️ Sorunlu</span>
-                                        <p class="card-text text-warning mt-2">API anahtarı mevcut ama çalışmıyor</p>
-                                    {% else %}
-                                        <span class="badge bg-danger fs-6">❌ Eksik</span>
-                                        <p class="card-text text-danger mt-2">GOOGLE_API_KEY tanımlanmamış</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Twitter API -->
-                        <div class="col-md-6 mb-3">
-                            <div class="card h-100 {% if api_status.twitter_bearer and api_status.twitter_api_key and api_status.twitter_api_secret and api_status.twitter_access_token and api_status.twitter_access_secret %}border-success{% elif api_status.twitter_bearer or api_status.twitter_api_key %}border-warning{% else %}border-danger{% endif %}">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">
-                                        <i class="fab fa-twitter me-2"></i>Twitter API
-                                    </h5>
-                                    {% if api_status.twitter_bearer and api_status.twitter_api_key and api_status.twitter_api_secret and api_status.twitter_access_token and api_status.twitter_access_secret %}
-                                        <span class="badge bg-success fs-6">✅ Tamamı Mevcut</span>
-                                        <p class="card-text text-success mt-2">Tüm Twitter API anahtarları tanımlı</p>
-                                    {% elif api_status.twitter_bearer or api_status.twitter_api_key %}
-                                        <span class="badge bg-warning fs-6">⚠️ Eksik Anahtarlar</span>
-                                        <p class="card-text text-warning mt-2">Bazı Twitter API anahtarları eksik</p>
-                                    {% else %}
-                                        <span class="badge bg-danger fs-6">❌ Hiçbiri Yok</span>
-                                        <p class="card-text text-danger mt-2">Twitter API anahtarları tanımlanmamış</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Telegram API -->
-                    <div class="row mb-4">
-                        <div class="col-md-6 mb-3">
-                            <div class="card h-100 {% if api_status.telegram_bot_token %}border-success{% else %}border-warning{% endif %}">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">
-                                        <i class="fab fa-telegram me-2"></i>Telegram Bot
-                                    </h5>
-                                    {% if api_status.telegram_bot_token %}
-                                        <span class="badge bg-success fs-6">✅ Mevcut</span>
-                                        <p class="card-text text-success mt-2">TELEGRAM_BOT_TOKEN tanımlı</p>
-                                    {% else %}
-                                        <span class="badge bg-warning fs-6">⚠️ Opsiyonel</span>
-                                        <p class="card-text text-muted mt-2">Telegram bildirimleri için gerekli</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Detaylı Twitter Durum -->
-                        <div class="col-md-6 mb-3">
-                            <div class="card h-100 border-info">
-                                <div class="card-body">
-                                    <h6 class="card-title">
-                                        <i class="fas fa-list me-2"></i>Twitter API Detayları
-                                    </h6>
-                                    <ul class="list-unstyled mb-0">
-                                        <li><small>Bearer Token: {% if api_status.twitter_bearer %}<span class="text-success">✅</span>{% else %}<span class="text-danger">❌</span>{% endif %}</small></li>
-                                        <li><small>API Key: {% if api_status.twitter_api_key %}<span class="text-success">✅</span>{% else %}<span class="text-danger">❌</span>{% endif %}</small></li>
-                                        <li><small>API Secret: {% if api_status.twitter_api_secret %}<span class="text-success">✅</span>{% else %}<span class="text-danger">❌</span>{% endif %}</small></li>
-                                        <li><small>Access Token: {% if api_status.twitter_access_token %}<span class="text-success">✅</span>{% else %}<span class="text-danger">❌</span>{% endif %}</small></li>
-                                        <li><small>Access Secret: {% if api_status.twitter_access_secret %}<span class="text-success">✅</span>{% else %}<span class="text-danger">❌</span>{% endif %}</small></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- API Test Butonu -->
-                    <div class="d-flex gap-2 mb-3">
-                        <a href="{{ url_for('api_status') }}" class="btn btn-outline-info" target="_blank">
-                            <i class="fas fa-vial me-2"></i>API Durumunu Test Et
-                        </a>
-                        <a href="{{ url_for('debug_env') }}" class="btn btn-outline-secondary" target="_blank">
-                            <i class="fas fa-bug me-2"></i>Debug Bilgileri
-                        </a>
-                    </div>
-                    
-                    {% if api_status.google_api_error %}
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            <strong>Gemini API Hatası:</strong> {{ api_status.google_api_error }}
-                        </div>
-                    {% endif %}
-                {% else %}
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        API durumu kontrol edilemedi
-                    </div>
-                {% endif %}
-                
-                <div class="alert alert-info mt-3">
-                    <h6><i class="fas fa-info-circle me-2"></i>Gerekli Environment Değişkenleri:</h6>
-                    <ul class="mb-0">
-                        <li><code>GOOGLE_API_KEY</code> - Google Gemini API anahtarı</li>
-                        <li><code>TWITTER_BEARER_TOKEN</code> - Twitter API Bearer Token</li>
-                        <li><code>TWITTER_API_KEY</code> - Twitter API Key</li>
-                        <li><code>TWITTER_API_SECRET</code> - Twitter API Secret</li>
-                        <li><code>TWITTER_ACCESS_TOKEN</code> - Twitter Access Token</li>
-                        <li><code>TWITTER_ACCESS_TOKEN_SECRET</code> - Twitter Access Token Secret</li>
-                        <li><code>TELEGRAM_BOT_TOKEN</code> - Telegram Bot Token (opsiyonel)</li>
-                    </ul>
+    <!-- Otomasyon Ayarları -->
+    <div class="card-modern">
+        <div class="p-8">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-cog text-white text-lg"></i>
                 </div>
+                <h2 class="text-2xl font-bold text-gray-900">Temel Ayarlar</h2>
             </div>
+            
+            <form method="POST" action="{{ url_for('save_settings') }}" class="space-y-8">
+                <!-- Ana Kontroller -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <div class="relative">
+                                <input type="checkbox" id="auto_mode" name="auto_mode" 
+                                       {{ 'checked' if settings.auto_mode else '' }}
+                                       class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </div>
+                            <div>
+                                <span class="text-lg font-semibold text-gray-900">Otomatik Mod</span>
+                                <p class="text-sm text-gray-600">Otomatik makale kontrolü ve tweet paylaşımı</p>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-3 cursor-pointer group">
+                            <div class="relative">
+                                <input type="checkbox" id="auto_post_enabled" name="auto_post_enabled" 
+                                       {{ 'checked' if settings.auto_post_enabled else '' }}
+                                       class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                            </div>
+                            <div>
+                                <span class="text-lg font-semibold text-gray-900">Otomatik Paylaşım</span>
+                                <p class="text-sm text-gray-600">Onay beklemeden direkt paylaş</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Kontrol Ayarları -->
+                <div class="border-t border-gray-200 pt-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Kontrol Ayarları</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label for="check_interval_hours" class="block text-sm font-medium text-gray-700">
+                                Kontrol Aralığı (Saat)
+                            </label>
+                            <input type="number" id="check_interval_hours" name="check_interval_hours" 
+                                   value="{{ settings.check_interval_hours or 2 }}" min="1" max="24"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                            <p class="text-sm text-gray-600">Kaç saatte bir makale kontrolü yapılacak</p>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="max_articles_per_run" class="block text-sm font-medium text-gray-700">
+                                Maksimum Makale Sayısı
+                            </label>
+                            <input type="number" id="max_articles_per_run" name="max_articles_per_run" 
+                                   value="{{ settings.max_articles_per_run or 3 }}" min="1" max="10"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                            <p class="text-sm text-gray-600">Her kontrolde işlenecek maksimum makale</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kalite Ayarları -->
+                <div class="border-t border-gray-200 pt-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Kalite Ayarları</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label for="min_score_threshold" class="block text-sm font-medium text-gray-700">
+                                Minimum Etki Skoru
+                            </label>
+                            <input type="number" id="min_score_threshold" name="min_score_threshold" 
+                                   value="{{ settings.min_score_threshold or 5 }}" min="1" max="10"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                            <p class="text-sm text-gray-600">Bu skorun altındaki makaleler paylaşılmaz</p>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="rate_limit_seconds" class="block text-sm font-medium text-gray-700">
+                                Rate Limit (Saniye)
+                            </label>
+                            <input type="number" id="rate_limit_seconds" name="rate_limit_seconds" 
+                                   value="{{ settings.rate_limit_seconds or 2.0 }}" min="0.5" max="10" step="0.5"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                            <p class="text-sm text-gray-600">İşlemler arası bekleme süresi</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onay Ayarları -->
+                <div class="border-t border-gray-200 pt-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Onay ve Bildirim Ayarları</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 cursor-pointer group">
+                                <div class="relative">
+                                    <input type="checkbox" id="manual_approval_required" name="manual_approval_required" 
+                                           {{ 'checked' if settings.manual_approval_required else '' }}
+                                           class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-600"></div>
+                                </div>
+                                <div>
+                                    <span class="text-lg font-semibold text-gray-900">Manuel Onay Gerekli</span>
+                                    <p class="text-sm text-gray-600">Tweet'ler paylaşılmadan önce onay beklesin</p>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 cursor-pointer group">
+                                <div class="relative">
+                                    <input type="checkbox" id="telegram_notifications" name="telegram_notifications" 
+                                           {{ 'checked' if settings.telegram_notifications else '' }}
+                                           class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </div>
+                                <div>
+                                    <span class="text-lg font-semibold text-gray-900">Telegram Bildirimleri</span>
+                                    <p class="text-sm text-gray-600">Yeni tweet'ler için bildirim gönder</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kaydet Butonu -->
+                <div class="border-t border-gray-200 pt-8">
+                    <button type="submit" class="btn-primary w-full md:w-auto flex items-center justify-center space-x-2">
+                        <i class="fas fa-save"></i>
+                        <span>Ayarları Kaydet</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Telegram Ayarları -->
+    <div class="card-modern">
+        <div class="p-8">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
+                    <i class="fab fa-telegram text-white text-lg"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900">Telegram Ayarları</h2>
+            </div>
+            
+            {% if telegram_config %}
+                <div class="p-4 rounded-xl border-l-4 mb-6 {{ 'bg-green-50 border-green-400' if telegram_config.ready else 'bg-yellow-50 border-yellow-400' }}">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-{{ 'check-circle text-green-600' if telegram_config.ready else 'exclamation-triangle text-yellow-600' }}"></i>
+                        <span class="font-medium {{ 'text-green-800' if telegram_config.ready else 'text-yellow-800' }}">
+                            {{ telegram_config.message }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-3 mb-6">
+                    <a href="{{ url_for('test_telegram') }}" class="px-6 py-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 font-medium flex items-center space-x-2">
+                        <i class="fas fa-vial"></i>
+                        <span>Bağlantıyı Test Et</span>
+                    </a>
+                    <a href="{{ url_for('auto_detect_chat_id') }}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium flex items-center space-x-2">
+                        <i class="fas fa-search"></i>
+                        <span>Chat ID Algıla</span>
+                    </a>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                    <h3 class="flex items-center space-x-2 text-lg font-semibold text-blue-900 mb-4">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Telegram Kurulumu</span>
+                    </h3>
+                    <ol class="space-y-2 text-blue-800">
+                        <li class="flex items-start space-x-2">
+                            <span class="flex-shrink-0 w-6 h-6 bg-blue-200 text-blue-800 rounded-full flex items-center justify-center text-sm font-medium">1</span>
+                            <span>Environment değişkenlerinde <code class="bg-blue-200 px-2 py-1 rounded text-sm">TELEGRAM_BOT_TOKEN</code> tanımlayın</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="flex-shrink-0 w-6 h-6 bg-blue-200 text-blue-800 rounded-full flex items-center justify-center text-sm font-medium">2</span>
+                            <span>Bot'unuza bir mesaj gönderin</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="flex-shrink-0 w-6 h-6 bg-blue-200 text-blue-800 rounded-full flex items-center justify-center text-sm font-medium">3</span>
+                            <span>"Chat ID Algıla" butonuna tıklayın</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="flex-shrink-0 w-6 h-6 bg-blue-200 text-blue-800 rounded-full flex items-center justify-center text-sm font-medium">4</span>
+                            <span>"Bağlantıyı Test Et" ile kontrol edin</span>
+                        </li>
+                    </ol>
+                </div>
+            {% else %}
+                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                        <span class="text-yellow-800 font-medium">Telegram yapılandırması yüklenemedi</span>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- API Ayarları -->
+    <div class="card-modern">
+        <div class="p-8">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-key text-white text-lg"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900">API Durumu</h2>
+            </div>
+            
+            {% if api_status %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Google Gemini API -->
+                    <div class="border rounded-xl p-6 text-center {{ 'border-green-200 bg-green-50' if api_status.google_api and api_status.google_api_working else 'border-yellow-200 bg-yellow-50' if api_status.google_api else 'border-red-200 bg-red-50' }}">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center {{ 'bg-green-100' if api_status.google_api and api_status.google_api_working else 'bg-yellow-100' if api_status.google_api else 'bg-red-100' }}">
+                            <i class="fab fa-google text-2xl {{ 'text-green-600' if api_status.google_api and api_status.google_api_working else 'text-yellow-600' if api_status.google_api else 'text-red-600' }}"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Google Gemini API</h3>
+                        {% if api_status.google_api and api_status.google_api_working %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-check-circle mr-2"></i>Çalışıyor
+                            </span>
+                            <p class="text-green-700 text-sm mt-2">API anahtarı mevcut ve çalışıyor</p>
+                        {% elif api_status.google_api %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>Sorunlu
+                            </span>
+                            <p class="text-yellow-700 text-sm mt-2">API anahtarı mevcut ama çalışmıyor</p>
+                        {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                <i class="fas fa-times-circle mr-2"></i>Eksik
+                            </span>
+                            <p class="text-red-700 text-sm mt-2">GOOGLE_API_KEY tanımlanmamış</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Twitter API -->
+                    <div class="border rounded-xl p-6 text-center {{ 'border-green-200 bg-green-50' if api_status.twitter_bearer and api_status.twitter_api_key and api_status.twitter_api_secret and api_status.twitter_access_token and api_status.twitter_access_secret else 'border-yellow-200 bg-yellow-50' if api_status.twitter_bearer or api_status.twitter_api_key else 'border-red-200 bg-red-50' }}">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center {{ 'bg-green-100' if api_status.twitter_bearer and api_status.twitter_api_key and api_status.twitter_api_secret and api_status.twitter_access_token and api_status.twitter_access_secret else 'bg-yellow-100' if api_status.twitter_bearer or api_status.twitter_api_key else 'bg-red-100' }}">
+                            <i class="fab fa-twitter text-2xl {{ 'text-green-600' if api_status.twitter_bearer and api_status.twitter_api_key and api_status.twitter_api_secret and api_status.twitter_access_token and api_status.twitter_access_secret else 'text-yellow-600' if api_status.twitter_bearer or api_status.twitter_api_key else 'text-red-600' }}"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Twitter API</h3>
+                        {% if api_status.twitter_bearer and api_status.twitter_api_key and api_status.twitter_api_secret and api_status.twitter_access_token and api_status.twitter_access_secret %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-check-circle mr-2"></i>Tamamı Mevcut
+                            </span>
+                            <p class="text-green-700 text-sm mt-2">Tüm Twitter API anahtarları tanımlı</p>
+                        {% elif api_status.twitter_bearer or api_status.twitter_api_key %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>Eksik Anahtarlar
+                            </span>
+                            <p class="text-yellow-700 text-sm mt-2">Bazı Twitter API anahtarları eksik</p>
+                        {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                <i class="fas fa-times-circle mr-2"></i>Hiçbiri Yok
+                            </span>
+                            <p class="text-red-700 text-sm mt-2">Twitter API anahtarları tanımlanmamış</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Telegram API Durumu -->
+                <div class="border rounded-xl p-6 {{ 'border-green-200 bg-green-50' if api_status.telegram_bot else 'border-gray-200 bg-gray-50' }}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center {{ 'bg-green-100' if api_status.telegram_bot else 'bg-gray-100' }}">
+                                <i class="fab fa-telegram text-xl {{ 'text-green-600' if api_status.telegram_bot else 'text-gray-400' }}"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Telegram Bot</h3>
+                                <p class="text-sm text-gray-600">
+                                    {% if api_status.telegram_bot %}
+                                        ✅ Telegram configuration complete (Bot token: ENV, Chat ID: Settings)
+                                    {% else %}
+                                        ⚠️ Telegram bot token not configured
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ 'bg-green-100 text-green-800' if api_status.telegram_bot else 'bg-gray-100 text-gray-800' }}">
+                            {{ 'Mevcut' if api_status.telegram_bot else 'Opsiyonel' }}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- API Kurulum Rehberi -->
+                <div class="mt-8 bg-gray-50 border border-gray-200 rounded-xl p-6">
+                    <h3 class="flex items-center space-x-2 text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-book"></i>
+                        <span>API Kurulum Rehberi</span>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Google Gemini API:</h4>
+                            <ul class="space-y-1">
+                                <li>• Google AI Studio'ya gidin</li>
+                                <li>• API anahtarı oluşturun</li>
+                                <li>• <code class="bg-gray-200 px-1 rounded text-sm">GOOGLE_API_KEY</code> olarak kaydedin</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Twitter API:</h4>
+                            <ul class="space-y-1">
+                                <li>• Twitter Developer Portal'a gidin</li>
+                                <li>• Uygulama oluşturun</li>
+                                <li>• API anahtarlarını environment'a ekleyin</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="p-4 bg-red-50 border border-red-200 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        <span class="text-red-800 font-medium">API durumu kontrol edilemedi</span>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
-
-{% if error %}
-<div class="alert alert-danger mt-3">
-    <i class="fas fa-exclamation-triangle me-2"></i>
-    Hata: {{ error }}
-</div>
-{% endif %}
 {% endblock %} 
