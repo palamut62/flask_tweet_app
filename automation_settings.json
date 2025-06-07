@@ -1,11 +1,11 @@
 {
   "auto_mode": true,
   "check_interval_hours": 3,
-  "max_articles_per_run": 10,
+  "max_articles_per_run": 3,
   "min_score_threshold": 5,
   "auto_post_enabled": true,
   "manual_approval_required": false,
   "rate_limit_seconds": 2.0,
   "telegram_notifications": true,
-  "last_updated": "2025-06-07T22:10:19.724737"
+  "last_updated": "2025-06-07T22:28:17.575649"
 }
