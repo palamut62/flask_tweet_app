@@ -1315,31 +1315,94 @@ def create_pdf(summaries, filename="daily_digest.pdf"):
     return filename
 
 def get_posted_articles_summary():
-    """Paylaşılmış makalelerin özetini döndür"""
+    """Paylaşılmış makalelerin özetini döndür - gelişmiş istatistiklerle"""
     try:
+        from datetime import datetime, date, timedelta
         posted_articles = load_json(HISTORY_FILE)
+        today = date.today()
         
         # Son 7 günlük makaleleri al
         cutoff_date = datetime.now() - timedelta(days=7)
         recent_articles = []
+        today_articles = []
+        week_articles = []
+        
+        # En yüksek skorlu makale
+        highest_scored = None
+        highest_score = 0
+        
+        # En son paylaşılan makale
+        latest_posted = None
+        latest_date = None
         
         for article in posted_articles:
             try:
-                posted_date = datetime.fromisoformat(article.get("posted_date", ""))
-                if posted_date > cutoff_date:
-                    recent_articles.append(article)
-            except:
+                posted_date_str = article.get("posted_date", "")
+                if posted_date_str:
+                    posted_date = datetime.fromisoformat(posted_date_str.replace('Z', '+00:00'))
+                    
+                    # Bugünkü makaleler
+                    if posted_date.date() == today:
+                        today_articles.append(article)
+                    
+                    # Son 7 günlük makaleler
+                    if posted_date > cutoff_date:
+                        recent_articles.append(article)
+                        week_articles.append(article)
+                    
+                    # En son paylaşılan
+                    if latest_date is None or posted_date > latest_date:
+                        latest_date = posted_date
+                        latest_posted = article
+                
+                # En yüksek skorlu makale (eğer skor varsa)
+                score = article.get("score", 0)
+                if isinstance(score, (int, float)) and score > highest_score:
+                    highest_score = score
+                    highest_scored = article
+                    
+            except Exception as e:
+                print(f"[DEBUG] Makale parse hatası: {e}")
                 continue
+        
+        # Başarı oranı hesapla (basit: paylaşılan / toplam)
+        success_rate = (len(posted_articles) / max(len(posted_articles) + 1, 1)) * 100
+        
+        # Kategori dağılımı (eğer varsa)
+        category_distribution = {}
+        for article in posted_articles:
+            category = article.get("category", "Genel")
+            category_distribution[category] = category_distribution.get(category, 0) + 1
         
         return {
             "total_posted": len(posted_articles),
             "recent_posted": len(recent_articles),
-            "recent_articles": recent_articles[-5:]  # Son 5 makale
+            "recent_articles": recent_articles[-5:],  # Son 5 makale
+            "today_articles": len(today_articles),
+            "week_articles": len(week_articles),
+            "highest_scored": highest_scored,
+            "latest_posted": latest_posted,
+            "success_rate": success_rate,
+            "category_distribution": category_distribution,
+            "average_score": highest_score / max(len(posted_articles), 1) if highest_score > 0 else 0,
+            "last_check_time": datetime.now().strftime("%H:%M") if posted_articles else "Henüz yok"
         }
         
     except Exception as e:
         print(f"Paylaşılmış makale özeti hatası: {e}")
-        return {"total_posted": 0, "recent_posted": 0, "recent_articles": []}
+        return {
+            "total_posted": 0, 
+            "recent_posted": 0, 
+            "recent_articles": [],
+            "today_articles": 0,
+            "week_articles": 0,
+            "highest_scored": None,
+            "latest_posted": None,
+            "success_rate": 0,
+            "category_distribution": {},
+            "average_score": 0,
+            "last_check_time": "Henüz yok"
+        }
 
 def reset_all_data():
     """Tüm uygulama verilerini sıfırla"""
@@ -1402,13 +1465,31 @@ def clear_pending_tweets():
         }
 
 def get_data_statistics():
-    """Veri istatistiklerini döndür"""
+    """Veri istatistiklerini döndür - bugünkü analizler dahil"""
     try:
+        from datetime import datetime, date
+        today = date.today()
         stats = {}
         
         # Paylaşılan makaleler
         posted_articles = load_json("posted_articles.json")
         stats["posted_articles"] = len(posted_articles)
+        stats["total_articles"] = len(posted_articles)  # Template uyumluluğu için
+        
+        # Bugünkü paylaşılan makaleler
+        today_articles = []
+        for article in posted_articles:
+            if article.get("posted_date"):
+                try:
+                    # ISO format tarihini parse et
+                    posted_date = datetime.fromisoformat(article["posted_date"].replace('Z', '+00:00'))
+                    if posted_date.date() == today:
+                        today_articles.append(article)
+                except (ValueError, TypeError) as e:
+                    print(f"[DEBUG] Tarih parse hatası: {e} - {article.get('posted_date')}")
+                    continue
+        
+        stats["today_articles"] = len(today_articles)
         
         # Bekleyen tweet'ler
         pending_tweets = load_json("pending_tweets.json")
@@ -1416,6 +1497,19 @@ def get_data_statistics():
         posted_count = len([t for t in pending_tweets if t.get("status") == "posted"])
         stats["pending_tweets"] = pending_count
         stats["posted_tweets_in_pending"] = posted_count
+        
+        # Bugünkü bekleyen tweet'ler
+        today_pending = []
+        for tweet in pending_tweets:
+            if tweet.get("created_date"):
+                try:
+                    created_date = datetime.fromisoformat(tweet["created_date"].replace('Z', '+00:00'))
+                    if created_date.date() == today and tweet.get("status") == "pending":
+                        today_pending.append(tweet)
+                except (ValueError, TypeError):
+                    continue
+        
+        stats["today_pending"] = len(today_pending)
         
         # Özetler
         summaries = load_json("summaries.json")
@@ -1429,17 +1523,26 @@ def get_data_statistics():
         accounts = load_json("accounts.json")
         stats["accounts"] = len(accounts)
         
+        # Bugünkü toplam aktivite
+        stats["today_total_activity"] = stats["today_articles"] + stats["today_pending"]
+        
+        print(f"[DEBUG] İstatistikler: Bugün {stats['today_articles']} makale, {stats['today_pending']} bekleyen")
+        
         return stats
         
     except Exception as e:
         print(f"İstatistik hatası: {e}")
         return {
             "posted_articles": 0,
+            "total_articles": 0,
+            "today_articles": 0,
             "pending_tweets": 0,
+            "today_pending": 0,
             "posted_tweets_in_pending": 0,
             "summaries": 0,
             "hashtags": 0,
-            "accounts": 0
+            "accounts": 0,
+            "today_total_activity": 0
         }
 
 def load_automation_settings():

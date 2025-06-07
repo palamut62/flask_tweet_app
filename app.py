@@ -89,6 +89,9 @@ def index():
         stats = get_data_statistics()
         automation_status = get_automation_status()
         
+        # Debug için istatistikleri logla
+        print(f"[DEBUG] Ana sayfa istatistikleri: {stats}")
+        
         # API durumunu kontrol et (ana sayfa için basit kontrol)
         api_check = {
             "google_api_available": bool(os.environ.get('GOOGLE_API_KEY')),
@@ -301,7 +304,8 @@ def check_and_post_articles():
                     pending_tweets.append({
                         "article": article,
                         "tweet_data": tweet_data,
-                        "created_at": datetime.now().isoformat(),
+                        "created_date": datetime.now().isoformat(),
+                        "created_at": datetime.now().isoformat(),  # Geriye uyumluluk için
                         "status": "pending"
                     })
                     save_json("pending_tweets.json", pending_tweets)
@@ -600,6 +604,47 @@ def debug_env():
         
     except Exception as e:
         return f"Hata: {str(e)}"
+
+@app.route('/debug/stats')
+@login_required
+def debug_stats():
+    """Debug: İstatistikleri kontrol et"""
+    try:
+        stats = get_data_statistics()
+        
+        # Bugünkü makaleleri detaylı göster
+        from datetime import datetime, date
+        today = date.today()
+        posted_articles = load_json("posted_articles.json")
+        
+        today_articles_detail = []
+        for article in posted_articles:
+            if article.get("posted_date"):
+                try:
+                    posted_date = datetime.fromisoformat(article["posted_date"].replace('Z', '+00:00'))
+                    if posted_date.date() == today:
+                        today_articles_detail.append({
+                            "title": article.get("title", "")[:50],
+                            "posted_date": article.get("posted_date"),
+                            "parsed_date": posted_date.strftime("%Y-%m-%d %H:%M")
+                        })
+                except Exception as e:
+                    today_articles_detail.append({
+                        "title": article.get("title", "")[:50],
+                        "posted_date": article.get("posted_date"),
+                        "error": str(e)
+                    })
+        
+        return jsonify({
+            "success": True,
+            "stats": stats,
+            "today_date": today.isoformat(),
+            "today_articles_detail": today_articles_detail,
+            "total_articles_in_file": len(posted_articles)
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
 
 if __name__ == '__main__':
     # Python Anywhere için production ayarları

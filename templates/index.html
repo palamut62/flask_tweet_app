@@ -52,17 +52,31 @@
         <!-- Hızlı İstatistikler -->
         <div class="card-modern gradient-bg text-white">
             <div class="p-6 text-center">
-                <h3 class="text-lg font-semibold mb-4">Bugünkü İstatistikler</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Bugünkü Analizler</h3>
+                    <button onclick="location.reload()" class="text-white/80 hover:text-white transition-colors">
+                        <i class="fas fa-sync-alt text-sm"></i>
+                    </button>
+                </div>
                 {% if stats %}
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
                         <div class="bg-white/20 rounded-lg p-4">
-                            <div class="text-2xl font-bold">{{ stats.total_articles or 0 }}</div>
-                            <div class="text-sm opacity-90">Toplam Makale</div>
+                            <div class="text-2xl font-bold">{{ stats.today_articles or 0 }}</div>
+                            <div class="text-sm opacity-90">Bugün Paylaşılan</div>
                         </div>
                         <div class="bg-white/20 rounded-lg p-4">
-                            <div class="text-2xl font-bold">{{ stats.pending_tweets or 0 }}</div>
-                            <div class="text-sm opacity-90">Bekleyen Tweet</div>
+                            <div class="text-2xl font-bold">{{ stats.today_pending or 0 }}</div>
+                            <div class="text-sm opacity-90">Bugün Bekleyen</div>
                         </div>
+                    </div>
+                    <div class="bg-white/10 rounded-lg p-3">
+                        <div class="text-lg font-bold">{{ stats.today_total_activity or 0 }}</div>
+                        <div class="text-xs opacity-80">Toplam Bugünkü Aktivite</div>
+                    </div>
+                {% else %}
+                    <div class="bg-white/20 rounded-lg p-4">
+                        <div class="text-2xl font-bold">0</div>
+                        <div class="text-sm opacity-90">Veri Yüklenemedi</div>
                     </div>
                 {% endif %}
             </div>
@@ -113,6 +127,41 @@
                     </div>
                 {% else %}
                     <p class="text-gray-500">API durumu kontrol edilemedi</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Genel İstatistikler -->
+        <div class="card-modern">
+            <div class="p-6">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-chart-bar text-white"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Genel İstatistikler</h3>
+                </div>
+                
+                {% if stats %}
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Toplam Makale:</span>
+                            <span class="font-bold text-gray-900">{{ stats.total_articles or 0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Bekleyen Tweet:</span>
+                            <span class="font-bold text-yellow-600">{{ stats.pending_tweets or 0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Özetler:</span>
+                            <span class="font-bold text-blue-600">{{ stats.summaries or 0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Hashtag'ler:</span>
+                            <span class="font-bold text-purple-600">{{ stats.hashtags or 0 }}</span>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-gray-500">İstatistikler yüklenemedi</p>
                 {% endif %}
             </div>
         </div>
@@ -244,8 +293,9 @@
                                 {% if article.tweet_url %}
                                 <div class="flex items-center space-x-2">
                                     <i class="fab fa-twitter text-twitter"></i>
-                                    <a href="{{ article.tweet_url }}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium">
-                                        Tweet'i Görüntüle
+                                    <a href="{{ article.tweet_url }}" target="_blank" class="text-twitter hover:text-blue-800 font-medium flex items-center space-x-1">
+                                        <span>Tweet'i Görüntüle</span>
+                                        <i class="fas fa-external-link-alt text-xs"></i>
                                     </a>
                                 </div>
                                 {% endif %}
@@ -256,12 +306,6 @@
                                     <i class="fas fa-external-link-alt"></i>
                                     <span>Makaleyi Oku</span>
                                 </a>
-                                {% if article.tweet_url %}
-                                <a href="{{ article.tweet_url }}" target="_blank" class="px-4 py-2 bg-twitter/10 text-twitter rounded-lg hover:bg-twitter/20 transition-all duration-200 font-medium flex items-center space-x-2">
-                                    <i class="fab fa-twitter"></i>
-                                    <span>Tweet</span>
-                                </a>
-                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}
