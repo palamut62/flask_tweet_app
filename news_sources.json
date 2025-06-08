@@ -15,7 +15,7 @@
         "excerpt": ".post-block__content"
       },
       "added_date": "2025-01-08T10:00:00",
-      "last_checked": "2025-06-08T11:27:01.294105",
+      "last_checked": "2025-06-08T11:28:07.925667",
       "article_count": 0,
       "success_rate": 0
     },
@@ -34,7 +34,7 @@
         "excerpt": ".excerpt, .summary, p"
       },
       "added_date": "2025-06-08T08:36:02.039502",
-      "last_checked": "2025-06-08T11:27:02.116823",
+      "last_checked": "2025-06-08T11:28:08.781536",
       "article_count": 5,
       "success_rate": 100
     },
@@ -43,7 +43,7 @@
       "name": "The Verge AI",
       "url": "https://www.theverge.com/ai-artificial-intelligence",
       "description": "The Verge yapay zeka haberleri",
-      "enabled": false,
+      "enabled": true,
       "selector_type": "auto_detect",
       "article_selectors": {
         "container": "article, .article, .post, .news-item",
@@ -53,7 +53,7 @@
         "excerpt": ".excerpt, .summary, p"
       },
       "added_date": "2025-06-08T08:36:02.040502",
-      "last_checked": "2025-06-08T08:48:15.163077",
+      "last_checked": "2025-06-08T11:28:09.901380",
       "article_count": 0,
       "success_rate": 0
     }
@@ -63,6 +63,6 @@
     "check_all_sources": true,
     "source_timeout": 30,
     "articles_per_source": 5,
-    "last_updated": "2025-06-08T11:27:02.116823"
+    "last_updated": "2025-06-08T11:28:09.901380"
   }
 }
