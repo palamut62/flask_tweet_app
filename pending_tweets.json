@@ -508,5 +508,173 @@
     "status": "pending",
     "error_reason": "Twitter API rate limit aşıldı: 429 Too Many Requests\nToo Many Requests",
     "retry_count": 0
+  },
+  {
+    "article": {
+      "title": "Perplexity’s CEO Sees AI Agents as the Next Web Battleground",
+      "url": "https://www.wired.com/story/perplexitys-ceo-sees-ai-agents-as-the-next-web-battleground/",
+      "excerpt": "",
+      "date": "ByWill Knight",
+      "source": "WIRED AI",
+      "source_id": "wired_ai",
+      "fetch_date": "2025-06-08T14:45:21.923637",
+      "is_new": true,
+      "already_posted": false,
+      "hash": "40873f102200ff8836322b6d00d2bf6f"
+    },
+    "tweet_data": {
+      "tweet": "⚔️🤖 Perplexity envisions AI agents, not search, as the next web platform! Will they become your personal internet assistants? #AIagents #PerplexityAI #FutureofWeb\n\n🔗 https://www.wired.com/story/perplexitys-ceo-sees-ai-agents-as-the-next-web-battleground/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Perplexity's CEO envisions AI agents becoming the next major platform, shifting user interaction from search engines to personalized, proactive assistants that retrieve and synthesize information autonomously.",
+        "companies": [
+          "Perplexity"
+        ],
+        "impact_level": 7,
+        "audience": "General",
+        "hashtags": [
+          "#AIagents",
+          "#PerplexityAI",
+          "#FutureofWeb"
+        ],
+        "emojis": [
+          "⚔",
+          "️",
+          "🤖"
+        ],
+        "tweet_text": ""
+      },
+      "source": "mcp_analysis"
+    },
+    "created_date": "2025-06-08T14:45:31.991496",
+    "created_at": "2025-06-08T14:45:31.991496",
+    "status": "pending",
+    "error_reason": "Twitter API rate limit aşıldı: 429 Too Many Requests\nToo Many Requests",
+    "retry_count": 0
+  },
+  {
+    "article": {
+      "title": "Facing a Changing Industry, AI Activists Rethink Their Strategy",
+      "url": "https://www.wired.com/story/report-ai-now-institute-artificial-intelligence/",
+      "excerpt": "",
+      "date": "ByLouise Matsakis",
+      "source": "WIRED AI",
+      "source_id": "wired_ai",
+      "fetch_date": "2025-06-08T14:45:21.924674",
+      "is_new": true,
+      "already_posted": false,
+      "hash": "52ed64cf4e5ec8cfb2ebf4c260331f5d"
+    },
+    "tweet_data": {
+      "tweet": "💡🤖🧠 AI activists shift gears! Facing a changing industry, they're rethinking strategies for responsible tech. Why? The fight for ethical AI just got smarter. #AIethics #AIstrategy #TechActivism\n\n🔗 https://www.wired.com/story/report-ai-now-institute-artificial-intelligence/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "This article discusses a *strategic* shift, not a technological one. AI activists are reassessing their methods due to the evolving AI landscape, likely focusing on more practical and targeted interventions instead of broad, overarching campaigns.",
+        "companies": [
+          "The provided title and content do not mention any specific companies."
+        ],
+        "impact_level": 6,
+        "audience": "General",
+        "hashtags": [
+          "#AIethics",
+          "#AIstrategy",
+          "#TechActivism"
+        ],
+        "emojis": [
+          "💡",
+          "🤖",
+          "🧠"
+        ],
+        "tweet_text": ""
+      },
+      "source": "mcp_analysis"
+    },
+    "created_date": "2025-06-08T14:45:41.221874",
+    "created_at": "2025-06-08T14:45:41.221874",
+    "status": "pending",
+    "error_reason": "Twitter API rate limit aşıldı: 429 Too Many Requests\nToo Many Requests",
+    "retry_count": 0
+  },
+  {
+    "article": {
+      "title": "Google DeepMind’s CEO Thinks AI Will Make Humans Less Selfish",
+      "url": "https://www.wired.com/story/google-deepminds-ceo-demis-hassabis-thinks-ai-will-make-humans-less-selfish/",
+      "excerpt": "",
+      "date": "BySteven Levy",
+      "source": "WIRED AI",
+      "source_id": "wired_ai",
+      "fetch_date": "2025-06-08T14:45:21.924674",
+      "is_new": true,
+      "already_posted": false,
+      "hash": "40e2b461a93c99962cc9af5bff84c0d6"
+    },
+    "tweet_data": {
+      "tweet": "🤖🧠⚡ Breaking: Demis Hassabis, Google DeepMind's CEO, posits that AI, by solving societal problems and providing ab... #ArtificialIntelligence #MachineLearning #DeepLearning\n\n🔗 https://www.wired.com/story/google-deepminds-ceo-demis-hassabis-thinks-ai-will-make-humans-less-selfish/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Demis Hassabis, Google DeepMind's CEO, posits that AI, by solving societal problems and providing abundance, could reduce human selfishness. The core idea is that AI-driven solutions can fundamentally alter human behavior by mitigating resource scarcity and fostering a more collaborative environment.",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "source": "mcp_analysis"
+    },
+    "created_date": "2025-06-08T14:45:47.060721",
+    "created_at": "2025-06-08T14:45:47.060721",
+    "status": "pending",
+    "error_reason": "Twitter API rate limit aşıldı: 429 Too Many Requests\nToo Many Requests",
+    "retry_count": 0
+  },
+  {
+    "article": {
+      "title": "Deepfake Scams Are Distorting Reality Itself",
+      "url": "https://www.wired.com/story/youre-not-ready-for-ai-powered-scams/",
+      "excerpt": "",
+      "date": "ByJules Roscoe",
+      "source": "WIRED AI",
+      "source_id": "wired_ai",
+      "fetch_date": "2025-06-08T14:45:21.925839",
+      "is_new": true,
+      "already_posted": false,
+      "hash": "b4185293b0bd6b959ae0e94074154401"
+    },
+    "tweet_data": {
+      "tweet": "🚀💻🌟 Breaking: Technology innovation #AR #VR #Metaverse\n\n🔗 https://www.wired.com/story/youre-not-ready-for-ai-powered-scams/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Technology innovation",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#AR",
+          "#VR",
+          "#Metaverse"
+        ],
+        "emojis": [
+          "🚀",
+          "💻",
+          "🌟"
+        ],
+        "tweet_text": ""
+      },
+      "source": "mcp_analysis"
+    },
+    "created_date": "2025-06-08T14:45:51.768925",
+    "created_at": "2025-06-08T14:45:51.768925",
+    "status": "pending",
+    "error_reason": "Twitter API rate limit aşıldı: 429 Too Many Requests\nToo Many Requests",
+    "retry_count": 0
   }
 ]

@@ -15,9 +15,9 @@
         "excerpt": ".loop-card__content"
       },
       "added_date": "2025-01-08T10:00:00",
-      "last_checked": "2025-06-08T14:42:46.795109",
+      "last_checked": "2025-06-08T14:45:17.562313",
       "article_count": 5,
-      "success_rate": 60
+      "success_rate": 70
     },
     {
       "id": "wired_ai",
@@ -34,9 +34,9 @@
         "excerpt": ".SummaryItemDek, .archive-item-component p"
       },
       "added_date": "2025-06-08T14:25:00",
-      "last_checked": "2025-06-08T14:42:50.703867",
+      "last_checked": "2025-06-08T14:45:21.928918",
       "article_count": 4,
-      "success_rate": 30
+      "success_rate": 40
     }
   ],
   "settings": {
@@ -44,6 +44,6 @@
     "check_all_sources": true,
     "source_timeout": 30,
     "articles_per_source": 5,
-    "last_updated": "2025-06-08T14:42:50.703867"
+    "last_updated": "2025-06-08T14:45:21.928918"
   }
 }
