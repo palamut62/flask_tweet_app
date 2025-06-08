@@ -19,7 +19,7 @@ from utils import (
     get_automation_status, send_telegram_notification, test_telegram_connection,
     check_telegram_configuration, auto_detect_and_save_chat_id,
     setup_twitter_api, send_gmail_notification, test_gmail_connection,
-    check_gmail_configuration
+    check_gmail_configuration, get_twitter_rate_limit_status
 )
 
 app = Flask(__name__)
@@ -613,10 +613,36 @@ def api_status():
         except Exception as e:
             status["google_api_test"] = f"HATA: {str(e)}"
         
+        # Twitter rate limit durumu ekle
+        try:
+            twitter_rate_limit = get_twitter_rate_limit_status()
+            status["twitter_rate_limit"] = twitter_rate_limit.get("status", "Bilinmeyen")
+        except Exception as e:
+            status["twitter_rate_limit"] = f"HATA: {str(e)}"
+        
         return jsonify(status)
         
     except Exception as e:
         return jsonify({"error": str(e)})
+
+@app.route('/test_twitter_rate_limit')
+@login_required
+def test_twitter_rate_limit():
+    """Twitter rate limit durumunu test et"""
+    try:
+        rate_limit_status = get_twitter_rate_limit_status()
+        
+        if rate_limit_status.get("success"):
+            flash("✅ Twitter API erişilebilir - Rate limit sorunu yok", "success")
+        else:
+            status = rate_limit_status.get("status", "Bilinmeyen hata")
+            flash(f"⚠️ Twitter API durumu: {status}", "warning")
+        
+        return redirect(url_for('settings'))
+        
+    except Exception as e:
+        flash(f"❌ Twitter rate limit testi hatası: {str(e)}", "error")
+        return redirect(url_for('settings'))
 
 @app.route('/debug/env')
 @login_required

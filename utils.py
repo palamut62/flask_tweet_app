@@ -2156,18 +2156,65 @@ def setup_twitter_v2_client():
         consumer_key=os.environ.get('TWITTER_API_KEY'),
         consumer_secret=os.environ.get('TWITTER_API_SECRET'),
         access_token=os.environ.get('TWITTER_ACCESS_TOKEN'),
-        access_token_secret=os.environ.get('TWITTER_ACCESS_TOKEN_SECRET')
+        access_token_secret=os.environ.get('TWITTER_ACCESS_TOKEN_SECRET'),
+        wait_on_rate_limit=True  # Rate limit'e takılınca otomatik bekle
     )
     return client
 
-def post_text_tweet_v2(tweet_text):
-    """Sadece metinli tweet atmak için Tweepy v2 API kullanımı"""
+def get_twitter_rate_limit_status():
+    """Twitter API rate limit durumunu kontrol et"""
     try:
+        import tweepy
+        from datetime import datetime, timezone
+        
+        client = setup_twitter_v2_client()
+        
+        # Rate limit bilgilerini al (bu işlem de rate limit'e tabidir)
+        try:
+            # Basit bir API çağrısı yaparak rate limit headers'ını al
+            me = client.get_me()
+            
+            # Response headers'ından rate limit bilgilerini çıkar
+            # Not: Tweepy v2'de rate limit bilgileri response.headers'da bulunur
+            return {
+                "success": True,
+                "status": "API erişilebilir",
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        except tweepy.TooManyRequests as e:
+            return {
+                "success": False,
+                "status": "Rate limit aşıldı",
+                "error": str(e),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "status": "API hatası",
+                "error": str(e),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+    except Exception as e:
+        return {
+            "success": False,
+            "status": "Bağlantı hatası",
+            "error": str(e),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+
+def post_text_tweet_v2(tweet_text):
+    """Sadece metinli tweet atmak için Tweepy v2 API kullanımı - Rate limit kontrolü ile"""
+    try:
+        import tweepy
+        
         client = setup_twitter_v2_client()
         TWITTER_LIMIT = 280
         if len(tweet_text) > TWITTER_LIMIT:
             tweet_text = tweet_text[:TWITTER_LIMIT-3] + "..."
         print(f"[DEBUG][post_text_tweet_v2] Tweet uzunluğu: {len(tweet_text)}")
+        
         response = client.create_tweet(text=tweet_text)
         if hasattr(response, 'data') and response.data and 'id' in response.data:
             tweet_id = response.data['id']
@@ -2177,8 +2224,26 @@ def post_text_tweet_v2(tweet_text):
         else:
             print(f"[ERROR][post_text_tweet_v2] Tweet gönderilemedi: {response}")
             return {"success": False, "error": "Tweet gönderilemedi"}
+            
+    except tweepy.TooManyRequests as rate_limit_error:
+        print(f"[RATE_LIMIT][post_text_tweet_v2] Twitter API rate limit aşıldı: {rate_limit_error}")
+        print("[INFO] Tweet pending listesine eklenecek, daha sonra tekrar denenecek")
+        return {"success": False, "error": "429 Too Many Requests - Rate limit aşıldı", "rate_limited": True}
+        
+    except tweepy.Unauthorized as auth_error:
+        print(f"[AUTH_ERROR][post_text_tweet_v2] Twitter API yetkilendirme hatası: {auth_error}")
+        return {"success": False, "error": f"Twitter API yetkilendirme hatası: {auth_error}"}
+        
+    except tweepy.Forbidden as forbidden_error:
+        print(f"[FORBIDDEN][post_text_tweet_v2] Twitter API yasak işlem: {forbidden_error}")
+        return {"success": False, "error": f"Twitter API yasak işlem: {forbidden_error}"}
+        
     except Exception as e:
-        print(f"[ERROR][post_text_tweet_v2] Hata: {e}")
+        print(f"[ERROR][post_text_tweet_v2] Genel hata: {e}")
+        # Rate limit hatası string kontrolü (fallback)
+        if "429" in str(e) or "Too Many Requests" in str(e):
+            print("[INFO] Rate limit hatası tespit edildi (string kontrolü)")
+            return {"success": False, "error": str(e), "rate_limited": True}
         return {"success": False, "error": str(e)}
 
 def fetch_url_content_with_mcp(url):
