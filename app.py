@@ -70,23 +70,7 @@ def logout():
 def index():
     """Ana sayfa"""
     try:
-        # Otomatik kontrol sistemi
-        global last_check_time
-        settings = load_automation_settings()
-        
-        if settings.get('auto_mode', False):
-            current_time = datetime.now()
-            check_interval_hours = settings.get('check_interval_hours', 2)
-            
-            # İlk çalışma veya belirlenen süre geçtiyse kontrol et
-            if (last_check_time is None or 
-                current_time - last_check_time >= timedelta(hours=check_interval_hours)):
-                
-                print(f"🔄 Otomatik kontrol başlatılıyor... (Son kontrol: {last_check_time})")
-                check_and_post_articles()
-                last_check_time = current_time
-        
-        # Sayfa verilerini hazırla
+        # Sayfa verilerini hazırla (otomatik kontrol yok)
         articles = load_json("posted_articles.json")
         pending_tweets = load_json("pending_tweets.json")
         stats = get_data_statistics()
@@ -256,8 +240,8 @@ def check_and_post_articles():
         if not api_key:
             return {"success": False, "message": "Google API anahtarı bulunamadı"}
         
-        # Yeni makaleleri MCP Firecrawl ile çek
-        articles = fetch_latest_ai_articles_with_mcp()
+        # Yeni makaleleri çek (utils.py'deki düzeltilmiş fonksiyonu kullan)
+        articles = fetch_latest_ai_articles()
         
         if not articles:
             return {"success": True, "message": "Yeni makale bulunamadı"}
@@ -300,9 +284,22 @@ def check_and_post_articles():
                         
                         print(f"✅ Tweet paylaşıldı: {article['title'][:50]}...")
                     else:
+                        # Twitter API hatası - pending listesine ekle
                         print(f"❌ Tweet paylaşım hatası: {tweet_result.get('error', 'Bilinmeyen hata')}")
+                        print(f"📝 Tweet pending listesine ekleniyor: {article['title'][:50]}...")
+                        
+                        pending_tweets = load_json("pending_tweets.json")
+                        pending_tweets.append({
+                            "article": article,
+                            "tweet_data": tweet_data,
+                            "created_date": datetime.now().isoformat(),
+                            "created_at": datetime.now().isoformat(),
+                            "status": "pending",
+                            "error_reason": tweet_result.get('error', 'Twitter API hatası')
+                        })
+                        save_json("pending_tweets.json", pending_tweets)
                 else:
-                    # Pending listesine ekle
+                    # Manuel onay gerekli - pending listesine ekle
                     pending_tweets = load_json("pending_tweets.json")
                     pending_tweets.append({
                         "article": article,

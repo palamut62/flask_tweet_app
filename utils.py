@@ -61,15 +61,30 @@ def fetch_latest_ai_articles_with_firecrawl():
             
             # Markdown içeriğinden makale linklerini çıkar
             markdown_content = scrape_result.get("markdown", "")
-            links = scrape_result.get("links", [])
             
-            # TechCrunch makale linklerini filtrele
+            # Basit regex ile TechCrunch makale URL'lerini bul
+            import re
+            current_year = datetime.now().year
+            
+            # Tüm TechCrunch URL'lerini bul
+            all_urls = re.findall(r'https://techcrunch\.com/[^\s\)\]]+', markdown_content)
+            
+            # Güncel yıl ve önceki yılın makalelerini filtrele
             article_urls = []
-            for link in links:
-                url = link.get("url", "")
-                if ("techcrunch.com" in url and 
-                    "/2024/" in url and 
-                    url not in posted_urls and
+            for url in all_urls:
+                # URL'yi temizle
+                url = url.rstrip(')')
+                
+                # Yıl kontrolü
+                year_check = f'/{current_year}/' in url or f'/{current_year-1}/' in url
+                
+                # Makale URL'si kontrolü (tarih formatı içermeli)
+                date_pattern = r'/\d{4}/\d{2}/\d{2}/'
+                is_article = re.search(date_pattern, url)
+                
+                if (year_check and is_article and 
+                    url not in posted_urls and 
+                    url not in article_urls and
                     len(article_urls) < 4):  # Sadece son 4 makale
                     article_urls.append(url)
             
@@ -1100,54 +1115,40 @@ def setup_twitter_api():
     return api
 
 def post_tweet(tweet_text, article_title=""):
-    """X platformunda tweet paylaşma ve Telegram bildirimi"""
+    """X platformunda tweet paylaşma ve Telegram bildirimi - Twitter API v2 kullanarak"""
     try:
-        client = setup_twitter_api()
-        if not client:
-            return {"success": False, "error": "Twitter API kurulumu başarısız"}
-        # Tweet uzunluk kontrolü (280 karakter limiti)
-        TWITTER_LIMIT = 280
-        if len(tweet_text) > TWITTER_LIMIT:
-            print(f"[WARNING] Tweet çok uzun ({len(tweet_text)} karakter), kısaltılıyor...")
-            # URL'yi koruyarak kısalt
-            if "\n\n🔗" in tweet_text:
-                parts = tweet_text.split("\n\n🔗")
-                main_text = parts[0]
-                url_part = f"\n\n🔗{parts[1]}"
-                # Ana metni kısalt
-                available_chars = TWITTER_LIMIT - len(url_part)
-                if len(main_text) > available_chars:
-                    main_text = main_text[:available_chars-3] + "..."
-                tweet_text = f"{main_text}{url_part}"
+        # Twitter API v2 kullan
+        tweet_result = post_text_tweet_v2(tweet_text)
+        
+        if not tweet_result.get("success"):
+            return tweet_result
+        
+        tweet_id = tweet_result.get("tweet_id")
+        tweet_url = tweet_result.get("url")
+        
+        # Telegram bildirimi gönder
+        telegram_sent = False
+        try:
+            telegram_result = send_telegram_notification(
+                message=tweet_text,
+                tweet_url=tweet_url,
+                article_title=article_title
+            )
+            if telegram_result.get("success"):
+                print(f"[SUCCESS] Telegram bildirimi gönderildi")
+                telegram_sent = True
             else:
-                # URL yoksa direkt kısalt
-                tweet_text = tweet_text[:TWITTER_LIMIT-3] + "..."
-        print(f"[DEBUG] Final tweet uzunluğu: {len(tweet_text)} karakter")
-        tweet = client.update_status(status=tweet_text)
-        if tweet and hasattr(tweet, 'id'):
-            tweet_id = tweet.id
-            tweet_url = f"https://twitter.com/user/status/{tweet_id}"
-            # Telegram bildirimi gönder
-            try:
-                telegram_result = send_telegram_notification(
-                    message=tweet_text,
-                    tweet_url=tweet_url,
-                    article_title=article_title
-                )
-                if telegram_result.get("success"):
-                    print(f"[SUCCESS] Telegram bildirimi gönderildi")
-                else:
-                    print(f"[WARNING] Telegram bildirimi gönderilemedi: {telegram_result.get('reason', 'unknown')}")
-            except Exception as telegram_error:
-                print(f"[ERROR] Telegram bildirim hatası: {telegram_error}")
-            return {
-                "success": True,
-                "tweet_id": tweet_id,
-                "url": tweet_url,
-                "telegram_sent": telegram_result.get("success", False) if 'telegram_result' in locals() else False
-            }
-        else:
-            return {"success": False, "error": "Tweet oluşturulamadı"}
+                print(f"[WARNING] Telegram bildirimi gönderilemedi: {telegram_result.get('reason', 'unknown')}")
+        except Exception as telegram_error:
+            print(f"[ERROR] Telegram bildirim hatası: {telegram_error}")
+        
+        return {
+            "success": True,
+            "tweet_id": tweet_id,
+            "url": tweet_url,
+            "telegram_sent": telegram_sent
+        }
+        
     except Exception as e:
         return {"success": False, "error": f"Tweet paylaşım hatası: {str(e)}"}
 
