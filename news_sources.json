@@ -15,28 +15,9 @@
         "excerpt": ".loop-card__content"
       },
       "added_date": "2025-01-08T10:00:00",
-      "last_checked": "2025-06-08T14:45:17.562313",
+      "last_checked": "2025-06-08T15:20:44.549534",
       "article_count": 5,
-      "success_rate": 70
-    },
-    {
-      "id": "wired_ai",
-      "name": "WIRED AI",
-      "url": "https://www.wired.com/tag/artificial-intelligence/",
-      "description": "WIRED yapay zeka haberleri",
-      "enabled": true,
-      "selector_type": "wired_modern",
-      "article_selectors": {
-        "container": "article, .SummaryItemWrapper, .archive-item-component",
-        "title": "h3 a, h2 a, .SummaryItemHedLink",
-        "link": "h3 a, h2 a, .SummaryItemHedLink",
-        "date": "time, .SummaryItemPublishDate",
-        "excerpt": ".SummaryItemDek, .archive-item-component p"
-      },
-      "added_date": "2025-06-08T14:25:00",
-      "last_checked": "2025-06-08T14:45:21.928918",
-      "article_count": 4,
-      "success_rate": 40
+      "success_rate": 100
     }
   ],
   "settings": {
@@ -44,6 +25,6 @@
     "check_all_sources": true,
     "source_timeout": 30,
     "articles_per_source": 5,
-    "last_updated": "2025-06-08T14:45:21.928918"
+    "last_updated": "2025-06-08T15:20:44.549534"
   }
 }

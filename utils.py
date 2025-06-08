@@ -12,6 +12,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import time
+import re
+from difflib import SequenceMatcher
 
 # .env dosyasını yükle
 load_dotenv()
@@ -135,6 +137,11 @@ def fetch_latest_ai_articles_with_firecrawl():
                 continue
         
         print(f"📊 Firecrawl MCP ile {len(articles_data)} yeni makale bulundu")
+        
+        # Duplikat filtreleme uygula
+        if articles_data:
+            articles_data = filter_duplicate_articles(articles_data)
+        
         return articles_data
         
     except Exception as e:
@@ -208,6 +215,11 @@ def fetch_latest_ai_articles_fallback():
                 print(f"⚠️ İçerik yetersiz, atlanıyor: {title[:50]}...")
         
         print(f"📊 Fallback ile toplam {len(articles_data)} yeni makale bulundu")
+        
+        # Duplikat filtreleme uygula
+        if articles_data:
+            articles_data = filter_duplicate_articles(articles_data)
+        
         return articles_data
         
     except Exception as e:
@@ -2173,9 +2185,17 @@ def setup_twitter_v2_client():
 
 
 def post_text_tweet_v2(tweet_text):
-    """Sadece metinli tweet atmak için Tweepy v2 API kullanımı"""
+    """Sadece metinli tweet atmak için Tweepy v2 API kullanımı - Rate limit kontrolü ile"""
     try:
         import tweepy
+        
+        # Rate limit kontrolü yap
+        rate_check = check_rate_limit("tweets")
+        if not rate_check.get("allowed", True):
+            wait_minutes = int(rate_check.get("wait_time", 0) / 60) + 1
+            error_msg = f"Twitter API rate limit aşıldı. {wait_minutes} dakika sonra tekrar deneyin. ({rate_check.get('requests_made', 0)}/{rate_check.get('limit', 300)} istek kullanıldı)"
+            safe_log(error_msg, "WARNING")
+            return {"success": False, "error": error_msg, "rate_limited": True, "wait_minutes": wait_minutes}
         
         client = setup_twitter_v2_client()
         TWITTER_LIMIT = 280
@@ -2184,6 +2204,10 @@ def post_text_tweet_v2(tweet_text):
         safe_log(f"Tweet uzunluğu: {len(tweet_text)}", "DEBUG")
         
         response = client.create_tweet(text=tweet_text)
+        
+        # Rate limit kullanımını güncelle
+        update_rate_limit_usage("tweets")
+        
         if hasattr(response, 'data') and response.data and 'id' in response.data:
             tweet_id = response.data['id']
             tweet_url = f"https://twitter.com/user/status/{tweet_id}"
@@ -2194,8 +2218,23 @@ def post_text_tweet_v2(tweet_text):
             return {"success": False, "error": "Tweet gönderilemedi"}
             
     except tweepy.TooManyRequests as rate_limit_error:
-        safe_log(f"Twitter API rate limit aşıldı: {rate_limit_error}", "WARNING")
-        return {"success": False, "error": f"Twitter API rate limit aşıldı: {rate_limit_error}"}
+        # API'den gelen rate limit bilgilerini güncelle
+        try:
+            # Rate limit durumunu güncelle
+            status = load_rate_limit_status()
+            current_time = time.time()
+            if "tweets" not in status:
+                status["tweets"] = {}
+            status["tweets"]["requests"] = TWITTER_RATE_LIMITS["tweets"]["limit"]  # Limit dolu
+            status["tweets"]["reset_time"] = current_time + 3600  # 1 saat sonra reset (Free plan için güvenli)
+            save_rate_limit_status(status)
+        except:
+            pass
+        
+        wait_minutes = 15  # Twitter API rate limit genelde 15 dakika
+        error_msg = f"Twitter API rate limit aşıldı: {rate_limit_error}\n{wait_minutes} dakika sonra tekrar deneyin."
+        safe_log(error_msg, "WARNING")
+        return {"success": False, "error": error_msg, "rate_limited": True, "wait_minutes": wait_minutes}
         
     except tweepy.Unauthorized as auth_error:
         safe_log(f"Twitter API yetkilendirme hatası: {auth_error}", "ERROR")
@@ -2892,6 +2931,13 @@ def fetch_articles_from_custom_sources():
         save_news_sources(config)
         
         terminal_log(f"📊 Toplam {len(all_articles)} makale çekildi", "info")
+        
+        # Duplikat filtreleme uygula
+        if all_articles:
+            filtered_articles = filter_duplicate_articles(all_articles)
+            terminal_log(f"✅ Duplikat filtreleme sonrası {len(filtered_articles)} benzersiz makale", "success")
+            return filtered_articles
+        
         return all_articles
         
     except Exception as e:
@@ -3330,4 +3376,609 @@ def sanitize_log_message(message):
     
     return message
 
+def calculate_text_similarity(text1, text2):
+    """İki metin arasındaki benzerlik oranını hesapla (0-1 arası)"""
+    if not text1 or not text2:
+        return 0.0
+    
+    # Metinleri normalize et
+    text1 = text1.lower().strip()
+    text2 = text2.lower().strip()
+    
+    # Çok kısa metinler için direkt karşılaştırma
+    if len(text1) < 10 or len(text2) < 10:
+        return 1.0 if text1 == text2 else 0.0
+    
+    # SequenceMatcher ile benzerlik hesapla
+    similarity = SequenceMatcher(None, text1, text2).ratio()
+    return similarity
+
+def normalize_title_for_comparison(title):
+    """Başlığı karşılaştırma için normalize et"""
+    if not title:
+        return ""
+    
+    # Küçük harfe çevir
+    normalized = title.lower()
+    
+    # Gereksiz karakterleri kaldır
+    normalized = re.sub(r'[^\w\s]', ' ', normalized)
+    
+    # Çoklu boşlukları tek boşluğa çevir
+    normalized = re.sub(r'\s+', ' ', normalized).strip()
+    
+    # Yaygın kelimeler ve ifadeleri kaldır
+    stop_words = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'says', 'announces', 'reveals', 'launches', 'introduces']
+    words = normalized.split()
+    filtered_words = [word for word in words if word not in stop_words and len(word) > 2]
+    
+    return ' '.join(filtered_words)
+
+def extract_key_content_features(content):
+    """İçerikten anahtar özellikler çıkar"""
+    if not content:
+        return set()
+    
+    # Metni normalize et
+    normalized = content.lower()
+    
+    # Sayıları ve özel terimleri çıkar
+    features = set()
+    
+    # Sayısal değerler (para, yüzde, sayılar)
+    numbers = re.findall(r'\$[\d,]+(?:\.\d+)?[bmk]?|\d+(?:\.\d+)?%|\d+(?:\.\d+)?(?:\s*(?:billion|million|thousand|percent))?', normalized)
+    features.update(numbers)
+    
+    # Şirket isimleri (büyük harfle başlayan kelimeler)
+    companies = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', content)
+    features.update([c.lower() for c in companies])
+    
+    # Önemli teknoloji terimleri
+    tech_terms = re.findall(r'\b(?:ai|artificial intelligence|machine learning|deep learning|neural network|algorithm|api|cloud|blockchain|cryptocurrency|robot|automation|quantum|5g|iot|ar|vr|metaverse)\b', normalized)
+    features.update(tech_terms)
+    
+    return features
+
+def check_content_similarity(article1, article2, title_threshold=0.8, content_threshold=0.6):
+    """İki makale arasındaki benzerliği kontrol et"""
+    try:
+        title1 = article1.get('title', '')
+        title2 = article2.get('title', '')
+        content1 = article1.get('content', '')
+        content2 = article2.get('content', '')
+        
+        # Başlık benzerliği
+        normalized_title1 = normalize_title_for_comparison(title1)
+        normalized_title2 = normalize_title_for_comparison(title2)
+        title_similarity = calculate_text_similarity(normalized_title1, normalized_title2)
+        
+        # Eğer başlıklar çok benzer ise, muhtemelen aynı haber
+        if title_similarity >= title_threshold:
+            return True, title_similarity, "title"
+        
+        # İçerik özellik benzerliği
+        features1 = extract_key_content_features(content1)
+        features2 = extract_key_content_features(content2)
+        
+        if features1 and features2:
+            # Jaccard benzerliği (kesişim / birleşim)
+            intersection = len(features1.intersection(features2))
+            union = len(features1.union(features2))
+            feature_similarity = intersection / union if union > 0 else 0.0
+            
+            if feature_similarity >= content_threshold:
+                return True, feature_similarity, "content_features"
+        
+        # İçerik metni benzerliği (sadece kısa içerikler için)
+        if len(content1) < 1000 and len(content2) < 1000:
+            content_similarity = calculate_text_similarity(content1[:500], content2[:500])
+            if content_similarity >= content_threshold:
+                return True, content_similarity, "content_text"
+        
+        return False, max(title_similarity, feature_similarity if 'feature_similarity' in locals() else 0), "no_match"
+        
+    except Exception as e:
+        print(f"Benzerlik kontrolü hatası: {e}")
+        return False, 0.0, "error"
+
+def filter_duplicate_articles(new_articles, existing_articles=None):
+    """Yeni makalelerden duplikatları filtrele"""
+    try:
+        # Ayarları yükle
+        settings = load_automation_settings()
+        
+        # Eğer duplikat tespiti kapalıysa, sadece temel kontrolleri yap
+        if not settings.get('enable_duplicate_detection', True):
+            print("🔄 Gelişmiş duplikat tespiti kapalı, sadece temel kontroller yapılıyor...")
+            return basic_duplicate_filter(new_articles, existing_articles)
+        
+        # Eşik değerlerini ayarlardan al
+        title_threshold = settings.get('title_similarity_threshold', 0.8)
+        content_threshold = settings.get('content_similarity_threshold', 0.6)
+        
+        print(f"🔍 Gelişmiş duplikat tespiti aktif (Başlık: {title_threshold:.0%}, İçerik: {content_threshold:.0%})")
+        
+        if existing_articles is None:
+            # Mevcut paylaşılan makaleleri yükle
+            existing_articles = load_json(HISTORY_FILE)
+        
+        # Bekleyen tweet'leri de kontrol et
+        pending_tweets = load_json("pending_tweets.json")
+        pending_articles = [tweet.get('article', {}) for tweet in pending_tweets if tweet.get('article')]
+        
+        # Tüm mevcut makaleleri birleştir (silinen makaleler de dahil)
+        all_existing = existing_articles + pending_articles
+        
+        # Silinen makaleleri de kontrol et (deleted=True olanlar)
+        deleted_articles = [article for article in existing_articles if article.get('deleted', False)]
+        if deleted_articles:
+            print(f"🗑️ {len(deleted_articles)} silinen makale duplikat kontrole dahil edildi")
+        
+        filtered_articles = []
+        duplicate_count = 0
+        
+        for new_article in new_articles:
+            is_duplicate = False
+            
+            # Önce URL kontrolü (hızlı)
+            new_url = new_article.get('url', '')
+            for existing in all_existing:
+                if new_url == existing.get('url', ''):
+                    is_duplicate = True
+                    break
+            
+            if is_duplicate:
+                duplicate_count += 1
+                print(f"🔄 URL duplikatı atlandı: {new_article.get('title', '')[:50]}...")
+                continue
+            
+            # Hash kontrolü (hızlı)
+            new_hash = new_article.get('hash', '')
+            if new_hash:
+                for existing in all_existing:
+                    if new_hash == existing.get('hash', ''):
+                        is_duplicate = True
+                        break
+            
+            if is_duplicate:
+                duplicate_count += 1
+                print(f"🔄 Hash duplikatı atlandı: {new_article.get('title', '')[:50]}...")
+                continue
+            
+            # İçerik benzerliği kontrolü (yavaş ama etkili)
+            for existing in all_existing:
+                is_similar, similarity_score, match_type = check_content_similarity(
+                    new_article, existing, title_threshold, content_threshold
+                )
+                if is_similar:
+                    is_duplicate = True
+                    print(f"🔄 İçerik benzerliği ({match_type}: {similarity_score:.2f}) - atlandı: {new_article.get('title', '')[:50]}...")
+                    break
+            
+            if not is_duplicate:
+                # Aynı batch içinde de kontrol et
+                for other_article in filtered_articles:
+                    is_similar, similarity_score, match_type = check_content_similarity(
+                        new_article, other_article, title_threshold, content_threshold
+                    )
+                    if is_similar:
+                        is_duplicate = True
+                        print(f"🔄 Batch içi benzerlik ({match_type}: {similarity_score:.2f}) - atlandı: {new_article.get('title', '')[:50]}...")
+                        break
+            
+            if not is_duplicate:
+                filtered_articles.append(new_article)
+                print(f"✅ Yeni makale eklendi: {new_article.get('title', '')[:50]}...")
+            else:
+                duplicate_count += 1
+        
+        print(f"📊 Duplikat filtreleme tamamlandı: {len(new_articles)} makale → {len(filtered_articles)} benzersiz makale ({duplicate_count} duplikat)")
+        return filtered_articles
+        
+    except Exception as e:
+        print(f"Duplikat filtreleme hatası: {e}")
+        return new_articles  # Hata durumunda orijinal listeyi döndür
+
+def basic_duplicate_filter(new_articles, existing_articles=None):
+    """Temel duplikat filtreleme - sadece URL ve hash kontrolü"""
+    try:
+        if existing_articles is None:
+            existing_articles = load_json(HISTORY_FILE)
+        
+        # Bekleyen tweet'leri de kontrol et
+        pending_tweets = load_json("pending_tweets.json")
+        pending_articles = [tweet.get('article', {}) for tweet in pending_tweets if tweet.get('article')]
+        
+        # Tüm mevcut makaleleri birleştir (silinen makaleler de dahil)
+        all_existing = existing_articles + pending_articles
+        
+        # Silinen makaleleri de kontrol et (deleted=True olanlar)
+        deleted_articles = [article for article in existing_articles if article.get('deleted', False)]
+        if deleted_articles:
+            print(f"🗑️ {len(deleted_articles)} silinen makale temel duplikat kontrole dahil edildi")
+        
+        # Mevcut URL'ler ve hash'ler
+        existing_urls = set(article.get('url', '') for article in all_existing)
+        existing_hashes = set(article.get('hash', '') for article in all_existing)
+        
+        filtered_articles = []
+        duplicate_count = 0
+        
+        for new_article in new_articles:
+            new_url = new_article.get('url', '')
+            new_hash = new_article.get('hash', '')
+            
+            # URL kontrolü
+            if new_url in existing_urls:
+                duplicate_count += 1
+                print(f"🔄 URL duplikatı atlandı: {new_article.get('title', '')[:50]}...")
+                continue
+            
+            # Hash kontrolü
+            if new_hash and new_hash in existing_hashes:
+                duplicate_count += 1
+                print(f"🔄 Hash duplikatı atlandı: {new_article.get('title', '')[:50]}...")
+                continue
+            
+            # Aynı batch içinde URL kontrolü
+            batch_urls = set(article.get('url', '') for article in filtered_articles)
+            if new_url in batch_urls:
+                duplicate_count += 1
+                print(f"🔄 Batch içi URL duplikatı atlandı: {new_article.get('title', '')[:50]}...")
+                continue
+            
+            filtered_articles.append(new_article)
+            print(f"✅ Yeni makale eklendi: {new_article.get('title', '')[:50]}...")
+        
+        print(f"📊 Temel duplikat filtreleme tamamlandı: {len(new_articles)} makale → {len(filtered_articles)} benzersiz makale ({duplicate_count} duplikat)")
+        return filtered_articles
+        
+    except Exception as e:
+        print(f"Temel duplikat filtreleme hatası: {e}")
+        return new_articles
+
+def clean_duplicate_pending_tweets():
+    """Bekleyen tweet'lerdeki duplikatları temizle"""
+    try:
+        pending_tweets = load_json("pending_tweets.json")
+        
+        if not pending_tweets:
+            return {
+                "success": True,
+                "message": "Bekleyen tweet bulunamadı",
+                "original_count": 0,
+                "cleaned_count": 0,
+                "removed_count": 0
+            }
+        
+        print(f"🔍 {len(pending_tweets)} bekleyen tweet kontrol ediliyor...")
+        
+        # Benzersiz tweet'leri saklamak için
+        unique_tweets = []
+        seen_urls = set()
+        seen_hashes = set()
+        seen_titles = set()
+        
+        duplicate_count = 0
+        
+        for tweet in pending_tweets:
+            article = tweet.get('article', {})
+            url = article.get('url', '')
+            hash_val = article.get('hash', '')
+            title = article.get('title', '')
+            
+            # URL kontrolü
+            if url and url in seen_urls:
+                duplicate_count += 1
+                print(f"🔄 URL duplikatı atlandı: {title[:50]}...")
+                continue
+            
+            # Hash kontrolü
+            if hash_val and hash_val in seen_hashes:
+                duplicate_count += 1
+                print(f"🔄 Hash duplikatı atlandı: {title[:50]}...")
+                continue
+            
+            # Başlık kontrolü (normalize edilmiş)
+            if title:
+                normalized_title = normalize_title_for_comparison(title)
+                if normalized_title in seen_titles:
+                    duplicate_count += 1
+                    print(f"🔄 Başlık duplikatı atlandı: {title[:50]}...")
+                    continue
+                seen_titles.add(normalized_title)
+            
+            # Benzersiz tweet olarak ekle
+            unique_tweets.append(tweet)
+            if url:
+                seen_urls.add(url)
+            if hash_val:
+                seen_hashes.add(hash_val)
+            
+            print(f"✅ Benzersiz tweet korundu: {title[:50]}...")
+        
+        # Temizlenmiş listeyi kaydet
+        save_json("pending_tweets.json", unique_tweets)
+        
+        result = {
+            "success": True,
+            "message": f"✅ Bekleyen tweet'ler temizlendi",
+            "original_count": len(pending_tweets),
+            "cleaned_count": len(unique_tweets),
+            "removed_count": duplicate_count
+        }
+        
+        print(f"📊 Duplikat temizleme tamamlandı: {len(pending_tweets)} → {len(unique_tweets)} tweet ({duplicate_count} duplikat kaldırıldı)")
+        
+        return result
+        
+    except Exception as e:
+        print(f"❌ Duplikat temizleme hatası: {e}")
+        return {
+            "success": False,
+            "message": f"❌ Temizleme hatası: {str(e)}",
+            "original_count": 0,
+            "cleaned_count": 0,
+            "removed_count": 0
+        }
+
 # =============================================================================
+# Rate limit yönetimi için global değişkenler
+RATE_LIMIT_FILE = "rate_limit_status.json"
+TWITTER_RATE_LIMITS = {
+    "tweets": {"limit": 5, "window": 900},  # 15 dakikada 5 tweet (Free plan için güvenli)
+    "user_lookup": {"limit": 50, "window": 900},  # 15 dakikada 50 kullanıcı sorgusu
+    "timeline": {"limit": 30, "window": 900}  # 15 dakikada 30 timeline sorgusu
+}
+
+def load_rate_limit_status():
+    """Rate limit durumunu yükle"""
+    try:
+        if os.path.exists(RATE_LIMIT_FILE):
+            with open(RATE_LIMIT_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return {}
+    except Exception as e:
+        print(f"Rate limit durumu yüklenirken hata: {e}")
+        return {}
+
+def save_rate_limit_status(status):
+    """Rate limit durumunu kaydet"""
+    try:
+        with open(RATE_LIMIT_FILE, 'w', encoding='utf-8') as f:
+            json.dump(status, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Rate limit durumu kaydedilirken hata: {e}")
+
+def check_rate_limit(endpoint="tweets"):
+    """Rate limit kontrolü yap"""
+    try:
+        status = load_rate_limit_status()
+        current_time = time.time()
+        
+        if endpoint not in status:
+            status[endpoint] = {
+                "requests": 0,
+                "reset_time": current_time + TWITTER_RATE_LIMITS[endpoint]["window"],
+                "last_request": current_time
+            }
+        
+        endpoint_status = status[endpoint]
+        
+        # Reset zamanı geçtiyse sıfırla
+        if current_time >= endpoint_status["reset_time"]:
+            endpoint_status["requests"] = 0
+            endpoint_status["reset_time"] = current_time + TWITTER_RATE_LIMITS[endpoint]["window"]
+        
+        # Limit kontrolü
+        if endpoint_status["requests"] >= TWITTER_RATE_LIMITS[endpoint]["limit"]:
+            wait_time = endpoint_status["reset_time"] - current_time
+            return {
+                "allowed": False,
+                "wait_time": wait_time,
+                "requests_made": endpoint_status["requests"],
+                "limit": TWITTER_RATE_LIMITS[endpoint]["limit"]
+            }
+        
+        return {
+            "allowed": True,
+            "requests_made": endpoint_status["requests"],
+            "limit": TWITTER_RATE_LIMITS[endpoint]["limit"],
+            "reset_time": endpoint_status["reset_time"]
+        }
+        
+    except Exception as e:
+        print(f"Rate limit kontrolü hatası: {e}")
+        return {"allowed": True}  # Hata durumunda izin ver
+
+def update_rate_limit_usage(endpoint="tweets"):
+    """Rate limit kullanımını güncelle"""
+    try:
+        status = load_rate_limit_status()
+        current_time = time.time()
+        
+        if endpoint not in status:
+            status[endpoint] = {
+                "requests": 0,
+                "reset_time": current_time + TWITTER_RATE_LIMITS[endpoint]["window"],
+                "last_request": current_time
+            }
+        
+        # Reset zamanı geçtiyse sıfırla
+        if current_time >= status[endpoint]["reset_time"]:
+            status[endpoint]["requests"] = 0
+            status[endpoint]["reset_time"] = current_time + TWITTER_RATE_LIMITS[endpoint]["window"]
+        
+        # Kullanımı artır
+        status[endpoint]["requests"] += 1
+        status[endpoint]["last_request"] = current_time
+        
+        save_rate_limit_status(status)
+        
+        print(f"Rate limit güncellendi - {endpoint}: {status[endpoint]['requests']}/{TWITTER_RATE_LIMITS[endpoint]['limit']}")
+        
+    except Exception as e:
+        print(f"Rate limit güncelleme hatası: {e}")
+
+def get_rate_limit_info():
+    """Rate limit bilgilerini al"""
+    try:
+        status = load_rate_limit_status()
+        current_time = time.time()
+        info = {}
+        
+        for endpoint in TWITTER_RATE_LIMITS:
+            if endpoint in status:
+                endpoint_status = status[endpoint]
+                
+                # Reset zamanı geçtiyse sıfırla
+                if current_time >= endpoint_status["reset_time"]:
+                    requests_made = 0
+                    reset_time = current_time + TWITTER_RATE_LIMITS[endpoint]["window"]
+                else:
+                    requests_made = endpoint_status["requests"]
+                    reset_time = endpoint_status["reset_time"]
+                
+                info[endpoint] = {
+                    "requests_made": requests_made,
+                    "limit": TWITTER_RATE_LIMITS[endpoint]["limit"],
+                    "remaining": TWITTER_RATE_LIMITS[endpoint]["limit"] - requests_made,
+                    "reset_time": reset_time,
+                    "reset_in_minutes": max(0, (reset_time - current_time) / 60)
+                }
+            else:
+                info[endpoint] = {
+                    "requests_made": 0,
+                    "limit": TWITTER_RATE_LIMITS[endpoint]["limit"],
+                    "remaining": TWITTER_RATE_LIMITS[endpoint]["limit"],
+                    "reset_time": current_time + TWITTER_RATE_LIMITS[endpoint]["window"],
+                    "reset_in_minutes": TWITTER_RATE_LIMITS[endpoint]["window"] / 60
+                }
+        
+        return info
+        
+    except Exception as e:
+        print(f"Rate limit bilgisi alma hatası: {e}")
+        return {}
+
+def retry_pending_tweets_after_rate_limit():
+    """Rate limit sıfırlandıktan sonra bekleyen tweet'leri tekrar dene"""
+    try:
+        # Rate limit durumunu kontrol et
+        rate_check = check_rate_limit("tweets")
+        if not rate_check.get("allowed", True):
+            print(f"Rate limit hala aktif, {int(rate_check.get('wait_time', 0) / 60)} dakika daha beklenecek")
+            return {"success": False, "message": "Rate limit hala aktif"}
+        
+        # Bekleyen tweet'leri yükle
+        pending_tweets = load_json("pending_tweets.json")
+        if not pending_tweets:
+            return {"success": True, "message": "Bekleyen tweet yok"}
+        
+        # Rate limit hatası olan tweet'leri filtrele
+        rate_limited_tweets = []
+        other_tweets = []
+        
+        for tweet in pending_tweets:
+            error_reason = tweet.get('error_reason', '')
+            if 'rate limit' in error_reason.lower() or '429' in error_reason:
+                rate_limited_tweets.append(tweet)
+            else:
+                other_tweets.append(tweet)
+        
+        if not rate_limited_tweets:
+            return {"success": True, "message": "Rate limit hatası olan tweet yok"}
+        
+        print(f"🔄 {len(rate_limited_tweets)} rate limit hatası olan tweet tekrar deneniyor...")
+        
+        successful_posts = 0
+        failed_posts = 0
+        
+        for tweet in rate_limited_tweets:
+            try:
+                # Rate limit kontrolü yap (her tweet için)
+                rate_check = check_rate_limit("tweets")
+                if not rate_check.get("allowed", True):
+                    print("Rate limit tekrar aşıldı, kalan tweet'ler beklemede kalacak")
+                    break
+                
+                # Tweet'i paylaş
+                tweet_text = tweet['tweet_data']['tweet']
+                result = post_text_tweet_v2(tweet_text)
+                
+                if result.get('success'):
+                    # Başarılı paylaşım - posted_articles'a ekle
+                    article = tweet['article']
+                    article['posted_date'] = datetime.now().isoformat()
+                    article['tweet_text'] = tweet_text
+                    article['tweet_url'] = result.get('url', '')
+                    article['manual_post'] = False
+                    
+                    # Posted articles'a ekle
+                    posted_articles = load_json("posted_articles.json")
+                    posted_articles.append(article)
+                    save_json("posted_articles.json", posted_articles)
+                    
+                    successful_posts += 1
+                    print(f"✅ Tweet başarıyla paylaşıldı: {article.get('title', '')[:50]}...")
+                    
+                else:
+                    # Hala hata var - tweet'i other_tweets'e ekle
+                    tweet['retry_count'] = tweet.get('retry_count', 0) + 1
+                    tweet['error_reason'] = result.get('error', 'Bilinmeyen hata')
+                    other_tweets.append(tweet)
+                    failed_posts += 1
+                    print(f"❌ Tweet paylaşım hatası: {result.get('error', 'Bilinmeyen hata')}")
+                    
+                    # Rate limit hatası ise dur
+                    if result.get('rate_limited'):
+                        print("Rate limit tekrar aşıldı, kalan tweet'ler beklemede kalacak")
+                        # Kalan tweet'leri de other_tweets'e ekle
+                        remaining_tweets = rate_limited_tweets[rate_limited_tweets.index(tweet) + 1:]
+                        other_tweets.extend(remaining_tweets)
+                        break
+                
+            except Exception as e:
+                print(f"Tweet retry hatası: {e}")
+                tweet['retry_count'] = tweet.get('retry_count', 0) + 1
+                tweet['error_reason'] = str(e)
+                other_tweets.append(tweet)
+                failed_posts += 1
+        
+        # Güncellenmiş pending tweet'leri kaydet
+        save_json("pending_tweets.json", other_tweets)
+        
+        message = f"✅ {successful_posts} tweet başarıyla paylaşıldı"
+        if failed_posts > 0:
+            message += f", {failed_posts} tweet hala beklemede"
+        
+        print(f"📊 Retry tamamlandı: {successful_posts} başarılı, {failed_posts} başarısız")
+        
+        return {
+            "success": True,
+            "message": message,
+            "successful_posts": successful_posts,
+            "failed_posts": failed_posts
+        }
+        
+    except Exception as e:
+        print(f"❌ Retry işlemi hatası: {e}")
+        return {"success": False, "message": str(e)}
+
+# ... existing code ...
+
+def terminal_log(message, level='info'):
+    """Global terminal log fonksiyonu - app.py'dan import edilebilir"""
+    try:
+        # app.py'dan TerminalLogHandler'ı import etmeye çalış
+        from app import log_handler
+        if log_handler:
+            log_handler.broadcast_log(message, level)
+        else:
+            print(f"[{level.upper()}] {message}")
+    except ImportError:
+        # app.py import edilemezse normal print kullan
+        print(f"[{level.upper()}] {message}")
+    except Exception as e:
+        # Herhangi bir hata durumunda normal print kullan
+        print(f"[{level.upper()}] {message}")

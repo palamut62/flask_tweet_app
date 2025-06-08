@@ -159,6 +159,23 @@
                             <span class="text-gray-600">Hashtag'ler:</span>
                             <span class="font-bold text-purple-600">{{ stats.hashtags or 0 }}</span>
                         </div>
+                        <div class="flex justify-between items-center pt-3 border-t border-gray-200">
+                            <span class="text-gray-600">Duplikat Kontrol:</span>
+                            <span class="font-bold {{ 'text-green-600' if settings.enable_duplicate_detection != False else 'text-red-600' }}">
+                                {{ 'Aktif' if settings.enable_duplicate_detection != False else 'Kapalı' }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Twitter Rate Limit:</span>
+                            <span id="rate-limit-status" class="font-bold text-blue-600">Yükleniyor...</span>
+                        </div>
+                        <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-info-circle text-yellow-500"></i>
+                                <span class="text-yellow-700 text-sm font-medium">Free Plan Uyarısı</span>
+                            </div>
+                            <p class="text-yellow-600 text-xs mt-1">X API Free plan: 15 dakikada maksimum 5 tweet. Manuel onay önerilir.</p>
+                        </div>
                     </div>
                 {% else %}
                     <p class="text-gray-500">İstatistikler yüklenemedi</p>
@@ -190,6 +207,14 @@
                     <a href="{{ url_for('clear_pending') }}" class="w-full px-6 py-3 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-all duration-200 font-medium flex items-center justify-center space-x-2">
                         <i class="fas fa-trash"></i>
                         <span>Bekleyenleri Temizle</span>
+                    </a>
+                    <a href="{{ url_for('clean_duplicate_pending') }}" class="w-full px-6 py-3 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-200 font-medium flex items-center justify-center space-x-2">
+                        <i class="fas fa-copy"></i>
+                        <span>Duplikatları Temizle</span>
+                    </a>
+                    <a href="{{ url_for('retry_rate_limited_tweets') }}" class="w-full px-6 py-3 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-all duration-200 font-medium flex items-center justify-center space-x-2">
+                        <i class="fas fa-redo"></i>
+                        <span>Rate Limit Retry</span>
                     </a>
 
                 </div>
@@ -243,6 +268,24 @@
                                 <span>Yayın: <span class="font-medium">{{ tweet.article.fetch_date[:10] if tweet.article.fetch_date else 'Tarih yok' }}</span></span>
                             </div>
                         </div>
+                        
+                        {% if tweet.error_reason %}
+                        <div class="mb-4 p-3 {% if 'rate limit' in tweet.error_reason.lower() %}bg-yellow-50 border border-yellow-200{% else %}bg-red-50 border border-red-200{% endif %} rounded-lg">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-{% if 'rate limit' in tweet.error_reason.lower() %}clock{% else %}exclamation-triangle{% endif %} {% if 'rate limit' in tweet.error_reason.lower() %}text-yellow-500{% else %}text-red-500{% endif %}"></i>
+                                <span class="{% if 'rate limit' in tweet.error_reason.lower() %}text-yellow-700{% else %}text-red-700{% endif %} text-sm font-medium">
+                                    {% if 'rate limit' in tweet.error_reason.lower() %}Rate Limit:{% else %}Hata:{% endif %}
+                                </span>
+                            </div>
+                            <p class="{% if 'rate limit' in tweet.error_reason.lower() %}text-yellow-600{% else %}text-red-600{% endif %} text-sm mt-1">{{ tweet.error_reason }}</p>
+                            {% if 'rate limit' in tweet.error_reason.lower() %}
+                            <div class="mt-2 text-xs text-yellow-600">
+                                <i class="fas fa-info-circle"></i>
+                                Bu tweet otomatik olarak rate limit sıfırlandığında tekrar denenecek.
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
                         
                         <div class="flex flex-wrap gap-3">
                             <button onclick="postTweet('{{ loop.index0 }}')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-medium flex items-center space-x-2">

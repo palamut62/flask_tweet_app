@@ -23,7 +23,7 @@ from utils import (
     get_automation_status, send_telegram_notification, test_telegram_connection,
     check_telegram_configuration, auto_detect_and_save_chat_id,
     setup_twitter_api, send_gmail_notification, test_gmail_connection,
-    check_gmail_configuration
+    check_gmail_configuration, get_rate_limit_info, terminal_log
 )
 
 app = Flask(__name__)
@@ -94,12 +94,16 @@ def index():
             "telegram_available": bool(os.environ.get('TELEGRAM_BOT_TOKEN'))
         }
         
+        # Ayarları yükle
+        settings = load_automation_settings()
+        
         return render_template('index.html', 
                              articles=articles[-10:], 
                              pending_tweets=pending_tweets,
                              stats=stats,
                              automation_status=automation_status,
                              api_check=api_check,
+                             settings=settings,
                              last_check=last_check_time)
     except Exception as e:
         from utils import safe_log
@@ -110,6 +114,7 @@ def index():
                              stats={},
                              automation_status={},
                              api_check={},
+                             settings={},
                              error=str(e))
 
 @app.route('/check_articles')
@@ -164,7 +169,16 @@ def fetch_latest_ai_articles_with_mcp():
                 
                 if filtered_articles:
                     terminal_log(f"📊 {len(filtered_articles)} yeni makale filtrelendi", "info")
-                    return filtered_articles[:10]  # İlk 10 makaleyi döndür
+                    
+                    # Duplikat filtreleme uygula
+                    from utils import filter_duplicate_articles
+                    final_articles = filter_duplicate_articles(filtered_articles)
+                    
+                    if final_articles:
+                        terminal_log(f"✅ Duplikat filtreleme sonrası {len(final_articles)} benzersiz makale", "success")
+                        return final_articles[:10]  # İlk 10 makaleyi döndür
+                    else:
+                        terminal_log("⚠️ Duplikat filtreleme sonrası hiç makale kalmadı", "warning")
                 else:
                     terminal_log("⚠️ Özel kaynaklardan yeni makale bulunamadı", "warning")
             else:
@@ -327,7 +341,9 @@ def check_and_post_articles():
                         terminal_log(f"📝 Tweet pending listesine ekleniyor: {article['title'][:50]}...", "info")
                         
                         pending_tweets = load_json("pending_tweets.json")
-                        pending_tweets.append({
+                        
+                        # Duplikat kontrolü yap
+                        new_tweet = {
                             "article": article,
                             "tweet_data": tweet_data,
                             "created_date": datetime.now().isoformat(),
@@ -335,20 +351,59 @@ def check_and_post_articles():
                             "status": "pending",
                             "error_reason": error_msg,
                             "retry_count": 0
-                        })
-                        save_json("pending_tweets.json", pending_tweets)
+                        }
+                        
+                        # URL ve hash kontrolü
+                        article_url = article.get('url', '')
+                        article_hash = article.get('hash', '')
+                        
+                        is_duplicate = False
+                        for existing_tweet in pending_tweets:
+                            existing_article = existing_tweet.get('article', {})
+                            if (article_url and article_url == existing_article.get('url', '')) or \
+                               (article_hash and article_hash == existing_article.get('hash', '')):
+                                is_duplicate = True
+                                terminal_log(f"⚠️ Duplikat tweet atlandı: {article['title'][:50]}...", "warning")
+                                break
+                        
+                        if not is_duplicate:
+                            pending_tweets.append(new_tweet)
+                            save_json("pending_tweets.json", pending_tweets)
+                            terminal_log(f"✅ Tweet pending listesine eklendi: {article['title'][:50]}...", "success")
+                        else:
+                            terminal_log(f"🔄 Duplikat tweet pending listesine eklenmedi", "info")
                 else:
                     # Manuel onay gerekli - pending listesine ekle
                     pending_tweets = load_json("pending_tweets.json")
-                    pending_tweets.append({
+                    
+                    # Duplikat kontrolü yap
+                    new_tweet = {
                         "article": article,
                         "tweet_data": tweet_data,
                         "created_date": datetime.now().isoformat(),
                         "created_at": datetime.now().isoformat(),  # Geriye uyumluluk için
                         "status": "pending"
-                    })
-                    save_json("pending_tweets.json", pending_tweets)
-                    terminal_log(f"📝 Tweet onay bekliyor: {article['title'][:50]}...", "info")
+                    }
+                    
+                    # URL ve hash kontrolü
+                    article_url = article.get('url', '')
+                    article_hash = article.get('hash', '')
+                    
+                    is_duplicate = False
+                    for existing_tweet in pending_tweets:
+                        existing_article = existing_tweet.get('article', {})
+                        if (article_url and article_url == existing_article.get('url', '')) or \
+                           (article_hash and article_hash == existing_article.get('hash', '')):
+                            is_duplicate = True
+                            terminal_log(f"⚠️ Duplikat tweet atlandı: {article['title'][:50]}...", "warning")
+                            break
+                    
+                    if not is_duplicate:
+                        pending_tweets.append(new_tweet)
+                        save_json("pending_tweets.json", pending_tweets)
+                        terminal_log(f"📝 Tweet onay bekliyor: {article['title'][:50]}...", "info")
+                    else:
+                        terminal_log(f"🔄 Duplikat tweet onay listesine eklenmedi", "info")
 
                 
             except Exception as article_error:
@@ -426,7 +481,7 @@ def post_tweet_route():
 @app.route('/delete_tweet', methods=['POST'])
 @login_required
 def delete_tweet_route():
-    """Tweet silme endpoint'i"""
+    """Tweet silme endpoint'i - Makaleyi silindi olarak işaretle"""
     try:
         data = request.get_json()
         tweet_id = data.get('tweet_id')
@@ -434,12 +489,35 @@ def delete_tweet_route():
         if not tweet_id:
             return jsonify({"success": False, "error": "Tweet ID gerekli"})
         
-        # Pending listesinden kaldır
+        # Pending tweet'i bul
         pending_tweets = load_json("pending_tweets.json")
+        deleted_tweet = None
+        
+        for i, pending in enumerate(pending_tweets):
+            if str(i) == str(tweet_id):
+                deleted_tweet = pending
+                break
+        
+        if deleted_tweet:
+            # Makaleyi "silindi" olarak işaretle
+            article = deleted_tweet['article']
+            article['deleted'] = True
+            article['deleted_date'] = datetime.now().isoformat()
+            article['tweet_text'] = deleted_tweet['tweet_data']['tweet']
+            article['deletion_reason'] = 'Manuel olarak silindi'
+            
+            # Posted articles'a "silindi" olarak ekle
+            posted_articles = load_json("posted_articles.json")
+            posted_articles.append(article)
+            save_json("posted_articles.json", posted_articles)
+            
+            terminal_log(f"📝 Makale silindi olarak işaretlendi: {article.get('title', '')[:50]}...", "info")
+        
+        # Pending listesinden kaldır
         pending_tweets = [p for i, p in enumerate(pending_tweets) if str(i) != str(tweet_id)]
         save_json("pending_tweets.json", pending_tweets)
         
-        return jsonify({"success": True, "message": "Tweet silindi"})
+        return jsonify({"success": True, "message": "Tweet silindi ve makale bir daha gösterilmeyecek"})
         
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
@@ -629,6 +707,9 @@ def save_settings():
             'manual_approval_required': request.form.get('manual_approval_required') == 'on',
             'telegram_notifications': request.form.get('telegram_notifications') == 'on',
             'email_notifications': request.form.get('email_notifications') == 'on',
+            'enable_duplicate_detection': request.form.get('enable_duplicate_detection') == 'on',
+            'title_similarity_threshold': float(request.form.get('title_similarity_threshold', 80)) / 100.0,
+            'content_similarity_threshold': float(request.form.get('content_similarity_threshold', 60)) / 100.0,
             'last_updated': datetime.now().isoformat()
         }
         
@@ -1320,6 +1401,132 @@ def log_stream():
 def terminal_page():
     """Terminal sayfası"""
     return render_template('terminal.html')
+
+@app.route('/test_duplicate_detection')
+@login_required
+def test_duplicate_detection():
+    """Duplikat tespit sistemini test et"""
+    try:
+        from utils import filter_duplicate_articles, load_automation_settings
+        
+        # Test makaleleri oluştur
+        test_articles = [
+            {
+                "title": "OpenAI Launches New GPT-5 Model",
+                "url": "https://example.com/openai-gpt5-1",
+                "content": "OpenAI today announced the launch of GPT-5, their most advanced language model yet. The new model features improved reasoning capabilities and better understanding of context.",
+                "hash": "test_hash_1",
+                "fetch_date": "2025-06-08T15:00:00",
+                "source": "Test Source 1"
+            },
+            {
+                "title": "OpenAI Unveils GPT-5: Revolutionary AI Model",
+                "url": "https://example.com/openai-gpt5-2", 
+                "content": "In a groundbreaking announcement, OpenAI has revealed GPT-5, featuring enhanced reasoning and contextual understanding capabilities.",
+                "hash": "test_hash_2",
+                "fetch_date": "2025-06-08T15:05:00",
+                "source": "Test Source 2"
+            },
+            {
+                "title": "Google Announces New Quantum Computer",
+                "url": "https://example.com/google-quantum",
+                "content": "Google has unveiled a new quantum computing system that promises to solve complex problems faster than traditional computers.",
+                "hash": "test_hash_3",
+                "fetch_date": "2025-06-08T15:10:00",
+                "source": "Test Source 3"
+            }
+        ]
+        
+        # Ayarları kontrol et
+        settings = load_automation_settings()
+        
+        # Duplikat filtreleme test et
+        filtered_articles = filter_duplicate_articles(test_articles, [])
+        
+        result = {
+            "success": True,
+            "message": "Duplikat tespit sistemi test edildi",
+            "settings": {
+                "enable_duplicate_detection": settings.get('enable_duplicate_detection', True),
+                "title_similarity_threshold": settings.get('title_similarity_threshold', 0.8),
+                "content_similarity_threshold": settings.get('content_similarity_threshold', 0.6)
+            },
+            "test_results": {
+                "original_count": len(test_articles),
+                "filtered_count": len(filtered_articles),
+                "duplicates_found": len(test_articles) - len(filtered_articles)
+            },
+            "filtered_articles": [
+                {
+                    "title": article.get("title", ""),
+                    "source": article.get("source", ""),
+                    "url": article.get("url", "")
+                } for article in filtered_articles
+            ]
+        }
+        
+        flash(f'Duplikat test tamamlandı: {len(test_articles)} → {len(filtered_articles)} makale', 'success')
+        return jsonify(result)
+        
+    except Exception as e:
+        flash(f'Duplikat test hatası: {str(e)}', 'error')
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/clean_duplicate_pending')
+@login_required
+def clean_duplicate_pending():
+    """Bekleyen tweet'lerdeki duplikatları temizle"""
+    try:
+        from utils import clean_duplicate_pending_tweets
+        
+        result = clean_duplicate_pending_tweets()
+        
+        if result.get('success'):
+            flash(f'{result.get("message")} - {result.get("original_count")} → {result.get("cleaned_count")} tweet ({result.get("removed_count")} duplikat kaldırıldı)', 'success')
+        else:
+            flash(result.get('message', 'Bilinmeyen hata'), 'error')
+            
+    except Exception as e:
+        flash(f'Duplikat temizleme hatası: {str(e)}', 'error')
+    
+    return redirect(url_for('index'))
+
+@app.route('/rate_limit_status')
+@login_required
+def rate_limit_status():
+    """Twitter API rate limit durumunu göster"""
+    try:
+        rate_info = get_rate_limit_info()
+        
+        return jsonify({
+            "success": True,
+            "rate_limits": rate_info
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+@app.route('/retry_rate_limited_tweets')
+@login_required
+def retry_rate_limited_tweets():
+    """Rate limit hatası olan tweet'leri tekrar dene"""
+    try:
+        from utils import retry_pending_tweets_after_rate_limit
+        
+        result = retry_pending_tweets_after_rate_limit()
+        
+        if result.get('success'):
+            flash(result.get('message', 'İşlem tamamlandı'), 'success')
+        else:
+            flash(result.get('message', 'Bilinmeyen hata'), 'warning')
+            
+    except Exception as e:
+        flash(f'Retry işlemi hatası: {str(e)}', 'error')
+    
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     # Arka plan zamanlayıcısını başlat

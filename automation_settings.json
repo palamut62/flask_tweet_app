@@ -1,11 +1,14 @@
 {
   "auto_mode": true,
   "check_interval_hours": 3,
-  "max_articles_per_run": 5,
-  "min_score_threshold": 5,
-  "auto_post_enabled": true,
-  "manual_approval_required": false,
+  "max_articles_per_run": 4,
+  "min_score_threshold": 7,
+  "auto_post_enabled": false,
+  "manual_approval_required": true,
   "telegram_notifications": false,
   "email_notifications": true,
-  "last_updated": "2025-06-08T14:08:47.897128"
+  "enable_duplicate_detection": true,
+  "title_similarity_threshold": 0.8,
+  "content_similarity_threshold": 0.7,
+  "last_updated": "2025-06-08T15:21:40.916469"
 }

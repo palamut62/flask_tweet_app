@@ -95,9 +95,63 @@
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
                             <p class="text-sm text-gray-600">Bu skorun altındaki makaleler paylaşılmaz</p>
                         </div>
-                        
-
                     </div>
+                    
+                    <!-- Duplikat Kontrol Ayarları -->
+                    <div class="mt-6 p-6 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl">
+                        <h4 class="text-lg font-semibold text-purple-900 mb-4 flex items-center space-x-2">
+                            <i class="fas fa-copy text-purple-600"></i>
+                            <span>Duplikat Kontrol Ayarları</span>
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label for="title_similarity_threshold" class="block text-sm font-medium text-purple-700">
+                                    Başlık Benzerlik Eşiği (%)
+                                </label>
+                                <input type="number" id="title_similarity_threshold" name="title_similarity_threshold" 
+                                       value="{{ (settings.title_similarity_threshold * 100) if settings.title_similarity_threshold else 80 }}" 
+                                       min="50" max="100" step="5"
+                                       class="w-full px-4 py-3 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
+                                <p class="text-sm text-purple-600">Bu oranın üzerinde benzer başlıklar duplikat sayılır</p>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label for="content_similarity_threshold" class="block text-sm font-medium text-purple-700">
+                                    İçerik Benzerlik Eşiği (%)
+                                </label>
+                                <input type="number" id="content_similarity_threshold" name="content_similarity_threshold" 
+                                       value="{{ (settings.content_similarity_threshold * 100) if settings.content_similarity_threshold else 60 }}" 
+                                       min="30" max="90" step="5"
+                                       class="w-full px-4 py-3 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
+                                <p class="text-sm text-purple-600">Bu oranın üzerinde benzer içerikler duplikat sayılır</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 space-y-4">
+                            <label class="flex items-center space-x-3 cursor-pointer group">
+                                <div class="relative">
+                                    <input type="checkbox" id="enable_duplicate_detection" name="enable_duplicate_detection" 
+                                           {{ 'checked' if settings.enable_duplicate_detection != False else '' }}
+                                           class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                </div>
+                                <div>
+                                    <span class="text-lg font-semibold text-purple-900">Gelişmiş Duplikat Tespiti</span>
+                                    <p class="text-sm text-purple-600">Farklı sitelerden gelen aynı haberleri tespit et ve filtrele</p>
+                                </div>
+                            </label>
+                            
+                            <div class="flex space-x-3">
+                                <a href="{{ url_for('test_duplicate_detection') }}" 
+                                   class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-200 font-medium flex items-center space-x-2">
+                                    <i class="fas fa-vial"></i>
+                                    <span>Duplikat Tespitini Test Et</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
                 </div>
 
                 <!-- Onay Ayarları -->

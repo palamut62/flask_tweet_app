@@ -317,6 +317,13 @@
             window.location.reload();
         }, 300000);
 
+        // Sayfa yüklendiğinde rate limit durumunu güncelle
+        document.addEventListener('DOMContentLoaded', function() {
+            updateRateLimitStatus();
+            // Her 30 saniyede bir rate limit durumunu güncelle
+            setInterval(updateRateLimitStatus, 30000);
+        });
+
         // Auto-hide flash messages after 5 seconds
         setTimeout(function() {
             const flashMessages = document.querySelectorAll('.flash-message');
@@ -328,6 +335,42 @@
                 }, 500);
             });
         }, 5000);
+
+        // Rate limit durumunu güncelle
+        function updateRateLimitStatus() {
+            fetch('/rate_limit_status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.rate_limits && data.rate_limits.tweets) {
+                        const tweets = data.rate_limits.tweets;
+                        const remaining = tweets.remaining;
+                        const limit = tweets.limit;
+                        const resetMinutes = Math.ceil(tweets.reset_in_minutes);
+                        
+                        const statusElement = document.getElementById('rate-limit-status');
+                        if (statusElement) {
+                            if (remaining > 50) {
+                                statusElement.textContent = `${remaining}/${limit}`;
+                                statusElement.className = 'font-bold text-green-600';
+                            } else if (remaining > 10) {
+                                statusElement.textContent = `${remaining}/${limit}`;
+                                statusElement.className = 'font-bold text-yellow-600';
+                            } else {
+                                statusElement.textContent = `${remaining}/${limit} (${resetMinutes}dk)`;
+                                statusElement.className = 'font-bold text-red-600';
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Rate limit durumu alınamadı:', error);
+                    const statusElement = document.getElementById('rate-limit-status');
+                    if (statusElement) {
+                        statusElement.textContent = 'Bilinmiyor';
+                        statusElement.className = 'font-bold text-gray-600';
+                    }
+                });
+        }
 
         // Tweet action functions
         function postTweet(tweetId) {
@@ -343,9 +386,15 @@
                 .then(data => {
                     if (data.success) {
                         showNotification('Tweet başarıyla paylaşıldı!', 'success');
+                        updateRateLimitStatus(); // Rate limit durumunu güncelle
                         setTimeout(() => window.location.reload(), 1000);
                     } else {
-                        showNotification('Hata: ' + data.error, 'error');
+                        if (data.rate_limited) {
+                            showNotification(`Rate limit hatası: ${data.error}`, 'warning');
+                            updateRateLimitStatus(); // Rate limit durumunu güncelle
+                        } else {
+                            showNotification('Hata: ' + data.error, 'error');
+                        }
                     }
                 })
                 .catch(error => {
@@ -354,8 +403,31 @@
             }
         }
 
+        function manualPostTweet(tweetId) {
+            fetch('/manual_post_tweet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({tweet_id: tweetId})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // X.com'da yeni sekmede aç
+                    window.open(data.x_share_url, '_blank');
+                    showNotification('X.com\'da paylaşım sayfası açıldı. Paylaştıktan sonra "Manuel Paylaşımı Onayla" butonuna tıklayın.', 'info');
+                } else {
+                    showNotification('Hata: ' + data.error, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Bir hata oluştu: ' + error, 'error');
+            });
+        }
+
         function deleteTweet(tweetId) {
-            if (confirm('Bu tweet\'i silmek istediğinizden emin misiniz?')) {
+            if (confirm('Bu tweet\'i silmek istediğinizden emin misiniz?\n\n⚠️ Bu makale bir daha gösterilmeyecek!')) {
                 fetch('/delete_tweet', {
                     method: 'POST',
                     headers: {
@@ -366,7 +438,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        showNotification('Tweet silindi!', 'success');
+                        showNotification('Tweet silindi ve makale bir daha gösterilmeyecek!', 'success');
                         setTimeout(() => window.location.reload(), 1000);
                     } else {
                         showNotification('Hata: ' + data.error, 'error');
