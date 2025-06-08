@@ -2,53 +2,54 @@
 
 ## 🚀 Uygulamayı Başlatma
 
-### 1. Ana Uygulama (Web Arayüzü)
+### ✅ Tek Komut ile Tam Sistem (Önerilen - PythonAnywhere Uyumlu)
 ```bash
 python app.py
 ```
 - **Adres**: http://127.0.0.1:5000
-- **Özellik**: Web arayüzü, manuel kontroller, ayarlar
-- **Davranış**: İlk açılışta otomatik işlem yapmaz, sadece ana sayfa açılır
+- **Özellik**: Web arayüzü + Arka plan zamanlayıcısı
+- **Otomatik**: Her 3 saatte bir haber kontrolü
+- **PythonAnywhere**: Tek web app olarak çalışır
+- **Maliyet**: Ek ücret yok
 
-### 2. Otomatik Zamanlayıcı (Arka Plan)
+### 🔧 Alternatif: Ayrı Zamanlayıcı (Eski Yöntem)
 ```bash
+# Terminal 1: Ana uygulama
+python app.py
+
+# Terminal 2: Ayrı zamanlayıcı
 python start_scheduler.py
 ```
-- **Özellik**: Her 3 saatte bir otomatik haber kontrolü ve tweet paylaşımı
-- **Log**: `scheduler.log` dosyasına kaydedilir
-- **Durdurma**: Ctrl+C ile durdurulabilir
+- **Kullanım**: Sadece geliştirme ortamı için
+- **PythonAnywhere**: Ek scheduled task ücreti gerekir
 
 ## 📋 Sistem Çalışma Mantığı
 
-### Ana Uygulama (app.py)
-- ✅ **İlk açılış**: Herhangi bir otomatik işlem yapmaz
-- ✅ **Hızlı başlangıç**: Anında ana sayfa açılır
+### Entegre Sistem (app.py)
+- ✅ **İlk açılış**: Hızlı ana sayfa + arka plan zamanlayıcı başlatma
+- ✅ **Web arayüzü**: Tam fonksiyonel kontrol paneli
 - ✅ **Manuel kontrol**: "Yeni Haber Kontrol Et" butonu ile
+- ✅ **Otomatik sistem**: Arka plan thread'i ile her 3 saatte bir
 - ✅ **Ayarlar**: Otomatik paylaşım ayarları
 - ✅ **Tweet yönetimi**: Pending tweet'leri onaylama/reddetme
-
-### Otomatik Zamanlayıcı (start_scheduler.py)
-- ✅ **Arka plan çalışma**: Ana uygulamadan bağımsız
-- ✅ **Periyodik kontrol**: Her 3 saatte bir
-- ✅ **Akıllı sistem**: Ayarları kontrol eder, devre dışıysa çalışmaz
-- ✅ **Log sistemi**: Tüm işlemler loglanır
+- ✅ **PythonAnywhere uyumlu**: Tek web app olarak çalışır
 
 ## 🔧 Önerilen Kullanım
 
 ### Geliştirme/Test Ortamı
 ```bash
-# Terminal 1: Ana uygulama
+# Tek komut - her şey dahil
 python app.py
-
-# Terminal 2: Otomatik zamanlayıcı (isteğe bağlı)
-python start_scheduler.py
 ```
 
 ### Prodüksiyon Ortamı (PythonAnywhere)
 ```bash
-# Web app olarak: app.py
-# Scheduled task olarak: start_scheduler.py (günde 8 kez - her 3 saatte)
+# Tek web app olarak
+python app.py
 ```
+- ✅ **Ek maliyet yok**: Scheduled task gerekmez
+- ✅ **Basit kurulum**: Tek dosya yönetimi
+- ✅ **Güvenilir**: Web app sürekli çalışır
 
 ## ⚙️ Ayarlar
 

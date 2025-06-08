@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, f
 import os
 import json
 import time
+import threading
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from functools import wraps
@@ -26,6 +27,7 @@ app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 # Global değişkenler
 last_check_time = None
 automation_running = False
+background_scheduler_running = False
 
 # Giriş kontrolü decorator'ı
 def login_required(f):
@@ -766,9 +768,65 @@ def ocr_image():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+def background_scheduler():
+    """Arka plan zamanlayıcısı - Her 3 saatte bir çalışır"""
+    global background_scheduler_running, last_check_time
+    
+    print("🚀 Arka plan zamanlayıcısı başlatıldı (Her 3 saatte bir çalışacak)")
+    background_scheduler_running = True
+    
+    while background_scheduler_running:
+        try:
+            # Ayarları kontrol et
+            settings = load_automation_settings()
+            
+            if settings.get('auto_post_enabled', False):
+                current_time = datetime.now()
+                check_interval_hours = settings.get('check_interval_hours', 3)
+                
+                # İlk çalışma veya belirlenen süre geçtiyse kontrol et
+                if (last_check_time is None or 
+                    current_time - last_check_time >= timedelta(hours=check_interval_hours)):
+                    
+                    print(f"🔄 Otomatik haber kontrolü başlatılıyor... (Son kontrol: {last_check_time})")
+                    
+                    try:
+                        result = check_and_post_articles()
+                        print(f"✅ Otomatik kontrol tamamlandı: {result.get('message', 'Sonuç yok')}")
+                        last_check_time = current_time
+                    except Exception as check_error:
+                        print(f"❌ Otomatik kontrol hatası: {check_error}")
+                        
+                else:
+                    next_check = last_check_time + timedelta(hours=check_interval_hours)
+                    remaining = next_check - current_time
+                    print(f"⏰ Sonraki kontrol: {remaining.total_seconds()/3600:.1f} saat sonra")
+            else:
+                print("⏸️ Otomatik paylaşım devre dışı")
+            
+            # 30 dakika bekle (kontrol sıklığı)
+            time.sleep(1800)  # 30 dakika = 1800 saniye
+            
+        except Exception as e:
+            print(f"❌ Arka plan zamanlayıcı hatası: {e}")
+            time.sleep(1800)  # Hata durumunda da 30 dakika bekle
+
+def start_background_scheduler():
+    """Arka plan zamanlayıcısını thread olarak başlat"""
+    global background_scheduler_running
+    
+    if not background_scheduler_running:
+        scheduler_thread = threading.Thread(target=background_scheduler, daemon=True)
+        scheduler_thread.start()
+        print("🔄 Arka plan zamanlayıcı thread'i başlatıldı")
+
 if __name__ == '__main__':
+    # Arka plan zamanlayıcısını başlat
+    start_background_scheduler()
+    
     # Python Anywhere için production ayarları
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') == 'development'
     
+    print(f"🌐 Flask uygulaması başlatılıyor - Port: {port}")
     app.run(host='0.0.0.0', port=port, debug=debug)
