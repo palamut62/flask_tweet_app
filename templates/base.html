@@ -2,7 +2,11 @@
 <html lang="tr" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#3b82f6">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -68,6 +72,77 @@
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
         }
         
+        /* Global mobil-friendly sınıflar */
+        .card-modern {
+            @apply bg-white rounded-2xl shadow-lg border border-gray-100 transition-all duration-200 hover:shadow-xl;
+        }
+        
+        .btn-mobile {
+            min-height: 48px;
+            font-size: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .input-mobile {
+            min-height: 48px;
+            font-size: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            transition: border-color 0.2s ease;
+        }
+        
+        .input-mobile:focus {
+            border-color: #3b82f6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .text-mobile-sm { font-size: 14px; }
+        .text-mobile-base { font-size: 16px; }
+        .text-mobile-lg { font-size: 18px; }
+        
+        .spacing-mobile {
+            padding: 1rem;
+            margin: 0.5rem;
+        }
+        
+        /* Login ve form sayfaları için özel stiller */
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .login-body {
+            padding: 2rem;
+        }
+        
+        .robot-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
         /* Navigation Styles */
         .nav-item {
             @apply flex flex-col items-center space-y-1 px-4 py-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-700 font-medium text-sm;
@@ -91,10 +166,150 @@
         
         .mobile-nav-link {
             @apply flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium;
+            min-height: 48px; /* Dokunma dostu minimum boyut */
         }
         
         .mobile-nav-link:hover {
             @apply transform translate-x-1;
+        }
+        
+        /* Mobil optimizasyonları - Tüm sayfalar için */
+        @media (max-width: 768px) {
+            .card-modern {
+                @apply mx-2;
+            }
+            
+            .btn-primary, .btn-secondary, .btn-success, .btn-warning, .btn-danger, .btn-info {
+                min-height: 48px;
+                font-size: 16px; /* iOS zoom'u önlemek için */
+                padding: 12px 16px;
+            }
+            
+            input, textarea, select {
+                font-size: 16px; /* iOS zoom'u önlemek için */
+                min-height: 48px;
+                padding: 12px 16px;
+            }
+            
+            .table-responsive {
+                font-size: 14px;
+            }
+            
+            /* Kart ve container'lar */
+            .container, .max-w-7xl {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            /* Form elemanları */
+            .form-control, .form-select {
+                min-height: 48px;
+                font-size: 16px;
+                border-radius: 8px;
+            }
+            
+            /* Modal ve popup'lar */
+            .modal-dialog {
+                margin: 1rem;
+                max-width: calc(100vw - 2rem);
+            }
+            
+            /* Tablo responsive */
+            .table {
+                font-size: 14px;
+            }
+            
+            .table td, .table th {
+                padding: 8px 4px;
+                white-space: nowrap;
+            }
+            
+            /* Alert ve notification'lar */
+            .alert {
+                margin: 0.5rem;
+                padding: 12px;
+                border-radius: 8px;
+            }
+            
+            /* Grid sistemleri */
+            .grid {
+                gap: 1rem;
+            }
+            
+            /* Text boyutları */
+            h1 { font-size: 1.75rem; }
+            h2 { font-size: 1.5rem; }
+            h3 { font-size: 1.25rem; }
+            h4 { font-size: 1.125rem; }
+            h5 { font-size: 1rem; }
+            
+            /* Spacing optimizasyonu */
+            .p-6 { padding: 1rem; }
+            .p-8 { padding: 1.5rem; }
+            .py-8 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+            .px-8 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        }
+        
+        /* Küçük mobil cihazlar (576px altı) */
+        @media (max-width: 576px) {
+            .btn-primary, .btn-secondary, .btn-success, .btn-warning, .btn-danger, .btn-info {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            .card-modern {
+                margin: 0.25rem;
+                border-radius: 12px;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            
+            /* Navigation optimizasyonu */
+            .nav-item span {
+                font-size: 12px;
+            }
+            
+            /* Tablo scroll */
+            .table-responsive {
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            
+            /* Form grup spacing */
+            .mb-3, .mb-4 {
+                margin-bottom: 1rem;
+            }
+        }
+        
+        /* Landscape orientation */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .py-8 {
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+            
+            .card-modern {
+                margin: 0.5rem 0;
+            }
+            
+            /* Navigation height reduction */
+            .h-20 {
+                height: 60px;
+            }
+        }
+        
+        /* Touch-friendly hover states */
+        @media (hover: none) {
+            .nav-item:hover {
+                transform: none;
+            }
+            
+            .mobile-nav-link:hover {
+                transform: none;
+            }
         }
     </style>
 </head>

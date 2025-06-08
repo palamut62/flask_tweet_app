@@ -8,6 +8,10 @@ from dotenv import load_dotenv
 from functools import wraps
 from werkzeug.utils import secure_filename
 import tweepy
+import smtplib
+import random
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # .env dosyasını yükle
 load_dotenv()
@@ -43,21 +47,142 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def send_otp_email(email, otp_code):
+    """E-posta ile OTP kodu gönder"""
+    try:
+        # E-posta ayarlarını kontrol et
+        if not EMAIL_SETTINGS['email'] or not EMAIL_SETTINGS['password']:
+            return False, "E-posta ayarları yapılandırılmamış"
+        
+        # E-posta içeriği
+        subject = "AI Tweet Bot - Giriş Doğrulama Kodu"
+        body = f"""
+        Merhaba,
+        
+        AI Tweet Bot uygulamasına giriş yapmak için doğrulama kodunuz:
+        
+        {otp_code}
+        
+        Bu kod 5 dakika geçerlidir.
+        
+        Eğer bu giriş denemesi size ait değilse, bu e-postayı görmezden gelebilirsiniz.
+        
+        İyi günler,
+        AI Tweet Bot
+        """
+        
+        # E-posta oluştur
+        msg = MIMEMultipart()
+        msg['From'] = EMAIL_SETTINGS['email']
+        msg['To'] = email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+        
+        # SMTP ile gönder
+        server = smtplib.SMTP(EMAIL_SETTINGS['smtp_server'], EMAIL_SETTINGS['smtp_port'])
+        server.starttls()
+        server.login(EMAIL_SETTINGS['email'], EMAIL_SETTINGS['password'])
+        server.send_message(msg)
+        server.quit()
+        
+        return True, "E-posta başarıyla gönderildi"
+        
+    except Exception as e:
+        return False, f"E-posta gönderme hatası: {str(e)}"
+
+@app.route('/send_otp', methods=['POST'])
+def send_otp():
+    """OTP kodu gönder"""
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip().lower()
+        
+        if not email:
+            return jsonify({"success": False, "error": "E-posta adresi gerekli"})
+        
+        # Admin e-posta kontrolü
+        admin_email = EMAIL_SETTINGS['admin_email'].lower()
+        if not admin_email:
+            return jsonify({"success": False, "error": "Admin e-posta adresi yapılandırılmamış"})
+        
+        if email != admin_email:
+            return jsonify({"success": False, "error": "Yetkisiz e-posta adresi"})
+        
+        # 6 haneli rastgele kod oluştur
+        otp_code = str(random.randint(100000, 999999))
+        
+        # E-posta gönder
+        success, message = send_otp_email(email, otp_code)
+        
+        if success:
+            # OTP kodunu kaydet (5 dakika geçerli)
+            email_otp_codes[email] = {
+                'code': otp_code,
+                'timestamp': datetime.now(),
+                'attempts': 0
+            }
+            
+            return jsonify({"success": True, "message": "Doğrulama kodu gönderildi"})
+        else:
+            return jsonify({"success": False, "error": message})
+            
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Sistem hatası: {str(e)}"})
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """Giriş sayfası"""
+    """E-posta OTP ile güvenli giriş"""
     if request.method == 'POST':
-        password = request.form.get('password')
-        correct_password = os.environ.get('SIFRE', 'admin123')
+        auth_method = request.form.get('auth_method', 'email_otp')
         
-        if password == correct_password:
-            session['logged_in'] = True
-            session['login_time'] = datetime.now().isoformat()
-            flash('Başarıyla giriş yaptınız!', 'success')
-            return redirect(url_for('index'))
-        else:
-            flash('Hatalı şifre!', 'error')
-            return render_template('login.html', error='Hatalı şifre girdiniz.')
+        if auth_method == 'email_otp':
+            email = request.form.get('email', '').strip().lower()
+            otp_code = request.form.get('otp_code', '').strip()
+            
+            if not email or not otp_code:
+                flash('E-posta ve doğrulama kodu gerekli!', 'error')
+                return render_template('login.html', error='Eksik bilgi')
+            
+            # Admin e-posta kontrolü
+            admin_email = EMAIL_SETTINGS['admin_email'].lower()
+            if email != admin_email:
+                flash('Yetkisiz e-posta adresi!', 'error')
+                return render_template('login.html', error='Yetkisiz erişim')
+            
+            # OTP kontrolü
+            if email in email_otp_codes:
+                otp_data = email_otp_codes[email]
+                
+                # Süre kontrolü (5 dakika)
+                if (datetime.now() - otp_data['timestamp']).seconds > 300:
+                    del email_otp_codes[email]
+                    flash('Doğrulama kodunun süresi doldu!', 'error')
+                    return render_template('login.html', error='Kod süresi doldu')
+                
+                # Deneme sayısı kontrolü
+                if otp_data['attempts'] >= 3:
+                    del email_otp_codes[email]
+                    flash('Çok fazla hatalı deneme!', 'error')
+                    return render_template('login.html', error='Çok fazla deneme')
+                
+                # Kod kontrolü
+                if otp_code == otp_data['code']:
+                    # Başarılı giriş
+                    del email_otp_codes[email]
+                    session['logged_in'] = True
+                    session['login_time'] = datetime.now().isoformat()
+                    session['auth_method'] = 'email_otp'
+                    session['user_email'] = email
+                    flash('E-posta doğrulama ile başarıyla giriş yaptınız!', 'success')
+                    return redirect(url_for('index'))
+                else:
+                    # Hatalı kod
+                    otp_data['attempts'] += 1
+                    flash(f'Hatalı doğrulama kodu! ({3 - otp_data["attempts"]} deneme hakkınız kaldı)', 'error')
+                    return render_template('login.html', error='Hatalı kod')
+            else:
+                flash('Geçersiz veya süresi dolmuş doğrulama kodu!', 'error')
+                return render_template('login.html', error='Geçersiz kod')
     
     # Eğer zaten giriş yapmışsa ana sayfaya yönlendir
     if 'logged_in' in session:
@@ -71,6 +196,20 @@ def logout():
     session.clear()
     flash('Başarıyla çıkış yaptınız!', 'info')
     return redirect(url_for('login'))
+
+# E-posta OTP sistemi için global değişken
+email_otp_codes = {}
+
+# E-posta ayarları
+EMAIL_SETTINGS = {
+    'smtp_server': 'smtp.gmail.com',
+    'smtp_port': 587,
+    'email': os.environ.get('EMAIL_ADDRESS', ''),
+    'password': os.environ.get('EMAIL_PASSWORD', ''),
+    'admin_email': os.environ.get('ADMIN_EMAIL', '')
+}
+
+
 
 @app.route('/')
 @login_required
