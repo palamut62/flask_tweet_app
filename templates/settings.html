@@ -130,14 +130,29 @@
                         <div class="space-y-2">
                             <label class="flex items-center space-x-3 cursor-pointer group">
                                 <div class="relative">
+                                    <input type="checkbox" id="email_notifications" name="email_notifications" 
+                                           {{ 'checked' if settings.email_notifications else '' }}
+                                           class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                </div>
+                                <div>
+                                    <span class="text-lg font-semibold text-gray-900">📧 E-posta Bildirimleri</span>
+                                    <p class="text-sm text-gray-600">Gmail ile güzel HTML e-posta bildirimleri</p>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-3 cursor-pointer group">
+                                <div class="relative">
                                     <input type="checkbox" id="telegram_notifications" name="telegram_notifications" 
                                            {{ 'checked' if settings.telegram_notifications else '' }}
                                            class="sr-only peer">
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                 </div>
                                 <div>
-                                    <span class="text-lg font-semibold text-gray-900">Telegram Bildirimleri</span>
-                                    <p class="text-sm text-gray-600">Yeni tweet'ler için bildirim gönder</p>
+                                    <span class="text-lg font-semibold text-gray-900">📱 Telegram Bildirimleri</span>
+                                    <p class="text-sm text-gray-600">Fallback bildirim sistemi (opsiyonel)</p>
                                 </div>
                             </label>
                         </div>
@@ -155,14 +170,96 @@
         </div>
     </div>
 
-    <!-- Telegram Ayarları -->
+    <!-- Gmail E-posta Bildirimleri -->
+    <div class="card-modern">
+        <div class="p-8">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-12 h-12 bg-gradient-to-r from-red-400 to-pink-500 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-envelope text-white text-lg"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900">Gmail E-posta Bildirimleri</h2>
+            </div>
+            
+            {% if gmail_config %}
+                <div class="p-4 rounded-xl border-l-4 mb-6 {{ 'bg-green-50 border-green-400' if gmail_config.ready else 'bg-yellow-50 border-yellow-400' if gmail_config.status == 'partial' else 'bg-red-50 border-red-400' }}">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-{{ 'check-circle text-green-600' if gmail_config.ready else 'exclamation-triangle text-yellow-600' if gmail_config.status == 'partial' else 'times-circle text-red-600' }}"></i>
+                        <span class="font-medium {{ 'text-green-800' if gmail_config.ready else 'text-yellow-800' if gmail_config.status == 'partial' else 'text-red-800' }}">
+                            {{ gmail_config.message }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-3 mb-6">
+                    <a href="{{ url_for('test_gmail') }}" class="px-6 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all duration-200 font-medium flex items-center space-x-2">
+                        <i class="fas fa-vial"></i>
+                        <span>Gmail Bağlantısını Test Et</span>
+                    </a>
+                </div>
+                
+                <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+                    <h3 class="flex items-center space-x-2 text-lg font-semibold text-red-900 mb-4">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Gmail SMTP Kurulumu</span>
+                    </h3>
+                    <ol class="space-y-3 text-red-800">
+                        <li class="flex items-start space-x-2">
+                            <span class="flex-shrink-0 w-6 h-6 bg-red-200 text-red-800 rounded-full flex items-center justify-center text-sm font-medium">1</span>
+                            <div>
+                                <strong>Gmail hesabınızda 2-Factor Authentication'ı etkinleştirin</strong>
+                                <p class="text-sm text-red-700 mt-1">Google hesap güvenlik ayarlarından 2FA'yı açın</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="flex-shrink-0 w-6 h-6 bg-red-200 text-red-800 rounded-full flex items-center justify-center text-sm font-medium">2</span>
+                            <div>
+                                <strong>Uygulama şifresi oluşturun</strong>
+                                <p class="text-sm text-red-700 mt-1">Google hesap → Güvenlik → Uygulama şifreleri → "AI Tweet Bot" için şifre oluşturun</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="flex-shrink-0 w-6 h-6 bg-red-200 text-red-800 rounded-full flex items-center justify-center text-sm font-medium">3</span>
+                            <div>
+                                <strong>.env dosyasına ekleyin:</strong>
+                                <div class="bg-red-100 p-3 rounded mt-2 font-mono text-sm">
+                                    <div>GMAIL_EMAIL=sizin_email@gmail.com</div>
+                                    <div>GMAIL_APP_PASSWORD=uygulama_şifreniz</div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="flex-shrink-0 w-6 h-6 bg-red-200 text-red-800 rounded-full flex items-center justify-center text-sm font-medium">4</span>
+                            <span>"Gmail Bağlantısını Test Et" butonu ile test edin</span>
+                        </li>
+                    </ol>
+                    
+                    <div class="mt-4 p-3 bg-red-100 rounded-lg">
+                        <p class="text-sm text-red-800">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            <strong>Not:</strong> Gmail bildirimleri Telegram'dan daha güvenilir ve kolay kurulur. 
+                            Her tweet paylaşıldığında size güzel bir HTML e-posta gönderilecek.
+                        </p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                        <span class="text-yellow-800 font-medium">Gmail yapılandırması yüklenemedi</span>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Telegram Ayarları (Artık Opsiyonel) -->
     <div class="card-modern">
         <div class="p-8">
             <div class="flex items-center space-x-3 mb-8">
                 <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
                     <i class="fab fa-telegram text-white text-lg"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900">Telegram Ayarları</h2>
+                <h2 class="text-2xl font-bold text-gray-900">Telegram Ayarları <span class="text-sm text-gray-500">(Opsiyonel - Fallback)</span></h2>
             </div>
             
             {% if telegram_config %}
@@ -282,6 +379,32 @@
                     </div>
                 </div>
                 
+                <!-- Gmail API Durumu -->
+                <div class="border rounded-xl p-6 {{ 'border-green-200 bg-green-50' if api_status.gmail_email and api_status.gmail_password else 'border-yellow-200 bg-yellow-50' if api_status.gmail_email else 'border-red-200 bg-red-50' }}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center {{ 'bg-green-100' if api_status.gmail_email and api_status.gmail_password else 'bg-yellow-100' if api_status.gmail_email else 'bg-red-100' }}">
+                                <i class="fas fa-envelope text-xl {{ 'text-green-600' if api_status.gmail_email and api_status.gmail_password else 'text-yellow-600' if api_status.gmail_email else 'text-red-600' }}"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Gmail SMTP</h3>
+                                <p class="text-sm text-gray-600">
+                                    {% if api_status.gmail_email and api_status.gmail_password %}
+                                        ✅ Gmail yapılandırması tamamlanmış
+                                    {% elif api_status.gmail_email %}
+                                        ⚠️ E-posta var, uygulama şifresi eksik
+                                    {% else %}
+                                        ❌ Gmail yapılandırması eksik
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ 'bg-green-100 text-green-800' if api_status.gmail_email and api_status.gmail_password else 'bg-yellow-100 text-yellow-800' if api_status.gmail_email else 'bg-red-100 text-red-800' }}">
+                            {{ 'Hazır' if api_status.gmail_email and api_status.gmail_password else 'Eksik' if api_status.gmail_email else 'Gerekli' }}
+                        </span>
+                    </div>
+                </div>
+                
                 <!-- Telegram API Durumu -->
                 <div class="border rounded-xl p-6 {{ 'border-green-200 bg-green-50' if api_status.telegram_bot else 'border-gray-200 bg-gray-50' }}">
                     <div class="flex items-center justify-between">
@@ -293,15 +416,15 @@
                                 <h3 class="text-lg font-semibold text-gray-900">Telegram Bot</h3>
                                 <p class="text-sm text-gray-600">
                                     {% if api_status.telegram_bot %}
-                                        ✅ Telegram configuration complete (Bot token: ENV, Chat ID: Settings)
+                                        ✅ Telegram yapılandırması tamamlanmış (Fallback)
                                     {% else %}
-                                        ⚠️ Telegram bot token not configured
+                                        ⚠️ Telegram bot token yapılandırılmamış
                                     {% endif %}
                                 </p>
                             </div>
                         </div>
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ 'bg-green-100 text-green-800' if api_status.telegram_bot else 'bg-gray-100 text-gray-800' }}">
-                            {{ 'Mevcut' if api_status.telegram_bot else 'Opsiyonel' }}
+                            {{ 'Fallback' if api_status.telegram_bot else 'Opsiyonel' }}
                         </span>
                     </div>
                 </div>

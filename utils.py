@@ -8,6 +8,9 @@ from datetime import datetime, timedelta
 import hashlib
 from dotenv import load_dotenv
 from PIL import Image
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # .env dosyasını yükle
 load_dotenv()
@@ -1115,7 +1118,7 @@ def setup_twitter_api():
     return api
 
 def post_tweet(tweet_text, article_title=""):
-    """X platformunda tweet paylaşma ve Telegram bildirimi - Twitter API v2 kullanarak"""
+    """X platformunda tweet paylaşma ve Gmail bildirimi - Twitter API v2 kullanarak"""
     try:
         # Twitter API v2 kullan
         tweet_result = post_text_tweet_v2(tweet_text)
@@ -1126,26 +1129,44 @@ def post_tweet(tweet_text, article_title=""):
         tweet_id = tweet_result.get("tweet_id")
         tweet_url = tweet_result.get("url")
         
-        # Telegram bildirimi gönder
-        telegram_sent = False
+        # Gmail bildirimi gönder (Telegram yerine)
+        email_sent = False
         try:
-            telegram_result = send_telegram_notification(
+            gmail_result = send_gmail_notification(
                 message=tweet_text,
                 tweet_url=tweet_url,
                 article_title=article_title
             )
-            if telegram_result.get("success"):
-                print(f"[SUCCESS] Telegram bildirimi gönderildi")
-                telegram_sent = True
+            if gmail_result.get("success"):
+                print(f"[SUCCESS] Gmail bildirimi gönderildi: {gmail_result.get('email')}")
+                email_sent = True
             else:
-                print(f"[WARNING] Telegram bildirimi gönderilemedi: {telegram_result.get('reason', 'unknown')}")
-        except Exception as telegram_error:
-            print(f"[ERROR] Telegram bildirim hatası: {telegram_error}")
+                print(f"[WARNING] Gmail bildirimi gönderilemedi: {gmail_result.get('reason', 'unknown')}")
+        except Exception as gmail_error:
+            print(f"[ERROR] Gmail bildirim hatası: {gmail_error}")
+        
+        # Fallback: Telegram bildirimi (eğer Gmail başarısız olursa)
+        telegram_sent = False
+        if not email_sent:
+            try:
+                telegram_result = send_telegram_notification(
+                    message=tweet_text,
+                    tweet_url=tweet_url,
+                    article_title=article_title
+                )
+                if telegram_result.get("success"):
+                    print(f"[SUCCESS] Fallback Telegram bildirimi gönderildi")
+                    telegram_sent = True
+                else:
+                    print(f"[WARNING] Fallback Telegram bildirimi de başarısız: {telegram_result.get('reason', 'unknown')}")
+            except Exception as telegram_error:
+                print(f"[ERROR] Fallback Telegram bildirim hatası: {telegram_error}")
         
         return {
             "success": True,
             "tweet_id": tweet_id,
             "url": tweet_url,
+            "email_sent": email_sent,
             "telegram_sent": telegram_sent
         }
         
@@ -1659,8 +1680,17 @@ def send_telegram_notification(message, tweet_url="", article_title=""):
             return {"success": False, "reason": "missing_bot_token"}
             
         if not chat_id:
-            print("[WARNING] Telegram chat ID eksik. Arayüzden 'Chat ID Bul' butonu ile ayarlayın.")
-            return {"success": False, "reason": "missing_chat_id"}
+            print("[INFO] Chat ID eksik, otomatik algılama deneniyor...")
+            # Otomatik Chat ID algılamayı dene
+            auto_result = auto_detect_and_save_chat_id()
+            
+            if auto_result["success"]:
+                chat_id = auto_result["chat_id"]
+                print(f"[SUCCESS] Chat ID otomatik algılandı: {chat_id}")
+            else:
+                print(f"[WARNING] Chat ID otomatik algılanamadı: {auto_result.get('error', 'Bilinmeyen hata')}")
+                print("[INFO] Bot'a @tweet62_bot adresinden bir mesaj gönderin ve tekrar deneyin.")
+                return {"success": False, "reason": "missing_chat_id", "auto_detect_error": auto_result.get('error')}
         
         # Telegram mesajını hazırla
         telegram_message = f"🤖 **Yeni Tweet Paylaşıldı!**\n\n"
@@ -1719,10 +1749,18 @@ def test_telegram_connection():
             }
             
         if not chat_id:
-            return {
-                "success": False, 
-                "error": "Chat ID eksik. 'Chat ID Bul' butonu ile chat ID'yi ayarlayın."
-            }
+            print("[INFO] Chat ID eksik, otomatik algılama deneniyor...")
+            # Otomatik Chat ID algılamayı dene
+            auto_result = auto_detect_and_save_chat_id()
+            
+            if auto_result["success"]:
+                chat_id = auto_result["chat_id"]
+                print(f"[SUCCESS] Chat ID otomatik algılandı: {chat_id}")
+            else:
+                return {
+                    "success": False, 
+                    "error": f"Chat ID eksik ve otomatik algılanamadı: {auto_result.get('error', 'Bilinmeyen hata')}. Bot'a @tweet62_bot adresinden bir mesaj gönderin."
+                }
         
         # Bot bilgilerini al
         url = f"https://api.telegram.org/bot{bot_token}/getMe"
@@ -2272,4 +2310,237 @@ def fetch_url_content_fallback(url):
             "content": f"URL: {url} - İçerik çekilemedi: {str(e)}",
             "url": url,
             "source": "error"
+        }
+
+# =============================================================================
+# GMAIL E-POSTA BİLDİRİM SİSTEMİ
+# =============================================================================
+
+def send_gmail_notification(message, tweet_url="", article_title=""):
+    """Gmail SMTP ile e-posta bildirimi gönder"""
+    try:
+        import smtplib
+        from email.mime.text import MIMEText
+        from email.mime.multipart import MIMEMultipart
+        from datetime import datetime
+        import os
+        
+        # Gmail SMTP ayarları
+        gmail_email = os.getenv("GMAIL_EMAIL", "").strip()
+        gmail_password = os.getenv("GMAIL_APP_PASSWORD", "").strip()
+        
+        # Ayarları kontrol et
+        settings = load_automation_settings()
+        email_notifications = settings.get("email_notifications", True)
+        
+        if not email_notifications:
+            print("[DEBUG] E-posta bildirimleri kapalı")
+            return {"success": False, "reason": "disabled"}
+        
+        if not gmail_email:
+            print("[WARNING] Gmail e-posta adresi eksik. .env dosyasında GMAIL_EMAIL ayarlayın.")
+            return {"success": False, "reason": "missing_email"}
+            
+        if not gmail_password:
+            print("[WARNING] Gmail uygulama şifresi eksik. .env dosyasında GMAIL_APP_PASSWORD ayarlayın.")
+            return {"success": False, "reason": "missing_password"}
+        
+        # E-posta içeriğini hazırla
+        subject = "🤖 AI Tweet Bot - Yeni Tweet Paylaşıldı!"
+        
+        # HTML e-posta içeriği
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px 10px 0 0; text-align: center; }}
+                .content {{ background: #f9f9f9; padding: 20px; border-radius: 0 0 10px 10px; }}
+                .tweet-box {{ background: white; border-left: 4px solid #1da1f2; padding: 15px; margin: 15px 0; border-radius: 5px; }}
+                .article-box {{ background: white; border-left: 4px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 5px; }}
+                .footer {{ text-align: center; margin-top: 20px; color: #666; font-size: 12px; }}
+                .btn {{ display: inline-block; background: #1da1f2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 10px 5px; }}
+                .stats {{ background: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🤖 AI Tweet Bot</h1>
+                    <p>Yeni Tweet Başarıyla Paylaşıldı!</p>
+                </div>
+                
+                <div class="content">
+                    <div class="tweet-box">
+                        <h3>💬 Paylaşılan Tweet:</h3>
+                        <p><strong>{message}</strong></p>
+                        {f'<a href="{tweet_url}" class="btn">🔗 Tweet&apos;i Görüntüle</a>' if tweet_url else ''}
+                    </div>
+                    
+                    {f'''
+                    <div class="article-box">
+                        <h3>📰 Kaynak Makale:</h3>
+                        <p><strong>{article_title}</strong></p>
+                    </div>
+                    ''' if article_title else ''}
+                    
+                    <div class="stats">
+                        <h3>📊 Sistem Bilgileri:</h3>
+                        <p><strong>⏰ Zaman:</strong> {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}</p>
+                        <p><strong>🤖 Bot:</strong> AI Tweet Bot v2.0</p>
+                        <p><strong>🔄 Durum:</strong> Otomatik paylaşım aktif</p>
+                    </div>
+                </div>
+                
+                <div class="footer">
+                    <p>Bu e-posta AI Tweet Bot tarafından otomatik olarak gönderilmiştir.</p>
+                    <p>Bildirimleri kapatmak için uygulama ayarlarından e-posta bildirimlerini devre dışı bırakabilirsiniz.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Metin versiyonu (fallback)
+        text_content = f"""
+🤖 AI Tweet Bot - Yeni Tweet Paylaşıldı!
+
+💬 Tweet: {message}
+
+{f'📰 Makale: {article_title}' if article_title else ''}
+
+{f'🔗 Tweet Linki: {tweet_url}' if tweet_url else ''}
+
+⏰ Zaman: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}
+
+Bu e-posta AI Tweet Bot tarafından otomatik olarak gönderilmiştir.
+        """
+        
+        # E-posta mesajını oluştur
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = gmail_email
+        msg['To'] = gmail_email  # Kendine gönder
+        
+        # Metin ve HTML parçalarını ekle
+        text_part = MIMEText(text_content, 'plain', 'utf-8')
+        html_part = MIMEText(html_content, 'html', 'utf-8')
+        
+        msg.attach(text_part)
+        msg.attach(html_part)
+        
+        # Gmail SMTP ile gönder
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(gmail_email, gmail_password)
+            server.send_message(msg)
+        
+        print(f"[SUCCESS] Gmail bildirimi gönderildi: {gmail_email}")
+        return {"success": True, "email": gmail_email}
+        
+    except Exception as e:
+        print(f"[ERROR] Gmail bildirim hatası: {e}")
+        return {"success": False, "error": str(e)}
+
+def test_gmail_connection():
+    """Gmail SMTP bağlantısını test et"""
+    try:
+        import smtplib
+        from email.mime.text import MIMEText
+        from datetime import datetime
+        import os
+        
+        gmail_email = os.getenv("GMAIL_EMAIL", "").strip()
+        gmail_password = os.getenv("GMAIL_APP_PASSWORD", "").strip()
+        
+        if not gmail_email:
+            return {
+                "success": False, 
+                "error": "Gmail e-posta adresi eksik. .env dosyasında GMAIL_EMAIL ayarlayın."
+            }
+            
+        if not gmail_password:
+            return {
+                "success": False, 
+                "error": "Gmail uygulama şifresi eksik. .env dosyasında GMAIL_APP_PASSWORD ayarlayın."
+            }
+        
+        # Test e-postası gönder
+        subject = "🧪 AI Tweet Bot - Test E-postası"
+        body = f"""
+🧪 Test E-postası
+
+Gmail SMTP bağlantısı başarıyla test edildi!
+
+⏰ Test Zamanı: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}
+📧 E-posta: {gmail_email}
+🤖 AI Tweet Bot v2.0
+
+Bu bir test e-postasıdır.
+        """
+        
+        msg = MIMEText(body, 'plain', 'utf-8')
+        msg['Subject'] = subject
+        msg['From'] = gmail_email
+        msg['To'] = gmail_email
+        
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(gmail_email, gmail_password)
+            server.send_message(msg)
+        
+        return {
+            "success": True, 
+            "message": f"✅ Test e-postası başarıyla gönderildi: {gmail_email}"
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+def check_gmail_configuration():
+    """Gmail konfigürasyonunu kontrol et"""
+    try:
+        import os
+        
+        gmail_email = os.getenv("GMAIL_EMAIL", "").strip()
+        gmail_password = os.getenv("GMAIL_APP_PASSWORD", "").strip()
+        
+        # Ayarları kontrol et
+        settings = load_automation_settings()
+        email_notifications = settings.get("email_notifications", True)
+        
+        status = {
+            "email_set": bool(gmail_email and "@" in gmail_email),
+            "password_set": bool(gmail_password),
+            "notifications_enabled": email_notifications,
+            "ready": False
+        }
+        
+        if status["email_set"] and status["password_set"] and status["notifications_enabled"]:
+            status["ready"] = True
+            status["message"] = "✅ Gmail yapılandırması tamamlanmış ve aktif"
+            status["status"] = "ready"
+        elif status["email_set"] and status["password_set"]:
+            status["message"] = "⚠️ Gmail yapılandırılmış ama bildirimler kapalı"
+            status["status"] = "disabled"
+        elif status["email_set"]:
+            status["message"] = "⚠️ E-posta var, uygulama şifresi eksik"
+            status["status"] = "partial"
+        else:
+            status["message"] = "❌ Gmail yapılandırması eksik"
+            status["status"] = "missing"
+            
+        return status
+        
+    except Exception as e:
+        return {
+            "email_set": False,
+            "password_set": False,
+            "notifications_enabled": False,
+            "ready": False,
+            "message": f"❌ Kontrol hatası: {e}",
+            "status": "error"
         }

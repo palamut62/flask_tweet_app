@@ -18,7 +18,8 @@ from utils import (
     get_data_statistics, load_automation_settings, save_automation_settings,
     get_automation_status, send_telegram_notification, test_telegram_connection,
     check_telegram_configuration, auto_detect_and_save_chat_id,
-    setup_twitter_api
+    setup_twitter_api, send_gmail_notification, test_gmail_connection,
+    check_gmail_configuration
 )
 
 app = Flask(__name__)
@@ -415,6 +416,7 @@ def settings():
     try:
         automation_settings = load_automation_settings()
         telegram_config = check_telegram_configuration()
+        gmail_config = check_gmail_configuration()
         
         # API durumunu kontrol et
         api_status = {
@@ -424,7 +426,9 @@ def settings():
             "twitter_api_secret": os.environ.get('TWITTER_API_SECRET') is not None,
             "twitter_access_token": os.environ.get('TWITTER_ACCESS_TOKEN') is not None,
             "twitter_access_secret": os.environ.get('TWITTER_ACCESS_TOKEN_SECRET') is not None,
-            "telegram_bot_token": os.environ.get('TELEGRAM_BOT_TOKEN') is not None
+            "telegram_bot_token": os.environ.get('TELEGRAM_BOT_TOKEN') is not None,
+            "gmail_email": os.environ.get('GMAIL_EMAIL') is not None,
+            "gmail_password": os.environ.get('GMAIL_APP_PASSWORD') is not None
         }
         
         # Gemini API test
@@ -443,6 +447,7 @@ def settings():
         return render_template('settings.html', 
                              settings=automation_settings,
                              telegram_config=telegram_config,
+                             gmail_config=gmail_config,
                              api_status=api_status)
     except Exception as e:
         return render_template('settings.html', 
@@ -465,6 +470,7 @@ def save_settings():
             'manual_approval_required': request.form.get('manual_approval_required') == 'on',
             'rate_limit_seconds': float(request.form.get('rate_limit_seconds', 2.0)),
             'telegram_notifications': request.form.get('telegram_notifications') == 'on',
+            'email_notifications': request.form.get('email_notifications') == 'on',
             'last_updated': datetime.now().isoformat()
         }
         
@@ -503,6 +509,21 @@ def auto_detect_chat_id():
             flash(f'Chat ID algılama hatası: {result.get("error", "Bilinmeyen hata")}', 'error')
     except Exception as e:
         flash(f'Chat ID algılama hatası: {str(e)}', 'error')
+    
+    return redirect(url_for('settings'))
+
+@app.route('/test_gmail')
+@login_required
+def test_gmail():
+    """Gmail SMTP bağlantı testi"""
+    try:
+        result = test_gmail_connection()
+        if result.get('success'):
+            flash(f'Gmail bağlantısı başarılı! {result.get("message", "")}', 'success')
+        else:
+            flash(f'Gmail hatası: {result.get("error", "Bilinmeyen hata")}', 'error')
+    except Exception as e:
+        flash(f'Gmail test hatası: {str(e)}', 'error')
     
     return redirect(url_for('settings'))
 
