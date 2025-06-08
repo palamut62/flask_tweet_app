@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+
+{% block title %}Canlı Terminal - AI Tweet Bot{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50 p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                        <i class="fas fa-terminal mr-3"></i>Canlı Terminal
+                    </h1>
+                    <p class="text-gray-600 mt-2">Uygulamanın tüm işlemlerini gerçek zamanlı olarak izleyin</p>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div id="connectionIndicator" class="w-3 h-3 bg-gray-400 rounded-full"></div>
+                        <span id="connectionText" class="text-sm text-gray-600">Bağlanıyor...</span>
+                    </div>
+                    
+                    <button onclick="toggleFullscreen()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-expand"></i> Tam Ekran
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal Container -->
+        <div class="bg-black rounded-xl shadow-2xl overflow-hidden border border-gray-800">
+            <!-- Terminal Header -->
+            <div class="bg-gray-800 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="flex space-x-2">
+                        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                    </div>
+                    <span class="text-white font-semibold">AI Tweet Bot Terminal</span>
+                    <span id="terminalStatus" class="text-xs text-gray-400">Hazır</span>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <button id="autoScrollToggle" onclick="toggleAutoScroll()" class="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors">
+                        <i class="fas fa-arrow-down"></i> Auto Scroll
+                    </button>
+                    <button onclick="clearTerminal()" class="px-3 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-trash"></i> Temizle
+                    </button>
+                    <button onclick="downloadLogs()" class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-download"></i> İndir
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Terminal Content -->
+            <div id="terminalOutput" class="bg-black text-green-400 font-mono text-sm p-6 h-96 overflow-y-auto">
+                <div class="terminal-line">
+                    <span class="text-gray-500">[SYSTEM]</span> Terminal başlatılıyor...
+                </div>
+                <div class="terminal-line">
+                    <span class="text-gray-500">[SYSTEM]</span> Canlı log akışı bağlantısı kuruluyor...
+                </div>
+                <div class="terminal-line">
+                    <span class="cursor">█</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal Controls -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Log Filtreleme -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50 p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-filter mr-2"></i>Log Filtreleme
+                </h3>
+                
+                <div class="space-y-3">
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="showInfo" checked class="rounded text-blue-600">
+                        <span class="text-green-600">Info</span>
+                    </label>
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="showSuccess" checked class="rounded text-blue-600">
+                        <span class="text-green-600">Success</span>
+                    </label>
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="showWarning" checked class="rounded text-blue-600">
+                        <span class="text-yellow-600">Warning</span>
+                    </label>
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="showError" checked class="rounded text-blue-600">
+                        <span class="text-red-600">Error</span>
+                    </label>
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" id="showDebug" class="rounded text-blue-600">
+                        <span class="text-cyan-600">Debug</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- İstatistikler -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50 p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-chart-line mr-2"></i>Log İstatistikleri
+                </h3>
+                
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span>Toplam Log:</span>
+                        <span id="totalLogs" class="font-semibold">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-green-600">Success:</span>
+                        <span id="successCount" class="font-semibold">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-yellow-600">Warning:</span>
+                        <span id="warningCount" class="font-semibold">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-red-600">Error:</span>
+                        <span id="errorCount" class="font-semibold">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hızlı Eylemler -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50 p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-bolt mr-2"></i>Hızlı Eylemler
+                </h3>
+                
+                <div class="space-y-3">
+                    <button onclick="triggerArticleCheck()" class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">
+                        <i class="fas fa-sync-alt mr-2"></i>Makale Kontrolü
+                    </button>
+                    <button onclick="testTelegram()" class="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm">
+                        <i class="fab fa-telegram mr-2"></i>Telegram Test
+                    </button>
+                    <button onclick="viewSettings()" class="w-full px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm">
+                        <i class="fas fa-cog mr-2"></i>Ayarlar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.terminal-line {
+    margin-bottom: 2px;
+    word-wrap: break-word;
+}
+
+.log-info { color: #00ff00; }
+.log-warning { color: #ffff00; }
+.log-error { color: #ff0000; }
+.log-debug { color: #00ffff; }
+.log-success { color: #00ff88; }
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.cursor {
+    animation: blink 1s infinite;
+}
+
+.terminal-line.hidden {
+    display: none;
+}
+</style>
+
+<script>
+let eventSource = null;
+let autoScroll = true;
+let logBuffer = [];
+let logStats = {
+    total: 0,
+    success: 0,
+    warning: 0,
+    error: 0,
+    info: 0,
+    debug: 0
+};
+
+// Sayfa yüklendiğinde terminal'i başlat
+document.addEventListener('DOMContentLoaded', function() {
+    startLogStream();
+    updateConnectionStatus('connecting');
+});
+
+function startLogStream() {
+    if (eventSource) {
+        eventSource.close();
+    }
+    
+    updateConnectionStatus('connecting');
+    
+    eventSource = new EventSource('/api/logs/stream');
+    
+    eventSource.onopen = function(event) {
+        updateConnectionStatus('connected');
+        addLogLine('Canlı log akışı başlatıldı', 'success');
+    };
+    
+    eventSource.onmessage = function(event) {
+        try {
+            const data = JSON.parse(event.data);
+            
+            // Heartbeat mesajlarını gösterme
+            if (data.message === 'heartbeat') {
+                return;
+            }
+            
+            addLogLine(data.message, data.level, data.timestamp);
+        } catch (e) {
+            addLogLine(event.data, 'info');
+        }
+    };
+    
+    eventSource.onerror = function(event) {
+        updateConnectionStatus('error');
+        addLogLine('Log akışı bağlantısı kesildi, yeniden bağlanmaya çalışılıyor...', 'warning');
+        
+        // 5 saniye sonra yeniden bağlan
+        setTimeout(() => {
+            startLogStream();
+        }, 5000);
+    };
+}
+
+function updateConnectionStatus(status) {
+    const indicator = document.getElementById('connectionIndicator');
+    const text = document.getElementById('connectionText');
+    const terminalStatus = document.getElementById('terminalStatus');
+    
+    switch(status) {
+        case 'connecting':
+            indicator.className = 'w-3 h-3 bg-yellow-400 rounded-full';
+            text.textContent = 'Bağlanıyor...';
+            terminalStatus.textContent = 'Bağlanıyor...';
+            break;
+        case 'connected':
+            indicator.className = 'w-3 h-3 bg-green-400 rounded-full';
+            text.textContent = 'Bağlı';
+            terminalStatus.textContent = 'Bağlı';
+            break;
+        case 'error':
+            indicator.className = 'w-3 h-3 bg-red-400 rounded-full';
+            text.textContent = 'Bağlantı Hatası';
+            terminalStatus.textContent = 'Bağlantı Hatası';
+            break;
+    }
+}
+
+function addLogLine(message, level = 'info', timestamp = null) {
+    if (!timestamp) {
+        timestamp = new Date().toLocaleTimeString('tr-TR');
+    }
+    
+    const logClass = `log-${level}`;
+    const logLine = document.createElement('div');
+    logLine.className = `terminal-line ${logClass}`;
+    logLine.setAttribute('data-level', level);
+    logLine.innerHTML = `<span class="text-gray-500">[${timestamp}]</span> ${escapeHtml(message)}`;
+    
+    logBuffer.push(logLine);
+    
+    // Buffer limitini kontrol et
+    if (logBuffer.length > 1000) {
+        logBuffer = logBuffer.slice(-1000);
+    }
+    
+    // İstatistikleri güncelle
+    logStats.total++;
+    logStats[level] = (logStats[level] || 0) + 1;
+    updateStats();
+    
+    updateTerminalContent();
+}
+
+function updateTerminalContent() {
+    const output = document.getElementById('terminalOutput');
+    const cursorLine = '<div class="terminal-line"><span class="cursor">█</span></div>';
+    
+    // Mevcut içeriği temizle
+    output.innerHTML = '';
+    
+    // Filtrelenmiş logları ekle
+    logBuffer.forEach(logLine => {
+        const level = logLine.getAttribute('data-level');
+        const checkbox = document.getElementById(`show${level.charAt(0).toUpperCase() + level.slice(1)}`);
+        
+        if (!checkbox || checkbox.checked) {
+            output.appendChild(logLine.cloneNode(true));
+        }
+    });
+    
+    // Cursor'ı ekle
+    output.insertAdjacentHTML('beforeend', cursorLine);
+    
+    scrollToBottom();
+}
+
+function updateStats() {
+    document.getElementById('totalLogs').textContent = logStats.total;
+    document.getElementById('successCount').textContent = logStats.success || 0;
+    document.getElementById('warningCount').textContent = logStats.warning || 0;
+    document.getElementById('errorCount').textContent = logStats.error || 0;
+}
+
+function scrollToBottom() {
+    if (autoScroll) {
+        const output = document.getElementById('terminalOutput');
+        output.scrollTop = output.scrollHeight;
+    }
+}
+
+function toggleAutoScroll() {
+    autoScroll = !autoScroll;
+    const btn = document.getElementById('autoScrollToggle');
+    
+    if (autoScroll) {
+        btn.className = 'px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors';
+        scrollToBottom();
+    } else {
+        btn.className = 'px-3 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors';
+    }
+}
+
+function clearTerminal() {
+    if (confirm('Terminal içeriğini temizlemek istediğinizden emin misiniz?')) {
+        logBuffer = [];
+        logStats = { total: 0, success: 0, warning: 0, error: 0, info: 0, debug: 0 };
+        updateStats();
+        
+        const output = document.getElementById('terminalOutput');
+        output.innerHTML = `
+            <div class="terminal-line log-info">
+                <span class="text-gray-500">[SYSTEM]</span> Terminal temizlendi
+            </div>
+            <div class="terminal-line">
+                <span class="cursor">█</span>
+            </div>
+        `;
+    }
+}
+
+function downloadLogs() {
+    const logs = logBuffer.map(line => line.textContent).join('\n');
+    const blob = new Blob([logs], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ai-tweet-bot-logs-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Hızlı eylemler
+function triggerArticleCheck() {
+    window.location.href = '/check_articles';
+}
+
+function testTelegram() {
+    window.location.href = '/test_telegram';
+}
+
+function viewSettings() {
+    window.location.href = '/settings';
+}
+
+// Filtre değişikliklerini dinle
+document.addEventListener('change', function(e) {
+    if (e.target.type === 'checkbox' && e.target.id.startsWith('show')) {
+        updateTerminalContent();
+    }
+});
+
+// Sayfa kapanırken bağlantıyı kapat
+window.addEventListener('beforeunload', function() {
+    if (eventSource) {
+        eventSource.close();
+    }
+});
+</script>
+{% endblock %} 

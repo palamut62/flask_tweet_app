@@ -140,11 +140,11 @@ def fetch_latest_ai_articles_with_mcp():
         # Önce özel kaynaklardan makale çek
         try:
             from utils import fetch_articles_from_custom_sources
-            print("🔍 Özel haber kaynaklarından makale çekiliyor...")
+            terminal_log("🔍 Özel haber kaynaklarından makale çekiliyor...", "info")
             custom_articles = fetch_articles_from_custom_sources()
             
             if custom_articles:
-                print(f"✅ Özel kaynaklardan {len(custom_articles)} makale bulundu")
+                terminal_log(f"✅ Özel kaynaklardan {len(custom_articles)} makale bulundu", "success")
                 
                 # Makale hash'lerini oluştur ve tekrar kontrolü yap
                 filtered_articles = []
@@ -158,25 +158,25 @@ def fetch_latest_ai_articles_with_mcp():
                         if url not in posted_urls and article_hash not in posted_hashes:
                             article['hash'] = article_hash
                             filtered_articles.append(article)
-                            print(f"🆕 Yeni makale: {title[:50]}...")
+                            terminal_log(f"🆕 Yeni makale: {title[:50]}...", "success")
                         else:
-                            print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
+                            terminal_log(f"✅ Makale zaten paylaşılmış: {title[:50]}...", "info")
                 
                 if filtered_articles:
-                    print(f"📊 {len(filtered_articles)} yeni makale filtrelendi")
+                    terminal_log(f"📊 {len(filtered_articles)} yeni makale filtrelendi", "info")
                     return filtered_articles[:10]  # İlk 10 makaleyi döndür
                 else:
-                    print("⚠️ Özel kaynaklardan yeni makale bulunamadı")
+                    terminal_log("⚠️ Özel kaynaklardan yeni makale bulunamadı", "warning")
             else:
-                print("⚠️ Özel kaynaklardan hiç makale çekilemedi")
+                terminal_log("⚠️ Özel kaynaklardan hiç makale çekilemedi", "warning")
             
         except Exception as custom_error:
-            print(f"❌ Özel kaynaklardan makale çekme hatası: {custom_error}")
+            terminal_log(f"❌ Özel kaynaklardan makale çekme hatası: {custom_error}", "error")
             import traceback
             traceback.print_exc()
         
         # Eğer özel kaynaklardan yeterli makale bulunamadıysa MCP dene
-        print("🔄 Özel kaynaklardan yeterli makale bulunamadı, MCP deneniyor...")
+        terminal_log("🔄 Özel kaynaklardan yeterli makale bulunamadı, MCP deneniyor...", "info")
         
         try:
             # MCP Firecrawl kullanarak gerçek zamanlı veri çek
@@ -192,7 +192,7 @@ def fetch_latest_ai_articles_with_mcp():
             
             if scrape_result and scrape_result.get("success"):
                 techcrunch_content = scrape_result.get("content", "")
-                print("✅ MCP Firecrawl ile gerçek zamanlı veri alındı")
+                terminal_log("✅ MCP Firecrawl ile gerçek zamanlı veri alındı", "success")
                 
                 # Markdown'dan makale linklerini çıkar
                 import re
@@ -206,7 +206,7 @@ def fetch_latest_ai_articles_with_mcp():
                         len(article_urls) < 4):  # Sadece son 4 makale
                         article_urls.append(url)
                 
-                print(f"🔗 {len(article_urls)} yeni makale URL'si bulundu")
+                terminal_log(f"🔗 {len(article_urls)} yeni makale URL'si bulundu", "info")
                 
                 articles_data = []
                 for url in article_urls:
@@ -237,30 +237,30 @@ def fetch_latest_ai_articles_with_mcp():
                                     "already_posted": False,
                                     "source": "TechCrunch AI (MCP)"
                                 })
-                                print(f"🆕 MCP ile yeni makale: {title[:50]}...")
+                                terminal_log(f"🆕 MCP ile yeni makale: {title[:50]}...", "success")
                             else:
-                                print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
+                                terminal_log(f"✅ Makale zaten paylaşılmış: {title[:50]}...", "info")
                         else:
-                            print(f"⚠️ İçerik çekilemedi: {url}")
+                            terminal_log(f"⚠️ İçerik çekilemedi: {url}", "warning")
                             
                     except Exception as article_error:
-                        print(f"❌ Makale çekme hatası ({url}): {article_error}")
+                        terminal_log(f"❌ Makale çekme hatası ({url}): {article_error}", "error")
                         continue
                 
                 if articles_data:
-                    print(f"📊 MCP ile {len(articles_data)} yeni makale bulundu")
+                    terminal_log(f"📊 MCP ile {len(articles_data)} yeni makale bulundu", "success")
                     return articles_data
                     
         except Exception as mcp_error:
-            print(f"❌ MCP Firecrawl hatası: {mcp_error}")
+            terminal_log(f"❌ MCP Firecrawl hatası: {mcp_error}", "error")
         
         # Son fallback
-        print("🔄 Fallback yönteme geçiliyor...")
+        terminal_log("🔄 Fallback yönteme geçiliyor...", "info")
         return fetch_latest_ai_articles()
         
     except Exception as e:
-        print(f"❌ Makale çekme hatası: {e}")
-        print("🔄 Fallback yönteme geçiliyor...")
+        terminal_log(f"❌ Makale çekme hatası: {e}", "error")
+        terminal_log("🔄 Fallback yönteme geçiliyor...", "info")
         return fetch_latest_ai_articles()
 
 def check_and_post_articles():
@@ -298,7 +298,7 @@ def check_and_post_articles():
                 # Skor kontrolü
                 impact_score = tweet_data.get('impact_score', 0)
                 if impact_score < min_score:
-                    print(f"⚠️ Düşük skor ({impact_score}), atlanıyor: {article['title'][:50]}...")
+                    terminal_log(f"⚠️ Düşük skor ({impact_score}), atlanıyor: {article['title'][:50]}...", "warning")
                     continue
                 
                 # Otomatik paylaşım kontrolü
@@ -318,13 +318,13 @@ def check_and_post_articles():
                                 article['title']
                             )
                         
-                        print(f"✅ Tweet paylaşıldı: {article['title'][:50]}...")
+                        terminal_log(f"✅ Tweet paylaşıldı: {article['title'][:50]}...", "success")
                     else:
                         # Twitter API hatası - pending listesine ekle
                         error_msg = tweet_result.get('error', 'Bilinmeyen hata')
                         
-                        print(f"❌ Tweet paylaşım hatası: {error_msg}")
-                        print(f"📝 Tweet pending listesine ekleniyor: {article['title'][:50]}...")
+                        terminal_log(f"❌ Tweet paylaşım hatası: {error_msg}", "error")
+                        terminal_log(f"📝 Tweet pending listesine ekleniyor: {article['title'][:50]}...", "info")
                         
                         pending_tweets = load_json("pending_tweets.json")
                         pending_tweets.append({
@@ -348,18 +348,19 @@ def check_and_post_articles():
                         "status": "pending"
                     })
                     save_json("pending_tweets.json", pending_tweets)
-                    print(f"📝 Tweet onay bekliyor: {article['title'][:50]}...")
+                    terminal_log(f"📝 Tweet onay bekliyor: {article['title'][:50]}...", "info")
 
                 
             except Exception as article_error:
-                print(f"❌ Makale işleme hatası: {article_error}")
+                terminal_log(f"❌ Makale işleme hatası: {article_error}", "error")
                 continue
         
         message = f"{len(articles)} makale bulundu, {posted_count} tweet paylaşıldı"
+        terminal_log(f"✅ Otomatik kontrol tamamlandı: {message}", "success")
         return {"success": True, "message": message}
         
     except Exception as e:
-        print(f"❌ Makale kontrol hatası: {e}")
+        terminal_log(f"❌ Makale kontrol hatası: {e}", "error")
         return {"success": False, "message": str(e)}
 
 @app.route('/post_tweet', methods=['POST'])
@@ -952,30 +953,30 @@ def background_scheduler():
                 if (last_check_time is None or 
                     current_time - last_check_time >= timedelta(hours=check_interval_hours)):
                     
-                    print(f"🔄 Otomatik haber kontrolü başlatılıyor... (Son kontrol: {last_check_time})")
+                    terminal_log(f"🔄 Otomatik haber kontrolü başlatılıyor... (Son kontrol: {last_check_time})", "info")
                     
                     try:
                         result = check_and_post_articles()
-                        print(f"✅ Otomatik kontrol tamamlandı: {result.get('message', 'Sonuç yok')}")
+                        terminal_log(f"✅ Otomatik kontrol tamamlandı: {result.get('message', 'Sonuç yok')}", "success")
                         
 
                         
                         last_check_time = current_time
                     except Exception as check_error:
-                        print(f"❌ Otomatik kontrol hatası: {check_error}")
+                        terminal_log(f"❌ Otomatik kontrol hatası: {check_error}", "error")
                         
                 else:
                     next_check = last_check_time + timedelta(hours=check_interval_hours)
                     remaining = next_check - current_time
-                    print(f"⏰ Sonraki kontrol: {remaining.total_seconds()/3600:.1f} saat sonra")
+                    terminal_log(f"⏰ Sonraki kontrol: {remaining.total_seconds()/3600:.1f} saat sonra", "info")
             else:
-                print("⏸️ Otomatik paylaşım devre dışı")
+                terminal_log("⏸️ Otomatik paylaşım devre dışı", "warning")
             
             # 30 dakika bekle (kontrol sıklığı)
             time.sleep(1800)  # 30 dakika = 1800 saniye
             
         except Exception as e:
-            print(f"❌ Arka plan zamanlayıcı hatası: {e}")
+            terminal_log(f"❌ Arka plan zamanlayıcı hatası: {e}", "error")
             time.sleep(1800)  # Hata durumunda da 30 dakika bekle
 
 def start_background_scheduler():
@@ -985,7 +986,8 @@ def start_background_scheduler():
     if not background_scheduler_running:
         scheduler_thread = threading.Thread(target=background_scheduler, daemon=True)
         scheduler_thread.start()
-        print("🔄 Arka plan zamanlayıcı thread'i başlatıldı")
+        terminal_log("🚀 Arka plan zamanlayıcısı başlatıldı (Her 3 saatte bir çalışacak)", "success")
+        terminal_log("🔄 Arka plan zamanlayıcı thread'i başlatıldı", "info")
 
 # ==========================================
 # ÖZEL HABER KAYNAKLARI ROUTE'LARI
@@ -1216,6 +1218,109 @@ def manual_post_confirmation(tweet_id):
     except Exception as e:
         return redirect(url_for('index'))
 
+# =============================================================================
+# CANLI TERMINAL SİSTEMİ
+# =============================================================================
+
+import queue
+import threading
+from flask import Response
+import json
+import time
+
+# Global log queue
+log_queue = queue.Queue(maxsize=1000)
+
+class TerminalLogHandler:
+    """Terminal için log handler"""
+    
+    def __init__(self):
+        self.clients = set()
+    
+    def add_client(self, client_queue):
+        """Yeni client ekle"""
+        self.clients.add(client_queue)
+    
+    def remove_client(self, client_queue):
+        """Client'ı kaldır"""
+        self.clients.discard(client_queue)
+    
+    def broadcast_log(self, message, level='info'):
+        """Tüm client'lara log gönder"""
+        timestamp = time.strftime('%H:%M:%S')
+        log_data = {
+            'message': message,
+            'level': level,
+            'timestamp': timestamp
+        }
+        
+        # Global queue'ya ekle
+        try:
+            log_queue.put_nowait(log_data)
+        except queue.Full:
+            # Queue dolu ise eski mesajları at
+            try:
+                log_queue.get_nowait()
+                log_queue.put_nowait(log_data)
+            except queue.Empty:
+                pass
+
+# Global terminal log handler
+terminal_logger = TerminalLogHandler()
+
+def terminal_log(message, level='info'):
+    """Terminal'e log gönder"""
+    terminal_logger.broadcast_log(message, level)
+    
+    # Konsola da yazdır
+    level_colors = {
+        'info': '\033[92m',      # Yeşil
+        'warning': '\033[93m',   # Sarı
+        'error': '\033[91m',     # Kırmızı
+        'debug': '\033[96m',     # Cyan
+        'success': '\033[92m'    # Yeşil
+    }
+    
+    color = level_colors.get(level, '\033[0m')
+    reset = '\033[0m'
+    timestamp = time.strftime('%H:%M:%S')
+    
+    print(f"{color}[{timestamp}] [{level.upper()}] {message}{reset}")
+
+@app.route('/api/logs/stream')
+@login_required
+def log_stream():
+    """Server-Sent Events ile canlı log akışı"""
+    
+    def event_stream():
+        client_queue = queue.Queue()
+        terminal_logger.add_client(client_queue)
+        
+        try:
+            # İlk bağlantı mesajı
+            yield f"data: {json.dumps({'message': 'Terminal bağlantısı kuruldu', 'level': 'success', 'timestamp': time.strftime('%H:%M:%S')})}\n\n"
+            
+            while True:
+                try:
+                    # Global queue'dan mesaj al
+                    log_data = log_queue.get(timeout=30)  # 30 saniye timeout
+                    yield f"data: {json.dumps(log_data)}\n\n"
+                    
+                except queue.Empty:
+                    # Heartbeat gönder
+                    yield f"data: {json.dumps({'message': 'heartbeat', 'level': 'debug', 'timestamp': time.strftime('%H:%M:%S')})}\n\n"
+                    
+        except GeneratorExit:
+            terminal_logger.remove_client(client_queue)
+    
+    return Response(event_stream(), mimetype='text/event-stream')
+
+@app.route('/terminal')
+@login_required
+def terminal_page():
+    """Terminal sayfası"""
+    return render_template('terminal.html')
+
 if __name__ == '__main__':
     # Arka plan zamanlayıcısını başlat
     start_background_scheduler()
@@ -1224,6 +1329,5 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') == 'development'
     
-    from utils import safe_log
-    safe_log(f"Flask uygulaması başlatılıyor - Port: {port}", "INFO")
+    terminal_log(f"Flask uygulaması başlatılıyor - Port: {port}", "info")
     app.run(host='0.0.0.0', port=port, debug=debug)

@@ -2855,11 +2855,19 @@ def fetch_articles_from_custom_sources():
             print("⚠️ Aktif haber kaynağı bulunamadı")
             return []
         
-        print(f"🔍 {len(enabled_sources)} haber kaynağından makale çekiliyor...")
+        # Terminal log için import
+        try:
+            from app import terminal_log
+        except ImportError:
+            # Eğer app.py'den import edilemezse normal print kullan
+            def terminal_log(msg, level='info'):
+                print(f"[{level.upper()}] {msg}")
+        
+        terminal_log(f"🔍 {len(enabled_sources)} haber kaynağından makale çekiliyor...", "info")
         
         for source in enabled_sources:
             try:
-                print(f"📰 {source['name']} kaynağı kontrol ediliyor...")
+                terminal_log(f"📰 {source['name']} kaynağı kontrol ediliyor...", "info")
                 
                 # Kaynak URL'sini çek
                 articles = fetch_articles_from_single_source(source)
@@ -2868,22 +2876,22 @@ def fetch_articles_from_custom_sources():
                     all_articles.extend(articles)
                     source["article_count"] = len(articles)
                     source["success_rate"] = min(100, source.get("success_rate", 0) + 10)
-                    print(f"✅ {source['name']}: {len(articles)} makale bulundu")
+                    terminal_log(f"✅ {source['name']}: {len(articles)} makale bulundu", "success")
                 else:
                     source["success_rate"] = max(0, source.get("success_rate", 100) - 20)
-                    print(f"⚠️ {source['name']}: Makale bulunamadı")
+                    terminal_log(f"⚠️ {source['name']}: Makale bulunamadı", "warning")
                 
                 source["last_checked"] = datetime.now().isoformat()
                 
             except Exception as e:
-                print(f"❌ {source['name']} hatası: {e}")
+                terminal_log(f"❌ {source['name']} hatası: {e}", "error")
                 source["success_rate"] = max(0, source.get("success_rate", 100) - 30)
                 source["last_checked"] = datetime.now().isoformat()
         
         # Güncellenmiş istatistikleri kaydet
         save_news_sources(config)
         
-        print(f"📊 Toplam {len(all_articles)} makale çekildi")
+        terminal_log(f"📊 Toplam {len(all_articles)} makale çekildi", "info")
         return all_articles
         
     except Exception as e:
