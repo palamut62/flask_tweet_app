@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Manuel Paylaşım Onayı{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+    <div class="max-w-4xl mx-auto px-4">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">📝 Manuel Paylaşım Onayı</h1>
+            <p class="text-gray-600">Tweet'i X'te paylaştınız mı? Onaylayın ki sistemden kaldırılsın.</p>
+        </div>
+
+        <!-- Tweet Önizleme -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">📋 Paylaşılan Tweet</h2>
+            
+            <!-- Tweet İçeriği -->
+            <div class="bg-gray-50 rounded-lg p-4 mb-4 border-l-4 border-blue-500">
+                <p class="text-gray-800 whitespace-pre-wrap">{{ tweet.tweet_data.tweet }}</p>
+            </div>
+
+            <!-- Makale Bilgileri -->
+            <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                <h3 class="font-semibold text-blue-800 mb-2">📰 Makale Bilgileri</h3>
+                <p class="text-blue-700 font-medium">{{ tweet.article.title }}</p>
+                <p class="text-blue-600 text-sm mt-1">{{ tweet.article.source }} - {{ tweet.article.date }}</p>
+                <a href="{{ tweet.article.url }}" target="_blank" class="text-blue-500 hover:text-blue-700 text-sm underline">
+                    🔗 Makaleyi Görüntüle
+                </a>
+            </div>
+
+            <!-- Analiz Bilgileri -->
+            {% if tweet.tweet_data.analysis %}
+            <div class="bg-green-50 rounded-lg p-4 mb-4">
+                <h3 class="font-semibold text-green-800 mb-2">🤖 AI Analizi</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="font-medium text-green-700">Etki Skoru:</span>
+                        <span class="text-green-600">{{ tweet.tweet_data.impact_score }}/10</span>
+                    </div>
+                    <div>
+                        <span class="font-medium text-green-700">Hedef Kitle:</span>
+                        <span class="text-green-600">{{ tweet.tweet_data.analysis.audience }}</span>
+                    </div>
+                    {% if tweet.tweet_data.analysis.companies %}
+                    <div class="md:col-span-2">
+                        <span class="font-medium text-green-700">Şirketler:</span>
+                        <span class="text-green-600">{{ tweet.tweet_data.analysis.companies | join(', ') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Onaylama Butonları -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">✅ Onaylama</h2>
+            
+            <div class="flex flex-col sm:flex-row gap-4">
+                <!-- Evet Butonu -->
+                <button onclick="confirmManualPost('{{ tweet_id }}', true)" 
+                        class="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                    <span class="mr-2">✅</span>
+                    Evet, Tweet'i Paylaştım
+                </button>
+
+                <!-- Hayır Butonu -->
+                <button onclick="confirmManualPost('{{ tweet_id }}', false)" 
+                        class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                    <span class="mr-2">❌</span>
+                    Hayır, Paylaşmadım
+                </button>
+
+                <!-- İptal Butonu -->
+                <a href="{{ url_for('index') }}" 
+                   class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center text-center">
+                    <span class="mr-2">🔙</span>
+                    Ana Sayfaya Dön
+                </a>
+            </div>
+
+            <!-- Bilgilendirme -->
+            <div class="mt-4 p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
+                <p class="text-yellow-800 text-sm">
+                    <span class="font-semibold">💡 Bilgi:</span>
+                    "Evet" dediğinizde tweet pending listesinden kaldırılacak ve paylaşıldı olarak işaretlenecek.
+                    "Hayır" dediğinizde tweet pending listesinde kalacak ve daha sonra tekrar deneyebilirsiniz.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmManualPost(tweetId, confirmed) {
+    console.log('confirmManualPost çağrıldı:', { tweetId, confirmed, parsedId: parseInt(tweetId) });
+    
+    if (confirmed) {
+        // Evet - Tweet paylaşıldı
+        const requestData = {
+            tweet_id: parseInt(tweetId),
+            confirmed: true
+        };
+        
+        console.log('Request data:', requestData);
+        
+        fetch('/confirm_manual_post', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ Tweet başarıyla onaylandı ve sistemden kaldırıldı!');
+                window.location.href = '/';
+            } else {
+                alert('❌ Hata: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('❌ Bağlantı hatası: ' + error);
+        });
+    } else {
+        // Hayır - Tweet paylaşılmadı
+        alert('Tweet pending listesinde kalacak. Daha sonra tekrar deneyebilirsiniz.');
+        window.location.href = '/';
+    }
+}
+</script>
+{% endblock %} 

@@ -11,6 +11,10 @@ import tweepy
 
 # .env dosyasını yükle
 load_dotenv()
+
+# Debug mode kontrolü
+DEBUG_MODE = os.environ.get('DEBUG', 'False').lower() == 'true'
+
 from utils import (
     fetch_latest_ai_articles, generate_ai_tweet_with_mcp_analysis,
     post_tweet, mark_article_as_posted, load_json, save_json,
@@ -19,7 +23,9 @@ from utils import (
     get_automation_status, send_telegram_notification, test_telegram_connection,
     check_telegram_configuration, auto_detect_and_save_chat_id,
     setup_twitter_api, send_gmail_notification, test_gmail_connection,
-    check_gmail_configuration, get_twitter_rate_limit_status
+    check_gmail_configuration, get_twitter_rate_limit_status,
+    retry_pending_tweets_after_rate_limit, check_and_retry_rate_limited_tweets,
+    get_rate_limited_tweets_count
 )
 
 app = Flask(__name__)
@@ -79,8 +85,9 @@ def index():
         stats = get_data_statistics()
         automation_status = get_automation_status()
         
-        # Debug için istatistikleri logla
-        print(f"[DEBUG] Ana sayfa istatistikleri: {stats}")
+        # Debug için istatistikleri logla (güvenli)
+        from utils import safe_log
+        safe_log(f"Ana sayfa istatistikleri: {stats}", "DEBUG")
         
         # API durumunu kontrol et (ana sayfa için basit kontrol)
         api_check = {
@@ -97,7 +104,8 @@ def index():
                              api_check=api_check,
                              last_check=last_check_time)
     except Exception as e:
-        print(f"Ana sayfa hatası: {e}")
+        from utils import safe_log
+        safe_log(f"Ana sayfa hatası: {str(e)}", "ERROR")
         return render_template('index.html', 
                              articles=[], 
                              pending_tweets=[],
@@ -128,7 +136,8 @@ def fetch_latest_ai_articles_with_mcp():
         posted_urls = [article.get('url', '') for article in posted_articles]
         posted_hashes = [article.get('hash', '') for article in posted_articles]
         
-        print("🔍 Özel haber kaynaklarından makale çekiliyor...")
+        from utils import safe_log
+        safe_log("Özel haber kaynaklarından makale çekiliyor...", "INFO")
         
         # Önce özel kaynaklardan makale çek
         try:
@@ -251,7 +260,8 @@ def fetch_latest_ai_articles_with_mcp():
 def check_and_post_articles():
     """Makale kontrol ve paylaşım fonksiyonu - MCP Firecrawl entegrasyonlu"""
     try:
-        print("🔍 Yeni makaleler kontrol ediliyor...")
+        from utils import safe_log
+        safe_log("Yeni makaleler kontrol ediliyor...", "INFO")
         
         # Ayarları yükle
         settings = load_automation_settings()
@@ -305,8 +315,15 @@ def check_and_post_articles():
                         print(f"✅ Tweet paylaşıldı: {article['title'][:50]}...")
                     else:
                         # Twitter API hatası - pending listesine ekle
-                        print(f"❌ Tweet paylaşım hatası: {tweet_result.get('error', 'Bilinmeyen hata')}")
-                        print(f"📝 Tweet pending listesine ekleniyor: {article['title'][:50]}...")
+                        error_msg = tweet_result.get('error', 'Bilinmeyen hata')
+                        is_rate_limited = tweet_result.get('rate_limited', False)
+                        
+                        if is_rate_limited:
+                            print(f"⏳ Rate limit hatası: {error_msg}")
+                            print(f"📝 Tweet rate limit sonrası tekrar denenecek: {article['title'][:50]}...")
+                        else:
+                            print(f"❌ Tweet paylaşım hatası: {error_msg}")
+                            print(f"📝 Tweet pending listesine ekleniyor: {article['title'][:50]}...")
                         
                         pending_tweets = load_json("pending_tweets.json")
                         pending_tweets.append({
@@ -314,8 +331,10 @@ def check_and_post_articles():
                             "tweet_data": tweet_data,
                             "created_date": datetime.now().isoformat(),
                             "created_at": datetime.now().isoformat(),
-                            "status": "pending",
-                            "error_reason": tweet_result.get('error', 'Twitter API hatası')
+                            "status": "pending" if not is_rate_limited else "rate_limited",
+                            "error_reason": error_msg,
+                            "rate_limited": is_rate_limited,
+                            "retry_count": 0
                         })
                         save_json("pending_tweets.json", pending_tweets)
                 else:
@@ -422,6 +441,130 @@ def delete_tweet_route():
         save_json("pending_tweets.json", pending_tweets)
         
         return jsonify({"success": True, "message": "Tweet silindi"})
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/manual_post_tweet', methods=['POST'])
+@login_required
+def manual_post_tweet_route():
+    """Manuel tweet paylaşım endpoint'i - API kullanmadan X'te paylaşım için"""
+    try:
+        data = request.get_json()
+        tweet_id = data.get('tweet_id')
+        
+        if not tweet_id:
+            return jsonify({"success": False, "error": "Tweet ID gerekli"})
+        
+        # Pending tweet'i bul
+        pending_tweets = load_json("pending_tweets.json")
+        tweet_to_post = None
+        tweet_index = None
+        
+        for i, pending in enumerate(pending_tweets):
+            if str(i) == str(tweet_id):
+                tweet_to_post = pending
+                tweet_index = i
+                break
+        
+        if not tweet_to_post:
+            return jsonify({"success": False, "error": "Tweet bulunamadı"})
+        
+        # Tweet metnini ve URL'yi hazırla
+        tweet_text = tweet_to_post['tweet_data']['tweet']
+        article_url = tweet_to_post['article'].get('url', '')
+        
+        # X.com paylaşım URL'si oluştur
+        import urllib.parse
+        encoded_text = urllib.parse.quote(tweet_text)
+        x_share_url = f"https://x.com/intent/tweet?text={encoded_text}"
+        
+        return jsonify({
+            "success": True,
+            "tweet_text": tweet_text,
+            "x_share_url": x_share_url,
+            "article_url": article_url,
+            "tweet_index": tweet_index,
+            "article_title": tweet_to_post['article'].get('title', '')
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/confirm_manual_post', methods=['POST'])
+@login_required
+def confirm_manual_post():
+    """Manuel paylaşım sonrası onaylama endpoint'i"""
+    try:
+        data = request.get_json()
+        tweet_id = data.get('tweet_id')
+        
+        # Debug logging
+        from utils import safe_log
+        safe_log(f"Manuel onay isteği - Tweet ID: {tweet_id}, Data: {data}", "DEBUG")
+        
+        if tweet_id is None or tweet_id == "":
+            safe_log(f"Tweet ID eksik - Data: {data}", "ERROR")
+            return jsonify({"success": False, "error": "Tweet ID gerekli"})
+        
+        # Tweet ID'yi integer'a çevir
+        try:
+            tweet_id = int(tweet_id)
+        except (ValueError, TypeError):
+            safe_log(f"Tweet ID integer'a çevrilemedi: {tweet_id}", "ERROR")
+            return jsonify({"success": False, "error": "Geçersiz Tweet ID"})
+        
+        # Pending tweet'i bul
+        pending_tweets = load_json("pending_tweets.json")
+        tweet_to_post = None
+        
+        if tweet_id >= len(pending_tweets) or tweet_id < 0:
+            safe_log(f"Tweet ID aralık dışı: {tweet_id}, Toplam: {len(pending_tweets)}", "ERROR")
+            return jsonify({"success": False, "error": "Tweet bulunamadı"})
+        
+        tweet_to_post = pending_tweets[tweet_id]
+        
+        if not tweet_to_post:
+            safe_log(f"Tweet bulunamadı - ID: {tweet_id}", "ERROR")
+            return jsonify({"success": False, "error": "Tweet bulunamadı"})
+        
+        # Manuel paylaşım olarak işaretle ve kaydet
+        from datetime import datetime
+        import urllib.parse
+        manual_tweet_result = {
+            "success": True,
+            "tweet_id": f"manual_{int(datetime.now().timestamp())}",
+            "url": f"https://x.com/search?q={urllib.parse.quote(tweet_to_post['tweet_data']['tweet'][:50])}",
+            "manual_post": True,
+            "posted_at": datetime.now().isoformat()
+        }
+        
+        # Tweet metnini article data'ya ekle (manuel paylaşım için)
+        tweet_to_post['article']['tweet_text'] = tweet_to_post['tweet_data']['tweet']
+        
+        # Makaleyi paylaşıldı olarak işaretle
+        mark_article_as_posted(tweet_to_post['article'], manual_tweet_result)
+        
+        # Pending listesinden kaldır
+        pending_tweets.pop(tweet_id)  # Index'e göre direkt kaldır
+        save_json("pending_tweets.json", pending_tweets)
+        
+        safe_log(f"Tweet başarıyla onaylandı ve kaldırıldı - ID: {tweet_id}", "INFO")
+        
+        # Telegram bildirimi
+        settings = load_automation_settings()
+        if settings.get('telegram_notifications', False):
+            send_telegram_notification(
+                f"✅ Tweet manuel olarak X'te paylaşıldı!\n\n{tweet_to_post['tweet_data']['tweet'][:100]}...",
+                manual_tweet_result.get('url', ''),
+                tweet_to_post['article']['title']
+            )
+        
+        return jsonify({
+            "success": True, 
+            "message": "Tweet manuel paylaşım olarak kaydedildi",
+            "tweet_url": manual_tweet_result.get('url', '')
+        })
         
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
@@ -590,16 +733,7 @@ def clear_pending():
 def api_status():
     """API durumunu kontrol et"""
     try:
-        status = {
-            "google_api": "MEVCUT" if os.environ.get('GOOGLE_API_KEY') else "EKSİK",
-            "twitter_bearer": "MEVCUT" if os.environ.get('TWITTER_BEARER_TOKEN') else "EKSİK",
-            "twitter_api_key": "MEVCUT" if os.environ.get('TWITTER_API_KEY') else "EKSİK",
-            "twitter_api_secret": "MEVCUT" if os.environ.get('TWITTER_API_SECRET') else "EKSİK",
-            "twitter_access_token": "MEVCUT" if os.environ.get('TWITTER_ACCESS_TOKEN') else "EKSİK",
-            "twitter_access_secret": "MEVCUT" if os.environ.get('TWITTER_ACCESS_TOKEN_SECRET') else "EKSİK",
-            "telegram_bot_token": "MEVCUT" if os.environ.get('TELEGRAM_BOT_TOKEN') else "EKSİK",
-            "secret_key": "MEVCUT" if os.environ.get('SECRET_KEY') else "EKSİK"
-        }
+        status = get_safe_env_status()
         
         # Gemini API test
         try:
@@ -644,21 +778,47 @@ def test_twitter_rate_limit():
         flash(f"❌ Twitter rate limit testi hatası: {str(e)}", "error")
         return redirect(url_for('settings'))
 
+@app.route('/retry_rate_limited_tweets')
+@login_required
+def retry_rate_limited_tweets():
+    """Rate limit nedeniyle bekleyen tweet'leri tekrar dene"""
+    try:
+        result = retry_pending_tweets_after_rate_limit()
+        
+        if result.get('success'):
+            flash(f"Rate limit retry tamamlandı: {result['message']}", 'success')
+        else:
+            flash(f"Rate limit retry hatası: {result['message']}", 'error')
+            
+    except Exception as e:
+        flash(f"Rate limit retry hatası: {str(e)}", 'error')
+    
+    return redirect(url_for('index'))
+
+@app.route('/api/rate_limit_status')
+@login_required
+def api_rate_limit_status():
+    """Rate limit durumu ve bekleyen tweet sayısı API"""
+    try:
+        rate_limit_status = get_twitter_rate_limit_status()
+        rate_limited_count = get_rate_limited_tweets_count()
+        
+        return jsonify({
+            "success": True,
+            "rate_limit_status": rate_limit_status,
+            "rate_limited_tweets_count": rate_limited_count,
+            "can_retry": rate_limit_status.get('can_post', False) and rate_limited_count > 0
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
 @app.route('/debug/env')
 @login_required
 def debug_env():
     """Environment variables debug sayfası (sadece geliştirme için)"""
     try:
-        env_vars = {
-            "GOOGLE_API_KEY": "MEVCUT" if os.environ.get('GOOGLE_API_KEY') else "EKSİK",
-            "TWITTER_BEARER_TOKEN": "MEVCUT" if os.environ.get('TWITTER_BEARER_TOKEN') else "EKSİK",
-            "TWITTER_API_KEY": "MEVCUT" if os.environ.get('TWITTER_API_KEY') else "EKSİK",
-            "TWITTER_API_SECRET": "MEVCUT" if os.environ.get('TWITTER_API_SECRET') else "EKSİK",
-            "TWITTER_ACCESS_TOKEN": "MEVCUT" if os.environ.get('TWITTER_ACCESS_TOKEN') else "EKSİK",
-            "TWITTER_ACCESS_TOKEN_SECRET": "MEVCUT" if os.environ.get('TWITTER_ACCESS_TOKEN_SECRET') else "EKSİK",
-            "TELEGRAM_BOT_TOKEN": "MEVCUT" if os.environ.get('TELEGRAM_BOT_TOKEN') else "EKSİK",
-            "SECRET_KEY": "MEVCUT" if os.environ.get('SECRET_KEY') else "EKSİK"
-        }
+        env_vars = get_safe_env_status()
         
         return f"""
         <h2>Environment Variables Debug</h2>
@@ -857,6 +1017,17 @@ def background_scheduler():
                     try:
                         result = check_and_post_articles()
                         print(f"✅ Otomatik kontrol tamamlandı: {result.get('message', 'Sonuç yok')}")
+                        
+                        # Rate limit tweet'lerini de kontrol et
+                        try:
+                            rate_limit_result = check_and_retry_rate_limited_tweets()
+                            if rate_limit_result.get('success'):
+                                print(f"✅ Rate limit kontrol: {rate_limit_result.get('message', 'Sonuç yok')}")
+                            else:
+                                print(f"⏳ Rate limit kontrol: {rate_limit_result.get('message', 'Sonuç yok')}")
+                        except Exception as rate_limit_error:
+                            print(f"❌ Rate limit kontrol hatası: {rate_limit_error}")
+                        
                         last_check_time = current_time
                     except Exception as check_error:
                         print(f"❌ Otomatik kontrol hatası: {check_error}")
@@ -1010,6 +1181,87 @@ def test_news_source_route():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+# =============================================================================
+# GÜVENLİK FONKSİYONLARI
+# =============================================================================
+
+def mask_sensitive_data(data):
+    """Hassas verileri maskele"""
+    if not data or len(str(data)) <= 3:
+        return "***"
+    return str(data)[:3] + "*" * (len(str(data)) - 3)
+
+def get_safe_env_status():
+    """Environment variable'ların durumunu güvenli şekilde döndür"""
+    return {
+        "google_api": "MEVCUT" if os.environ.get('GOOGLE_API_KEY') else "EKSİK",
+        "twitter_bearer": "MEVCUT" if os.environ.get('TWITTER_BEARER_TOKEN') else "EKSİK",
+        "twitter_api_key": "MEVCUT" if os.environ.get('TWITTER_API_KEY') else "EKSİK",
+        "twitter_api_secret": "MEVCUT" if os.environ.get('TWITTER_API_SECRET') else "EKSİK",
+        "twitter_access_token": "MEVCUT" if os.environ.get('TWITTER_ACCESS_TOKEN') else "EKSİK",
+        "twitter_access_secret": "MEVCUT" if os.environ.get('TWITTER_ACCESS_TOKEN_SECRET') else "EKSİK",
+        "telegram_bot_token": "MEVCUT" if os.environ.get('TELEGRAM_BOT_TOKEN') else "EKSİK",
+        "gmail_email": "MEVCUT" if os.environ.get('GMAIL_EMAIL') else "EKSİK",
+        "gmail_password": "MEVCUT" if os.environ.get('GMAIL_APP_PASSWORD') else "EKSİK",
+        "secret_key": "MEVCUT" if os.environ.get('SECRET_KEY') else "EKSİK"
+    }
+
+@app.route('/security_check')
+@login_required
+def security_check():
+    """Güvenlik yapılandırmasını kontrol et"""
+    try:
+        from utils import check_security_configuration
+        security_status = check_security_configuration()
+        return render_template('security_check.html', security=security_status)
+    except Exception as e:
+        from utils import safe_log
+        safe_log(f"Güvenlik kontrol hatası: {str(e)}", "ERROR")
+        return render_template('security_check.html', security={"secure": False, "issues": [f"Kontrol hatası: {str(e)}"]})
+
+@app.route('/test_twitter_rate_limit_detailed')
+@login_required
+def test_twitter_rate_limit_detailed():
+    """Twitter API rate limit durumunu detaylı test et"""
+    try:
+        from utils import get_twitter_rate_limit_status
+        
+        # Rate limit durumunu kontrol et
+        rate_limit_status = get_twitter_rate_limit_status()
+        
+        return jsonify({
+            "success": True,
+            "rate_limit_status": rate_limit_status,
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        })
+
+@app.route('/manual_post_confirmation/<int:tweet_id>')
+@login_required
+def manual_post_confirmation(tweet_id):
+    """Manuel paylaşım onaylama sayfası"""
+    try:
+        # Pending tweet'i bul
+        pending_tweets = load_json("pending_tweets.json")
+        
+        if tweet_id >= len(pending_tweets):
+            return redirect(url_for('index'))
+        
+        tweet_to_confirm = pending_tweets[tweet_id]
+        
+        return render_template('manual_confirmation.html', 
+                             tweet=tweet_to_confirm, 
+                             tweet_id=tweet_id)
+        
+    except Exception as e:
+        return redirect(url_for('index'))
+
 if __name__ == '__main__':
     # Arka plan zamanlayıcısını başlat
     start_background_scheduler()
@@ -1018,5 +1270,6 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') == 'development'
     
-    print(f"🌐 Flask uygulaması başlatılıyor - Port: {port}")
+    from utils import safe_log
+    safe_log(f"Flask uygulaması başlatılıyor - Port: {port}", "INFO")
     app.run(host='0.0.0.0', port=port, debug=debug)

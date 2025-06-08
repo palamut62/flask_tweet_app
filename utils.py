@@ -11,6 +11,7 @@ from PIL import Image
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import time
 
 # .env dosyasını yükle
 load_dotenv()
@@ -382,7 +383,7 @@ Cevap:"""
 def gemini_call(prompt, api_key, max_tokens=100):
     """Google Gemini API çağrısı"""
     if not api_key:
-        print("Gemini API anahtarı bulunamadı")
+        safe_log("Gemini API anahtarı bulunamadı", "WARNING")
         return "API anahtarı eksik"
     
     try:
@@ -394,7 +395,7 @@ def gemini_call(prompt, api_key, max_tokens=100):
         # Modeli oluştur
         model = genai.GenerativeModel('gemini-2.0-flash')
         
-        print(f"[DEBUG] Gemini API çağrısı yapılıyor... Model: gemini-2.0-flash")
+        safe_log("Gemini API çağrısı yapılıyor... Model: gemini-2.0-flash", "DEBUG")
         
         # Generation config
         generation_config = genai.types.GenerationConfig(
@@ -408,18 +409,18 @@ def gemini_call(prompt, api_key, max_tokens=100):
             generation_config=generation_config
         )
         
-        print(f"[DEBUG] Gemini API Yanıtı alındı")
+        safe_log("Gemini API Yanıtı alındı", "DEBUG")
         
         if response.text:
             content = response.text.strip()
-            print(f"[DEBUG] İçerik alındı: {len(content)} karakter")
+            safe_log(f"İçerik alındı: {len(content)} karakter", "DEBUG")
             return content
         else:
-            print("[DEBUG] Gemini API yanıtında metin bulunamadı")
+            safe_log("Gemini API yanıtında metin bulunamadı", "DEBUG")
             return "API hatası"
             
     except Exception as e:
-        print(f"[DEBUG] Gemini API çağrı hatası: {e}")
+        safe_log(f"Gemini API çağrı hatası: {str(e)}", "ERROR")
         return "API hatası"
 
 def generate_smart_hashtags(title, content):
@@ -1123,8 +1124,21 @@ def post_tweet(tweet_text, article_title=""):
         # Twitter API v2 kullan
         tweet_result = post_text_tweet_v2(tweet_text)
         
+        # Rate limit kontrolü - başarısız olsa bile sonucu döndür
         if not tweet_result.get("success"):
-            return tweet_result
+            # Rate limit durumunda özel işlem
+            if tweet_result.get("rate_limited", False):
+                safe_log(f"Rate limit hatası: {tweet_result.get('error', 'Bilinmeyen hata')}", "WARNING")
+                return {
+                    "success": False,
+                    "error": tweet_result.get("error", "Rate limit aşıldı"),
+                    "rate_limited": True,
+                    "retry_after": tweet_result.get("retry_after", 900)  # 15 dakika default
+                }
+            else:
+                # Diğer hatalar
+                safe_log(f"Tweet paylaşım hatası: {tweet_result.get('error', 'Bilinmeyen hata')}", "ERROR")
+                return tweet_result
         
         tweet_id = tweet_result.get("tweet_id")
         tweet_url = tweet_result.get("url")
@@ -1138,12 +1152,12 @@ def post_tweet(tweet_text, article_title=""):
                 article_title=article_title
             )
             if gmail_result.get("success"):
-                print(f"[SUCCESS] Gmail bildirimi gönderildi: {gmail_result.get('email')}")
+                safe_log(f"Gmail bildirimi gönderildi: {gmail_result.get('email')}", "INFO")
                 email_sent = True
             else:
-                print(f"[WARNING] Gmail bildirimi gönderilemedi: {gmail_result.get('reason', 'unknown')}")
+                safe_log(f"Gmail bildirimi gönderilemedi: {gmail_result.get('reason', 'unknown')}", "WARNING")
         except Exception as gmail_error:
-            print(f"[ERROR] Gmail bildirim hatası: {gmail_error}")
+            safe_log(f"Gmail bildirim hatası: {gmail_error}", "ERROR")
         
         # Fallback: Telegram bildirimi (eğer Gmail başarısız olursa)
         telegram_sent = False
@@ -1155,12 +1169,12 @@ def post_tweet(tweet_text, article_title=""):
                     article_title=article_title
                 )
                 if telegram_result.get("success"):
-                    print(f"[SUCCESS] Fallback Telegram bildirimi gönderildi")
+                    safe_log("Fallback Telegram bildirimi gönderildi", "INFO")
                     telegram_sent = True
                 else:
-                    print(f"[WARNING] Fallback Telegram bildirimi de başarısız: {telegram_result.get('reason', 'unknown')}")
+                    safe_log(f"Fallback Telegram bildirimi de başarısız: {telegram_result.get('reason', 'unknown')}", "WARNING")
             except Exception as telegram_error:
-                print(f"[ERROR] Fallback Telegram bildirim hatası: {telegram_error}")
+                safe_log(f"Fallback Telegram bildirim hatası: {telegram_error}", "ERROR")
         
         return {
             "success": True,
@@ -1171,12 +1185,16 @@ def post_tweet(tweet_text, article_title=""):
         }
         
     except Exception as e:
+        safe_log(f"Tweet paylaşım hatası: {str(e)}", "ERROR")
         return {"success": False, "error": f"Tweet paylaşım hatası: {str(e)}"}
 
 def mark_article_as_posted(article_data, tweet_result):
-    """Makaleyi paylaşıldı olarak işaretle"""
+    """Makaleyi paylaşıldı olarak işaretle - API ve manuel paylaşımları destekler"""
     try:
         posted_articles = load_json(HISTORY_FILE)
+        
+        # Manuel paylaşım kontrolü
+        is_manual_post = tweet_result.get("manual_post", False)
         
         posted_article = {
             "title": article_data.get("title", ""),
@@ -1184,15 +1202,24 @@ def mark_article_as_posted(article_data, tweet_result):
             "hash": article_data.get("hash", ""),
             "posted_date": datetime.now().isoformat(),
             "tweet_id": tweet_result.get("tweet_id", ""),
-            "tweet_url": tweet_result.get("url", "")
+            "tweet_url": tweet_result.get("url", ""),
+            "manual_post": is_manual_post,
+            "post_method": "manuel" if is_manual_post else "api"
         }
+        
+        # Manuel paylaşım için ek bilgiler
+        if is_manual_post:
+            posted_article["tweet_text"] = article_data.get("tweet_text", "")
+            posted_article["manual_posted_at"] = tweet_result.get("posted_at", datetime.now().isoformat())
         
         posted_articles.append(posted_article)
         save_json(HISTORY_FILE, posted_articles)
         
+        safe_log(f"Makale kaydedildi: {article_data.get('title', '')[:50]}... (Yöntem: {posted_article['post_method']})", "INFO")
+        
         return True
     except Exception as e:
-        print(f"Makale kaydetme hatası: {e}")
+        safe_log(f"Makale kaydetme hatası: {e}", "ERROR")
         return False
 
 def check_duplicate_articles():
@@ -1676,7 +1703,7 @@ def send_telegram_notification(message, tweet_url="", article_title=""):
             return {"success": False, "reason": "disabled"}
         
         if not bot_token:
-            print("[WARNING] Telegram bot token eksik. .env dosyasında TELEGRAM_BOT_TOKEN ayarlayın.")
+            safe_log("Telegram bot token eksik. .env dosyasında TELEGRAM_BOT_TOKEN ayarlayın.", "WARNING")
             return {"success": False, "reason": "missing_bot_token"}
             
         if not chat_id:
@@ -2157,37 +2184,73 @@ def setup_twitter_v2_client():
         consumer_secret=os.environ.get('TWITTER_API_SECRET'),
         access_token=os.environ.get('TWITTER_ACCESS_TOKEN'),
         access_token_secret=os.environ.get('TWITTER_ACCESS_TOKEN_SECRET'),
-        wait_on_rate_limit=True  # Rate limit'e takılınca otomatik bekle
+        wait_on_rate_limit=False  # Rate limit'e takılınca hemen hata döndür
     )
     return client
 
 def get_twitter_rate_limit_status():
-    """Twitter API rate limit durumunu kontrol et"""
+    """Twitter API rate limit durumunu detaylı kontrol et"""
     try:
         import tweepy
         from datetime import datetime, timezone
         
         client = setup_twitter_v2_client()
         
-        # Rate limit bilgilerini al (bu işlem de rate limit'e tabidir)
+        # Rate limit bilgilerini al
         try:
             # Basit bir API çağrısı yaparak rate limit headers'ını al
-            me = client.get_me()
+            response = client.get_me()
             
-            # Response headers'ından rate limit bilgilerini çıkar
-            # Not: Tweepy v2'de rate limit bilgileri response.headers'da bulunur
-            return {
+            # Response'dan rate limit bilgilerini çıkar
+            rate_limit_info = {
                 "success": True,
                 "status": "API erişilebilir",
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "user_info": {
+                    "username": response.data.username if response.data else "Bilinmiyor",
+                    "id": response.data.id if response.data else "Bilinmiyor"
+                }
             }
+            
+            # Eğer response'da meta bilgiler varsa ekle
+            if hasattr(response, 'meta') and response.meta:
+                rate_limit_info["meta"] = response.meta
+                
+            return rate_limit_info
+            
         except tweepy.TooManyRequests as e:
+            # Rate limit detaylarını çıkar
+            retry_after = 900  # Default 15 dakika
+            reset_time = None
+            remaining = 0
+            
+            try:
+                if hasattr(e, 'response') and e.response and hasattr(e.response, 'headers'):
+                    headers = e.response.headers
+                    retry_after = int(headers.get('x-rate-limit-reset', 900))
+                    remaining = int(headers.get('x-rate-limit-remaining', 0))
+                    reset_time = headers.get('x-rate-limit-reset')
+            except:
+                pass
+                
             return {
                 "success": False,
                 "status": "Rate limit aşıldı",
                 "error": str(e),
+                "retry_after": retry_after,
+                "remaining_requests": remaining,
+                "reset_time": reset_time,
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
+            
+        except tweepy.Unauthorized as auth_error:
+            return {
+                "success": False,
+                "status": "Yetkilendirme hatası",
+                "error": str(auth_error),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
         except Exception as e:
             return {
                 "success": False,
@@ -2213,37 +2276,51 @@ def post_text_tweet_v2(tweet_text):
         TWITTER_LIMIT = 280
         if len(tweet_text) > TWITTER_LIMIT:
             tweet_text = tweet_text[:TWITTER_LIMIT-3] + "..."
-        print(f"[DEBUG][post_text_tweet_v2] Tweet uzunluğu: {len(tweet_text)}")
+        safe_log(f"Tweet uzunluğu: {len(tweet_text)}", "DEBUG")
         
         response = client.create_tweet(text=tweet_text)
         if hasattr(response, 'data') and response.data and 'id' in response.data:
             tweet_id = response.data['id']
             tweet_url = f"https://twitter.com/user/status/{tweet_id}"
-            print(f"[SUCCESS][post_text_tweet_v2] Tweet gönderildi: {tweet_url}")
+            safe_log(f"Tweet başarıyla gönderildi: {tweet_url}", "INFO")
             return {"success": True, "tweet_id": tweet_id, "url": tweet_url}
         else:
-            print(f"[ERROR][post_text_tweet_v2] Tweet gönderilemedi: {response}")
+            safe_log(f"Tweet gönderilemedi: {response}", "ERROR")
             return {"success": False, "error": "Tweet gönderilemedi"}
             
     except tweepy.TooManyRequests as rate_limit_error:
-        print(f"[RATE_LIMIT][post_text_tweet_v2] Twitter API rate limit aşıldı: {rate_limit_error}")
-        print("[INFO] Tweet pending listesine eklenecek, daha sonra tekrar denenecek")
-        return {"success": False, "error": "429 Too Many Requests - Rate limit aşıldı", "rate_limited": True}
+        safe_log(f"Twitter API rate limit aşıldı: {rate_limit_error}", "WARNING")
+        safe_log("Tweet pending listesine eklenecek, daha sonra tekrar denenecek", "INFO")
+        
+        # Rate limit bilgilerini çıkar (eğer varsa)
+        retry_after = 900  # Default 15 dakika
+        try:
+            if hasattr(rate_limit_error, 'response') and rate_limit_error.response:
+                retry_after = int(rate_limit_error.response.headers.get('x-rate-limit-reset', 900))
+        except:
+            pass
+            
+        return {
+            "success": False, 
+            "error": "429 Too Many Requests - Rate limit aşıldı", 
+            "rate_limited": True,
+            "retry_after": retry_after
+        }
         
     except tweepy.Unauthorized as auth_error:
-        print(f"[AUTH_ERROR][post_text_tweet_v2] Twitter API yetkilendirme hatası: {auth_error}")
+        safe_log(f"Twitter API yetkilendirme hatası: {auth_error}", "ERROR")
         return {"success": False, "error": f"Twitter API yetkilendirme hatası: {auth_error}"}
         
     except tweepy.Forbidden as forbidden_error:
-        print(f"[FORBIDDEN][post_text_tweet_v2] Twitter API yasak işlem: {forbidden_error}")
+        safe_log(f"Twitter API yasak işlem: {forbidden_error}", "ERROR")
         return {"success": False, "error": f"Twitter API yasak işlem: {forbidden_error}"}
         
     except Exception as e:
-        print(f"[ERROR][post_text_tweet_v2] Genel hata: {e}")
+        safe_log(f"Tweet paylaşım genel hatası: {e}", "ERROR")
         # Rate limit hatası string kontrolü (fallback)
         if "429" in str(e) or "Too Many Requests" in str(e):
-            print("[INFO] Rate limit hatası tespit edildi (string kontrolü)")
-            return {"success": False, "error": str(e), "rate_limited": True}
+            safe_log("Rate limit hatası tespit edildi (string kontrolü)", "INFO")
+            return {"success": False, "error": str(e), "rate_limited": True, "retry_after": 900}
         return {"success": False, "error": str(e)}
 
 def fetch_url_content_with_mcp(url):
@@ -2407,7 +2484,7 @@ def send_gmail_notification(message, tweet_url="", article_title=""):
             return {"success": False, "reason": "missing_email"}
             
         if not gmail_password:
-            print("[WARNING] Gmail uygulama şifresi eksik. .env dosyasında GMAIL_APP_PASSWORD ayarlayın.")
+            safe_log("Gmail uygulama şifresi eksik. .env dosyasında GMAIL_APP_PASSWORD ayarlayın.", "WARNING")
             return {"success": False, "reason": "missing_password"}
         
         # E-posta içeriğini hazırla
@@ -2962,3 +3039,277 @@ def update_fetch_articles_function():
         print(f"❌ Güncellenmiş makale çekme hatası: {e}")
         # Fallback olarak eski fonksiyonu çağır
         return fetch_latest_ai_articles_fallback()
+
+# =============================================================================
+# GÜVENLİ LOGGING SİSTEMİ
+# =============================================================================
+
+def safe_log(message, level="INFO", sensitive_data=None):
+    """Güvenli logging - şifre ve API anahtarlarını gizler"""
+    import os
+    
+    # Sadece debug modunda detaylı log
+    debug_mode = os.environ.get('DEBUG', 'False').lower() == 'true'
+    
+    if not debug_mode and level == "DEBUG":
+        return
+    
+    # Mesajı güvenli hale getir
+    safe_message = sanitize_log_message(str(message))
+    
+    # Hassas verileri gizle
+    if sensitive_data:
+        for key, value in sensitive_data.items():
+            if value and len(str(value)) > 3:
+                masked_value = str(value)[:3] + "*" * (len(str(value)) - 3)
+                safe_message = safe_message.replace(str(value), masked_value)
+    
+    # Production'da sadece önemli logları göster
+    if not debug_mode and level not in ["ERROR", "WARNING", "INFO"]:
+        return
+    
+    print(f"[{level}] {safe_message}")
+
+# =============================================================================
+# GÜVENLİK KONTROL FONKSİYONLARI
+# =============================================================================
+
+def check_security_configuration():
+    """Güvenlik yapılandırmasını kontrol et"""
+    import os
+    
+    security_issues = []
+    
+    # 1. Debug mode kontrolü
+    debug_mode = os.environ.get('DEBUG', 'False').lower() == 'true'
+    flask_env = os.environ.get('FLASK_ENV', 'production')
+    
+    if debug_mode and flask_env == 'production':
+        security_issues.append("⚠️ Production'da DEBUG modu açık!")
+    
+    # 2. Varsayılan şifre kontrolü
+    password = os.environ.get('SIFRE', 'admin123')
+    if password in ['admin123', 'password', '123456', 'admin']:
+        security_issues.append("🔒 Varsayılan şifre kullanılıyor! Değiştirin.")
+    
+    # 3. Secret key kontrolü
+    secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
+    if secret_key == 'your-secret-key-here' or len(secret_key) < 32:
+        security_issues.append("🔑 Güçlü SECRET_KEY kullanın!")
+    
+    # 4. API anahtarları kontrolü
+    api_keys = [
+        'GOOGLE_API_KEY',
+        'TWITTER_API_KEY',
+        'TWITTER_API_SECRET',
+        'TWITTER_ACCESS_TOKEN',
+        'TWITTER_ACCESS_TOKEN_SECRET'
+    ]
+    
+    for key in api_keys:
+        value = os.environ.get(key, '')
+        if value and ('your-' in value.lower() or 'example' in value.lower()):
+            security_issues.append(f"🔐 {key} örnek değer içeriyor!")
+    
+    return {
+        "secure": len(security_issues) == 0,
+        "issues": security_issues,
+        "debug_mode": debug_mode,
+        "flask_env": flask_env
+    }
+
+def sanitize_log_message(message):
+    """Log mesajlarından hassas bilgileri temizle"""
+    import re
+    
+    # API anahtarı pattern'leri
+    patterns = [
+        r'AIza[0-9A-Za-z-_]{35}',  # Google API Key
+        r'sk-[a-zA-Z0-9]{48}',     # OpenAI API Key
+        r'[0-9]{10}:[A-Za-z0-9_-]{35}',  # Telegram Bot Token
+        r'[A-Za-z0-9]{25}',        # Twitter Bearer Token
+        r'[A-Za-z0-9]{15,25}',     # Twitter API Keys
+    ]
+    
+    for pattern in patterns:
+        message = re.sub(pattern, '***MASKED***', message)
+    
+    # Şifre pattern'leri
+    password_patterns = [
+        r'password["\s]*[:=]["\s]*[^"\s]+',
+        r'pass["\s]*[:=]["\s]*[^"\s]+',
+        r'token["\s]*[:=]["\s]*[^"\s]+',
+        r'key["\s]*[:=]["\s]*[^"\s]+',
+    ]
+    
+    for pattern in password_patterns:
+        message = re.sub(pattern, 'password=***MASKED***', message, flags=re.IGNORECASE)
+    
+    return message
+
+# =============================================================================
+# RATE LİMİT YÖNETİMİ VE OTOMATİK TEKRAR DENEME
+# =============================================================================
+
+def retry_pending_tweets_after_rate_limit():
+    """Rate limit sonrası bekleyen tweet'leri tekrar dene"""
+    try:
+        from datetime import datetime, timedelta
+        
+        safe_log("Rate limit sonrası bekleyen tweet'ler kontrol ediliyor...", "INFO")
+        
+        # Pending tweet'leri yükle
+        pending_tweets = load_json("pending_tweets.json")
+        
+        if not pending_tweets:
+            safe_log("Bekleyen tweet bulunamadı", "INFO")
+            return {"success": True, "message": "Bekleyen tweet yok"}
+        
+        # Rate limit durumunda olan tweet'leri filtrele
+        rate_limited_tweets = []
+        other_pending_tweets = []
+        
+        for i, tweet in enumerate(pending_tweets):
+            error_reason = tweet.get('error_reason', '')
+            if ('rate limit' in error_reason.lower() or 
+                '429' in error_reason or 
+                'too many requests' in error_reason.lower()):
+                tweet['original_index'] = i
+                rate_limited_tweets.append(tweet)
+            else:
+                other_pending_tweets.append(tweet)
+        
+        if not rate_limited_tweets:
+            safe_log("Rate limit nedeniyle bekleyen tweet bulunamadı", "INFO")
+            return {"success": True, "message": "Rate limit tweet'i yok"}
+        
+        safe_log(f"{len(rate_limited_tweets)} rate limit tweet'i tekrar denenecek", "INFO")
+        
+        # Rate limit kontrolü yap
+        rate_limit_status = get_twitter_rate_limit_status()
+        if not rate_limit_status.get('can_post', False):
+            remaining_time = rate_limit_status.get('reset_time_minutes', 15)
+            safe_log(f"Hala rate limit aktif, {remaining_time} dakika sonra tekrar denenecek", "WARNING")
+            return {"success": False, "message": f"Rate limit aktif, {remaining_time} dakika bekle"}
+        
+        # Ayarları yükle
+        settings = load_automation_settings()
+        rate_limit_seconds = settings.get('rate_limit_seconds', 3.0)
+        
+        successful_posts = 0
+        failed_posts = 0
+        updated_pending = other_pending_tweets.copy()
+        
+        for tweet_data in rate_limited_tweets:
+            try:
+                safe_log(f"Rate limit tweet'i tekrar deneniyor: {tweet_data['article']['title'][:50]}...", "INFO")
+                
+                # Tweet'i paylaş
+                tweet_result = post_tweet(
+                    tweet_data['tweet_data']['tweet'], 
+                    tweet_data['article']['title']
+                )
+                
+                if tweet_result.get('success'):
+                    # Başarılı paylaşım
+                    mark_article_as_posted(tweet_data['article'], tweet_result)
+                    successful_posts += 1
+                    
+                    safe_log(f"Rate limit tweet'i başarıyla paylaşıldı: {tweet_data['article']['title'][:50]}...", "SUCCESS")
+                    
+                    # Telegram bildirimi
+                    if settings.get('telegram_notifications', False):
+                        send_telegram_notification(
+                            f"✅ Rate limit sonrası tweet paylaşıldı!\n\n{tweet_data['tweet_data']['tweet'][:100]}...",
+                            tweet_result.get('tweet_url', ''),
+                            tweet_data['article']['title']
+                        )
+                
+                elif tweet_result.get('rate_limited', False):
+                    # Hala rate limit var, tweet'i pending'de bırak
+                    safe_log("Hala rate limit aktif, tweet pending'de kalacak", "WARNING")
+                    updated_pending.append(tweet_data)
+                    break  # Diğer tweet'leri denemeye gerek yok
+                
+                else:
+                    # Başka bir hata, tweet'i pending'de bırak ama error_reason güncelle
+                    tweet_data['error_reason'] = tweet_result.get('error', 'Bilinmeyen hata')
+                    tweet_data['retry_count'] = tweet_data.get('retry_count', 0) + 1
+                    tweet_data['last_retry'] = datetime.now().isoformat()
+                    
+                    # Çok fazla deneme yapıldıysa tweet'i sil
+                    if tweet_data.get('retry_count', 0) >= 5:
+                        safe_log(f"Tweet çok fazla denendi, siliniyor: {tweet_data['article']['title'][:50]}...", "WARNING")
+                        failed_posts += 1
+                    else:
+                        updated_pending.append(tweet_data)
+                        failed_posts += 1
+                
+                # Rate limiting
+                time.sleep(rate_limit_seconds)
+                
+            except Exception as tweet_error:
+                safe_log(f"Rate limit tweet retry hatası: {tweet_error}", "ERROR")
+                # Hata durumunda tweet'i pending'de bırak
+                tweet_data['error_reason'] = f"Retry hatası: {str(tweet_error)}"
+                tweet_data['retry_count'] = tweet_data.get('retry_count', 0) + 1
+                updated_pending.append(tweet_data)
+                failed_posts += 1
+                continue
+        
+        # Güncellenmiş pending listesini kaydet
+        save_json("pending_tweets.json", updated_pending)
+        
+        message = f"Rate limit retry: {successful_posts} başarılı, {failed_posts} başarısız"
+        safe_log(message, "INFO")
+        
+        return {
+            "success": True, 
+            "message": message,
+            "successful_posts": successful_posts,
+            "failed_posts": failed_posts,
+            "remaining_pending": len(updated_pending)
+        }
+        
+    except Exception as e:
+        safe_log(f"Rate limit retry genel hatası: {e}", "ERROR")
+        return {"success": False, "message": str(e)}
+
+def check_and_retry_rate_limited_tweets():
+    """Periyodik olarak rate limit tweet'lerini kontrol et ve tekrar dene"""
+    try:
+        # Rate limit durumunu kontrol et
+        rate_limit_status = get_twitter_rate_limit_status()
+        
+        if rate_limit_status.get('can_post', False):
+            # Rate limit yok, bekleyen tweet'leri dene
+            return retry_pending_tweets_after_rate_limit()
+        else:
+            remaining_time = rate_limit_status.get('reset_time_minutes', 15)
+            safe_log(f"Rate limit aktif, {remaining_time} dakika sonra tekrar kontrol edilecek", "INFO")
+            return {"success": False, "message": f"Rate limit aktif, {remaining_time} dakika bekle"}
+            
+    except Exception as e:
+        safe_log(f"Rate limit kontrol hatası: {e}", "ERROR")
+        return {"success": False, "message": str(e)}
+
+def get_rate_limited_tweets_count():
+    """Rate limit nedeniyle bekleyen tweet sayısını döndür"""
+    try:
+        pending_tweets = load_json("pending_tweets.json")
+        
+        rate_limited_count = 0
+        for tweet in pending_tweets:
+            error_reason = tweet.get('error_reason', '')
+            if ('rate limit' in error_reason.lower() or 
+                '429' in error_reason or 
+                'too many requests' in error_reason.lower()):
+                rate_limited_count += 1
+        
+        return rate_limited_count
+        
+    except Exception as e:
+        safe_log(f"Rate limited tweet sayısı alma hatası: {e}", "ERROR")
+        return 0
+
+# =============================================================================

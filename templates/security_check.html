@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}AI Tweet Bot - Güvenlik Kontrolü{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    <!-- Sayfa Başlığı -->
+    <div class="text-center">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2">
+            🔒 Güvenlik Kontrolü
+        </h1>
+        <p class="text-gray-600">Uygulamanızın güvenlik yapılandırmasını kontrol edin</p>
+    </div>
+
+    <!-- Güvenlik Durumu -->
+    <div class="card-modern">
+        <div class="p-8">
+            {% if security %}
+                <!-- Genel Durum -->
+                <div class="flex items-center space-x-4 mb-8">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center {{ 'bg-green-100' if security.secure else 'bg-red-100' }}">
+                        <i class="fas fa-{{ 'shield-alt text-green-600' if security.secure else 'exclamation-triangle text-red-600' }} text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold {{ 'text-green-800' if security.secure else 'text-red-800' }}">
+                            {% if security.secure %}
+                                ✅ Güvenlik Yapılandırması Uygun
+                            {% else %}
+                                ⚠️ Güvenlik Sorunları Tespit Edildi
+                            {% endif %}
+                        </h2>
+                        <p class="text-gray-600">
+                            {% if security.secure %}
+                                Tüm güvenlik kontrolleri başarılı
+                            {% else %}
+                                {{ security.issues|length }} güvenlik sorunu bulundu
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Güvenlik Sorunları -->
+                {% if security.issues %}
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
+                        <h3 class="text-lg font-semibold text-red-800 mb-4 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Güvenlik Sorunları
+                        </h3>
+                        <ul class="space-y-3">
+                            {% for issue in security.issues %}
+                                <li class="flex items-start space-x-3">
+                                    <i class="fas fa-times-circle text-red-500 mt-1"></i>
+                                    <span class="text-red-700">{{ issue }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- Sistem Bilgileri -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="border rounded-xl p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-cog mr-2"></i>
+                            Sistem Modu
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Debug Modu:</span>
+                                <span class="px-3 py-1 rounded-full text-sm font-medium {{ 'bg-yellow-100 text-yellow-800' if security.debug_mode else 'bg-green-100 text-green-800' }}">
+                                    {{ 'Açık' if security.debug_mode else 'Kapalı' }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Flask Ortamı:</span>
+                                <span class="px-3 py-1 rounded-full text-sm font-medium {{ 'bg-green-100 text-green-800' if security.flask_env == 'production' else 'bg-yellow-100 text-yellow-800' }}">
+                                    {{ security.flask_env|title }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border rounded-xl p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-shield-alt mr-2"></i>
+                            Güvenlik Özellikleri
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Güvenli Logging:</span>
+                                <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    Aktif
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">API Maskeleme:</span>
+                                <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    Aktif
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Güvenlik Önerileri -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-blue-900 mb-4 flex items-center">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        Güvenlik Önerileri
+                    </h3>
+                    <ul class="space-y-2 text-blue-800">
+                        <li class="flex items-start space-x-2">
+                            <i class="fas fa-check-circle text-blue-600 mt-1"></i>
+                            <span>Environment variable'larınızı <code class="bg-blue-200 px-2 py-1 rounded text-sm">.env</code> dosyasında saklayın</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fas fa-check-circle text-blue-600 mt-1"></i>
+                            <span>Production'da <code class="bg-blue-200 px-2 py-1 rounded text-sm">DEBUG=False</code> ayarlayın</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fas fa-check-circle text-blue-600 mt-1"></i>
+                            <span>Güçlü ve benzersiz şifreler kullanın</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fas fa-check-circle text-blue-600 mt-1"></i>
+                            <span>API anahtarlarınızı düzenli olarak yenileyin</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fas fa-check-circle text-blue-600 mt-1"></i>
+                            <span><code class="bg-blue-200 px-2 py-1 rounded text-sm">.env</code> dosyasını asla Git'e commit etmeyin</span>
+                        </li>
+                    </ul>
+                </div>
+
+            {% else %}
+                <div class="text-center py-12">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">Güvenlik Kontrolü Yapılamadı</h2>
+                    <p class="text-gray-600">Sistem yapılandırması kontrol edilemedi.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Geri Dön -->
+    <div class="text-center">
+        <a href="{{ url_for('settings') }}" class="btn-secondary">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Ayarlara Geri Dön
+        </a>
+    </div>
+</div>
+{% endblock %} 

@@ -67,99 +67,173 @@
         .warning-gradient {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
         }
+        
+        /* Navigation Styles */
+        .nav-item {
+            @apply flex flex-col items-center space-y-1 px-4 py-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-700 font-medium text-sm;
+        }
+        
+        .nav-item:hover {
+            @apply transform scale-105;
+        }
+        
+        .nav-item-active {
+            @apply bg-white shadow-md;
+        }
+        
+        .nav-item-active .nav-icon {
+            @apply shadow-sm;
+        }
+        
+        .nav-icon {
+            @apply w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all duration-200;
+        }
+        
+        .mobile-nav-link {
+            @apply flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium;
+        }
+        
+        .mobile-nav-link:hover {
+            @apply transform translate-x-1;
+        }
     </style>
 </head>
 <body class="h-full bg-gradient-to-br from-slate-50 to-blue-50 font-sans">
     <!-- Navigation -->
-    <nav class="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-50 shadow-sm">
+    <nav class="bg-white/95 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
+            <div class="flex justify-between items-center h-20">
                 <!-- Logo -->
                 <div class="flex items-center">
-                    <a href="{{ url_for('index') }}" class="flex items-center space-x-3 group">
-                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                            <i class="fas fa-robot text-white text-lg"></i>
+                    <a href="{{ url_for('index') }}" class="flex items-center space-x-4 group">
+                        <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200 shadow-lg">
+                            <i class="fas fa-robot text-white text-xl"></i>
                         </div>
-                        <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            AI Tweet Bot
-                        </span>
+                        <div class="hidden sm:block">
+                            <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                AI Tweet Bot
+                            </span>
+                            <div class="text-xs text-gray-500 font-medium">Otomatik Tweet Sistemi</div>
+                        </div>
                     </a>
                 </div>
 
                 <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="{{ url_for('index') }}" class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-150 hover:bg-blue-50 hover:text-blue-700 {% if request.endpoint == 'index' %}text-blue-700 font-bold bg-blue-100{% else %}text-gray-800{% endif %}">
-                        <i class="fas fa-home"></i>
+                <div class="hidden lg:flex items-center space-x-2">
+                    <a href="{{ url_for('index') }}" class="nav-item {% if request.endpoint == 'index' %}nav-item-active{% endif %}">
+                        <div class="nav-icon bg-blue-100 text-blue-600">
+                            <i class="fas fa-home"></i>
+                        </div>
                         <span>Ana Sayfa</span>
                     </a>
-                    <a href="{{ url_for('settings') }}" class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-150 hover:bg-blue-50 hover:text-blue-700 {% if request.endpoint == 'settings' %}text-blue-700 font-bold bg-blue-100{% else %}text-gray-800{% endif %}">
-                        <i class="fas fa-cog"></i>
+                    
+                    <a href="{{ url_for('settings') }}" class="nav-item {% if request.endpoint == 'settings' %}nav-item-active{% endif %}">
+                        <div class="nav-icon bg-gray-100 text-gray-600">
+                            <i class="fas fa-cog"></i>
+                        </div>
                         <span>Ayarlar</span>
                     </a>
-                    <a href="{{ url_for('statistics') }}" class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-150 hover:bg-blue-50 hover:text-blue-700 {% if request.endpoint == 'statistics' %}text-blue-700 font-bold bg-blue-100{% else %}text-gray-800{% endif %}">
-                        <i class="fas fa-chart-bar"></i>
+                    
+                    <a href="{{ url_for('statistics') }}" class="nav-item {% if request.endpoint == 'statistics' %}nav-item-active{% endif %}">
+                        <div class="nav-icon bg-indigo-100 text-indigo-600">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
                         <span>İstatistikler</span>
                     </a>
-                    <a href="{{ url_for('news_sources') }}" class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-150 hover:bg-purple-50 hover:text-purple-700 {% if request.endpoint == 'news_sources' %}text-purple-700 font-bold bg-purple-100{% else %}text-gray-800{% endif %}">
-                        <i class="fas fa-newspaper"></i>
+                    
+                    <a href="{{ url_for('news_sources') }}" class="nav-item {% if request.endpoint == 'news_sources' %}nav-item-active{% endif %}">
+                        <div class="nav-icon bg-purple-100 text-purple-600">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
                         <span>Haber Kaynakları</span>
                     </a>
-                    <a href="{{ url_for('create_tweet') }}" class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-all duration-150 hover:bg-green-50 hover:text-green-700 {% if request.endpoint == 'create_tweet' %}text-green-700 font-bold bg-green-100{% else %}text-gray-800{% endif %}">
-                        <i class="fas fa-pen-nib"></i>
+                    
+                    <a href="{{ url_for('create_tweet') }}" class="nav-item {% if request.endpoint == 'create_tweet' %}nav-item-active{% endif %}">
+                        <div class="nav-icon bg-green-100 text-green-600">
+                            <i class="fas fa-pen-nib"></i>
+                        </div>
                         <span>Tweet Oluştur</span>
+                    </a>
+                    
+                    <a href="{{ url_for('security_check') }}" class="nav-item {% if request.endpoint == 'security_check' %}nav-item-active{% endif %}">
+                        <div class="nav-icon bg-red-100 text-red-600">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <span>Güvenlik</span>
                     </a>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-4">
                     <a href="{{ url_for('check_articles') }}" 
-                       class="hidden sm:flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                       class="hidden sm:flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium">
                         <i class="fas fa-sync-alt"></i>
-                        <span class="font-medium">Kontrol Et</span>
+                        <span>Kontrol Et</span>
                     </a>
                     
                     <!-- Mobile Menu Button -->
-                    <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                        <i class="fas fa-bars text-gray-600"></i>
+                    <button id="mobile-menu-btn" class="lg:hidden p-3 rounded-xl hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-bars text-gray-600 text-lg"></i>
                     </button>
                     
                     <a href="{{ url_for('logout') }}" 
                        onclick="return confirm('Çıkış yapmak istediğinizden emin misiniz?')"
-                       class="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
+                       class="flex items-center space-x-2 px-4 py-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 font-medium">
                         <i class="fas fa-sign-out-alt"></i>
-                        <span class="hidden sm:inline font-medium">Çıkış</span>
+                        <span class="hidden sm:inline">Çıkış</span>
                     </a>
                 </div>
             </div>
         </div>
 
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-200">
-            <div class="px-4 py-3 space-y-2">
-                <a href="{{ url_for('index') }}" class="mobile-nav-link">
-                    <i class="fas fa-home"></i>
+        <div id="mobile-menu" class="lg:hidden hidden bg-white/95 backdrop-blur-lg border-t border-gray-200/50">
+            <div class="px-6 py-4 space-y-2">
+                <a href="{{ url_for('index') }}" class="mobile-nav-link {% if request.endpoint == 'index' %}bg-blue-50 text-blue-700{% endif %}">
+                    <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-home text-sm"></i>
+                    </div>
                     <span>Ana Sayfa</span>
                 </a>
-                <a href="{{ url_for('settings') }}" class="mobile-nav-link">
-                    <i class="fas fa-cog"></i>
+                <a href="{{ url_for('settings') }}" class="mobile-nav-link {% if request.endpoint == 'settings' %}bg-gray-50 text-gray-700{% endif %}">
+                    <div class="w-8 h-8 bg-gray-100 text-gray-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-cog text-sm"></i>
+                    </div>
                     <span>Ayarlar</span>
                 </a>
-                <a href="{{ url_for('statistics') }}" class="mobile-nav-link">
-                    <i class="fas fa-chart-bar"></i>
+                <a href="{{ url_for('statistics') }}" class="mobile-nav-link {% if request.endpoint == 'statistics' %}bg-indigo-50 text-indigo-700{% endif %}">
+                    <div class="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-chart-bar text-sm"></i>
+                    </div>
                     <span>İstatistikler</span>
                 </a>
-                <a href="{{ url_for('news_sources') }}" class="mobile-nav-link text-purple-700">
-                    <i class="fas fa-newspaper"></i>
+                <a href="{{ url_for('news_sources') }}" class="mobile-nav-link {% if request.endpoint == 'news_sources' %}bg-purple-50 text-purple-700{% endif %}">
+                    <div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-newspaper text-sm"></i>
+                    </div>
                     <span>Haber Kaynakları</span>
                 </a>
-                <a href="{{ url_for('create_tweet') }}" class="mobile-nav-link text-green-700">
-                    <i class="fas fa-pen-nib"></i>
+                <a href="{{ url_for('create_tweet') }}" class="mobile-nav-link {% if request.endpoint == 'create_tweet' %}bg-green-50 text-green-700{% endif %}">
+                    <div class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-pen-nib text-sm"></i>
+                    </div>
                     <span>Tweet Oluştur</span>
                 </a>
-                <a href="{{ url_for('check_articles') }}" class="mobile-nav-link text-green-600">
-                    <i class="fas fa-sync-alt"></i>
-                    <span>Şimdi Kontrol Et</span>
+                <a href="{{ url_for('security_check') }}" class="mobile-nav-link {% if request.endpoint == 'security_check' %}bg-red-50 text-red-700{% endif %}">
+                    <div class="w-8 h-8 bg-red-100 text-red-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-sm"></i>
+                    </div>
+                    <span>Güvenlik</span>
                 </a>
+                
+                <div class="border-t border-gray-200 pt-3 mt-3">
+                    <a href="{{ url_for('check_articles') }}" class="mobile-nav-link text-green-600 bg-green-50">
+                        <div class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-sync-alt text-sm"></i>
+                        </div>
+                        <span>Şimdi Kontrol Et</span>
+                    </a>
+                </div>
             </div>
         </div>
     </nav>

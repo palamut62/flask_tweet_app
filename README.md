@@ -42,25 +42,47 @@ pip install -r requirements.txt
 
 ### 3. Environment Değişkenlerini Ayarla
 
-PythonAnywhere Dashboard'da **Files** sekmesine git ve `.env` dosyası oluştur:
+**⚠️ GÜVENLİK UYARISI:**
+- `.env` dosyasını asla Git'e commit etmeyin
+- Güçlü ve benzersiz şifreler kullanın
+- Production'da `DEBUG=False` ayarlayın
+- API anahtarlarınızı düzenli olarak yenileyin
+
+PythonAnywhere Dashboard'da **Files** sekmesine git ve `.env.example` dosyasını `.env` olarak kopyalayıp düzenle:
 
 ```env
-# Google Gemini API
-GOOGLE_API_KEY=your_google_gemini_api_key_here
-
-# Twitter API Credentials
-TWITTER_BEARER_TOKEN=your_twitter_bearer_token_here
-TWITTER_API_KEY=your_twitter_api_key_here
-TWITTER_API_SECRET=your_twitter_api_secret_here
-TWITTER_ACCESS_TOKEN=your_twitter_access_token_here
-TWITTER_ACCESS_TOKEN_SECRET=your_twitter_access_token_secret_here
-
-# Telegram Bot (Optional)
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
-
-# Flask Configuration
-SECRET_KEY=your_secret_key_for_flask_sessions
+# =============================================================================
+# UYGULAMA GÜVENLİĞİ
+# =============================================================================
+SECRET_KEY=your-secret-key-here-change-this-to-strong-random-string
+SIFRE=your-admin-password-here-change-this
+DEBUG=False
 FLASK_ENV=production
+
+# =============================================================================
+# GOOGLE GEMINI AI API
+# =============================================================================
+GOOGLE_API_KEY=your-google-gemini-api-key-here
+
+# =============================================================================
+# TWITTER API CREDENTIALS
+# =============================================================================
+TWITTER_BEARER_TOKEN=your-twitter-bearer-token
+TWITTER_API_KEY=your-twitter-api-key
+TWITTER_API_SECRET=your-twitter-api-secret
+TWITTER_ACCESS_TOKEN=your-twitter-access-token
+TWITTER_ACCESS_TOKEN_SECRET=your-twitter-access-token-secret
+
+# =============================================================================
+# TELEGRAM BOT (Opsiyonel - Bildirimler için)
+# =============================================================================
+TELEGRAM_BOT_TOKEN=your-telegram-bot-token
+
+# =============================================================================
+# GMAIL SMTP (Opsiyonel - E-posta bildirimleri için)
+# =============================================================================
+GMAIL_EMAIL=your-email@gmail.com
+GMAIL_APP_PASSWORD=your-gmail-app-password
 ```
 
 ### 4. Web App Yapılandırması
@@ -195,6 +217,56 @@ print(f'Task completed: {result}')
 tail -f /var/log/yourusername.pythonanywhere.com.error.log
 tail -f /var/log/yourusername.pythonanywhere.com.server.log
 ```
+
+## 🔒 Güvenlik
+
+### Güvenlik Kontrolleri
+
+Uygulama, güvenlik açıklarını tespit etmek için otomatik kontroller yapar:
+
+- **Varsayılan Şifre Kontrolü**: Zayıf şifreleri tespit eder
+- **Debug Modu Kontrolü**: Production'da debug modunu kontrol eder
+- **API Anahtarı Kontrolü**: Örnek değerleri tespit eder
+- **Secret Key Kontrolü**: Güçlü secret key kullanımını kontrol eder
+
+### Güvenlik Sayfası
+
+`/security_check` sayfasından güvenlik durumunuzu kontrol edebilirsiniz:
+
+- ✅ Güvenlik durumu özeti
+- ⚠️ Tespit edilen güvenlik sorunları
+- 💡 Güvenlik önerileri
+- 🔧 Sistem yapılandırması
+
+### Güvenli Logging
+
+Uygulama, hassas bilgilerin loglanmasını önler:
+
+- API anahtarları otomatik maskelenir
+- Şifreler log'larda görünmez
+- Debug modunda bile hassas veriler korunur
+- Production'da minimal logging
+
+### Güvenlik Önerileri
+
+1. **Environment Variables**:
+   - `.env` dosyasını Git'e commit etmeyin
+   - `.gitignore` dosyasında `.env` olduğundan emin olun
+
+2. **Şifreler**:
+   - Varsayılan şifreleri değiştirin
+   - Güçlü ve benzersiz şifreler kullanın
+   - Düzenli olarak şifreleri güncelleyin
+
+3. **API Anahtarları**:
+   - API anahtarlarını düzenli olarak yenileyin
+   - Gereksiz izinleri kaldırın
+   - Rate limit'leri ayarlayın
+
+4. **Production Ayarları**:
+   - `DEBUG=False` ayarlayın
+   - `FLASK_ENV=production` kullanın
+   - HTTPS kullanın
 
 ## 🔄 Güncelleme
 
