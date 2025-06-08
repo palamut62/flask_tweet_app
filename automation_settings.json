@@ -1,12 +1,11 @@
 {
   "auto_mode": true,
   "check_interval_hours": 3,
-  "max_articles_per_run": 3,
+  "max_articles_per_run": 5,
   "min_score_threshold": 5,
   "auto_post_enabled": true,
   "manual_approval_required": false,
-  "rate_limit_seconds": 5.0,
   "telegram_notifications": false,
   "email_notifications": true,
-  "last_updated": "2025-06-08T11:26:48.806499"
+  "last_updated": "2025-06-08T14:08:47.897128"
 }

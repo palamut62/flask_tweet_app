@@ -1124,21 +1124,10 @@ def post_tweet(tweet_text, article_title=""):
         # Twitter API v2 kullan
         tweet_result = post_text_tweet_v2(tweet_text)
         
-        # Rate limit kontrolü - başarısız olsa bile sonucu döndür
+        # Başarısız olursa hata döndür
         if not tweet_result.get("success"):
-            # Rate limit durumunda özel işlem
-            if tweet_result.get("rate_limited", False):
-                safe_log(f"Rate limit hatası: {tweet_result.get('error', 'Bilinmeyen hata')}", "WARNING")
-                return {
-                    "success": False,
-                    "error": tweet_result.get("error", "Rate limit aşıldı"),
-                    "rate_limited": True,
-                    "retry_after": tweet_result.get("retry_after", 900)  # 15 dakika default
-                }
-            else:
-                # Diğer hatalar
-                safe_log(f"Tweet paylaşım hatası: {tweet_result.get('error', 'Bilinmeyen hata')}", "ERROR")
-                return tweet_result
+            safe_log(f"Tweet paylaşım hatası: {tweet_result.get('error', 'Bilinmeyen hata')}", "ERROR")
+            return tweet_result
         
         tweet_id = tweet_result.get("tweet_id")
         tweet_url = tweet_result.get("url")
@@ -1530,7 +1519,6 @@ def load_automation_settings():
             "working_hours_start": "09:00",
             "working_hours_end": "18:00",
             "weekend_enabled": True,
-            "rate_limit_delay": 2,
             "last_updated": datetime.now().isoformat()
         }
         
@@ -1555,7 +1543,6 @@ def load_automation_settings():
             "working_hours_start": "09:00",
             "working_hours_end": "18:00",
             "weekend_enabled": True,
-            "rate_limit_delay": 2,
             "last_updated": datetime.now().isoformat()
         }
 
@@ -1638,7 +1625,6 @@ def update_scheduler_settings():
             "check_interval_hours": settings.get("check_interval_hours", 3),
             "max_articles_per_run": settings.get("max_articles_per_run", 10),
             "auto_post_enabled": settings.get("auto_post_enabled", False),
-            "rate_limit_delay": settings.get("rate_limit_delay", 2),
             "last_updated": datetime.now().isoformat()
         }
         
@@ -1676,10 +1662,7 @@ def validate_automation_settings(settings):
     except ValueError:
         errors.append("Çalışma saatleri HH:MM formatında olmalı")
     
-    # Rate limit kontrolü
-    rate_delay = settings.get("rate_limit_delay", 2)
-    if not isinstance(rate_delay, (int, float)) or rate_delay < 0 or rate_delay > 60:
-        errors.append("Rate limit gecikmesi 0-60 saniye arasında olmalı")
+
     
     return errors
 
@@ -2183,92 +2166,14 @@ def setup_twitter_v2_client():
         consumer_key=os.environ.get('TWITTER_API_KEY'),
         consumer_secret=os.environ.get('TWITTER_API_SECRET'),
         access_token=os.environ.get('TWITTER_ACCESS_TOKEN'),
-        access_token_secret=os.environ.get('TWITTER_ACCESS_TOKEN_SECRET'),
-        wait_on_rate_limit=False  # Rate limit'e takılınca hemen hata döndür
+        access_token_secret=os.environ.get('TWITTER_ACCESS_TOKEN_SECRET')
     )
     return client
 
-def get_twitter_rate_limit_status():
-    """Twitter API rate limit durumunu detaylı kontrol et"""
-    try:
-        import tweepy
-        from datetime import datetime, timezone
-        
-        client = setup_twitter_v2_client()
-        
-        # Rate limit bilgilerini al
-        try:
-            # Basit bir API çağrısı yaparak rate limit headers'ını al
-            response = client.get_me()
-            
-            # Response'dan rate limit bilgilerini çıkar
-            rate_limit_info = {
-                "success": True,
-                "status": "API erişilebilir",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "user_info": {
-                    "username": response.data.username if response.data else "Bilinmiyor",
-                    "id": response.data.id if response.data else "Bilinmiyor"
-                }
-            }
-            
-            # Eğer response'da meta bilgiler varsa ekle
-            if hasattr(response, 'meta') and response.meta:
-                rate_limit_info["meta"] = response.meta
-                
-            return rate_limit_info
-            
-        except tweepy.TooManyRequests as e:
-            # Rate limit detaylarını çıkar
-            retry_after = 900  # Default 15 dakika
-            reset_time = None
-            remaining = 0
-            
-            try:
-                if hasattr(e, 'response') and e.response and hasattr(e.response, 'headers'):
-                    headers = e.response.headers
-                    retry_after = int(headers.get('x-rate-limit-reset', 900))
-                    remaining = int(headers.get('x-rate-limit-remaining', 0))
-                    reset_time = headers.get('x-rate-limit-reset')
-            except:
-                pass
-                
-            return {
-                "success": False,
-                "status": "Rate limit aşıldı",
-                "error": str(e),
-                "retry_after": retry_after,
-                "remaining_requests": remaining,
-                "reset_time": reset_time,
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
-            
-        except tweepy.Unauthorized as auth_error:
-            return {
-                "success": False,
-                "status": "Yetkilendirme hatası",
-                "error": str(auth_error),
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
-            
-        except Exception as e:
-            return {
-                "success": False,
-                "status": "API hatası",
-                "error": str(e),
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
-            
-    except Exception as e:
-        return {
-            "success": False,
-            "status": "Bağlantı hatası",
-            "error": str(e),
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
+
 
 def post_text_tweet_v2(tweet_text):
-    """Sadece metinli tweet atmak için Tweepy v2 API kullanımı - Rate limit kontrolü ile"""
+    """Sadece metinli tweet atmak için Tweepy v2 API kullanımı"""
     try:
         import tweepy
         
@@ -2290,22 +2195,7 @@ def post_text_tweet_v2(tweet_text):
             
     except tweepy.TooManyRequests as rate_limit_error:
         safe_log(f"Twitter API rate limit aşıldı: {rate_limit_error}", "WARNING")
-        safe_log("Tweet pending listesine eklenecek, daha sonra tekrar denenecek", "INFO")
-        
-        # Rate limit bilgilerini çıkar (eğer varsa)
-        retry_after = 900  # Default 15 dakika
-        try:
-            if hasattr(rate_limit_error, 'response') and rate_limit_error.response:
-                retry_after = int(rate_limit_error.response.headers.get('x-rate-limit-reset', 900))
-        except:
-            pass
-            
-        return {
-            "success": False, 
-            "error": "429 Too Many Requests - Rate limit aşıldı", 
-            "rate_limited": True,
-            "retry_after": retry_after
-        }
+        return {"success": False, "error": f"Twitter API rate limit aşıldı: {rate_limit_error}"}
         
     except tweepy.Unauthorized as auth_error:
         safe_log(f"Twitter API yetkilendirme hatası: {auth_error}", "ERROR")
@@ -2317,10 +2207,6 @@ def post_text_tweet_v2(tweet_text):
         
     except Exception as e:
         safe_log(f"Tweet paylaşım genel hatası: {e}", "ERROR")
-        # Rate limit hatası string kontrolü (fallback)
-        if "429" in str(e) or "Too Many Requests" in str(e):
-            safe_log("Rate limit hatası tespit edildi (string kontrolü)", "INFO")
-            return {"success": False, "error": str(e), "rate_limited": True, "retry_after": 900}
         return {"success": False, "error": str(e)}
 
 def fetch_url_content_with_mcp(url):
@@ -2745,57 +2631,172 @@ def save_news_sources(config):
     except Exception as e:
         return {"success": False, "message": f"❌ Kaydetme hatası: {e}"}
 
-def add_news_source(name, url, description=""):
-    """Yeni haber kaynağı ekle"""
+def test_selectors_for_url(url):
+    """URL için selector'ları test et ve önerilerde bulun"""
+    try:
+        import requests
+        from bs4 import BeautifulSoup
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Otomatik selector tespiti
+        auto_selectors, container_count = auto_detect_selectors(soup, url)
+        
+        # Selector'ları doğrula
+        is_valid, validation_msg = validate_selectors(soup, auto_selectors)
+        
+        if is_valid:
+            # Örnek makaleler çek
+            sample_articles = []
+            containers = soup.select(auto_selectors["container"])
+            
+            for container in containers[:3]:  # İlk 3 makale
+                try:
+                    title_elem = container.select_one(auto_selectors["title"])
+                    if title_elem:
+                        title = title_elem.get_text(strip=True)
+                        link_elem = title_elem if title_elem.name == 'a' else title_elem.find('a')
+                        link = link_elem.get('href', '') if link_elem else ''
+                        
+                        if link.startswith('/'):
+                            from urllib.parse import urljoin
+                            link = urljoin(url, link)
+                        
+                        sample_articles.append({
+                            'title': title[:100] + '...' if len(title) > 100 else title,
+                            'link': link
+                        })
+                except:
+                    continue
+            
+            return {
+                'success': True,
+                'message': validation_msg,
+                'selectors': auto_selectors,
+                'container_count': container_count,
+                'sample_articles': sample_articles
+            }
+        else:
+            return {
+                'success': False,
+                'message': validation_msg,
+                'selectors': auto_selectors,
+                'container_count': container_count
+            }
+            
+    except Exception as e:
+        return {
+            'success': False,
+            'message': f'Test hatası: {str(e)}'
+        }
+
+def add_news_source_with_validation(name, url, description="", auto_detect=True):
+    """Doğrulama ile yeni haber kaynağı ekle"""
     try:
         config = load_news_sources()
         
         # URL'yi temizle ve doğrula
         url = url.strip()
         if not url.startswith(('http://', 'https://')):
-            return {"success": False, "message": "❌ Geçerli bir URL girin (http:// veya https:// ile başlamalı)"}
+            url = 'https://' + url
         
         # Aynı URL var mı kontrol et
         for source in config["sources"]:
             if source["url"] == url:
-                return {"success": False, "message": "❌ Bu URL zaten eklenmiş"}
+                return {
+                    "success": False,
+                    "message": f"❌ Bu URL zaten mevcut: {source['name']}"
+                }
         
         # Maksimum kaynak sayısını kontrol et
         max_sources = config["settings"].get("max_sources", 10)
         if len(config["sources"]) >= max_sources:
             return {"success": False, "message": f"❌ Maksimum {max_sources} kaynak eklenebilir"}
         
-        # Yeni kaynak oluştur
-        new_source = {
-            "id": f"custom_{len(config['sources']) + 1}_{int(datetime.now().timestamp())}",
-            "name": name.strip(),
-            "url": url,
-            "description": description.strip(),
-            "enabled": True,
-            "selector_type": "auto_detect",
-            "article_selectors": {
+        # URL'yi test et
+        if auto_detect:
+            print(f"🔍 {name} kaynağı test ediliyor...")
+            test_result = test_selectors_for_url(url)
+            
+            if not test_result['success']:
+                return {
+                    "success": False,
+                    "message": f"❌ URL test başarısız: {test_result['message']}",
+                    "test_details": test_result
+                }
+            
+            selectors = test_result['selectors']
+            selector_type = "auto_detected"
+            print(f"✅ {name}: {test_result['container_count']} konteyner bulundu")
+            
+        else:
+            # Manuel selector'lar
+            selectors = {
                 "container": "article, .article, .post, .news-item",
                 "title": "h1, h2, h3, .title, .headline",
                 "link": "a",
                 "date": "time, .date, .published",
                 "excerpt": ".excerpt, .summary, p"
-            },
+            }
+            selector_type = "manual"
+        
+        # Benzersiz ID oluştur
+        import random
+        source_id = f"custom_{len(config['sources']) + 1}_{random.randint(1000000000, 9999999999)}"
+        
+        # Yeni kaynak oluştur
+        new_source = {
+            "id": source_id,
+            "name": name.strip(),
+            "url": url,
+            "description": description.strip(),
+            "enabled": True,
+            "selector_type": selector_type,
+            "article_selectors": selectors,
             "added_date": datetime.now().isoformat(),
-            "last_checked": None,
+            "last_checked": datetime.now().isoformat(),
             "article_count": 0,
             "success_rate": 0
         }
         
+        # Kaynağı ekle
         config["sources"].append(new_source)
+        config["settings"]["last_updated"] = datetime.now().isoformat()
+        
+        # Kaydet
         result = save_news_sources(config)
         
         if result["success"]:
-            return {"success": True, "message": f"✅ '{name}' kaynağı başarıyla eklendi", "source": new_source}
+            response = {
+                "success": True,
+                "message": f"✅ '{name}' kaynağı başarıyla eklendi",
+                "source": new_source
+            }
+            
+            # Test sonuçlarını da ekle
+            if auto_detect and 'test_result' in locals():
+                response['test_details'] = test_result
+            
+            return response
         else:
             return result
-            
+        
     except Exception as e:
-        return {"success": False, "message": f"❌ Kaynak ekleme hatası: {e}"}
+        return {
+            "success": False,
+            "message": f"❌ Kaynak ekleme hatası: {str(e)}"
+        }
+
+def add_news_source(name, url, description=""):
+    """Yeni haber kaynağı ekle (otomatik doğrulama ile)"""
+    return add_news_source_with_validation(name, url, description, auto_detect=True)
 
 def remove_news_source(source_id):
     """Haber kaynağını kaldır"""
@@ -2889,11 +2890,132 @@ def fetch_articles_from_custom_sources():
         print(f"❌ Özel kaynaklardan makale çekme hatası: {e}")
         return []
 
+def auto_detect_selectors(soup, url):
+    """Sayfadan otomatik olarak en iyi selector'ları tespit et"""
+    
+    # Yaygın makale konteyner pattern'leri (öncelik sırasına göre)
+    container_patterns = [
+        # Modern WordPress (TechCrunch tarzı)
+        "li.wp-block-post",
+        "article.wp-block-post", 
+        ".loop-card",
+        
+        # Modern haber siteleri
+        "article[data-testid*='story']",
+        "article[data-testid*='card']",
+        ".story-card",
+        ".news-item",
+        
+        # Genel WordPress
+        "article.post",
+        ".post-item",
+        ".entry",
+        
+        # Klasik yapılar
+        "article",
+        ".article",
+        ".post",
+        "[class*='article']",
+        "[class*='post']",
+        "[class*='story']",
+        "[class*='news']"
+    ]
+    
+    best_selectors = {
+        "container": "article",
+        "title": "h2 a",
+        "link": "h2 a", 
+        "date": "time",
+        "excerpt": "p"
+    }
+    
+    max_containers = 0
+    
+    # En çok konteyner bulan selector'ı seç (ama çok fazla olmasın)
+    for pattern in container_patterns:
+        containers = soup.select(pattern)
+        container_count = len(containers)
+        
+        # İdeal aralık: 3-50 konteyner
+        if 3 <= container_count <= 50 and container_count > max_containers:
+            max_containers = container_count
+            best_selectors["container"] = pattern
+            
+            # Bu konteyner için en iyi title selector'ını bul
+            if containers:
+                sample_container = containers[0]
+                
+                title_patterns = [
+                    "h3.loop-card__title a",  # TechCrunch modern
+                    "h2 a", "h3 a", "h1 a",
+                    ".title a", ".headline a",
+                    "[class*='title'] a",
+                    "[class*='headline'] a",
+                    "a[href*='article']",
+                    "a[href*='post']",
+                    "a"  # Son çare
+                ]
+                
+                for title_pattern in title_patterns:
+                    title_elem = sample_container.select_one(title_pattern)
+                    if title_elem and title_elem.get_text(strip=True):
+                        best_selectors["title"] = title_pattern
+                        best_selectors["link"] = title_pattern
+                        break
+                
+                # Date selector
+                date_patterns = [
+                    "time.loop-card__time",
+                    "time", ".date", ".published",
+                    "[class*='date']", "[class*='time']",
+                    "[datetime]"
+                ]
+                
+                for date_pattern in date_patterns:
+                    if sample_container.select_one(date_pattern):
+                        best_selectors["date"] = date_pattern
+                        break
+    
+    return best_selectors, max_containers
+
+def validate_selectors(soup, selectors):
+    """Selector'ların çalışıp çalışmadığını kontrol et"""
+    
+    container_selector = selectors.get("container", "article")
+    containers = soup.select(container_selector)
+    
+    if not containers:
+        return False, "Konteyner bulunamadı"
+    
+    if len(containers) > 100:
+        return False, f"Çok fazla konteyner ({len(containers)}), selector çok genel"
+    
+    # İlk konteynerden örnek al
+    sample_container = containers[0]
+    
+    title_selector = selectors.get("title", "h2 a")
+    title_elem = sample_container.select_one(title_selector)
+    
+    if not title_elem:
+        return False, "Başlık elementi bulunamadı"
+    
+    title_text = title_elem.get_text(strip=True)
+    if len(title_text) < 10:
+        return False, "Başlık çok kısa"
+    
+    # Link kontrolü
+    link_elem = title_elem if title_elem.name == 'a' else title_elem.find('a')
+    if not link_elem or not link_elem.get('href'):
+        return False, "Link bulunamadı"
+    
+    return True, f"✅ {len(containers)} konteyner, örnek başlık: {title_text[:50]}..."
+
 def fetch_articles_from_single_source(source):
     """Tek bir kaynaktan makale çek"""
     try:
         url = source["url"]
         selectors = source.get("article_selectors", {})
+        source_name = source.get("name", "Bilinmeyen")
         
         # Sayfayı çek
         headers = {
@@ -2906,6 +3028,41 @@ def fetch_articles_from_single_source(source):
         soup = BeautifulSoup(response.content, 'html.parser')
         articles = []
         
+        # Eğer selector_type auto_detect ise veya mevcut selector'lar çalışmıyorsa
+        if source.get('selector_type') == 'auto_detect' or not selectors:
+            print(f"🔍 {source_name} için otomatik selector tespiti yapılıyor...")
+            auto_selectors, container_count = auto_detect_selectors(soup, url)
+            
+            # Otomatik tespit edilen selector'ları doğrula
+            is_valid, validation_msg = validate_selectors(soup, auto_selectors)
+            
+            if is_valid:
+                print(f"✅ Otomatik tespit başarılı: {validation_msg}")
+                selectors = auto_selectors
+                
+                # Başarılı selector'ları kaydet
+                source["article_selectors"] = auto_selectors
+                source["selector_type"] = "auto_detected"
+            else:
+                print(f"❌ Otomatik tespit başarısız: {validation_msg}")
+                return []
+        else:
+            # Mevcut selector'ları doğrula
+            is_valid, validation_msg = validate_selectors(soup, selectors)
+            if not is_valid:
+                print(f"⚠️ Mevcut selector'lar çalışmıyor: {validation_msg}")
+                print(f"🔄 Otomatik tespit deneniyor...")
+                
+                auto_selectors, container_count = auto_detect_selectors(soup, url)
+                is_auto_valid, auto_validation_msg = validate_selectors(soup, auto_selectors)
+                
+                if is_auto_valid:
+                    print(f"✅ Otomatik tespit ile düzeltildi: {auto_validation_msg}")
+                    selectors = auto_selectors
+                else:
+                    print(f"❌ Otomatik tespit de başarısız: {auto_validation_msg}")
+                    return []
+        
         # Makale konteynerlerini bul
         container_selector = selectors.get("container", "article, .article, .post")
         containers = soup.select(container_selector)
@@ -2913,14 +3070,18 @@ def fetch_articles_from_single_source(source):
         if not containers:
             # Alternatif selectors dene
             alternative_selectors = [
+                "li.wp-block-post",  # TechCrunch modern
+                "article[data-testid='story-card']",  # The Verge modern
+                ".c-entry-box", ".c-compact-river__entry",  # The Verge classic
                 "article", ".post", ".news-item", ".story", 
                 ".entry", ".content-item", "[class*='article']",
-                "[class*='post']", "[class*='news']"
+                "[class*='post']", "[class*='news']", "[class*='loop-card']"
             ]
             
             for alt_selector in alternative_selectors:
                 containers = soup.select(alt_selector)
                 if containers:
+                    print(f"🔄 Alternatif selector kullanıldı: {alt_selector}")
                     break
         
         print(f"🔍 {source['name']}: {len(containers)} konteyner bulundu")
@@ -2930,6 +3091,20 @@ def fetch_articles_from_single_source(source):
                 # Başlık bul
                 title_selector = selectors.get("title", "h1, h2, h3, .title, .headline")
                 title_elem = container.select_one(title_selector)
+                
+                # Alternatif title selector'ları dene
+                if not title_elem:
+                    alt_title_selectors = [
+                        "h3.loop-card__title a",  # TechCrunch modern
+                        "h2 a", ".c-entry-box__title a",  # The Verge
+                        "h1 a", "h2 a", "h3 a", "h4 a",
+                        ".title a", ".headline a", "[class*='title'] a"
+                    ]
+                    
+                    for alt_selector in alt_title_selectors:
+                        title_elem = container.select_one(alt_selector)
+                        if title_elem:
+                            break
                 
                 if not title_elem:
                     continue
@@ -3146,170 +3321,5 @@ def sanitize_log_message(message):
         message = re.sub(pattern, 'password=***MASKED***', message, flags=re.IGNORECASE)
     
     return message
-
-# =============================================================================
-# RATE LİMİT YÖNETİMİ VE OTOMATİK TEKRAR DENEME
-# =============================================================================
-
-def retry_pending_tweets_after_rate_limit():
-    """Rate limit sonrası bekleyen tweet'leri tekrar dene"""
-    try:
-        from datetime import datetime, timedelta
-        
-        safe_log("Rate limit sonrası bekleyen tweet'ler kontrol ediliyor...", "INFO")
-        
-        # Pending tweet'leri yükle
-        pending_tweets = load_json("pending_tweets.json")
-        
-        if not pending_tweets:
-            safe_log("Bekleyen tweet bulunamadı", "INFO")
-            return {"success": True, "message": "Bekleyen tweet yok"}
-        
-        # Rate limit durumunda olan tweet'leri filtrele
-        rate_limited_tweets = []
-        other_pending_tweets = []
-        
-        for i, tweet in enumerate(pending_tweets):
-            error_reason = tweet.get('error_reason', '')
-            if ('rate limit' in error_reason.lower() or 
-                '429' in error_reason or 
-                'too many requests' in error_reason.lower()):
-                tweet['original_index'] = i
-                rate_limited_tweets.append(tweet)
-            else:
-                other_pending_tweets.append(tweet)
-        
-        if not rate_limited_tweets:
-            safe_log("Rate limit nedeniyle bekleyen tweet bulunamadı", "INFO")
-            return {"success": True, "message": "Rate limit tweet'i yok"}
-        
-        safe_log(f"{len(rate_limited_tweets)} rate limit tweet'i tekrar denenecek", "INFO")
-        
-        # Rate limit kontrolü yap
-        rate_limit_status = get_twitter_rate_limit_status()
-        if not rate_limit_status.get('can_post', False):
-            remaining_time = rate_limit_status.get('reset_time_minutes', 15)
-            safe_log(f"Hala rate limit aktif, {remaining_time} dakika sonra tekrar denenecek", "WARNING")
-            return {"success": False, "message": f"Rate limit aktif, {remaining_time} dakika bekle"}
-        
-        # Ayarları yükle
-        settings = load_automation_settings()
-        rate_limit_seconds = settings.get('rate_limit_seconds', 3.0)
-        
-        successful_posts = 0
-        failed_posts = 0
-        updated_pending = other_pending_tweets.copy()
-        
-        for tweet_data in rate_limited_tweets:
-            try:
-                safe_log(f"Rate limit tweet'i tekrar deneniyor: {tweet_data['article']['title'][:50]}...", "INFO")
-                
-                # Tweet'i paylaş
-                tweet_result = post_tweet(
-                    tweet_data['tweet_data']['tweet'], 
-                    tweet_data['article']['title']
-                )
-                
-                if tweet_result.get('success'):
-                    # Başarılı paylaşım
-                    mark_article_as_posted(tweet_data['article'], tweet_result)
-                    successful_posts += 1
-                    
-                    safe_log(f"Rate limit tweet'i başarıyla paylaşıldı: {tweet_data['article']['title'][:50]}...", "SUCCESS")
-                    
-                    # Telegram bildirimi
-                    if settings.get('telegram_notifications', False):
-                        send_telegram_notification(
-                            f"✅ Rate limit sonrası tweet paylaşıldı!\n\n{tweet_data['tweet_data']['tweet'][:100]}...",
-                            tweet_result.get('tweet_url', ''),
-                            tweet_data['article']['title']
-                        )
-                
-                elif tweet_result.get('rate_limited', False):
-                    # Hala rate limit var, tweet'i pending'de bırak
-                    safe_log("Hala rate limit aktif, tweet pending'de kalacak", "WARNING")
-                    updated_pending.append(tweet_data)
-                    break  # Diğer tweet'leri denemeye gerek yok
-                
-                else:
-                    # Başka bir hata, tweet'i pending'de bırak ama error_reason güncelle
-                    tweet_data['error_reason'] = tweet_result.get('error', 'Bilinmeyen hata')
-                    tweet_data['retry_count'] = tweet_data.get('retry_count', 0) + 1
-                    tweet_data['last_retry'] = datetime.now().isoformat()
-                    
-                    # Çok fazla deneme yapıldıysa tweet'i sil
-                    if tweet_data.get('retry_count', 0) >= 5:
-                        safe_log(f"Tweet çok fazla denendi, siliniyor: {tweet_data['article']['title'][:50]}...", "WARNING")
-                        failed_posts += 1
-                    else:
-                        updated_pending.append(tweet_data)
-                        failed_posts += 1
-                
-                # Rate limiting
-                time.sleep(rate_limit_seconds)
-                
-            except Exception as tweet_error:
-                safe_log(f"Rate limit tweet retry hatası: {tweet_error}", "ERROR")
-                # Hata durumunda tweet'i pending'de bırak
-                tweet_data['error_reason'] = f"Retry hatası: {str(tweet_error)}"
-                tweet_data['retry_count'] = tweet_data.get('retry_count', 0) + 1
-                updated_pending.append(tweet_data)
-                failed_posts += 1
-                continue
-        
-        # Güncellenmiş pending listesini kaydet
-        save_json("pending_tweets.json", updated_pending)
-        
-        message = f"Rate limit retry: {successful_posts} başarılı, {failed_posts} başarısız"
-        safe_log(message, "INFO")
-        
-        return {
-            "success": True, 
-            "message": message,
-            "successful_posts": successful_posts,
-            "failed_posts": failed_posts,
-            "remaining_pending": len(updated_pending)
-        }
-        
-    except Exception as e:
-        safe_log(f"Rate limit retry genel hatası: {e}", "ERROR")
-        return {"success": False, "message": str(e)}
-
-def check_and_retry_rate_limited_tweets():
-    """Periyodik olarak rate limit tweet'lerini kontrol et ve tekrar dene"""
-    try:
-        # Rate limit durumunu kontrol et
-        rate_limit_status = get_twitter_rate_limit_status()
-        
-        if rate_limit_status.get('can_post', False):
-            # Rate limit yok, bekleyen tweet'leri dene
-            return retry_pending_tweets_after_rate_limit()
-        else:
-            remaining_time = rate_limit_status.get('reset_time_minutes', 15)
-            safe_log(f"Rate limit aktif, {remaining_time} dakika sonra tekrar kontrol edilecek", "INFO")
-            return {"success": False, "message": f"Rate limit aktif, {remaining_time} dakika bekle"}
-            
-    except Exception as e:
-        safe_log(f"Rate limit kontrol hatası: {e}", "ERROR")
-        return {"success": False, "message": str(e)}
-
-def get_rate_limited_tweets_count():
-    """Rate limit nedeniyle bekleyen tweet sayısını döndür"""
-    try:
-        pending_tweets = load_json("pending_tweets.json")
-        
-        rate_limited_count = 0
-        for tweet in pending_tweets:
-            error_reason = tweet.get('error_reason', '')
-            if ('rate limit' in error_reason.lower() or 
-                '429' in error_reason or 
-                'too many requests' in error_reason.lower()):
-                rate_limited_count += 1
-        
-        return rate_limited_count
-        
-    except Exception as e:
-        safe_log(f"Rate limited tweet sayısı alma hatası: {e}", "ERROR")
-        return 0
 
 # =============================================================================

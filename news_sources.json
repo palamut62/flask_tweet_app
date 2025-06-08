@@ -6,54 +6,35 @@
       "url": "https://techcrunch.com/category/artificial-intelligence/",
       "description": "TechCrunch Yapay Zeka haberleri",
       "enabled": true,
-      "selector_type": "rss_like",
+      "selector_type": "modern_wordpress",
       "article_selectors": {
-        "container": "article.post-block",
-        "title": "h2.post-block__title a",
-        "link": "h2.post-block__title a",
-        "date": "time.river-byline__time",
-        "excerpt": ".post-block__content"
+        "container": "li.wp-block-post",
+        "title": "h3.loop-card__title a.loop-card__title-link",
+        "link": "h3.loop-card__title a.loop-card__title-link",
+        "date": "time.loop-card__time",
+        "excerpt": ".loop-card__content"
       },
       "added_date": "2025-01-08T10:00:00",
-      "last_checked": "2025-06-08T11:28:07.925667",
-      "article_count": 0,
-      "success_rate": 0
-    },
-    {
-      "id": "custom_2_1749360962",
-      "name": "VentureBeat AI",
-      "url": "https://venturebeat.com/ai/",
-      "description": "VentureBeat AI haberleri",
-      "enabled": true,
-      "selector_type": "auto_detect",
-      "article_selectors": {
-        "container": "article, .article, .post, .news-item",
-        "title": "h1, h2, h3, .title, .headline",
-        "link": "a",
-        "date": "time, .date, .published",
-        "excerpt": ".excerpt, .summary, p"
-      },
-      "added_date": "2025-06-08T08:36:02.039502",
-      "last_checked": "2025-06-08T11:28:08.781536",
+      "last_checked": "2025-06-08T14:24:29.321464",
       "article_count": 5,
-      "success_rate": 100
+      "success_rate": 30
     },
     {
-      "id": "custom_3_1749360962",
-      "name": "The Verge AI",
-      "url": "https://www.theverge.com/ai-artificial-intelligence",
-      "description": "The Verge yapay zeka haberleri",
+      "id": "wired_ai",
+      "name": "WIRED AI",
+      "url": "https://www.wired.com/tag/artificial-intelligence/",
+      "description": "WIRED yapay zeka haberleri",
       "enabled": true,
-      "selector_type": "auto_detect",
+      "selector_type": "wired_modern",
       "article_selectors": {
-        "container": "article, .article, .post, .news-item",
-        "title": "h1, h2, h3, .title, .headline",
-        "link": "a",
-        "date": "time, .date, .published",
-        "excerpt": ".excerpt, .summary, p"
+        "container": "article, .SummaryItemWrapper, .archive-item-component",
+        "title": "h3 a, h2 a, .SummaryItemHedLink",
+        "link": "h3 a, h2 a, .SummaryItemHedLink",
+        "date": "time, .SummaryItemPublishDate",
+        "excerpt": ".SummaryItemDek, .archive-item-component p"
       },
-      "added_date": "2025-06-08T08:36:02.040502",
-      "last_checked": "2025-06-08T11:28:09.901380",
+      "added_date": "2025-06-08T14:25:00",
+      "last_checked": "2025-06-08T14:24:33.538163",
       "article_count": 0,
       "success_rate": 0
     }
@@ -63,6 +44,6 @@
     "check_all_sources": true,
     "source_timeout": 30,
     "articles_per_source": 5,
-    "last_updated": "2025-06-08T11:28:09.901380"
+    "last_updated": "2025-06-08T14:24:50.796440"
   }
 }

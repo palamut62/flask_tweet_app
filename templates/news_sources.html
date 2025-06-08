@@ -56,7 +56,7 @@
                 <h2 class="text-2xl font-bold text-gray-900">Yeni Haber Kaynağı Ekle</h2>
             </div>
             
-            <form method="POST" action="{{ url_for('add_news_source_route') }}" class="space-y-6">
+            <form method="POST" action="{{ url_for('add_news_source_route') }}" class="space-y-6" id="addSourceForm">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="space-y-2">
                         <label for="name" class="block text-sm font-medium text-gray-700">
@@ -73,12 +73,21 @@
                         <label for="url" class="block text-sm font-medium text-gray-700">
                             URL *
                         </label>
-                        <input type="url" 
-                               id="url" 
-                               name="url" 
-                               required 
-                               placeholder="https://example.com/ai-news"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
+                        <div class="relative">
+                            <input type="url" 
+                                   id="url" 
+                                   name="url" 
+                                   required 
+                                   placeholder="https://example.com/ai-news"
+                                   class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
+                            <button type="button" 
+                                    id="testUrlBtn"
+                                    onclick="testUrlBeforeAdd()"
+                                    class="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200 transition-all duration-200">
+                                <i class="fas fa-vial"></i>
+                            </button>
+                        </div>
+                        <div id="urlTestResult" class="text-sm mt-1 hidden"></div>
                     </div>
                     <div class="space-y-2">
                         <label for="description" class="block text-sm font-medium text-gray-700">
@@ -92,8 +101,27 @@
                     </div>
                 </div>
                 
+                <!-- Otomatik Tespit Seçeneği -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" 
+                               id="auto_detect" 
+                               name="auto_detect" 
+                               checked 
+                               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                        <label for="auto_detect" class="text-sm font-medium text-gray-700">
+                            Otomatik Selector Tespiti
+                        </label>
+                        <i class="fas fa-info-circle text-blue-500" title="Sayfa yapısını otomatik analiz ederek en uygun selector'ları bulur"></i>
+                    </div>
+                    <p class="text-xs text-gray-600 mt-2 ml-7">
+                        Önerilen: Sayfa yapısını otomatik analiz ederek makale selector'larını tespit eder. 
+                        Bu seçenek kapalıysa genel selector'lar kullanılır.
+                    </p>
+                </div>
+                
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-                    <button type="submit" class="btn-primary flex items-center space-x-2">
+                    <button type="submit" class="btn-primary flex items-center space-x-2" id="submitBtn">
                         <i class="fas fa-plus"></i>
                         <span>Kaynak Ekle</span>
                     </button>
@@ -161,7 +189,7 @@
                         <!-- Butonlar -->
                         <div class="flex flex-wrap gap-2">
                             <!-- Test Butonu -->
-                            <button onclick="testSource('{{ source.id }}')" 
+                            <button onclick="testSource('{{ source.id }}', this)" 
                                     class="flex items-center space-x-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 text-sm">
                                 <i class="fas fa-vial"></i>
                                 <span>Test</span>
@@ -222,10 +250,86 @@
 </div>
 
 <script>
-function testSource(sourceId) {
+// URL test fonksiyonu (kaynak eklemeden önce)
+function testUrlBeforeAdd() {
+    const urlInput = document.getElementById('url');
+    const testBtn = document.getElementById('testUrlBtn');
+    const resultDiv = document.getElementById('urlTestResult');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    const url = urlInput.value.trim();
+    
+    if (!url) {
+        showUrlTestResult('URL gerekli', 'error');
+        return;
+    }
+    
     // Test butonunu disable et
-    event.target.disabled = true;
-    event.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Test Ediliyor...';
+    testBtn.disabled = true;
+    testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    fetch('/test_news_source_url', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({url: url})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const message = `✅ ${data.container_count} konteyner bulundu. ${data.sample_articles ? data.sample_articles.length : 0} örnek makale tespit edildi.`;
+            showUrlTestResult(message, 'success');
+            
+            // Submit butonunu aktif et
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50');
+        } else {
+            showUrlTestResult(`❌ ${data.message}`, 'error');
+            
+            // Submit butonunu pasif et
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50');
+        }
+        
+        // Test butonunu tekrar aktif et
+        testBtn.disabled = false;
+        testBtn.innerHTML = '<i class="fas fa-vial"></i>';
+    })
+    .catch(error => {
+        showUrlTestResult(`❌ Test hatası: ${error}`, 'error');
+        
+        // Test butonunu tekrar aktif et
+        testBtn.disabled = false;
+        testBtn.innerHTML = '<i class="fas fa-vial"></i>';
+        
+        // Submit butonunu pasif et
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-50');
+    });
+}
+
+function showUrlTestResult(message, type) {
+    const resultDiv = document.getElementById('urlTestResult');
+    resultDiv.className = `text-sm mt-1 ${type === 'success' ? 'text-green-600' : 'text-red-600'}`;
+    resultDiv.textContent = message;
+    resultDiv.classList.remove('hidden');
+}
+
+// URL değiştiğinde test sonucunu temizle
+document.getElementById('url').addEventListener('input', function() {
+    const resultDiv = document.getElementById('urlTestResult');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    resultDiv.classList.add('hidden');
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('opacity-50');
+});
+
+function testSource(sourceId, buttonElement) {
+    // Test butonunu disable et
+    buttonElement.disabled = true;
+    buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Test Ediliyor...';
     
     fetch('/test_news_source', {
         method: 'POST',
@@ -238,14 +342,14 @@ function testSource(sourceId) {
     .then(data => {
         showTestResult(data);
         // Test butonunu tekrar aktif et
-        event.target.disabled = false;
-        event.target.innerHTML = '<i class="fas fa-vial"></i> Test';
+        buttonElement.disabled = false;
+        buttonElement.innerHTML = '<i class="fas fa-vial"></i> <span>Test</span>';
     })
     .catch(error => {
         showTestResult({success: false, error: 'Test sırasında hata oluştu: ' + error});
         // Test butonunu tekrar aktif et
-        event.target.disabled = false;
-        event.target.innerHTML = '<i class="fas fa-vial"></i> Test';
+        buttonElement.disabled = false;
+        buttonElement.innerHTML = '<i class="fas fa-vial"></i> <span>Test</span>';
     });
 }
 

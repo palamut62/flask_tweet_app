@@ -96,21 +96,7 @@
                             <p class="text-sm text-gray-600">Bu skorun altındaki makaleler paylaşılmaz</p>
                         </div>
                         
-                        <div class="space-y-2">
-                            <label for="rate_limit_seconds" class="block text-sm font-medium text-gray-700">
-                                Rate Limit (Saniye) ⚠️
-                            </label>
-                            <input type="number" id="rate_limit_seconds" name="rate_limit_seconds" 
-                                   value="{{ settings.rate_limit_seconds or 10.0 }}" min="5" max="60" step="1"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                            <p class="text-sm text-red-600">⚠️ Twitter API rate limit'i önlemek için minimum 10 saniye önerilir</p>
-                            <div class="mt-2">
-                                <a href="{{ url_for('test_twitter_rate_limit') }}" class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 text-sm">
-                                    <i class="fas fa-tachometer-alt mr-2"></i>
-                                    Rate Limit Durumunu Test Et
-                                </a>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
 

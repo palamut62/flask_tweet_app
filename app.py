@@ -23,9 +23,7 @@ from utils import (
     get_automation_status, send_telegram_notification, test_telegram_connection,
     check_telegram_configuration, auto_detect_and_save_chat_id,
     setup_twitter_api, send_gmail_notification, test_gmail_connection,
-    check_gmail_configuration, get_twitter_rate_limit_status,
-    retry_pending_tweets_after_rate_limit, check_and_retry_rate_limited_tweets,
-    get_rate_limited_tweets_count
+    check_gmail_configuration
 )
 
 app = Flask(__name__)
@@ -142,6 +140,7 @@ def fetch_latest_ai_articles_with_mcp():
         # Önce özel kaynaklardan makale çek
         try:
             from utils import fetch_articles_from_custom_sources
+            print("🔍 Özel haber kaynaklarından makale çekiliyor...")
             custom_articles = fetch_articles_from_custom_sources()
             
             if custom_articles:
@@ -164,10 +163,17 @@ def fetch_latest_ai_articles_with_mcp():
                             print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
                 
                 if filtered_articles:
+                    print(f"📊 {len(filtered_articles)} yeni makale filtrelendi")
                     return filtered_articles[:10]  # İlk 10 makaleyi döndür
+                else:
+                    print("⚠️ Özel kaynaklardan yeni makale bulunamadı")
+            else:
+                print("⚠️ Özel kaynaklardan hiç makale çekilemedi")
             
         except Exception as custom_error:
             print(f"❌ Özel kaynaklardan makale çekme hatası: {custom_error}")
+            import traceback
+            traceback.print_exc()
         
         # Eğer özel kaynaklardan yeterli makale bulunamadıysa MCP dene
         print("🔄 Özel kaynaklardan yeterli makale bulunamadı, MCP deneniyor...")
@@ -316,14 +322,9 @@ def check_and_post_articles():
                     else:
                         # Twitter API hatası - pending listesine ekle
                         error_msg = tweet_result.get('error', 'Bilinmeyen hata')
-                        is_rate_limited = tweet_result.get('rate_limited', False)
                         
-                        if is_rate_limited:
-                            print(f"⏳ Rate limit hatası: {error_msg}")
-                            print(f"📝 Tweet rate limit sonrası tekrar denenecek: {article['title'][:50]}...")
-                        else:
-                            print(f"❌ Tweet paylaşım hatası: {error_msg}")
-                            print(f"📝 Tweet pending listesine ekleniyor: {article['title'][:50]}...")
+                        print(f"❌ Tweet paylaşım hatası: {error_msg}")
+                        print(f"📝 Tweet pending listesine ekleniyor: {article['title'][:50]}...")
                         
                         pending_tweets = load_json("pending_tweets.json")
                         pending_tweets.append({
@@ -331,9 +332,8 @@ def check_and_post_articles():
                             "tweet_data": tweet_data,
                             "created_date": datetime.now().isoformat(),
                             "created_at": datetime.now().isoformat(),
-                            "status": "pending" if not is_rate_limited else "rate_limited",
+                            "status": "pending",
                             "error_reason": error_msg,
-                            "rate_limited": is_rate_limited,
                             "retry_count": 0
                         })
                         save_json("pending_tweets.json", pending_tweets)
@@ -349,9 +349,7 @@ def check_and_post_articles():
                     })
                     save_json("pending_tweets.json", pending_tweets)
                     print(f"📝 Tweet onay bekliyor: {article['title'][:50]}...")
-                
-                # Rate limiting
-                time.sleep(settings.get('rate_limit_seconds', 2))
+
                 
             except Exception as article_error:
                 print(f"❌ Makale işleme hatası: {article_error}")
@@ -628,7 +626,6 @@ def save_settings():
             'min_score_threshold': int(request.form.get('min_score_threshold', 5)),
             'auto_post_enabled': request.form.get('auto_post_enabled') == 'on',
             'manual_approval_required': request.form.get('manual_approval_required') == 'on',
-            'rate_limit_seconds': float(request.form.get('rate_limit_seconds', 2.0)),
             'telegram_notifications': request.form.get('telegram_notifications') == 'on',
             'email_notifications': request.form.get('email_notifications') == 'on',
             'last_updated': datetime.now().isoformat()
@@ -747,71 +744,14 @@ def api_status():
         except Exception as e:
             status["google_api_test"] = f"HATA: {str(e)}"
         
-        # Twitter rate limit durumu ekle
-        try:
-            twitter_rate_limit = get_twitter_rate_limit_status()
-            status["twitter_rate_limit"] = twitter_rate_limit.get("status", "Bilinmeyen")
-        except Exception as e:
-            status["twitter_rate_limit"] = f"HATA: {str(e)}"
+
         
         return jsonify(status)
         
     except Exception as e:
         return jsonify({"error": str(e)})
 
-@app.route('/test_twitter_rate_limit')
-@login_required
-def test_twitter_rate_limit():
-    """Twitter rate limit durumunu test et"""
-    try:
-        rate_limit_status = get_twitter_rate_limit_status()
-        
-        if rate_limit_status.get("success"):
-            flash("✅ Twitter API erişilebilir - Rate limit sorunu yok", "success")
-        else:
-            status = rate_limit_status.get("status", "Bilinmeyen hata")
-            flash(f"⚠️ Twitter API durumu: {status}", "warning")
-        
-        return redirect(url_for('settings'))
-        
-    except Exception as e:
-        flash(f"❌ Twitter rate limit testi hatası: {str(e)}", "error")
-        return redirect(url_for('settings'))
 
-@app.route('/retry_rate_limited_tweets')
-@login_required
-def retry_rate_limited_tweets():
-    """Rate limit nedeniyle bekleyen tweet'leri tekrar dene"""
-    try:
-        result = retry_pending_tweets_after_rate_limit()
-        
-        if result.get('success'):
-            flash(f"Rate limit retry tamamlandı: {result['message']}", 'success')
-        else:
-            flash(f"Rate limit retry hatası: {result['message']}", 'error')
-            
-    except Exception as e:
-        flash(f"Rate limit retry hatası: {str(e)}", 'error')
-    
-    return redirect(url_for('index'))
-
-@app.route('/api/rate_limit_status')
-@login_required
-def api_rate_limit_status():
-    """Rate limit durumu ve bekleyen tweet sayısı API"""
-    try:
-        rate_limit_status = get_twitter_rate_limit_status()
-        rate_limited_count = get_rate_limited_tweets_count()
-        
-        return jsonify({
-            "success": True,
-            "rate_limit_status": rate_limit_status,
-            "rate_limited_tweets_count": rate_limited_count,
-            "can_retry": rate_limit_status.get('can_post', False) and rate_limited_count > 0
-        })
-        
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
 
 @app.route('/debug/env')
 @login_required
@@ -1018,15 +958,7 @@ def background_scheduler():
                         result = check_and_post_articles()
                         print(f"✅ Otomatik kontrol tamamlandı: {result.get('message', 'Sonuç yok')}")
                         
-                        # Rate limit tweet'lerini de kontrol et
-                        try:
-                            rate_limit_result = check_and_retry_rate_limited_tweets()
-                            if rate_limit_result.get('success'):
-                                print(f"✅ Rate limit kontrol: {rate_limit_result.get('message', 'Sonuç yok')}")
-                            else:
-                                print(f"⏳ Rate limit kontrol: {rate_limit_result.get('message', 'Sonuç yok')}")
-                        except Exception as rate_limit_error:
-                            print(f"❌ Rate limit kontrol hatası: {rate_limit_error}")
+
                         
                         last_check_time = current_time
                     except Exception as check_error:
@@ -1075,27 +1007,70 @@ def news_sources():
 def add_news_source_route():
     """Yeni haber kaynağı ekle"""
     try:
-        from utils import add_news_source
+        from utils import add_news_source_with_validation
         
         name = request.form.get('name', '').strip()
         url = request.form.get('url', '').strip()
         description = request.form.get('description', '').strip()
+        auto_detect = request.form.get('auto_detect', 'true').lower() == 'true'
         
         if not name or not url:
             flash('Kaynak adı ve URL gerekli!', 'error')
             return redirect(url_for('news_sources'))
         
-        result = add_news_source(name, url, description)
+        result = add_news_source_with_validation(name, url, description, auto_detect)
         
         if result['success']:
             flash(result['message'], 'success')
+            
+            # Test detaylarını da göster
+            if 'test_details' in result:
+                test_details = result['test_details']
+                if test_details.get('sample_articles'):
+                    sample_count = len(test_details['sample_articles'])
+                    flash(f'🔍 Test: {test_details["container_count"]} konteyner, {sample_count} örnek makale bulundu', 'info')
         else:
             flash(result['message'], 'error')
+            
+            # Test detaylarını hata durumunda da göster
+            if 'test_details' in result:
+                test_details = result['test_details']
+                flash(f'🔍 Test detayı: {test_details.get("message", "Bilinmeyen hata")}', 'warning')
             
     except Exception as e:
         flash(f'Kaynak ekleme hatası: {str(e)}', 'error')
     
     return redirect(url_for('news_sources'))
+
+@app.route('/test_news_source_url', methods=['POST'])
+@login_required
+def test_news_source_url():
+    """Haber kaynağı URL'ini test et"""
+    try:
+        from utils import test_selectors_for_url
+        
+        data = request.get_json()
+        url = data.get('url', '').strip()
+        
+        if not url:
+            return jsonify({
+                'success': False,
+                'message': 'URL gerekli'
+            })
+        
+        # URL formatını kontrol et
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+        
+        result = test_selectors_for_url(url)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Test hatası: {str(e)}'
+        })
 
 @app.route('/remove_news_source', methods=['POST'])
 @login_required
@@ -1219,28 +1194,7 @@ def security_check():
         safe_log(f"Güvenlik kontrol hatası: {str(e)}", "ERROR")
         return render_template('security_check.html', security={"secure": False, "issues": [f"Kontrol hatası: {str(e)}"]})
 
-@app.route('/test_twitter_rate_limit_detailed')
-@login_required
-def test_twitter_rate_limit_detailed():
-    """Twitter API rate limit durumunu detaylı test et"""
-    try:
-        from utils import get_twitter_rate_limit_status
-        
-        # Rate limit durumunu kontrol et
-        rate_limit_status = get_twitter_rate_limit_status()
-        
-        return jsonify({
-            "success": True,
-            "rate_limit_status": rate_limit_status,
-            "timestamp": datetime.now().isoformat()
-        })
-        
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e),
-            "timestamp": datetime.now().isoformat()
-        })
+
 
 @app.route('/manual_post_confirmation/<int:tweet_id>')
 @login_required
