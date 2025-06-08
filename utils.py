@@ -2544,3 +2544,356 @@ def check_gmail_configuration():
             "message": f"❌ Kontrol hatası: {e}",
             "status": "error"
         }
+
+# ==========================================
+# ÖZEL HABER KAYNAKLARI YÖNETİMİ
+# ==========================================
+
+NEWS_SOURCES_FILE = "news_sources.json"
+
+def load_news_sources():
+    """Haber kaynaklarını yükle"""
+    try:
+        if os.path.exists(NEWS_SOURCES_FILE):
+            return load_json(NEWS_SOURCES_FILE)
+        else:
+            # Varsayılan konfigürasyon
+            default_config = {
+                "sources": [
+                    {
+                        "id": "techcrunch_ai",
+                        "name": "TechCrunch AI",
+                        "url": "https://techcrunch.com/category/artificial-intelligence/",
+                        "description": "TechCrunch Yapay Zeka haberleri",
+                        "enabled": True,
+                        "selector_type": "rss_like",
+                        "article_selectors": {
+                            "container": "article.post-block",
+                            "title": "h2.post-block__title a",
+                            "link": "h2.post-block__title a",
+                            "date": "time.river-byline__time",
+                            "excerpt": ".post-block__content"
+                        },
+                        "added_date": datetime.now().isoformat(),
+                        "last_checked": None,
+                        "article_count": 0,
+                        "success_rate": 100
+                    }
+                ],
+                "settings": {
+                    "max_sources": 10,
+                    "check_all_sources": True,
+                    "source_timeout": 30,
+                    "articles_per_source": 5,
+                    "last_updated": datetime.now().isoformat()
+                }
+            }
+            save_json(NEWS_SOURCES_FILE, default_config)
+            return default_config
+    except Exception as e:
+        print(f"Haber kaynakları yükleme hatası: {e}")
+        return {"sources": [], "settings": {}}
+
+def save_news_sources(config):
+    """Haber kaynaklarını kaydet"""
+    try:
+        config["settings"]["last_updated"] = datetime.now().isoformat()
+        save_json(NEWS_SOURCES_FILE, config)
+        return {"success": True, "message": "✅ Haber kaynakları kaydedildi"}
+    except Exception as e:
+        return {"success": False, "message": f"❌ Kaydetme hatası: {e}"}
+
+def add_news_source(name, url, description=""):
+    """Yeni haber kaynağı ekle"""
+    try:
+        config = load_news_sources()
+        
+        # URL'yi temizle ve doğrula
+        url = url.strip()
+        if not url.startswith(('http://', 'https://')):
+            return {"success": False, "message": "❌ Geçerli bir URL girin (http:// veya https:// ile başlamalı)"}
+        
+        # Aynı URL var mı kontrol et
+        for source in config["sources"]:
+            if source["url"] == url:
+                return {"success": False, "message": "❌ Bu URL zaten eklenmiş"}
+        
+        # Maksimum kaynak sayısını kontrol et
+        max_sources = config["settings"].get("max_sources", 10)
+        if len(config["sources"]) >= max_sources:
+            return {"success": False, "message": f"❌ Maksimum {max_sources} kaynak eklenebilir"}
+        
+        # Yeni kaynak oluştur
+        new_source = {
+            "id": f"custom_{len(config['sources']) + 1}_{int(datetime.now().timestamp())}",
+            "name": name.strip(),
+            "url": url,
+            "description": description.strip(),
+            "enabled": True,
+            "selector_type": "auto_detect",
+            "article_selectors": {
+                "container": "article, .article, .post, .news-item",
+                "title": "h1, h2, h3, .title, .headline",
+                "link": "a",
+                "date": "time, .date, .published",
+                "excerpt": ".excerpt, .summary, p"
+            },
+            "added_date": datetime.now().isoformat(),
+            "last_checked": None,
+            "article_count": 0,
+            "success_rate": 0
+        }
+        
+        config["sources"].append(new_source)
+        result = save_news_sources(config)
+        
+        if result["success"]:
+            return {"success": True, "message": f"✅ '{name}' kaynağı başarıyla eklendi", "source": new_source}
+        else:
+            return result
+            
+    except Exception as e:
+        return {"success": False, "message": f"❌ Kaynak ekleme hatası: {e}"}
+
+def remove_news_source(source_id):
+    """Haber kaynağını kaldır"""
+    try:
+        config = load_news_sources()
+        
+        # Kaynağı bul ve kaldır
+        original_count = len(config["sources"])
+        config["sources"] = [s for s in config["sources"] if s["id"] != source_id]
+        
+        if len(config["sources"]) == original_count:
+            return {"success": False, "message": "❌ Kaynak bulunamadı"}
+        
+        result = save_news_sources(config)
+        if result["success"]:
+            return {"success": True, "message": "✅ Kaynak başarıyla kaldırıldı"}
+        else:
+            return result
+            
+    except Exception as e:
+        return {"success": False, "message": f"❌ Kaynak kaldırma hatası: {e}"}
+
+def toggle_news_source(source_id, enabled=None):
+    """Haber kaynağını aktif/pasif yap"""
+    try:
+        config = load_news_sources()
+        
+        for source in config["sources"]:
+            if source["id"] == source_id:
+                if enabled is None:
+                    source["enabled"] = not source["enabled"]
+                else:
+                    source["enabled"] = bool(enabled)
+                
+                result = save_news_sources(config)
+                if result["success"]:
+                    status = "aktif" if source["enabled"] else "pasif"
+                    return {"success": True, "message": f"✅ '{source['name']}' kaynağı {status} yapıldı"}
+                else:
+                    return result
+        
+        return {"success": False, "message": "❌ Kaynak bulunamadı"}
+        
+    except Exception as e:
+        return {"success": False, "message": f"❌ Durum değiştirme hatası: {e}"}
+
+def fetch_articles_from_custom_sources():
+    """Özel haber kaynaklarından makale çek"""
+    try:
+        config = load_news_sources()
+        all_articles = []
+        
+        enabled_sources = [s for s in config["sources"] if s.get("enabled", True)]
+        
+        if not enabled_sources:
+            print("⚠️ Aktif haber kaynağı bulunamadı")
+            return []
+        
+        print(f"🔍 {len(enabled_sources)} haber kaynağından makale çekiliyor...")
+        
+        for source in enabled_sources:
+            try:
+                print(f"📰 {source['name']} kaynağı kontrol ediliyor...")
+                
+                # Kaynak URL'sini çek
+                articles = fetch_articles_from_single_source(source)
+                
+                if articles:
+                    all_articles.extend(articles)
+                    source["article_count"] = len(articles)
+                    source["success_rate"] = min(100, source.get("success_rate", 0) + 10)
+                    print(f"✅ {source['name']}: {len(articles)} makale bulundu")
+                else:
+                    source["success_rate"] = max(0, source.get("success_rate", 100) - 20)
+                    print(f"⚠️ {source['name']}: Makale bulunamadı")
+                
+                source["last_checked"] = datetime.now().isoformat()
+                
+            except Exception as e:
+                print(f"❌ {source['name']} hatası: {e}")
+                source["success_rate"] = max(0, source.get("success_rate", 100) - 30)
+                source["last_checked"] = datetime.now().isoformat()
+        
+        # Güncellenmiş istatistikleri kaydet
+        save_news_sources(config)
+        
+        print(f"📊 Toplam {len(all_articles)} makale çekildi")
+        return all_articles
+        
+    except Exception as e:
+        print(f"❌ Özel kaynaklardan makale çekme hatası: {e}")
+        return []
+
+def fetch_articles_from_single_source(source):
+    """Tek bir kaynaktan makale çek"""
+    try:
+        url = source["url"]
+        selectors = source.get("article_selectors", {})
+        
+        # Sayfayı çek
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
+        articles = []
+        
+        # Makale konteynerlerini bul
+        container_selector = selectors.get("container", "article, .article, .post")
+        containers = soup.select(container_selector)
+        
+        if not containers:
+            # Alternatif selectors dene
+            alternative_selectors = [
+                "article", ".post", ".news-item", ".story", 
+                ".entry", ".content-item", "[class*='article']",
+                "[class*='post']", "[class*='news']"
+            ]
+            
+            for alt_selector in alternative_selectors:
+                containers = soup.select(alt_selector)
+                if containers:
+                    break
+        
+        print(f"🔍 {source['name']}: {len(containers)} konteyner bulundu")
+        
+        for container in containers[:5]:  # İlk 5 makale
+            try:
+                # Başlık bul
+                title_selector = selectors.get("title", "h1, h2, h3, .title, .headline")
+                title_elem = container.select_one(title_selector)
+                
+                if not title_elem:
+                    continue
+                
+                title = title_elem.get_text(strip=True)
+                
+                # Link bul
+                link_elem = title_elem.find('a') if title_elem.name != 'a' else title_elem
+                if not link_elem:
+                    link_elem = container.select_one('a')
+                
+                if not link_elem:
+                    continue
+                
+                link = link_elem.get('href', '')
+                
+                # Relative URL'leri absolute yap
+                if link.startswith('/'):
+                    from urllib.parse import urljoin
+                    link = urljoin(url, link)
+                elif not link.startswith('http'):
+                    continue
+                
+                # Özet bul
+                excerpt_selector = selectors.get("excerpt", ".excerpt, .summary, p")
+                excerpt_elem = container.select_one(excerpt_selector)
+                excerpt = excerpt_elem.get_text(strip=True)[:200] if excerpt_elem else ""
+                
+                # Tarih bul (opsiyonel)
+                date_selector = selectors.get("date", "time, .date, .published")
+                date_elem = container.select_one(date_selector)
+                date_str = date_elem.get_text(strip=True) if date_elem else ""
+                
+                if title and link:
+                    articles.append({
+                        "title": title,
+                        "url": link,
+                        "excerpt": excerpt,
+                        "date": date_str,
+                        "source": source["name"],
+                        "source_id": source["id"],
+                        "fetch_date": datetime.now().isoformat(),
+                        "is_new": True,
+                        "already_posted": False
+                    })
+                    
+            except Exception as e:
+                print(f"⚠️ Makale parse hatası: {e}")
+                continue
+        
+        return articles
+        
+    except Exception as e:
+        print(f"❌ {source.get('name', 'Bilinmeyen')} kaynak hatası: {e}")
+        return []
+
+def get_news_sources_stats():
+    """Haber kaynakları istatistiklerini al"""
+    try:
+        config = load_news_sources()
+        
+        total_sources = len(config["sources"])
+        enabled_sources = len([s for s in config["sources"] if s.get("enabled", True)])
+        total_articles = sum(s.get("article_count", 0) for s in config["sources"])
+        avg_success_rate = sum(s.get("success_rate", 0) for s in config["sources"]) / max(1, total_sources)
+        
+        return {
+            "total_sources": total_sources,
+            "enabled_sources": enabled_sources,
+            "disabled_sources": total_sources - enabled_sources,
+            "total_articles_fetched": total_articles,
+            "average_success_rate": round(avg_success_rate, 1),
+            "sources": config["sources"],
+            "settings": config["settings"]
+        }
+        
+    except Exception as e:
+        return {
+            "total_sources": 0,
+            "enabled_sources": 0,
+            "disabled_sources": 0,
+            "total_articles_fetched": 0,
+            "average_success_rate": 0,
+            "sources": [],
+            "settings": {},
+            "error": str(e)
+        }
+
+def update_fetch_articles_function():
+    """Ana makale çekme fonksiyonunu güncelle - özel kaynakları dahil et"""
+    try:
+        # Önce özel kaynaklardan makale çek
+        custom_articles = fetch_articles_from_custom_sources()
+        
+        # Sonra mevcut TechCrunch fallback'i çek (eğer özel kaynaklarda TechCrunch yoksa)
+        config = load_news_sources()
+        has_techcrunch = any("techcrunch" in s.get("url", "").lower() for s in config["sources"] if s.get("enabled", True))
+        
+        if not has_techcrunch:
+            print("🔄 TechCrunch fallback ekleniyor...")
+            fallback_articles = fetch_latest_ai_articles_fallback()
+            custom_articles.extend(fallback_articles)
+        
+        return custom_articles
+        
+    except Exception as e:
+        print(f"❌ Güncellenmiş makale çekme hatası: {e}")
+        # Fallback olarak eski fonksiyonu çağır
+        return fetch_latest_ai_articles_fallback()

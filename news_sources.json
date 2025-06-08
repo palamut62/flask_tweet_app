@@ -1,0 +1,68 @@
+{
+  "sources": [
+    {
+      "id": "techcrunch_ai",
+      "name": "TechCrunch AI",
+      "url": "https://techcrunch.com/category/artificial-intelligence/",
+      "description": "TechCrunch Yapay Zeka haberleri",
+      "enabled": true,
+      "selector_type": "rss_like",
+      "article_selectors": {
+        "container": "article.post-block",
+        "title": "h2.post-block__title a",
+        "link": "h2.post-block__title a",
+        "date": "time.river-byline__time",
+        "excerpt": ".post-block__content"
+      },
+      "added_date": "2025-01-08T10:00:00",
+      "last_checked": "2025-06-08T08:37:34.211697",
+      "article_count": 0,
+      "success_rate": 60
+    },
+    {
+      "id": "custom_2_1749360962",
+      "name": "VentureBeat AI",
+      "url": "https://venturebeat.com/ai/",
+      "description": "VentureBeat AI haberleri",
+      "enabled": true,
+      "selector_type": "auto_detect",
+      "article_selectors": {
+        "container": "article, .article, .post, .news-item",
+        "title": "h1, h2, h3, .title, .headline",
+        "link": "a",
+        "date": "time, .date, .published",
+        "excerpt": ".excerpt, .summary, p"
+      },
+      "added_date": "2025-06-08T08:36:02.039502",
+      "last_checked": "2025-06-08T08:37:35.176551",
+      "article_count": 5,
+      "success_rate": 20
+    },
+    {
+      "id": "custom_3_1749360962",
+      "name": "The Verge AI",
+      "url": "https://www.theverge.com/ai-artificial-intelligence",
+      "description": "The Verge yapay zeka haberleri",
+      "enabled": true,
+      "selector_type": "auto_detect",
+      "article_selectors": {
+        "container": "article, .article, .post, .news-item",
+        "title": "h1, h2, h3, .title, .headline",
+        "link": "a",
+        "date": "time, .date, .published",
+        "excerpt": ".excerpt, .summary, p"
+      },
+      "added_date": "2025-06-08T08:36:02.040502",
+      "last_checked": "2025-06-08T08:37:36.015674",
+      "article_count": 0,
+      "success_rate": 0
+    }
+  ],
+  "settings": {
+    "max_sources": 10,
+    "check_all_sources": true,
+    "source_timeout": 30,
+    "articles_per_source": 5,
+    "last_updated": "2025-06-08T08:37:36.015674"
+  }
+}

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haber Kaynakları - AI Tweet Bot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .source-card {
+            border-left: 4px solid #007bff;
+            transition: all 0.3s ease;
+        }
+        .source-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .source-card.disabled {
+            border-left-color: #6c757d;
+            opacity: 0.7;
+        }
+        .source-card.success {
+            border-left-color: #28a745;
+        }
+        .source-card.warning {
+            border-left-color: #ffc107;
+        }
+        .source-card.danger {
+            border-left-color: #dc3545;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-test {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: none;
+            color: white;
+        }
+        .btn-test:hover {
+            background: linear-gradient(45deg, #20c997, #28a745);
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-robot me-2"></i>AI Tweet Bot
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('index') }}">
+                    <i class="fas fa-home me-1"></i>Ana Sayfa
+                </a>
+                <a class="nav-link" href="{{ url_for('settings') }}">
+                    <i class="fas fa-cog me-1"></i>Ayarlar
+                </a>
+                <a class="nav-link" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt me-1"></i>Çıkış
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Başlık -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-6">
+                    <i class="fas fa-newspaper text-primary me-3"></i>
+                    Haber Kaynakları Yönetimi
+                </h1>
+                <p class="text-muted">Özel haber kaynaklarınızı ekleyin ve yönetin. Sistem bu kaynaklardan otomatik olarak makale çekecek.</p>
+            </div>
+        </div>
+
+        <!-- Flash Mesajları -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- İstatistikler -->
+        {% if stats %}
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-newspaper fa-2x mb-2"></i>
+                        <h3>{{ stats.total_sources }}</h3>
+                        <p class="mb-0">Toplam Kaynak</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <h3>{{ stats.enabled_sources }}</h3>
+                        <p class="mb-0">Aktif Kaynak</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-pause-circle fa-2x mb-2"></i>
+                        <h3>{{ stats.disabled_sources }}</h3>
+                        <p class="mb-0">Pasif Kaynak</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-2x mb-2"></i>
+                        <h3>{{ stats.average_success_rate }}%</h3>
+                        <p class="mb-0">Ortalama Başarı</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Yeni Kaynak Ekleme -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-plus me-2"></i>Yeni Haber Kaynağı Ekle
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('add_news_source_route') }}">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Kaynak Adı *</label>
+                                        <input type="text" class="form-control" id="name" name="name" required 
+                                               placeholder="örn: Wired AI">
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="mb-3">
+                                        <label for="url" class="form-label">URL *</label>
+                                        <input type="url" class="form-control" id="url" name="url" required 
+                                               placeholder="https://example.com/ai-news">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Açıklama</label>
+                                        <input type="text" class="form-control" id="description" name="description" 
+                                               placeholder="Kısa açıklama">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Kaynak Ekle
+                            </button>
+                        </form>
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                <strong>Popüler AI Haber Siteleri:</strong>
+                                VentureBeat AI, The Verge AI, MIT Technology Review, AI News, OpenAI Blog
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mevcut Kaynaklar -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Mevcut Haber Kaynakları
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if stats and stats.sources %}
+                            <div class="row">
+                                {% for source in stats.sources %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card source-card {{ 'disabled' if not source.enabled else ('success' if source.success_rate >= 80 else ('warning' if source.success_rate >= 50 else 'danger')) }}">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="card-title mb-1">
+                                                        <i class="fas fa-{{ 'check-circle text-success' if source.enabled else 'pause-circle text-muted' }} me-2"></i>
+                                                        {{ source.name }}
+                                                    </h6>
+                                                    <p class="card-text small text-muted mb-2">
+                                                        <i class="fas fa-link me-1"></i>
+                                                        <a href="{{ source.url }}" target="_blank" class="text-decoration-none">
+                                                            {{ source.url[:50] }}{% if source.url|length > 50 %}...{% endif %}
+                                                        </a>
+                                                    </p>
+                                                    {% if source.description %}
+                                                    <p class="card-text small mb-2">{{ source.description }}</p>
+                                                    {% endif %}
+                                                    
+                                                    <div class="row text-center small">
+                                                        <div class="col-4">
+                                                            <strong>{{ source.article_count or 0 }}</strong><br>
+                                                            <small class="text-muted">Makale</small>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <strong>{{ source.success_rate or 0 }}%</strong><br>
+                                                            <small class="text-muted">Başarı</small>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <strong>{{ source.last_checked.split('T')[0] if source.last_checked else 'Hiç' }}</strong><br>
+                                                            <small class="text-muted">Son Kontrol</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-3 d-flex gap-2 flex-wrap">
+                                                <!-- Test Butonu -->
+                                                <button class="btn btn-test btn-sm" onclick="testSource('{{ source.id }}')">
+                                                    <i class="fas fa-flask me-1"></i>Test Et
+                                                </button>
+                                                
+                                                <!-- Aktif/Pasif Toggle -->
+                                                <form method="POST" action="{{ url_for('toggle_news_source_route') }}" class="d-inline">
+                                                    <input type="hidden" name="source_id" value="{{ source.id }}">
+                                                    <input type="hidden" name="enabled" value="{{ 'false' if source.enabled else 'true' }}">
+                                                    <button type="submit" class="btn btn-{{ 'warning' if source.enabled else 'success' }} btn-sm">
+                                                        <i class="fas fa-{{ 'pause' if source.enabled else 'play' }} me-1"></i>
+                                                        {{ 'Pasif Yap' if source.enabled else 'Aktif Yap' }}
+                                                    </button>
+                                                </form>
+                                                
+                                                <!-- Sil Butonu -->
+                                                {% if source.id != 'techcrunch_ai' %}
+                                                <form method="POST" action="{{ url_for('remove_news_source_route') }}" class="d-inline" 
+                                                      onsubmit="return confirm('Bu kaynağı silmek istediğinizden emin misiniz?')">
+                                                    <input type="hidden" name="source_id" value="{{ source.id }}">
+                                                    <button type="submit" class="btn btn-danger btn-sm">
+                                                        <i class="fas fa-trash me-1"></i>Sil
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Henüz haber kaynağı eklenmemiş</h5>
+                                <p class="text-muted">Yukarıdaki formu kullanarak ilk haber kaynağınızı ekleyin.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function testSource(sourceId) {
+            alert('Test fonksiyonu: ' + sourceId);
+        }
+    </script>
+</body>
+</html> 

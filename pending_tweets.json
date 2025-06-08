@@ -1,1 +1,82 @@
-[]
+[
+  {
+    "article": {
+      "title": "Voice AI that actually converts: New TTS model boosts sales 15% for major brands",
+      "url": "https://venturebeat.com/ai/voice-ai-that-actually-converts-new-tts-model-boosts-sales-15-for-major-brands/",
+      "excerpt": "",
+      "date": "June 6, 2025 6:00 AM",
+      "source": "VentureBeat AI",
+      "source_id": "custom_2_1749360962",
+      "fetch_date": "2025-06-08T08:37:35.176551",
+      "is_new": true,
+      "already_posted": false,
+      "hash": "ed4bae5cd11b42ef586afd03455417be"
+    },
+    "tweet_data": {
+      "tweet": "🤖🧠⚡ Breaking: Technology innovation #ArtificialIntelligence #MachineLearning #DeepLearning\n\n🔗 https://venturebeat.com/ai/voice-ai-that-actually-converts-new-tts-model-boosts-sales-15-for-major-brands/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Technology innovation",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "source": "mcp_analysis"
+    },
+    "created_date": "2025-06-08T08:38:10.835674",
+    "created_at": "2025-06-08T08:38:10.835674",
+    "status": "pending",
+    "error_reason": "429 Too Many Requests\nToo Many Requests"
+  },
+  {
+    "article": {
+      "title": "Google claims Gemini 2.5 Pro preview beats DeepSeek R1 and Grok 3 Beta in coding performance",
+      "url": "https://venturebeat.com/ai/google-claims-gemini-2-5-pro-preview-beats-deepseek-r1-and-grok-3-beta-in-coding-performance/",
+      "excerpt": "",
+      "date": "June 5, 2025 2:30 PM",
+      "source": "VentureBeat AI",
+      "source_id": "custom_2_1749360962",
+      "fetch_date": "2025-06-08T08:37:35.176551",
+      "is_new": true,
+      "already_posted": false,
+      "hash": "b884f6aef7214dcf65e74851863e753f"
+    },
+    "tweet_data": {
+      "tweet": "🤖🧠⚡ Breaking: Technology innovation #ArtificialIntelligence #MachineLearning #DeepLearning\n\n🔗 https://venturebeat.com/ai/google-claims-gemini-2-5-pro-preview-beats-deepseek-r1-and-grok-3-beta-in-coding-performance/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Technology innovation",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "source": "mcp_analysis"
+    },
+    "created_date": "2025-06-08T08:38:15.777668",
+    "created_at": "2025-06-08T08:38:15.777668",
+    "status": "pending",
+    "error_reason": "429 Too Many Requests\nToo Many Requests"
+  }
+]

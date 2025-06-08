@@ -119,19 +119,50 @@ def check_articles():
     return redirect(url_for('index'))
 
 def fetch_latest_ai_articles_with_mcp():
-    """MCP Firecrawl araçlarını kullanarak yeni makaleleri çek"""
+    """Özel haber kaynaklarından ve MCP ile AI makalelerini çek"""
     try:
         import hashlib
-        import re
         
         # Önce mevcut yayınlanan makaleleri yükle
         posted_articles = load_json("posted_articles.json")
         posted_urls = [article.get('url', '') for article in posted_articles]
         posted_hashes = [article.get('hash', '') for article in posted_articles]
         
-        print("🔍 TechCrunch AI kategorisinden MCP Firecrawl ile makale çekiliyor...")
+        print("🔍 Özel haber kaynaklarından makale çekiliyor...")
         
-        # Gerçek MCP Firecrawl ile TechCrunch AI sayfasını çek
+        # Önce özel kaynaklardan makale çek
+        try:
+            from utils import fetch_articles_from_custom_sources
+            custom_articles = fetch_articles_from_custom_sources()
+            
+            if custom_articles:
+                print(f"✅ Özel kaynaklardan {len(custom_articles)} makale bulundu")
+                
+                # Makale hash'lerini oluştur ve tekrar kontrolü yap
+                filtered_articles = []
+                for article in custom_articles:
+                    title = article.get('title', '')
+                    url = article.get('url', '')
+                    
+                    if title and url:
+                        article_hash = hashlib.md5(title.encode()).hexdigest()
+                        
+                        if url not in posted_urls and article_hash not in posted_hashes:
+                            article['hash'] = article_hash
+                            filtered_articles.append(article)
+                            print(f"🆕 Yeni makale: {title[:50]}...")
+                        else:
+                            print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
+                
+                if filtered_articles:
+                    return filtered_articles[:10]  # İlk 10 makaleyi döndür
+            
+        except Exception as custom_error:
+            print(f"❌ Özel kaynaklardan makale çekme hatası: {custom_error}")
+        
+        # Eğer özel kaynaklardan yeterli makale bulunamadıysa MCP dene
+        print("🔄 Özel kaynaklardan yeterli makale bulunamadı, MCP deneniyor...")
+        
         try:
             # MCP Firecrawl kullanarak gerçek zamanlı veri çek
             from utils import mcp_firecrawl_scrape
@@ -147,87 +178,73 @@ def fetch_latest_ai_articles_with_mcp():
             if scrape_result and scrape_result.get("success"):
                 techcrunch_content = scrape_result.get("content", "")
                 print("✅ MCP Firecrawl ile gerçek zamanlı veri alındı")
-            else:
-                # Fallback: Web search sonuçlarından en yeni makaleleri kullan
-                techcrunch_content = """
-                [2025 will be a 'pivotal year' for Meta's augmented and virtual reality, says CTO](https://techcrunch.com/2025/06/06/2025-will-be-a-pivotal-year-for-metas-augmented-and-virtual-reality-says-cto/)
-                [Why investing in growth-stage AI startups is getting riskier and more complicated](https://techcrunch.com/2025/06/06/why-investing-in-growth-stage-ai-startups-is-getting-riskier-and-more-complicated/)
-                [Anthropic appoints a national security expert to its governing trust](https://techcrunch.com/2025/06/06/anthropic-appoints-a-national-security-expert-to-its-governing-trust/)
-                [Figure AI CEO skips live demo, sidesteps BMW deal questions onstage at tech conference](https://techcrunch.com/2025/06/06/figure-ai-ceo-skips-live-demo-sidesteps-bmw-deal-questions-on-stage-at-tech-conference/)
-                """
-                print("⚠️ MCP Firecrawl başarısız, fallback kullanılıyor")
                 
+                # Markdown'dan makale linklerini çıkar
+                import re
+                url_pattern = r'https://techcrunch\.com/\d{4}/\d{2}/\d{2}/[^)\s]+'
+                found_urls = re.findall(url_pattern, techcrunch_content)
+                
+                article_urls = []
+                for url in found_urls:
+                    if (url not in posted_urls and 
+                        "/2025/" in url and 
+                        len(article_urls) < 4):  # Sadece son 4 makale
+                        article_urls.append(url)
+                
+                print(f"🔗 {len(article_urls)} yeni makale URL'si bulundu")
+                
+                articles_data = []
+                for url in article_urls:
+                    try:
+                        # URL'den başlığı çıkar (basit yöntem)
+                        title_part = url.split('/')[-1].replace('-', ' ').title()
+                        
+                        # Fallback yöntemi ile içeriği çek
+                        from utils import fetch_article_content_advanced_fallback
+                        article_result = fetch_article_content_advanced_fallback(url)
+                        
+                        if article_result and article_result.get("content"):
+                            title = article_result.get("title", title_part)
+                            content = article_result.get("content", "")
+                            
+                            # Makale hash'i oluştur
+                            article_hash = hashlib.md5(title.encode()).hexdigest()
+                            
+                            # Tekrar kontrolü
+                            if article_hash not in posted_hashes:
+                                articles_data.append({
+                                    "title": title,
+                                    "url": url,
+                                    "content": content,
+                                    "hash": article_hash,
+                                    "fetch_date": datetime.now().isoformat(),
+                                    "is_new": True,
+                                    "already_posted": False,
+                                    "source": "TechCrunch AI (MCP)"
+                                })
+                                print(f"🆕 MCP ile yeni makale: {title[:50]}...")
+                            else:
+                                print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
+                        else:
+                            print(f"⚠️ İçerik çekilemedi: {url}")
+                            
+                    except Exception as article_error:
+                        print(f"❌ Makale çekme hatası ({url}): {article_error}")
+                        continue
+                
+                if articles_data:
+                    print(f"📊 MCP ile {len(articles_data)} yeni makale bulundu")
+                    return articles_data
+                    
         except Exception as mcp_error:
             print(f"❌ MCP Firecrawl hatası: {mcp_error}")
-            # Fallback: Web search sonuçlarından en yeni makaleleri kullan
-            techcrunch_content = """
-            [2025 will be a 'pivotal year' for Meta's augmented and virtual reality, says CTO](https://techcrunch.com/2025/06/06/2025-will-be-a-pivotal-year-for-metas-augmented-and-virtual-reality-says-cto/)
-            [Why investing in growth-stage AI startups is getting riskier and more complicated](https://techcrunch.com/2025/06/06/why-investing-in-growth-stage-ai-startups-is-getting-riskier-and-more-complicated/)
-            [Anthropic appoints a national security expert to its governing trust](https://techcrunch.com/2025/06/06/anthropic-appoints-a-national-security-expert-to-its-governing-trust/)
-            [Figure AI CEO skips live demo, sidesteps BMW deal questions onstage at tech conference](https://techcrunch.com/2025/06/06/figure-ai-ceo-skips-live-demo-sidesteps-bmw-deal-questions-on-stage-at-tech-conference/)
-            """
         
-        # URL'leri çıkar
-        url_pattern = r'https://techcrunch\.com/\d{4}/\d{2}/\d{2}/[^)\s]+'
-        found_urls = re.findall(url_pattern, techcrunch_content)
-        
-        article_urls = []
-        for url in found_urls:
-            if (url not in posted_urls and 
-                "/2025/" in url and 
-                len(article_urls) < 4):  # Sadece son 4 makale
-                article_urls.append(url)
-        
-        print(f"🔗 {len(article_urls)} yeni makale URL'si bulundu")
-        
-        if not article_urls:
-            print("⚠️ Yeni makale URL'si bulunamadı, fallback kullanılıyor...")
-            return fetch_latest_ai_articles()
-        
-        articles_data = []
-        for url in article_urls:
-            try:
-                # URL'den başlığı çıkar (basit yöntem)
-                title_part = url.split('/')[-1].replace('-', ' ').title()
-                
-                # Fallback yöntemi ile içeriği çek
-                from utils import fetch_article_content_advanced_fallback
-                article_result = fetch_article_content_advanced_fallback(url)
-                
-                if article_result and article_result.get("content"):
-                    title = article_result.get("title", title_part)
-                    content = article_result.get("content", "")
-                    
-                    # Makale hash'i oluştur
-                    article_hash = hashlib.md5(title.encode()).hexdigest()
-                    
-                    # Tekrar kontrolü
-                    if article_hash not in posted_hashes:
-                        articles_data.append({
-                            "title": title,
-                            "url": url,
-                            "content": content,
-                            "hash": article_hash,
-                            "fetch_date": datetime.now().isoformat(),
-                            "is_new": True,
-                            "already_posted": False,
-                            "source": "mcp_enhanced"
-                        })
-                        print(f"🆕 MCP ile yeni makale: {title[:50]}...")
-                    else:
-                        print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
-                else:
-                    print(f"⚠️ İçerik çekilemedi: {url}")
-                    
-            except Exception as article_error:
-                print(f"❌ Makale çekme hatası ({url}): {article_error}")
-                continue
-        
-        print(f"📊 MCP Enhanced ile {len(articles_data)} yeni makale bulundu")
-        return articles_data
+        # Son fallback
+        print("🔄 Fallback yönteme geçiliyor...")
+        return fetch_latest_ai_articles()
         
     except Exception as e:
-        print(f"MCP Enhanced haber çekme hatası: {e}")
+        print(f"❌ Makale çekme hatası: {e}")
         print("🔄 Fallback yönteme geçiliyor...")
         return fetch_latest_ai_articles()
 
@@ -243,8 +260,8 @@ def check_and_post_articles():
         if not api_key:
             return {"success": False, "message": "Google API anahtarı bulunamadı"}
         
-        # Yeni makaleleri çek (utils.py'deki düzeltilmiş fonksiyonu kullan)
-        articles = fetch_latest_ai_articles()
+        # Yeni makaleleri çek (özel kaynaklardan)
+        articles = fetch_latest_ai_articles_with_mcp()
         
         if not articles:
             return {"success": True, "message": "Yeni makale bulunamadı"}
@@ -840,6 +857,132 @@ def start_background_scheduler():
         scheduler_thread = threading.Thread(target=background_scheduler, daemon=True)
         scheduler_thread.start()
         print("🔄 Arka plan zamanlayıcı thread'i başlatıldı")
+
+# ==========================================
+# ÖZEL HABER KAYNAKLARI ROUTE'LARI
+# ==========================================
+
+@app.route('/news_sources')
+@login_required
+def news_sources():
+    """Haber kaynakları yönetim sayfası"""
+    try:
+        from utils import get_news_sources_stats
+        stats = get_news_sources_stats()
+        return render_template('news_sources.html', stats=stats)
+    except Exception as e:
+        return render_template('news_sources.html', stats={}, error=str(e))
+
+@app.route('/add_news_source', methods=['POST'])
+@login_required
+def add_news_source_route():
+    """Yeni haber kaynağı ekle"""
+    try:
+        from utils import add_news_source
+        
+        name = request.form.get('name', '').strip()
+        url = request.form.get('url', '').strip()
+        description = request.form.get('description', '').strip()
+        
+        if not name or not url:
+            flash('Kaynak adı ve URL gerekli!', 'error')
+            return redirect(url_for('news_sources'))
+        
+        result = add_news_source(name, url, description)
+        
+        if result['success']:
+            flash(result['message'], 'success')
+        else:
+            flash(result['message'], 'error')
+            
+    except Exception as e:
+        flash(f'Kaynak ekleme hatası: {str(e)}', 'error')
+    
+    return redirect(url_for('news_sources'))
+
+@app.route('/remove_news_source', methods=['POST'])
+@login_required
+def remove_news_source_route():
+    """Haber kaynağını kaldır"""
+    try:
+        from utils import remove_news_source
+        
+        source_id = request.form.get('source_id')
+        if not source_id:
+            flash('Kaynak ID gerekli!', 'error')
+            return redirect(url_for('news_sources'))
+        
+        result = remove_news_source(source_id)
+        
+        if result['success']:
+            flash(result['message'], 'success')
+        else:
+            flash(result['message'], 'error')
+            
+    except Exception as e:
+        flash(f'Kaynak kaldırma hatası: {str(e)}', 'error')
+    
+    return redirect(url_for('news_sources'))
+
+@app.route('/toggle_news_source', methods=['POST'])
+@login_required
+def toggle_news_source_route():
+    """Haber kaynağını aktif/pasif yap"""
+    try:
+        from utils import toggle_news_source
+        
+        source_id = request.form.get('source_id')
+        enabled = request.form.get('enabled') == 'true'
+        
+        if not source_id:
+            flash('Kaynak ID gerekli!', 'error')
+            return redirect(url_for('news_sources'))
+        
+        result = toggle_news_source(source_id, enabled)
+        
+        if result['success']:
+            flash(result['message'], 'success')
+        else:
+            flash(result['message'], 'error')
+            
+    except Exception as e:
+        flash(f'Durum değiştirme hatası: {str(e)}', 'error')
+    
+    return redirect(url_for('news_sources'))
+
+@app.route('/test_news_source', methods=['POST'])
+@login_required
+def test_news_source_route():
+    """Haber kaynağını test et"""
+    try:
+        from utils import fetch_articles_from_single_source, load_news_sources
+        
+        source_id = request.form.get('source_id')
+        if not source_id:
+            return jsonify({'success': False, 'error': 'Kaynak ID gerekli'})
+        
+        config = load_news_sources()
+        source = None
+        
+        for s in config['sources']:
+            if s['id'] == source_id:
+                source = s
+                break
+        
+        if not source:
+            return jsonify({'success': False, 'error': 'Kaynak bulunamadı'})
+        
+        articles = fetch_articles_from_single_source(source)
+        
+        return jsonify({
+            'success': True,
+            'article_count': len(articles),
+            'articles': articles[:3],  # İlk 3 makaleyi göster
+            'message': f'{len(articles)} makale bulundu'
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
     # Arka plan zamanlayıcısını başlat
