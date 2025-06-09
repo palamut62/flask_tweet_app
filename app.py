@@ -12,6 +12,7 @@ import smtplib
 import random
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from bs4 import BeautifulSoup
 
 # .env dosyasını yükle
 load_dotenv()

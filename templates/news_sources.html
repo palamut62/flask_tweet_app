@@ -2,6 +2,108 @@
 
 {% block title %}AI Tweet Bot - Haber Kaynakları{% endblock %}
 
+{% block extra_head %}
+<style>
+/* Sayfa kaynağı görüntüleyici stilleri */
+.html-source-viewer {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.html-source-viewer [data-selector] {
+    transition: all 0.2s ease;
+    border-radius: 2px;
+    padding: 1px 2px;
+    margin: 1px;
+    display: inline-block;
+}
+
+.html-source-viewer [data-selector]:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 10;
+    position: relative;
+}
+
+.html-source-viewer [data-selector="article_container"] {
+    background-color: rgba(255, 107, 107, 0.3) !important;
+    border: 2px solid #ff6b6b !important;
+}
+
+.html-source-viewer [data-selector="title_selector"] {
+    background-color: rgba(78, 205, 196, 0.3) !important;
+    border: 2px solid #4ecdc4 !important;
+}
+
+.html-source-viewer [data-selector="link_selector"] {
+    background-color: rgba(69, 183, 209, 0.3) !important;
+    border: 2px solid #45b7d1 !important;
+}
+
+.html-source-viewer [data-selector="date_selector"] {
+    background-color: rgba(150, 206, 180, 0.3) !important;
+    border: 2px solid #96ceb4 !important;
+}
+
+.html-source-viewer [data-selector="summary_selector"] {
+    background-color: rgba(254, 202, 87, 0.3) !important;
+    border: 2px solid #feca57 !important;
+}
+
+/* Tooltip stilleri */
+.html-source-viewer [data-selector]::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 1000;
+}
+
+.html-source-viewer [data-selector]:hover::after {
+    opacity: 1;
+}
+
+/* Loading animasyonları */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Modal responsive */
+@media (max-width: 1024px) {
+    #pageSourceModal .flex-1 {
+        flex-direction: column;
+    }
+    
+    #pageSourceModal .w-1\/3 {
+        width: 100%;
+        max-height: 300px;
+    }
+    
+    #pageSourceModal .w-2\/3 {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="max-w-6xl mx-auto space-y-8">
     <!-- Sayfa Başlığı -->
@@ -712,6 +814,308 @@ function closeSelectorHelpModal() {
     modal.classList.remove('flex');
 }
 
+// URL değiştiğinde çağrılır
+function onUrlChange() {
+    const url = document.getElementById('url').value.trim();
+    const analyzeBtn = document.getElementById('analyzePageBtn');
+    
+    if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+        analyzeBtn.disabled = false;
+        analyzeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        analyzeBtn.disabled = true;
+        analyzeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+// Sayfa kaynağını AI ile analiz et
+function analyzePageSource() {
+    const url = document.getElementById('url').value.trim();
+    
+    if (!url) {
+        alert('Lütfen önce bir URL girin');
+        return;
+    }
+    
+    // Modal'ı aç
+    const modal = document.getElementById('pageSourceModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Loading state'i göster
+    document.getElementById('aiAnalysisContent').innerHTML = `
+        <div class="text-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">AI analizi yapılıyor...</p>
+            <p class="text-xs text-gray-500 mt-2">Bu işlem 10-30 saniye sürebilir</p>
+        </div>
+    `;
+    
+    document.getElementById('htmlSourceContent').innerHTML = `
+        <div class="text-center py-8">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-400 mx-auto mb-4"></div>
+            <p class="text-green-400">Sayfa kaynağı yükleniyor...</p>
+        </div>
+    `;
+    
+    // API çağrısı
+    fetch('/analyze_page_source', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: url })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayAnalysisResults(data);
+        } else {
+            showAnalysisError(data.error || 'Analiz başarısız oldu');
+        }
+    })
+    .catch(error => {
+        console.error('Analiz hatası:', error);
+        showAnalysisError('Bağlantı hatası: ' + error.message);
+    });
+}
+
+// Analiz sonuçlarını göster
+function displayAnalysisResults(data) {
+    const aiAnalysis = data.ai_analysis;
+    const htmlContent = data.html_content;
+    
+    // AI analizi sonuçlarını göster
+    document.getElementById('aiAnalysisContent').innerHTML = `
+        <div class="space-y-4">
+            <!-- Güven Seviyesi -->
+            <div class="bg-${getConfidenceColor(aiAnalysis.confidence)}-50 border border-${getConfidenceColor(aiAnalysis.confidence)}-200 rounded-lg p-3">
+                <div class="flex items-center">
+                    <i class="fas fa-${getConfidenceIcon(aiAnalysis.confidence)} text-${getConfidenceColor(aiAnalysis.confidence)}-600 mr-2"></i>
+                    <span class="font-medium text-${getConfidenceColor(aiAnalysis.confidence)}-800">
+                        Güven: ${aiAnalysis.confidence}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Analiz Sonucu -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                <h4 class="font-medium text-gray-900 mb-2">📊 Sayfa Analizi</h4>
+                <p class="text-sm text-gray-700">${aiAnalysis.analysis}</p>
+            </div>
+            
+            <!-- Tespit Edilen Selector'lar -->
+            <div class="space-y-3">
+                <h4 class="font-medium text-gray-900">🎯 Tespit Edilen Selector'lar</h4>
+                
+                ${Object.entries(aiAnalysis.selectors).map(([key, value]) => `
+                    <div class="bg-white border border-gray-200 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-medium text-gray-500 uppercase">${getSelectorLabel(key)}</span>
+                            <button onclick="copyToClipboard('${value}')" 
+                                    class="text-xs text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <code class="text-sm text-gray-800 bg-gray-100 px-2 py-1 rounded block break-all">${value}</code>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <!-- Notlar -->
+            ${aiAnalysis.notes ? `
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <h4 class="font-medium text-yellow-800 mb-2">📝 Notlar</h4>
+                    <p class="text-sm text-yellow-700">${aiAnalysis.notes}</p>
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    // HTML kaynağını göster (renklendirilmiş)
+    document.getElementById('htmlSourceContent').innerHTML = `
+        <div class="html-source-viewer">
+            ${htmlContent}
+        </div>
+    `;
+    
+    // Tıklanabilir elementleri aktif et
+    activateClickableElements();
+}
+
+// Analiz hatasını göster
+function showAnalysisError(error) {
+    document.getElementById('aiAnalysisContent').innerHTML = `
+        <div class="text-center py-8">
+            <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
+            <h4 class="font-medium text-gray-900 mb-2">Analiz Başarısız</h4>
+            <p class="text-sm text-gray-600 mb-4">${error}</p>
+            <button onclick="analyzePageSource()" 
+                    class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                Tekrar Dene
+            </button>
+        </div>
+    `;
+    
+    document.getElementById('htmlSourceContent').innerHTML = `
+        <div class="text-center py-8">
+            <i class="fas fa-times text-red-400 text-2xl mb-4"></i>
+            <p class="text-red-400">Sayfa kaynağı yüklenemedi</p>
+        </div>
+    `;
+}
+
+// Tıklanabilir elementleri aktif et
+function activateClickableElements() {
+    const elements = document.querySelectorAll('[data-selector]');
+    
+    elements.forEach(element => {
+        element.style.cursor = 'pointer';
+        element.title = `Tıklayın: ${element.getAttribute('data-selector-value')}`;
+        
+        element.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const selector = this.getAttribute('data-selector-value');
+            const selectorType = this.getAttribute('data-selector');
+            
+            copyToClipboard(selector);
+            
+            // Visual feedback
+            const originalBg = this.style.backgroundColor;
+            this.style.backgroundColor = '#10b981';
+            this.style.color = 'white';
+            
+            setTimeout(() => {
+                this.style.backgroundColor = originalBg;
+                this.style.color = '';
+            }, 500);
+            
+            // Toast notification
+            showToast(`${getSelectorLabel(selectorType)} selector kopyalandı: ${selector}`);
+        });
+    });
+}
+
+// Tespit edilen selector'ları forma uygula
+function applyDetectedSelectors() {
+    const aiAnalysisContent = document.getElementById('aiAnalysisContent');
+    const selectorElements = aiAnalysisContent.querySelectorAll('code');
+    
+    if (selectorElements.length === 0) {
+        alert('Henüz selector analizi yapılmamış');
+        return;
+    }
+    
+    // Otomatik tespit checkbox'ını kapat
+    const autoDetectCheckbox = document.getElementById('auto_detect');
+    if (autoDetectCheckbox) {
+        autoDetectCheckbox.checked = false;
+        toggleManualSelectors();
+    }
+    
+    // Selector'ları forma uygula
+    const selectorMapping = {
+        'article_container': 'article_container',
+        'title_selector': 'title_selector', 
+        'link_selector': 'link_selector',
+        'date_selector': 'date_selector',
+        'summary_selector': 'summary_selector'
+    };
+    
+    selectorElements.forEach((element, index) => {
+        const selectorValue = element.textContent.trim();
+        const keys = Object.keys(selectorMapping);
+        
+        if (keys[index]) {
+            const fieldId = selectorMapping[keys[index]];
+            const field = document.getElementById(fieldId);
+            
+            if (field) {
+                field.value = selectorValue;
+                
+                // Visual feedback
+                field.style.backgroundColor = '#dcfce7';
+                setTimeout(() => {
+                    field.style.backgroundColor = '';
+                }, 1000);
+            }
+        }
+    });
+    
+    // Modal'ı kapat
+    closePageSourceModal();
+    
+    // Başarı mesajı
+    showToast('✅ AI tarafından tespit edilen selector\'lar forma uygulandı!');
+}
+
+// Modal'ı kapat
+function closePageSourceModal() {
+    const modal = document.getElementById('pageSourceModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Yardımcı fonksiyonlar
+function getConfidenceColor(confidence) {
+    switch(confidence) {
+        case 'Yüksek': return 'green';
+        case 'Orta': return 'yellow';
+        case 'Düşük': return 'red';
+        default: return 'gray';
+    }
+}
+
+function getConfidenceIcon(confidence) {
+    switch(confidence) {
+        case 'Yüksek': return 'check-circle';
+        case 'Orta': return 'exclamation-circle';
+        case 'Düşük': return 'times-circle';
+        default: return 'question-circle';
+    }
+}
+
+function getSelectorLabel(key) {
+    const labels = {
+        'article_container': 'Konteyner',
+        'title_selector': 'Başlık',
+        'link_selector': 'Link',
+        'date_selector': 'Tarih',
+        'summary_selector': 'Özet'
+    };
+    return labels[key] || key;
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        console.log('Kopyalandı:', text);
+    }).catch(err => {
+        console.error('Kopyalama hatası:', err);
+        // Fallback
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+    });
+}
+
+function showToast(message) {
+    // Basit toast notification
+    const toast = document.createElement('div');
+    toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
 // Manuel selector'ları test et
 function testManualSelectors() {
     const url = document.getElementById('url').value.trim();
@@ -1066,6 +1470,19 @@ document.addEventListener('DOMContentLoaded', function() {
         clearManualSelectors(); // Başlangıçta disable et
     } else {
         enableManualSelectors(); // Manuel modda aktif et
+    }
+    
+    // URL analiz butonunu başlangıçta devre dışı bırak
+    const analyzeBtn = document.getElementById('analyzePageBtn');
+    if (analyzeBtn) {
+        analyzeBtn.disabled = true;
+        analyzeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    
+    // URL değişikliklerini dinle
+    const urlInput = document.getElementById('url');
+    if (urlInput) {
+        urlInput.addEventListener('input', onUrlChange);
     }
 });
 </script>
