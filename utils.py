@@ -4029,7 +4029,7 @@ def safe_log(message, level="INFO", sensitive_data=None):
 # =============================================================================
 
 def check_security_configuration():
-    """Güvenlik yapılandırmasını kontrol et"""
+    """Güvenlik yapılandırmasını kontrol et - E-posta OTP sistemi için güncellenmiş"""
     import os
     
     security_issues = []
@@ -4041,15 +4041,30 @@ def check_security_configuration():
     if debug_mode and flask_env == 'production':
         security_issues.append("⚠️ Production'da DEBUG modu açık!")
     
-    # 2. Varsayılan şifre kontrolü
-    password = os.environ.get('SIFRE', 'admin123')
-    if password in ['admin123', 'password', '123456', 'admin']:
-        security_issues.append("🔒 Varsayılan şifre kullanılıyor! Değiştirin.")
+    # 2. E-posta OTP sistemi kontrolü
+    admin_email = os.environ.get('ADMIN_EMAIL', '')
+    email_address = os.environ.get('EMAIL_ADDRESS', '')
+    email_password = os.environ.get('EMAIL_PASSWORD', '')
+    
+    if not admin_email:
+        security_issues.append("📧 ADMIN_EMAIL yapılandırılmamış! Giriş yapılamaz.")
+    elif not '@' in admin_email or '.' not in admin_email:
+        security_issues.append("📧 ADMIN_EMAIL geçersiz format!")
+    
+    if not email_address:
+        security_issues.append("📧 EMAIL_ADDRESS yapılandırılmamış! OTP gönderilemez.")
+    elif not '@' in email_address or '.' not in email_address:
+        security_issues.append("📧 EMAIL_ADDRESS geçersiz format!")
+    
+    if not email_password:
+        security_issues.append("🔐 EMAIL_PASSWORD yapılandırılmamış! SMTP bağlantısı kurulamaz.")
+    elif len(email_password) < 8:
+        security_issues.append("🔐 EMAIL_PASSWORD çok kısa! App Password kullanın.")
     
     # 3. Secret key kontrolü
     secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
     if secret_key == 'your-secret-key-here' or len(secret_key) < 32:
-        security_issues.append("🔑 Güçlü SECRET_KEY kullanın!")
+        security_issues.append("🔑 Güçlü SECRET_KEY kullanın! (En az 32 karakter)")
     
     # 4. API anahtarları kontrolü
     api_keys = [
@@ -4057,19 +4072,43 @@ def check_security_configuration():
         'TWITTER_API_KEY',
         'TWITTER_API_SECRET',
         'TWITTER_ACCESS_TOKEN',
-        'TWITTER_ACCESS_TOKEN_SECRET'
+        'TWITTER_ACCESS_TOKEN_SECRET',
+        'TWITTER_BEARER_TOKEN'
     ]
     
     for key in api_keys:
         value = os.environ.get(key, '')
-        if value and ('your-' in value.lower() or 'example' in value.lower()):
-            security_issues.append(f"🔐 {key} örnek değer içeriyor!")
+        if value and ('your-' in value.lower() or 'example' in value.lower() or 'test' in value.lower()):
+            security_issues.append(f"🔐 {key} örnek/test değer içeriyor!")
+    
+    # 5. Telegram güvenlik kontrolü
+    telegram_token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+    if telegram_token and len(telegram_token) < 40:
+        security_issues.append("🤖 TELEGRAM_BOT_TOKEN çok kısa! Geçerli token kullanın.")
+    
+    # 6. Gmail güvenlik kontrolü
+    gmail_email = os.environ.get('GMAIL_EMAIL', '')
+    gmail_password = os.environ.get('GMAIL_APP_PASSWORD', '')
+    
+    if gmail_email and not gmail_password:
+        security_issues.append("📧 GMAIL_EMAIL var ama GMAIL_APP_PASSWORD eksik!")
+    
+    # 7. Güvenlik seviyesi değerlendirmesi
+    security_score = 100 - (len(security_issues) * 10)
+    security_level = "Yüksek" if security_score >= 80 else "Orta" if security_score >= 60 else "Düşük"
     
     return {
         "secure": len(security_issues) == 0,
         "issues": security_issues,
         "debug_mode": debug_mode,
-        "flask_env": flask_env
+        "flask_env": flask_env,
+        "auth_method": "E-posta OTP",
+        "admin_email": admin_email,
+        "email_configured": bool(email_address and email_password),
+        "security_score": security_score,
+        "security_level": security_level,
+        "total_checks": 7,
+        "passed_checks": 7 - len(security_issues)
     }
 
 def sanitize_log_message(message):

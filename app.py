@@ -2233,13 +2233,22 @@ Sadece JSON döndür, başka açıklama ekleme.
         # HTML'i highlight'la (selector'ları işaretle)
         highlighted_html = highlight_selectors_in_html(html_content, ai_analysis.get("selectors", {}))
         
+        # HTML boyutunu kontrol et (kısaltma yapmıyoruz, sadece log)
+        if len(highlighted_html) > 1000000:  # 1MB üzerinde uyarı ver
+            terminal_log(f"⚠️ HTML büyük ({len(highlighted_html)} karakter), yükleme biraz uzun sürebilir", "warning")
+        else:
+            terminal_log(f"✅ HTML boyutu: {len(highlighted_html)} karakter", "info")
+        
         terminal_log("✅ AI analizi tamamlandı", "success")
         
         return jsonify({
             'success': True,
             'url': url,
-            'html_content': highlighted_html[:50000],  # İlk 50KB
+            'html_content': highlighted_html,
+            'original_html': html_content,  # Orijinal HTML'i de gönder
             'ai_analysis': ai_analysis,
+            'html_size': len(highlighted_html),
+            'original_size': len(html_content),
             'timestamp': datetime.now().isoformat()
         })
         
@@ -2251,48 +2260,125 @@ Sadece JSON döndür, başka açıklama ekleme.
         })
 
 def highlight_selectors_in_html(html_content, selectors):
-    """HTML içeriğinde selector'ları renklendir"""
+    """HTML içeriğinde selector'ları renklendir - Gelişmiş sistem"""
     try:
         from bs4 import BeautifulSoup
+        import re
+        
+        # HTML'i temizle ve düzenle
         soup = BeautifulSoup(html_content, 'html.parser')
         
-        # Selector renkleri
-        selector_colors = {
-            'article_container': '#ff6b6b',  # Kırmızı
-            'title_selector': '#4ecdc4',    # Turkuaz
-            'link_selector': '#45b7d1',     # Mavi
-            'date_selector': '#96ceb4',     # Yeşil
-            'summary_selector': '#feca57'   # Sarı
+        # Script ve style taglarını kaldır (görüntüleme için)
+        for script in soup(["script", "style", "noscript"]):
+            script.decompose()
+        
+        # Selector renkleri ve stilleri
+        selector_styles = {
+            'article_container': {
+                'background': 'rgba(255, 107, 107, 0.2)',
+                'border': '2px solid #ff6b6b',
+                'color': '#721c24',
+                'label': 'KONTEYNER'
+            },
+            'title_selector': {
+                'background': 'rgba(78, 205, 196, 0.2)',
+                'border': '2px solid #4ecdc4',
+                'color': '#0f5132',
+                'label': 'BAŞLIK'
+            },
+            'link_selector': {
+                'background': 'rgba(69, 183, 209, 0.2)',
+                'border': '2px solid #45b7d1',
+                'color': '#0c4a6e',
+                'label': 'LİNK'
+            },
+            'date_selector': {
+                'background': 'rgba(150, 206, 180, 0.2)',
+                'border': '2px solid #96ceb4',
+                'color': '#14532d',
+                'label': 'TARİH'
+            },
+            'summary_selector': {
+                'background': 'rgba(254, 202, 87, 0.2)',
+                'border': '2px solid #feca57',
+                'color': '#92400e',
+                'label': 'ÖZET'
+            }
         }
         
         # Her selector için elementleri bul ve işaretle
+        highlighted_count = 0
+        
         for selector_name, selector in selectors.items():
-            if not selector:
+            if not selector or not selector.strip():
                 continue
                 
-            color = selector_colors.get(selector_name, '#cccccc')
+            style_info = selector_styles.get(selector_name, {
+                'background': 'rgba(200, 200, 200, 0.2)',
+                'border': '2px solid #cccccc',
+                'color': '#666666',
+                'label': selector_name.upper()
+            })
             
             try:
                 # CSS selector'ı parse et
                 elements = soup.select(selector)
+                terminal_log(f"🎯 {selector_name} için {len(elements)} element bulundu: {selector}", "info")
                 
-                for element in elements[:10]:  # İlk 10 elementi işaretle
-                    # Mevcut style'ı koru ve yeni style ekle
-                    current_style = element.get('style', '')
-                    new_style = f"{current_style}; background-color: {color}; border: 2px solid {color}; opacity: 0.8;"
-                    element['style'] = new_style
-                    element['data-selector'] = selector_name
-                    element['data-selector-value'] = selector
-                    element['title'] = f"{selector_name}: {selector}"
-                    
-            except Exception as e:
-                terminal_log(f"⚠️ Selector işaretleme hatası ({selector}): {e}", "warning")
+                for i, element in enumerate(elements[:15]):  # İlk 15 elementi işaretle
+                    try:
+                        # Element'in mevcut style'ını koru
+                        current_style = element.get('style', '')
+                        
+                        # Yeni style oluştur
+                        new_style = f"""
+                            {current_style};
+                            background: {style_info['background']} !important;
+                            border: {style_info['border']} !important;
+                            color: {style_info['color']} !important;
+                            padding: 2px 4px !important;
+                            margin: 1px !important;
+                            border-radius: 3px !important;
+                            position: relative !important;
+                            cursor: pointer !important;
+                            transition: all 0.2s ease !important;
+                        """.strip()
+                        
+                        element['style'] = new_style
+                        element['data-selector'] = selector_name
+                        element['data-selector-value'] = selector
+                        element['data-selector-label'] = style_info['label']
+                        element['title'] = f"🎯 {style_info['label']}: {selector} (#{i+1})"
+                        element['class'] = element.get('class', []) + ['highlighted-selector']
+                        
+                        # Pseudo-element için label ekle
+                        element['data-before-content'] = f"{style_info['label']} #{i+1}"
+                        
+                        highlighted_count += 1
+                        
+                    except Exception as elem_error:
+                        terminal_log(f"⚠️ Element işaretleme hatası: {elem_error}", "warning")
+                        continue
+                        
+            except Exception as selector_error:
+                terminal_log(f"⚠️ Selector işaretleme hatası ({selector}): {selector_error}", "warning")
                 continue
         
-        return str(soup)
+        terminal_log(f"✅ Toplam {highlighted_count} element işaretlendi", "success")
+        
+        # HTML'i string'e çevir ve formatla
+        html_str = str(soup)
+        
+        # HTML'i daha okunabilir hale getir
+        html_str = re.sub(r'><', '>\n<', html_str)  # Tag'ler arası satır sonu
+        html_str = re.sub(r'\n\s*\n', '\n', html_str)  # Çoklu boş satırları tek satıra çevir
+        
+        return html_str
         
     except Exception as e:
         terminal_log(f"❌ HTML highlight hatası: {e}", "error")
+        import traceback
+        traceback.print_exc()
         return html_content
 
 if __name__ == '__main__':

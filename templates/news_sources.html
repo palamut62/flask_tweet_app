@@ -6,51 +6,354 @@
 <style>
 /* Sayfa kaynağı görüntüleyici stilleri */
 .html-source-viewer {
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
-    line-height: 1.4;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.5;
     white-space: pre-wrap;
-    word-break: break-all;
+    word-break: break-word;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
 }
 
-.html-source-viewer [data-selector] {
-    transition: all 0.2s ease;
-    border-radius: 2px;
-    padding: 1px 2px;
-    margin: 1px;
+/* Highlighted selector'lar */
+.html-source-viewer .highlighted-selector {
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin: 2px;
     display: inline-block;
-}
-
-.html-source-viewer [data-selector]:hover {
-    transform: scale(1.02);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    z-index: 10;
     position: relative;
+    cursor: pointer;
+    font-weight: 500;
 }
 
+.html-source-viewer .highlighted-selector:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 100;
+    filter: brightness(1.2);
+}
+
+.html-source-viewer .highlighted-selector:active {
+    transform: scale(0.98);
+}
+
+/* Selector türlerine göre renkler */
 .html-source-viewer [data-selector="article_container"] {
-    background-color: rgba(255, 107, 107, 0.3) !important;
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 107, 107, 0.1)) !important;
     border: 2px solid #ff6b6b !important;
+    color: #ff6b6b !important;
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);
 }
 
 .html-source-viewer [data-selector="title_selector"] {
-    background-color: rgba(78, 205, 196, 0.3) !important;
+    background: linear-gradient(135deg, rgba(78, 205, 196, 0.3), rgba(78, 205, 196, 0.1)) !important;
     border: 2px solid #4ecdc4 !important;
+    color: #4ecdc4 !important;
+    box-shadow: 0 0 10px rgba(78, 205, 196, 0.2);
 }
 
 .html-source-viewer [data-selector="link_selector"] {
-    background-color: rgba(69, 183, 209, 0.3) !important;
+    background: linear-gradient(135deg, rgba(69, 183, 209, 0.3), rgba(69, 183, 209, 0.1)) !important;
     border: 2px solid #45b7d1 !important;
+    color: #45b7d1 !important;
+    box-shadow: 0 0 10px rgba(69, 183, 209, 0.2);
 }
 
 .html-source-viewer [data-selector="date_selector"] {
-    background-color: rgba(150, 206, 180, 0.3) !important;
+    background: linear-gradient(135deg, rgba(150, 206, 180, 0.3), rgba(150, 206, 180, 0.1)) !important;
     border: 2px solid #96ceb4 !important;
+    color: #96ceb4 !important;
+    box-shadow: 0 0 10px rgba(150, 206, 180, 0.2);
 }
 
 .html-source-viewer [data-selector="summary_selector"] {
-    background-color: rgba(254, 202, 87, 0.3) !important;
+    background: linear-gradient(135deg, rgba(254, 202, 87, 0.3), rgba(254, 202, 87, 0.1)) !important;
     border: 2px solid #feca57 !important;
+    color: #feca57 !important;
+    box-shadow: 0 0 10px rgba(254, 202, 87, 0.2);
+}
+
+/* Label gösterimi */
+.html-source-viewer .highlighted-selector::before {
+    content: attr(data-selector-label) " #" counter(selector-counter);
+    position: absolute;
+    top: -20px;
+    left: 0;
+    background: rgba(0,0,0,0.9);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.html-source-viewer .highlighted-selector:hover::before {
+    opacity: 1;
+}
+
+/* HTML syntax highlighting */
+.html-source-viewer {
+    counter-reset: selector-counter;
+}
+
+.html-source-viewer .highlighted-selector {
+    counter-increment: selector-counter;
+}
+
+/* HTML tag renkleri */
+.html-source-viewer {
+    color: #e0e0e0;
+}
+
+/* Daha iyi görünüm için HTML formatlaması */
+.html-source-viewer pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    white-space: pre-wrap;
+}
+
+/* Mevcut highlight */
+.html-source-viewer .current-highlight {
+    animation: pulse-highlight 2s ease-in-out;
+    transform: scale(1.1) !important;
+    z-index: 200 !important;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5) !important;
+}
+
+@keyframes pulse-highlight {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+    }
+}
+
+/* Tab sistemi stilleri - Chrome Style */
+.tab-button {
+    border-bottom: 2px solid transparent;
+    color: #6b7280;
+    transition: all 0.2s ease;
+    background: transparent;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    margin-right: 2px;
+    position: relative;
+}
+
+.tab-button:hover {
+    color: #374151;
+    background: rgba(0, 0, 0, 0.05);
+    border-bottom-color: #d1d5db;
+}
+
+.tab-button.active {
+    color: #1f2937;
+    border-bottom-color: #7c3aed;
+    background: white;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.tab-button.active::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: white;
+    z-index: 11;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: flex;
+}
+
+/* Orijinal kaynak stilleri */
+#originalSourceContent {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+/* Formatlanmış kaynak stilleri */
+#formattedSourceContent {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.5;
+}
+
+/* Chrome DevTools benzeri kod görüntüleyici */
+.code-container {
+    display: flex;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.line-numbers {
+    background: #f9fafb;
+    border-right: 1px solid #e5e7eb;
+    padding: 12px 8px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #6b7280;
+    text-align: right;
+    user-select: none;
+    min-width: 50px;
+}
+
+.line-numbers .line-number {
+    padding: 0 4px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.line-numbers .line-number:hover {
+    background: #e5e7eb;
+}
+
+.code-content {
+    flex: 1;
+    padding: 12px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #1f2937;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Syntax highlighting için gelişmiş renkler */
+.html-tag {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.html-attr {
+    color: #059669;
+    font-weight: 500;
+}
+
+.html-value {
+    color: #2563eb;
+    font-weight: 400;
+}
+
+.html-equals {
+    color: #6b7280;
+}
+
+.html-bracket {
+    color: #374151;
+    font-weight: 600;
+}
+
+.html-comment {
+    color: #6b7280;
+    font-style: italic;
+}
+
+.html-text {
+    color: #1f2937;
+    font-style: italic;
+}
+
+#formattedSourceContent .html-equals {
+    color: #6b7280;
+}
+
+#formattedSourceContent .html-bracket {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* Formatlanmış tab'da selector renklendirme */
+#formattedSourceContent .highlighted-selector {
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    border-radius: 3px !important;
+    padding: 1px 2px !important;
+    margin: 0 1px !important;
+}
+
+#formattedSourceContent .highlighted-selector:hover {
+    transform: scale(1.02) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Orijinal kaynak için temiz görünüm */
+#originalSourceContent {
+    color: #374151;
+    line-height: 1.6;
+}
+
+/* Satır numaraları için stil */
+.line-numbers {
+    background: #f9fafb;
+    border-right: 1px solid #e5e7eb;
+    color: #9ca3af;
+    font-size: 11px;
+    padding: 0 8px;
+    text-align: right;
+    user-select: none;
+    min-width: 50px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+}
+
+.line-number {
+    line-height: 1.5;
+    padding: 0 4px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.line-number:hover {
+    background: #e5e7eb;
+}
+
+/* Code container için flex layout */
+.code-container {
+    display: flex;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    overflow-x: auto;
+}
+
+.code-content {
+    flex: 1;
+    padding: 0 12px;
+    white-space: pre;
+    overflow-x: auto;
 }
 
 /* Tooltip stilleri */
@@ -540,43 +843,164 @@
             
             <!-- Sağ Panel: HTML Kaynağı -->
             <div class="w-2/3 flex flex-col">
-                <!-- Toolbar -->
-                <div class="p-4 border-b border-gray-200 bg-gray-50">
-                    <div class="flex items-center justify-between">
-                        <h4 class="font-medium text-gray-900">Sayfa Kaynağı (Renklendirilmiş)</h4>
-                        <div class="flex items-center space-x-2">
-                            <div class="flex items-center space-x-4 text-xs">
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-red-400 rounded mr-1"></div>
-                                    <span>Konteyner</span>
+                <!-- Tab Navigation - Chrome Style -->
+                <div class="border-b border-gray-200 bg-gray-50">
+                    <nav class="flex px-4" aria-label="Tabs">
+                        <button onclick="switchTab('highlighted')" 
+                                id="highlightedTab"
+                                class="tab-button active py-3 px-4 border-b-2 font-medium text-sm flex items-center space-x-2 rounded-t-lg">
+                            <i class="fas fa-palette text-purple-500"></i>
+                            <span>Renklendirilmiş</span>
+                            <span class="ml-1 text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full">AI</span>
+                        </button>
+                        <button onclick="switchTab('source')" 
+                                id="sourceTab"
+                                class="tab-button py-3 px-4 border-b-2 font-medium text-sm flex items-center space-x-2 rounded-t-lg">
+                            <i class="fas fa-code text-blue-500"></i>
+                            <span>Orijinal Kaynak</span>
+                            <span class="ml-1 text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">RAW</span>
+                        </button>
+                        <button onclick="switchTab('formatted')" 
+                                id="formattedTab"
+                                class="tab-button py-3 px-4 border-b-2 font-medium text-sm flex items-center space-x-2 rounded-t-lg">
+                            <i class="fas fa-file-code text-green-500"></i>
+                            <span>Formatlanmış</span>
+                            <span class="ml-1 text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">SYNTAX</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="flex-1 flex flex-col">
+                    <!-- Highlighted Tab -->
+                    <div id="highlightedContent" class="tab-content active flex-1 flex flex-col">
+                        <!-- Toolbar -->
+                        <div class="p-4 border-b border-gray-200 bg-gray-50">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-medium text-gray-900">Renklendirilmiş Sayfa Kaynağı</h4>
+                                <div class="flex items-center space-x-3">
+                                    <div id="htmlStats" class="text-xs text-gray-600">
+                                        <!-- HTML istatistikleri buraya gelecek -->
+                                    </div>
+                                    <button onclick="scrollToNextHighlight()" 
+                                            class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200"
+                                            title="Sonraki işaretli alana git">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </button>
                                 </div>
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-teal-400 rounded mr-1"></div>
-                                    <span>Başlık</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4 text-xs">
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-red-400 rounded mr-1"></div>
+                                        <span>Konteyner</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-teal-400 rounded mr-1"></div>
+                                        <span>Başlık</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-blue-400 rounded mr-1"></div>
+                                        <span>Link</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-green-400 rounded mr-1"></div>
+                                        <span>Tarih</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-yellow-400 rounded mr-1"></div>
+                                        <span>Özet</span>
+                                    </div>
                                 </div>
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-blue-400 rounded mr-1"></div>
-                                    <span>Link</span>
+                                <div class="text-xs text-gray-500">
+                                    💡 Renkli alanları tıklayarak selector'ları kopyalayın
                                 </div>
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-green-400 rounded mr-1"></div>
-                                    <span>Tarih</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-yellow-400 rounded mr-1"></div>
-                                    <span>Özet</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Highlighted HTML Content -->
+                        <div class="flex-1 overflow-y-auto">
+                            <div id="htmlSourceContent" class="min-h-full">
+                                <div class="text-center py-8">
+                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-400 mx-auto mb-4"></div>
+                                    <p class="text-green-400">Renklendirilmiş sayfa kaynağı yükleniyor...</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- HTML Content -->
-                <div class="flex-1 overflow-y-auto">
-                    <div id="htmlSourceContent" class="p-4 font-mono text-xs bg-gray-900 text-green-400 min-h-full">
-                        <div class="text-center py-8">
-                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-400 mx-auto mb-4"></div>
-                            <p class="text-green-400">Sayfa kaynağı yükleniyor...</p>
+
+                    <!-- Source Tab -->
+                    <div id="sourceContent" class="tab-content flex-1 flex flex-col hidden">
+                        <!-- Source Toolbar -->
+                        <div class="p-4 border-b border-gray-200 bg-gray-50">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-medium text-gray-900">Orijinal HTML Kaynağı</h4>
+                                <div class="flex items-center space-x-3">
+                                    <div id="sourceStats" class="text-xs text-gray-600">
+                                        <!-- Kaynak istatistikleri buraya gelecek -->
+                                    </div>
+                                    <button onclick="copySourceToClipboard()" 
+                                            class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
+                                            title="Tüm kaynağı kopyala">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button onclick="downloadSource()" 
+                                            class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
+                                            title="HTML dosyası olarak indir">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Original HTML Content -->
+                        <div class="flex-1 overflow-y-auto">
+                            <div class="code-container bg-white min-h-full">
+                                <div class="line-numbers" id="originalLineNumbers">
+                                    <!-- Satır numaraları buraya gelecek -->
+                                </div>
+                                <div id="originalSourceContent" class="code-content min-h-full">
+                                    <div class="text-center py-8">
+                                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400 mx-auto mb-4"></div>
+                                        <p class="text-gray-600">Orijinal sayfa kaynağı yükleniyor...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formatted Tab -->
+                    <div id="formattedContent" class="tab-content flex-1 flex flex-col hidden">
+                        <!-- Formatted Toolbar -->
+                        <div class="p-4 border-b border-gray-200 bg-gray-50">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-medium text-gray-900">Formatlanmış HTML</h4>
+                                <div class="flex items-center space-x-3">
+                                    <div id="formattedStats" class="text-xs text-gray-600">
+                                        <!-- Formatlanmış istatistikler buraya gelecek -->
+                                    </div>
+                                    <button onclick="copyFormattedToClipboard()" 
+                                            class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
+                                            title="Formatlanmış kodu kopyala">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Formatted HTML Content -->
+                        <div class="flex-1 overflow-y-auto">
+                            <div class="code-container bg-white min-h-full">
+                                <div class="line-numbers" id="formattedLineNumbers">
+                                    <!-- Satır numaraları buraya gelecek -->
+                                </div>
+                                <div id="formattedSourceContent" class="code-content min-h-full">
+                                    <div class="text-center py-8">
+                                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400 mx-auto mb-4"></div>
+                                        <p class="text-gray-600">Formatlanmış sayfa kaynağı yükleniyor...</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -884,6 +1308,20 @@ function analyzePageSource() {
 function displayAnalysisResults(data) {
     const aiAnalysis = data.ai_analysis;
     const htmlContent = data.html_content;
+    const htmlSize = data.html_size || htmlContent.length;
+    const originalSize = data.original_size || 0;
+    
+    // Global değişkene kaydet (tab sistemi için)
+    window.currentAnalysisData = {
+        html_content: htmlContent,
+        original_html: data.original_html || htmlContent,
+        ai_analysis: aiAnalysis,
+        url: data.url,
+        html_size: htmlSize,
+        original_size: originalSize
+    };
+    window.originalSourceLoaded = false;
+    window.formattedSourceLoaded = false;
     
     // AI analizi sonuçlarını göster
     document.getElementById('aiAnalysisContent').innerHTML = `
@@ -895,6 +1333,19 @@ function displayAnalysisResults(data) {
                     <span class="font-medium text-${getConfidenceColor(aiAnalysis.confidence)}-800">
                         Güven: ${aiAnalysis.confidence}
                     </span>
+                </div>
+            </div>
+            
+            <!-- HTML Boyut Bilgisi -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-file-code text-blue-600 mr-2"></i>
+                        <span class="font-medium text-blue-800">HTML Boyutu</span>
+                    </div>
+                    <div class="text-sm text-blue-700">
+                        ${formatBytes(htmlSize)} ${originalSize > htmlSize ? `(${formatBytes(originalSize)} → kısaltıldı)` : ''}
+                    </div>
                 </div>
             </div>
             
@@ -932,15 +1383,31 @@ function displayAnalysisResults(data) {
         </div>
     `;
     
-    // HTML kaynağını göster (renklendirilmiş)
-    document.getElementById('htmlSourceContent').innerHTML = `
-        <div class="html-source-viewer">
-            ${htmlContent}
+    // Renklendirilmiş HTML kaynağını göster
+    const htmlContainer = document.getElementById('htmlSourceContent');
+    htmlContainer.innerHTML = `
+        <div class="html-source-viewer p-4 font-mono text-xs bg-gray-900 text-green-400">
+            <pre class="whitespace-pre-wrap break-words">${htmlContent}</pre>
         </div>
     `;
     
+    // Scroll pozisyonunu sıfırla
+    htmlContainer.scrollTop = 0;
+    
     // Tıklanabilir elementleri aktif et
     activateClickableElements();
+    
+    // Highlighted elementlerin sayısını göster
+    const highlightedElements = htmlContainer.querySelectorAll('.highlighted-selector');
+    if (highlightedElements.length > 0) {
+        showToast(`✨ ${highlightedElements.length} element renklendirildi ve tıklanabilir hale getirildi!`, 'success');
+    }
+    
+    // HTML istatistiklerini güncelle
+    updateHtmlStats(data);
+    
+    // Scroll index'ini sıfırla
+    currentHighlightIndex = 0;
 }
 
 // Analiz hatasını göster
@@ -1114,6 +1581,72 @@ function showToast(message) {
     setTimeout(() => {
         toast.remove();
     }, 3000);
+}
+
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Sonraki işaretli alana scroll et
+let currentHighlightIndex = 0;
+
+function scrollToNextHighlight() {
+    const highlights = document.querySelectorAll('.highlighted-selector');
+    
+    if (highlights.length === 0) {
+        showToast('⚠️ Henüz işaretli element bulunamadı');
+        return;
+    }
+    
+    // Mevcut highlight'ı temizle
+    highlights.forEach(el => el.classList.remove('current-highlight'));
+    
+    // Sonraki highlight'a git
+    const currentElement = highlights[currentHighlightIndex];
+    currentElement.classList.add('current-highlight');
+    
+    // Element'e scroll et
+    currentElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+    });
+    
+    // Index'i güncelle
+    currentHighlightIndex = (currentHighlightIndex + 1) % highlights.length;
+    
+    // Bilgi göster
+    const selectorType = currentElement.getAttribute('data-selector-label');
+    const selectorValue = currentElement.getAttribute('data-selector-value');
+    showToast(`🎯 ${selectorType}: ${selectorValue}`);
+}
+
+// HTML istatistiklerini güncelle
+function updateHtmlStats(data) {
+    const htmlContainer = document.getElementById('htmlSourceContent');
+    const highlights = htmlContainer.querySelectorAll('.highlighted-selector');
+    
+    // Selector türlerine göre sayıları hesapla
+    const stats = {};
+    highlights.forEach(el => {
+        const type = el.getAttribute('data-selector');
+        stats[type] = (stats[type] || 0) + 1;
+    });
+    
+    const statsHtml = Object.entries(stats).map(([type, count]) => {
+        const label = getSelectorLabel(type);
+        return `${label}: ${count}`;
+    }).join(' | ');
+    
+    document.getElementById('htmlStats').innerHTML = `
+        <span class="font-medium">${highlights.length} işaretli element</span>
+        ${statsHtml ? ` (${statsHtml})` : ''}
+    `;
 }
 
 // Manuel selector'ları test et
@@ -1458,6 +1991,664 @@ function debugFormSubmit(event) {
     return true;
 }
 
+// ===== TAB SİSTEMİ FONKSİYONLARI =====
+
+// Tab değiştirme fonksiyonu (Chrome benzeri)
+function switchTab(tabName) {
+    // Tüm tab butonlarını pasif yap
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Tüm tab içeriklerini gizle
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+        content.classList.add('hidden');
+    });
+    
+    // Seçilen tab'ı aktif yap
+    const activeTab = document.getElementById(tabName + 'Tab');
+    const activeContent = document.getElementById(tabName + 'Content');
+    
+    activeTab.classList.add('active');
+    activeContent.classList.remove('hidden');
+    activeContent.classList.add('active');
+    
+    // Loading state göster
+    if ((tabName === 'source' && !window.originalSourceLoaded) || 
+        (tabName === 'formatted' && !window.formattedSourceLoaded)) {
+        
+        const contentElement = activeContent.querySelector('.code-content, #htmlSourceContent');
+        if (contentElement) {
+            contentElement.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400 mx-auto mb-4"></div>
+                    <p class="text-gray-600">${tabName === 'source' ? 'Orijinal kaynak' : 'Formatlanmış kaynak'} yükleniyor...</p>
+                </div>
+            `;
+        }
+    }
+    
+    // Tab'a özel işlemler (async)
+    setTimeout(() => {
+        if (tabName === 'source' && !window.originalSourceLoaded) {
+            loadOriginalSource();
+        } else if (tabName === 'formatted' && !window.formattedSourceLoaded) {
+            loadFormattedSource();
+        }
+    }, 100);
+    
+    // Tab değişikliği için toast
+    const tabLabels = {
+        'highlighted': 'Renklendirilmiş Görünüm',
+        'source': 'Orijinal Kaynak',
+        'formatted': 'Formatlanmış Kod'
+    };
+    
+    showToast(`📄 ${tabLabels[tabName]} aktif`, 'info');
+}
+
+// Orijinal kaynağı yükle
+function loadOriginalSource() {
+    if (window.currentAnalysisData && window.currentAnalysisData.original_html) {
+        const content = window.currentAnalysisData.original_html;
+        const formattedContent = formatHtmlForDisplay(content, false); // Görüntüleme için formatla
+        document.getElementById('originalSourceContent').textContent = formattedContent;
+        
+        // Satır numaralarını oluştur
+        generateLineNumbers(formattedContent, 'originalLineNumbers');
+        
+        // İstatistikleri güncelle
+        const lineCount = formattedContent.split('\n').length;
+        document.getElementById('sourceStats').innerHTML = `
+            <span class="font-medium">${formatBytes(content.length)}</span>
+            <span class="text-gray-400">|</span>
+            <span>${lineCount} satır</span>
+            <span class="text-gray-400">|</span>
+            <span>Orijinal</span>
+        `;
+        
+        window.originalSourceLoaded = true;
+    } else {
+        // Eğer orijinal HTML yoksa, renklendirilmiş versiyondan temizle
+        const highlightedContent = document.getElementById('htmlSourceContent').innerHTML;
+        if (highlightedContent) {
+            // HTML'den renklendirme etiketlerini temizle
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = highlightedContent;
+            
+            // Tüm style ve data attribute'larını kaldır
+            const elements = tempDiv.querySelectorAll('*');
+            elements.forEach(el => {
+                el.removeAttribute('style');
+                el.removeAttribute('data-selector');
+                el.removeAttribute('data-selector-value');
+                el.removeAttribute('data-selector-label');
+                el.removeAttribute('data-before-content');
+                el.removeAttribute('title');
+                el.classList.remove('highlighted-selector');
+            });
+            
+            const cleanContent = tempDiv.innerHTML || '';
+            const formattedContent = formatHtmlForDisplay(cleanContent, false);
+            document.getElementById('originalSourceContent').textContent = formattedContent;
+            
+            // Satır numaralarını oluştur
+            generateLineNumbers(formattedContent, 'originalLineNumbers');
+            
+            // İstatistikleri güncelle
+            const lineCount = formattedContent.split('\n').length;
+            document.getElementById('sourceStats').innerHTML = `
+                <span class="font-medium">${formatBytes(cleanContent.length)}</span>
+                <span class="text-gray-400">|</span>
+                <span>${lineCount} satır</span>
+                <span class="text-gray-400">|</span>
+                <span>Temizlenmiş</span>
+            `;
+            
+            window.originalSourceLoaded = true;
+        }
+    }
+}
+
+// Formatlanmış kaynağı yükle
+function loadFormattedSource() {
+    if (window.currentAnalysisData && window.currentAnalysisData.html_content) {
+        // Renklendirilmiş HTML'i kullan (selector'lar dahil)
+        const highlightedContent = window.currentAnalysisData.html_content;
+        const formattedContent = formatHtmlForDisplay(highlightedContent, true, true); // Syntax highlighting + selector'ları koru
+        document.getElementById('formattedSourceContent').innerHTML = formattedContent;
+        
+        // Satır numaralarını oluştur
+        const plainText = document.getElementById('formattedSourceContent').textContent || formattedContent;
+        generateLineNumbers(plainText, 'formattedLineNumbers');
+        
+        // Tıklanabilir elementleri aktif et
+        activateClickableElementsInFormatted();
+        
+        // İstatistikleri güncelle
+        const lineCount = plainText.split('\n').length;
+        document.getElementById('formattedStats').innerHTML = `
+            <span class="font-medium">${formatBytes(highlightedContent.length)}</span>
+            <span class="text-gray-400">|</span>
+            <span>${lineCount} satır</span>
+            <span class="text-gray-400">|</span>
+            <span>Syntax + Selectors</span>
+        `;
+        
+        window.formattedSourceLoaded = true;
+    } else {
+        // Renklendirilmiş versiyondan formatla
+        const highlightedContent = document.getElementById('htmlSourceContent').innerHTML;
+        if (highlightedContent) {
+            const formattedContent = formatHtmlForDisplay(highlightedContent, true, true); // Selector'ları koru
+            document.getElementById('formattedSourceContent').innerHTML = formattedContent;
+            
+            // Satır numaralarını oluştur
+            const plainText = document.getElementById('formattedSourceContent').textContent || formattedContent;
+            generateLineNumbers(plainText, 'formattedLineNumbers');
+            
+            // Tıklanabilir elementleri aktif et
+            activateClickableElementsInFormatted();
+            
+            // İstatistikleri güncelle
+            const lineCount = plainText.split('\n').length;
+            document.getElementById('formattedStats').innerHTML = `
+                <span class="font-medium">${formatBytes(highlightedContent.length)}</span>
+                <span class="text-gray-400">|</span>
+                <span>${lineCount} satır</span>
+                <span class="text-gray-400">|</span>
+                <span>Syntax + Selectors</span>
+            `;
+            
+            window.formattedSourceLoaded = true;
+        }
+    }
+}
+
+// HTML'i görüntüleme için formatla (Chrome DevTools benzeri)
+function formatHtmlForDisplay(htmlContent, withSyntaxHighlighting = false, preserveSelectors = false) {
+    try {
+        if (!htmlContent || htmlContent.trim() === '') {
+            return '';
+        }
+        
+        // HTML'i temizle
+        let content = htmlContent.trim();
+        
+        // Eğer syntax highlighting isteniyorsa
+        if (withSyntaxHighlighting) {
+            return formatHtmlWithSyntaxHighlighting(content, preserveSelectors);
+        }
+        
+        // Sadece düz metin formatlaması
+        return formatHtmlAsPlainText(content);
+        
+    } catch (error) {
+        console.error('HTML formatlama hatası:', error);
+        return htmlContent;
+    }
+}
+
+// HTML'i düz metin olarak formatla
+function formatHtmlAsPlainText(htmlContent) {
+    try {
+        // HTML'i güzel formatla
+        let formatted = '';
+        let indentLevel = 0;
+        const indentSize = 2;
+        
+        // HTML'i token'lara böl
+        const tokens = htmlContent.split(/(<[^>]*>)/);
+        
+        for (const token of tokens) {
+            const trimmedToken = token.trim();
+            if (!trimmedToken) continue;
+            
+            if (trimmedToken.startsWith('<')) {
+                // HTML tag
+                const isClosingTag = trimmedToken.startsWith('</');
+                const isSelfClosing = trimmedToken.endsWith('/>') || 
+                    ['<br>', '<hr>', '<img', '<input', '<meta', '<link', '<area', '<base', '<col', '<embed', '<source', '<track', '<wbr'].some(tag => 
+                        trimmedToken.toLowerCase().startsWith(tag));
+                
+                // Kapanış tag'i ise girinti azalt
+                if (isClosingTag) {
+                    indentLevel = Math.max(0, indentLevel - 1);
+                }
+                
+                // Girinti ekle
+                const indent = ' '.repeat(indentLevel * indentSize);
+                formatted += indent + trimmedToken + '\n';
+                
+                // Açılış tag'i ise girinti artır
+                if (!isClosingTag && !isSelfClosing) {
+                    indentLevel++;
+                }
+            } else {
+                // Text content
+                if (trimmedToken.length > 0) {
+                    const indent = ' '.repeat(indentLevel * indentSize);
+                    // Uzun text'leri böl
+                    if (trimmedToken.length > 100) {
+                        const words = trimmedToken.split(' ');
+                        let line = '';
+                        for (const word of words) {
+                            if (line.length + word.length > 100) {
+                                if (line.trim()) {
+                                    formatted += indent + line.trim() + '\n';
+                                }
+                                line = word + ' ';
+                            } else {
+                                line += word + ' ';
+                            }
+                        }
+                        if (line.trim()) {
+                            formatted += indent + line.trim() + '\n';
+                        }
+                    } else {
+                        formatted += indent + trimmedToken + '\n';
+                    }
+                }
+            }
+        }
+        
+        return formatted.trim();
+        
+    } catch (error) {
+        console.error('Düz metin formatlama hatası:', error);
+        return htmlContent;
+    }
+}
+
+// HTML'i syntax highlighting ile formatla
+function formatHtmlWithSyntaxHighlighting(htmlContent, preserveSelectors = false) {
+    try {
+        // HTML'i güzel formatla ve syntax highlighting ekle
+        let formatted = '';
+        let indentLevel = 0;
+        const indentSize = 2;
+        
+        // HTML'i token'lara böl
+        const tokens = htmlContent.split(/(<[^>]*>)/);
+        
+        for (const token of tokens) {
+            const trimmedToken = token.trim();
+            if (!trimmedToken) continue;
+            
+            if (trimmedToken.startsWith('<')) {
+                // HTML tag
+                const isClosingTag = trimmedToken.startsWith('</');
+                const isSelfClosing = trimmedToken.endsWith('/>') || 
+                    ['<br>', '<hr>', '<img', '<input', '<meta', '<link', '<area', '<base', '<col', '<embed', '<source', '<track', '<wbr'].some(tag => 
+                        trimmedToken.toLowerCase().startsWith(tag));
+                
+                // Kapanış tag'i ise girinti azalt
+                if (isClosingTag) {
+                    indentLevel = Math.max(0, indentLevel - 1);
+                }
+                
+                // Girinti ekle
+                const indent = ' '.repeat(indentLevel * indentSize);
+                
+                // Syntax highlighting ekle
+                const highlightedTag = addAdvancedSyntaxHighlighting(trimmedToken, preserveSelectors);
+                formatted += indent + highlightedTag + '\n';
+                
+                // Açılış tag'i ise girinti artır
+                if (!isClosingTag && !isSelfClosing) {
+                    indentLevel++;
+                }
+            } else {
+                // Text content
+                if (trimmedToken.length > 0) {
+                    const indent = ' '.repeat(indentLevel * indentSize);
+                    formatted += indent + `<span class="html-text">${escapeHtml(trimmedToken)}</span>\n`;
+                }
+            }
+        }
+        
+        return formatted.trim();
+        
+    } catch (error) {
+        console.error('Syntax highlighting formatlama hatası:', error);
+        return escapeHtml(htmlContent);
+    }
+}
+
+// HTML'i düzgün formatla (satır satır, girintili) - ESKİ FONKSİYON
+function formatHtmlProperly(htmlContent, withSyntaxHighlighting = false, preserveSelectors = false) {
+    try {
+        // HTML'i temizle ve parse et
+        let cleanHtml = htmlContent.trim();
+        
+        // Eğer selector'ları koruyacaksak, önce DOM parse edelim
+        if (preserveSelectors) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = cleanHtml;
+            cleanHtml = tempDiv.innerHTML;
+        }
+        
+        // Tek satırda olan HTML'i düzgün formatlayalım
+        let formatted = '';
+        let indentLevel = 0;
+        const indentSize = 2; // 2 boşluk girinti
+        
+        // HTML'i tag'lere böl
+        const tokens = cleanHtml.split(/(<[^>]*>)/);
+        
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i].trim();
+            if (!token) continue;
+            
+            if (token.startsWith('<')) {
+                // Bu bir HTML tag'i
+                const isClosingTag = token.startsWith('</');
+                const isSelfClosing = token.endsWith('/>') || 
+                    ['<br>', '<hr>', '<img', '<input', '<meta', '<link'].some(tag => token.startsWith(tag));
+                
+                // Kapanış tag'i ise girinti azalt
+                if (isClosingTag) {
+                    indentLevel = Math.max(0, indentLevel - 1);
+                }
+                
+                // Girinti ekle ve tag'i yaz
+                const indent = ' '.repeat(indentLevel * indentSize);
+                
+                if (withSyntaxHighlighting) {
+                    // Gelişmiş syntax highlighting ekle (selector'ları koruyarak)
+                    const highlightedTag = addAdvancedSyntaxHighlighting(token, preserveSelectors);
+                    formatted += indent + highlightedTag + '\n';
+                } else {
+                    // Sadece escape et (selector'ları koruyarak)
+                    if (preserveSelectors && token.includes('data-selector')) {
+                        // Selector'lı element'i olduğu gibi bırak
+                        formatted += indent + token + '\n';
+                    } else {
+                        const escapedTag = escapeHtml(token);
+                        formatted += indent + escapedTag + '\n';
+                    }
+                }
+                
+                // Açılış tag'i ise girinti artır (self-closing değilse)
+                if (!isClosingTag && !isSelfClosing) {
+                    indentLevel++;
+                }
+            } else {
+                // Bu text content
+                if (token.length > 0) {
+                    const indent = ' '.repeat(indentLevel * indentSize);
+                    const escapedText = withSyntaxHighlighting ? escapeHtml(token) : escapeHtml(token);
+                    
+                    // Uzun text'leri böl
+                    if (token.length > 80) {
+                        const words = token.split(' ');
+                        let line = '';
+                        for (const word of words) {
+                            if (line.length + word.length > 80) {
+                                if (line.trim()) {
+                                    formatted += indent + escapeHtml(line.trim()) + '\n';
+                                }
+                                line = word + ' ';
+                            } else {
+                                line += word + ' ';
+                            }
+                        }
+                        if (line.trim()) {
+                            formatted += indent + escapeHtml(line.trim()) + '\n';
+                        }
+                    } else {
+                        formatted += indent + escapedText + '\n';
+                    }
+                }
+            }
+        }
+        
+        return formatted.trim();
+        
+    } catch (error) {
+        console.error('HTML formatlama hatası:', error);
+        // Hata durumunda basit escape
+        return escapeHtml(htmlContent);
+    }
+}
+
+// HTML karakterlerini escape et
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Gelişmiş syntax highlighting ekle
+function addSyntaxHighlighting(htmlTag, preserveSelectors = false) {
+    if (preserveSelectors && htmlTag.includes('data-selector')) {
+        // Selector'lı element'i olduğu gibi döndür (zaten renklendirilmiş)
+        return htmlTag;
+    }
+    
+    let highlighted = escapeHtml(htmlTag);
+    
+    // Tag adını renklendir
+    highlighted = highlighted.replace(/&lt;(\/?[a-zA-Z][a-zA-Z0-9]*)/g, 
+        '&lt;<span class="html-tag">$1</span>');
+    
+    // Attribute'ları renklendir
+    highlighted = highlighted.replace(/(\s+)([a-zA-Z-]+)(=)(&quot;[^&]*?&quot;|&#39;[^&]*?&#39;)/g, 
+        '$1<span class="html-attr">$2</span><span class="html-equals">$3</span><span class="html-value">$4</span>');
+    
+    // Kapanış > işaretini renklendir
+    highlighted = highlighted.replace(/(&gt;)$/, '<span class="html-bracket">$1</span>');
+    
+    return highlighted;
+}
+
+// Gelişmiş syntax highlighting (Chrome DevTools benzeri)
+function addAdvancedSyntaxHighlighting(htmlTag, preserveSelectors = false) {
+    if (preserveSelectors && htmlTag.includes('data-selector')) {
+        // Selector'lı element için hem syntax highlighting hem selector renklendirme
+        let highlighted = htmlTag;
+        
+        // Önce HTML karakterlerini escape et (selector attribute'ları hariç)
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlTag;
+        const element = tempDiv.firstChild;
+        
+        if (element) {
+            // Tag adını renklendir
+            const tagName = element.tagName.toLowerCase();
+            highlighted = highlighted.replace(new RegExp(`<${tagName}`, 'i'), 
+                `<span class="html-tag">&lt;${tagName}</span>`);
+            
+            // Kapanış tag'i varsa onu da renklendir
+            if (htmlTag.includes(`</${tagName}`)) {
+                highlighted = highlighted.replace(new RegExp(`</${tagName}>`, 'i'), 
+                    `<span class="html-tag">&lt;/${tagName}</span><span class="html-bracket">&gt;</span>`);
+            }
+            
+            // Attribute'ları renklendir (selector attribute'ları hariç)
+            highlighted = highlighted.replace(/(\s+)([a-zA-Z-]+(?!-selector))=(["'][^"']*["'])/g, 
+                '$1<span class="html-attr">$2</span><span class="html-equals">=</span><span class="html-value">$3</span>');
+        }
+        
+        return highlighted;
+    }
+    
+    // Normal syntax highlighting
+    let highlighted = escapeHtml(htmlTag);
+    
+    // Comment kontrolü
+    if (htmlTag.startsWith('<!--')) {
+        return `<span class="html-comment">${highlighted}</span>`;
+    }
+    
+    // Tag adını renklendir
+    highlighted = highlighted.replace(/&lt;(\/?[a-zA-Z][a-zA-Z0-9]*)/g, 
+        '&lt;<span class="html-tag">$1</span>');
+    
+    // Attribute'ları renklendir
+    highlighted = highlighted.replace(/(\s+)([a-zA-Z-]+)(=)(&quot;[^&]*?&quot;|&#39;[^&]*?&#39;)/g, 
+        '$1<span class="html-attr">$2</span><span class="html-equals">$3</span><span class="html-value">$4</span>');
+    
+    // Kapanış > işaretini renklendir
+    highlighted = highlighted.replace(/(&gt;)$/, '<span class="html-bracket">$1</span>');
+    
+    return highlighted;
+}
+
+// Satır numaralarını oluştur
+function generateLineNumbers(content, targetElementId) {
+    const lines = content.split('\n');
+    const lineNumbers = [];
+    
+    for (let i = 1; i <= lines.length; i++) {
+        lineNumbers.push(`<div class="line-number">${i}</div>`);
+    }
+    
+    document.getElementById(targetElementId).innerHTML = lineNumbers.join('');
+}
+
+// Formatlanmış tab'da tıklanabilir elementleri aktif et
+function activateClickableElementsInFormatted() {
+    const formattedContainer = document.getElementById('formattedSourceContent');
+    const elements = formattedContainer.querySelectorAll('[data-selector]');
+    
+    elements.forEach(element => {
+        element.style.cursor = 'pointer';
+        element.title = `Tıklayın: ${element.getAttribute('data-selector-value')}`;
+        
+        element.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const selector = this.getAttribute('data-selector-value');
+            const selectorType = this.getAttribute('data-selector');
+            
+            copyToClipboard(selector);
+            
+            // Visual feedback
+            const originalBg = this.style.backgroundColor;
+            this.style.backgroundColor = '#10b981';
+            this.style.color = 'white';
+            
+            setTimeout(() => {
+                this.style.backgroundColor = originalBg;
+                this.style.color = '';
+            }, 500);
+            
+            // Toast notification
+            showToast(`${getSelectorLabel(selectorType)} selector kopyalandı: ${selector}`, 'success');
+        });
+    });
+}
+
+// Orijinal kaynağı panoya kopyala
+function copySourceToClipboard() {
+    const contentElement = document.getElementById('originalSourceContent');
+    if (!contentElement || !contentElement.textContent.trim()) {
+        showToast('Henüz orijinal kaynak yüklenmedi!', 'error');
+        return;
+    }
+    
+    // HTML etiketlerini kaldırıp sadece text içeriği al
+    const content = contentElement.textContent || contentElement.innerText || '';
+    
+    navigator.clipboard.writeText(content).then(() => {
+        showToast('✅ Orijinal kaynak panoya kopyalandı!', 'success');
+    }).catch(err => {
+        showToast('❌ Kopyalama hatası!', 'error');
+    });
+}
+
+// Formatlanmış kodu panoya kopyala
+function copyFormattedToClipboard() {
+    const contentElement = document.getElementById('formattedSourceContent');
+    if (!contentElement || !contentElement.textContent.trim()) {
+        showToast('Henüz formatlanmış kaynak yüklenmedi!', 'error');
+        return;
+    }
+    
+    // HTML etiketlerini kaldırıp sadece text içeriği al
+    const content = contentElement.textContent || contentElement.innerText || '';
+    
+    navigator.clipboard.writeText(content).then(() => {
+        showToast('✅ Formatlanmış kod panoya kopyalandı!', 'success');
+    }).catch(err => {
+        showToast('❌ Kopyalama hatası!', 'error');
+    });
+}
+
+// HTML dosyası olarak indir
+function downloadSource() {
+    const content = document.getElementById('originalSourceContent').textContent;
+    if (!content) {
+        showToast('Henüz orijinal kaynak yüklenmedi!', 'error');
+        return;
+    }
+    
+    const blob = new Blob([content], { type: 'text/html' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'page_source.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    showToast('✅ HTML dosyası indirildi!', 'success');
+}
+
+// Dosya boyutunu formatla
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Gelişmiş toast sistemi
+function showToast(message, type = 'info') {
+    const colors = {
+        'success': 'bg-green-600',
+        'error': 'bg-red-600',
+        'warning': 'bg-yellow-600',
+        'info': 'bg-blue-600'
+    };
+    
+    const icons = {
+        'success': 'fas fa-check',
+        'error': 'fas fa-times',
+        'warning': 'fas fa-exclamation',
+        'info': 'fas fa-info'
+    };
+    
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 ${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2 transform translate-x-full transition-transform duration-300`;
+    
+    toast.innerHTML = `
+        <i class="${icons[type]}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Animasyon ile göster
+    setTimeout(() => {
+        toast.classList.remove('translate-x-full');
+    }, 100);
+    
+    // 3 saniye sonra kaldır
+    setTimeout(() => {
+        toast.classList.add('translate-x-full');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 3000);
+}
+
 // Sayfa yüklendiğinde manuel selector'ları gizle
 document.addEventListener('DOMContentLoaded', function() {
     const autoDetect = document.getElementById('auto_detect');
@@ -1484,6 +2675,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (urlInput) {
         urlInput.addEventListener('input', onUrlChange);
     }
+    
+    // Global değişkenleri başlat
+    window.originalSourceLoaded = false;
+    window.formattedSourceLoaded = false;
+    window.currentAnalysisData = null;
 });
 </script>
 {% endblock %} 

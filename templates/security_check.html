@@ -3,7 +3,7 @@
 {% block title %}AI Tweet Bot - Güvenlik Kontrolü{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-8">
+<div class="max-w-6xl mx-auto space-y-8">
     <!-- Sayfa Başlığı -->
     <div class="text-center">
         <h1 class="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2">
@@ -18,10 +18,10 @@
             {% if security %}
                 <!-- Genel Durum -->
                 <div class="flex items-center space-x-4 mb-8">
-                    <div class="w-16 h-16 rounded-full flex items-center justify-center {{ 'bg-green-100' if security.secure else 'bg-red-100' }}">
-                        <i class="fas fa-{{ 'shield-alt text-green-600' if security.secure else 'exclamation-triangle text-red-600' }} text-2xl"></i>
+                    <div class="w-20 h-20 rounded-full flex items-center justify-center {{ 'bg-green-100' if security.secure else 'bg-red-100' }}">
+                        <i class="fas fa-{{ 'shield-alt text-green-600' if security.secure else 'exclamation-triangle text-red-600' }} text-3xl"></i>
                     </div>
-                    <div>
+                    <div class="flex-1">
                         <h2 class="text-2xl font-bold {{ 'text-green-800' if security.secure else 'text-red-800' }}">
                             {% if security.secure %}
                                 ✅ Güvenlik Yapılandırması Uygun
@@ -29,13 +29,43 @@
                                 ⚠️ Güvenlik Sorunları Tespit Edildi
                             {% endif %}
                         </h2>
-                        <p class="text-gray-600">
+                        <p class="text-gray-600 mb-2">
                             {% if security.secure %}
                                 Tüm güvenlik kontrolleri başarılı
                             {% else %}
                                 {{ security.issues|length }} güvenlik sorunu bulundu
                             {% endif %}
                         </p>
+                        <!-- Güvenlik Skoru -->
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-1 bg-gray-200 rounded-full h-3">
+                                <div class="h-3 rounded-full {{ 'bg-green-500' if security.security_score >= 80 else 'bg-yellow-500' if security.security_score >= 60 else 'bg-red-500' }}" 
+                                     style="width: {{ security.security_score if security.security_score else 0 }}%"></div>
+                            </div>
+                            <span class="text-sm font-medium {{ 'text-green-600' if security.security_score >= 80 else 'text-yellow-600' if security.security_score >= 60 else 'text-red-600' }}">
+                                {{ security.security_score }}% ({{ security.security_level }})
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Güvenlik İstatistikleri -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-blue-600">{{ security.passed_checks }}</div>
+                        <div class="text-sm text-blue-800">Başarılı Kontrol</div>
+                    </div>
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-red-600">{{ security.issues|length }}</div>
+                        <div class="text-sm text-red-800">Güvenlik Sorunu</div>
+                    </div>
+                    <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-green-600">{{ security.total_checks }}</div>
+                        <div class="text-sm text-green-800">Toplam Kontrol</div>
+                    </div>
+                    <div class="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
+                        <div class="text-lg font-bold text-purple-600">{{ security.auth_method }}</div>
+                        <div class="text-sm text-purple-800">Giriş Yöntemi</div>
                     </div>
                 </div>
 
@@ -44,7 +74,7 @@
                     <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
                         <h3 class="text-lg font-semibold text-red-800 mb-4 flex items-center">
                             <i class="fas fa-exclamation-triangle mr-2"></i>
-                            Güvenlik Sorunları
+                            Güvenlik Sorunları ({{ security.issues|length }})
                         </h3>
                         <ul class="space-y-3">
                             {% for issue in security.issues %}
@@ -58,7 +88,8 @@
                 {% endif %}
 
                 <!-- Sistem Bilgileri -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Sistem Modu -->
                     <div class="border rounded-xl p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                             <i class="fas fa-cog mr-2"></i>
@@ -80,6 +111,34 @@
                         </div>
                     </div>
 
+                    <!-- E-posta OTP Sistemi -->
+                    <div class="border rounded-xl p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>
+                            E-posta OTP
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Admin E-posta:</span>
+                                <span class="px-3 py-1 rounded-full text-sm font-medium {{ 'bg-green-100 text-green-800' if security.admin_email else 'bg-red-100 text-red-800' }}">
+                                    {{ 'Yapılandırılmış' if security.admin_email else 'Eksik' }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">SMTP Yapılandırması:</span>
+                                <span class="px-3 py-1 rounded-full text-sm font-medium {{ 'bg-green-100 text-green-800' if security.email_configured else 'bg-red-100 text-red-800' }}">
+                                    {{ 'Aktif' if security.email_configured else 'Eksik' }}
+                                </span>
+                            </div>
+                            {% if security.admin_email %}
+                                <div class="text-xs text-gray-500 mt-2">
+                                    Admin: {{ security.admin_email[:3] }}***@{{ security.admin_email.split('@')[1] if '@' in security.admin_email else '***' }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Güvenlik Özellikleri -->
                     <div class="border rounded-xl p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                             <i class="fas fa-shield-alt mr-2"></i>
@@ -98,6 +157,12 @@
                                     Aktif
                                 </span>
                             </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">OTP Doğrulama:</span>
+                                <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    Aktif
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -108,29 +173,73 @@
                         <i class="fas fa-lightbulb mr-2"></i>
                         Güvenlik Önerileri
                     </h3>
-                    <ul class="space-y-2 text-blue-800">
-                        <li class="flex items-start space-x-2">
-                            <i class="fas fa-check-circle text-blue-600 mt-1"></i>
-                            <span>Environment variable'larınızı <code class="bg-blue-200 px-2 py-1 rounded text-sm">.env</code> dosyasında saklayın</span>
-                        </li>
-                        <li class="flex items-start space-x-2">
-                            <i class="fas fa-check-circle text-blue-600 mt-1"></i>
-                            <span>Production'da <code class="bg-blue-200 px-2 py-1 rounded text-sm">DEBUG=False</code> ayarlayın</span>
-                        </li>
-                        <li class="flex items-start space-x-2">
-                            <i class="fas fa-check-circle text-blue-600 mt-1"></i>
-                            <span>Güçlü ve benzersiz şifreler kullanın</span>
-                        </li>
-                        <li class="flex items-start space-x-2">
-                            <i class="fas fa-check-circle text-blue-600 mt-1"></i>
-                            <span>API anahtarlarınızı düzenli olarak yenileyin</span>
-                        </li>
-                        <li class="flex items-start space-x-2">
-                            <i class="fas fa-check-circle text-blue-600 mt-1"></i>
-                            <span><code class="bg-blue-200 px-2 py-1 rounded text-sm">.env</code> dosyasını asla Git'e commit etmeyin</span>
-                        </li>
-                    </ul>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <ul class="space-y-2 text-blue-800">
+                            <li class="flex items-start space-x-2">
+                                <i class="fas fa-check-circle text-blue-600 mt-1"></i>
+                                <span>Environment variable'larınızı <code class="bg-blue-200 px-2 py-1 rounded text-sm">.env</code> dosyasında saklayın</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fas fa-check-circle text-blue-600 mt-1"></i>
+                                <span>Production'da <code class="bg-blue-200 px-2 py-1 rounded text-sm">DEBUG=False</code> ayarlayın</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fas fa-check-circle text-blue-600 mt-1"></i>
+                                <span>Gmail için <strong>App Password</strong> kullanın (normal şifre değil)</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fas fa-check-circle text-blue-600 mt-1"></i>
+                                <span>Admin e-posta adresini güvenli tutun</span>
+                            </li>
+                        </ul>
+                        <ul class="space-y-2 text-blue-800">
+                            <li class="flex items-start space-x-2">
+                                <i class="fas fa-check-circle text-blue-600 mt-1"></i>
+                                <span>API anahtarlarınızı düzenli olarak yenileyin</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fas fa-check-circle text-blue-600 mt-1"></i>
+                                <span><code class="bg-blue-200 px-2 py-1 rounded text-sm">.env</code> dosyasını asla Git'e commit etmeyin</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fas fa-check-circle text-blue-600 mt-1"></i>
+                                <span>OTP kodlarını kimseyle paylaşmayın</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <i class="fas fa-check-circle text-blue-600 mt-1"></i>
+                                <span>Güçlü ve benzersiz <code class="bg-blue-200 px-2 py-1 rounded text-sm">SECRET_KEY</code> kullanın</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
+
+                <!-- E-posta OTP Kurulum Rehberi -->
+                {% if not security.email_configured %}
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mt-6">
+                        <h3 class="text-lg font-semibold text-yellow-900 mb-4 flex items-center">
+                            <i class="fas fa-wrench mr-2"></i>
+                            E-posta OTP Kurulum Rehberi
+                        </h3>
+                        <div class="space-y-4 text-yellow-800">
+                            <div class="bg-yellow-100 rounded-lg p-4">
+                                <h4 class="font-semibold mb-2">1. Gmail App Password Oluşturun:</h4>
+                                <ol class="list-decimal list-inside space-y-1 text-sm">
+                                    <li>Google hesabınızda 2FA'yı aktif edin</li>
+                                    <li><a href="https://myaccount.google.com/apppasswords" target="_blank" class="text-blue-600 underline">Google App Passwords</a> sayfasına gidin</li>
+                                    <li>"AI Tweet Bot" için yeni app password oluşturun</li>
+                                    <li>Oluşturulan 16 haneli şifreyi kopyalayın</li>
+                                </ol>
+                            </div>
+                            <div class="bg-yellow-100 rounded-lg p-4">
+                                <h4 class="font-semibold mb-2">2. Environment Variables'ları Ayarlayın:</h4>
+                                <pre class="bg-gray-800 text-green-400 p-3 rounded text-sm overflow-x-auto"><code>ADMIN_EMAIL=your-admin@gmail.com
+EMAIL_ADDRESS=your-sender@gmail.com  
+EMAIL_PASSWORD=your-16-digit-app-password
+SECRET_KEY=your-very-long-secret-key-here</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
 
             {% else %}
                 <div class="text-center py-12">
