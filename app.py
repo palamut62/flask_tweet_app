@@ -209,6 +209,10 @@ EMAIL_SETTINGS = {
     'admin_email': os.environ.get('ADMIN_EMAIL', '')
 }
 
+# Terminal log sistemi için global değişkenler
+import queue
+log_queue = queue.Queue(maxsize=100)
+
 
 
 @app.route('/')
@@ -332,7 +336,7 @@ def fetch_latest_ai_articles_with_mcp():
         terminal_log("🔄 Özel kaynaklardan yeterli makale bulunamadı, MCP deneniyor...", "info")
         
         try:
-            # MCP Firecrawl kullanarak gerçek zamanlı veri çek
+            # MCP Firecrawl kullanarak gerçek zamanlı veri çek (PythonAnywhere fallback sistemi)
             from utils import mcp_firecrawl_scrape
             
             scrape_result = mcp_firecrawl_scrape({
@@ -1234,13 +1238,47 @@ def add_news_source_route():
         name = request.form.get('name', '').strip()
         url = request.form.get('url', '').strip()
         description = request.form.get('description', '').strip()
-        auto_detect = request.form.get('auto_detect', 'true').lower() == 'true'
+        
+        # Checkbox değerini doğru oku (checkbox işaretliyse 'on', değilse None)
+        auto_detect_value = request.form.get('auto_detect')
+        auto_detect = auto_detect_value == 'on'
+        
+        # Debug için log ekle
+        terminal_log(f"🔍 Form verileri - auto_detect_value: {auto_detect_value}, auto_detect: {auto_detect}", "debug")
+        
+        # Manuel selector'ları al
+        manual_selectors = None
+        
+        terminal_log(f"🔍 auto_detect durumu: {auto_detect}", "debug")
+        
+        if not auto_detect:
+            terminal_log("📝 Manuel mod aktif - Selector'ları alıyorum", "info")
+            manual_selectors = {
+                'article_container': request.form.get('article_container', '').strip(),
+                'title_selector': request.form.get('title_selector', '').strip(),
+                'link_selector': request.form.get('link_selector', '').strip(),
+                'date_selector': request.form.get('date_selector', '').strip(),
+                'summary_selector': request.form.get('summary_selector', '').strip(),
+                'base_url': request.form.get('base_url', '').strip()
+            }
+            
+            terminal_log(f"🔍 Manuel selector'lar: {manual_selectors}", "debug")
+            
+            # Manuel selector'lar için zorunlu alanları kontrol et
+            if not manual_selectors['article_container'] or not manual_selectors['title_selector'] or not manual_selectors['link_selector']:
+                terminal_log("❌ Manuel mod için zorunlu alanlar eksik!", "error")
+                flash('Manuel mod için konteyner, başlık ve link selector\'ları zorunludur!', 'error')
+                return redirect(url_for('news_sources'))
+        else:
+            # Otomatik tespit modunda manuel selector'ları temizle
+            terminal_log("🤖 Otomatik tespit modu aktif - Manuel selector'lar atlanıyor", "info")
+            manual_selectors = None
         
         if not name or not url:
             flash('Kaynak adı ve URL gerekli!', 'error')
             return redirect(url_for('news_sources'))
         
-        result = add_news_source_with_validation(name, url, description, auto_detect)
+        result = add_news_source_with_validation(name, url, description, auto_detect, manual_selectors)
         
         if result['success']:
             flash(result['message'], 'success')
@@ -1251,6 +1289,8 @@ def add_news_source_route():
                 if test_details.get('sample_articles'):
                     sample_count = len(test_details['sample_articles'])
                     flash(f'🔍 Test: {test_details["container_count"]} konteyner, {sample_count} örnek makale bulundu', 'info')
+                elif test_details.get('article_count'):
+                    flash(f'🔍 Manuel test: {test_details["article_count"]} makale bulundu', 'info')
         else:
             flash(result['message'], 'error')
             
@@ -1292,6 +1332,46 @@ def test_news_source_url():
         return jsonify({
             'success': False,
             'message': f'Test hatası: {str(e)}'
+        })
+
+@app.route('/test_manual_selectors', methods=['POST'])
+@login_required
+def test_manual_selectors():
+    """Manuel selector'ları test et"""
+    try:
+        from utils import test_manual_selectors_for_url
+        
+        data = request.get_json()
+        url = data.get('url', '').strip()
+        selectors = data.get('selectors', {})
+        
+        if not url:
+            return jsonify({
+                'success': False,
+                'error': 'URL gerekli'
+            })
+        
+        # Zorunlu selector'ları kontrol et
+        required_selectors = ['article_container', 'title_selector', 'link_selector']
+        for selector in required_selectors:
+            if not selectors.get(selector, '').strip():
+                return jsonify({
+                    'success': False,
+                    'error': f'{selector} zorunludur'
+                })
+        
+        # URL formatını kontrol et
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+        
+        result = test_manual_selectors_for_url(url, selectors)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Test hatası: {str(e)}'
         })
 
 @app.route('/remove_news_source', methods=['POST'])
@@ -1666,6 +1746,553 @@ def retry_rate_limited_tweets():
         flash(f'Retry işlemi hatası: {str(e)}', 'error')
     
     return redirect(url_for('index'))
+
+@app.route('/debug/test_article_fetch')
+@login_required
+def debug_test_article_fetch():
+    """PythonAnywhere'de makale çekme işlevini test et"""
+    try:
+        from utils import (
+            fetch_articles_from_custom_sources, 
+            fetch_latest_ai_articles_fallback,
+            fetch_latest_ai_articles,
+            load_news_sources
+        )
+        
+        test_results = {
+            "timestamp": datetime.now().isoformat(),
+            "environment": "PythonAnywhere" if not DEBUG_MODE else "Local",
+            "tests": {}
+        }
+        
+        # Test 1: Özel haber kaynakları
+        try:
+            terminal_log("🧪 Test 1: Özel haber kaynaklarını test ediliyor...", "info")
+            custom_articles = fetch_articles_from_custom_sources()
+            test_results["tests"]["custom_sources"] = {
+                "success": True,
+                "article_count": len(custom_articles) if custom_articles else 0,
+                "articles": [
+                    {
+                        "title": article.get("title", "")[:50] + "...",
+                        "url": article.get("url", ""),
+                        "source": article.get("source", "")
+                    } for article in (custom_articles[:3] if custom_articles else [])
+                ]
+            }
+            terminal_log(f"✅ Test 1 başarılı: {len(custom_articles) if custom_articles else 0} makale", "success")
+        except Exception as e:
+            test_results["tests"]["custom_sources"] = {
+                "success": False,
+                "error": str(e)
+            }
+            terminal_log(f"❌ Test 1 başarısız: {e}", "error")
+        
+        # Test 2: Fallback sistemi
+        try:
+            terminal_log("🧪 Test 2: Fallback sistemini test ediliyor...", "info")
+            fallback_articles = fetch_latest_ai_articles_fallback()
+            test_results["tests"]["fallback_system"] = {
+                "success": True,
+                "article_count": len(fallback_articles) if fallback_articles else 0,
+                "articles": [
+                    {
+                        "title": article.get("title", "")[:50] + "...",
+                        "url": article.get("url", ""),
+                        "source": article.get("source", "")
+                    } for article in (fallback_articles[:3] if fallback_articles else [])
+                ]
+            }
+            terminal_log(f"✅ Test 2 başarılı: {len(fallback_articles) if fallback_articles else 0} makale", "success")
+        except Exception as e:
+            test_results["tests"]["fallback_system"] = {
+                "success": False,
+                "error": str(e)
+            }
+            terminal_log(f"❌ Test 2 başarısız: {e}", "error")
+        
+        # Test 3: Ana makale çekme fonksiyonu
+        try:
+            terminal_log("🧪 Test 3: Ana makale çekme fonksiyonunu test ediliyor...", "info")
+            main_articles = fetch_latest_ai_articles()
+            test_results["tests"]["main_function"] = {
+                "success": True,
+                "article_count": len(main_articles) if main_articles else 0,
+                "articles": [
+                    {
+                        "title": article.get("title", "")[:50] + "...",
+                        "url": article.get("url", ""),
+                        "source": article.get("source", "")
+                    } for article in (main_articles[:3] if main_articles else [])
+                ]
+            }
+            terminal_log(f"✅ Test 3 başarılı: {len(main_articles) if main_articles else 0} makale", "success")
+        except Exception as e:
+            test_results["tests"]["main_function"] = {
+                "success": False,
+                "error": str(e)
+            }
+            terminal_log(f"❌ Test 3 başarısız: {e}", "error")
+        
+        # Test 4: Haber kaynakları yapılandırması
+        try:
+            terminal_log("🧪 Test 4: Haber kaynakları yapılandırmasını kontrol ediliyor...", "info")
+            news_config = load_news_sources()
+            enabled_sources = [s for s in news_config.get("sources", []) if s.get("enabled", True)]
+            test_results["tests"]["news_sources_config"] = {
+                "success": True,
+                "total_sources": len(news_config.get("sources", [])),
+                "enabled_sources": len(enabled_sources),
+                "sources": [
+                    {
+                        "name": source.get("name", ""),
+                        "url": source.get("url", ""),
+                        "enabled": source.get("enabled", True),
+                        "last_checked": source.get("last_checked", ""),
+                        "success_rate": source.get("success_rate", 0)
+                    } for source in enabled_sources
+                ]
+            }
+            terminal_log(f"✅ Test 4 başarılı: {len(enabled_sources)} aktif kaynak", "success")
+        except Exception as e:
+            test_results["tests"]["news_sources_config"] = {
+                "success": False,
+                "error": str(e)
+            }
+            terminal_log(f"❌ Test 4 başarısız: {e}", "error")
+        
+        # Genel sonuç
+        successful_tests = sum(1 for test in test_results["tests"].values() if test.get("success", False))
+        total_tests = len(test_results["tests"])
+        
+        test_results["summary"] = {
+            "successful_tests": successful_tests,
+            "total_tests": total_tests,
+            "success_rate": f"{(successful_tests/total_tests)*100:.1f}%" if total_tests > 0 else "0%",
+            "best_method": None
+        }
+        
+        # En iyi yöntemi belirle
+        best_content_length = 0
+        best_method = None
+        
+        for test_name, test_result in test_results["tests"].items():
+            if test_result.get("success") and test_result.get("content_length", 0) > best_content_length:
+                best_content_length = test_result.get("content_length", 0)
+                best_method = test_name
+        
+        test_results["summary"]["best_method"] = best_method
+        
+        terminal_log(f"🏁 Test tamamlandı: {successful_tests}/{total_tests} başarılı", "info")
+        if best_method:
+            terminal_log(f"🏆 En iyi yöntem: {best_method} ({best_content_length} karakter)", "success")
+        
+        return jsonify({
+            "success": True,
+            "message": f"Test tamamlandı: {successful_tests}/{total_tests} başarılı",
+            "results": test_results
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Test hatası: {e}", "error")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+@app.route('/test_manual_selector_ui')
+@login_required
+def test_manual_selector_ui():
+    """Manuel selector UI test sayfası"""
+    return render_template('test_manual_selectors.html')
+
+@app.route('/selector_guide')
+@login_required
+def selector_guide():
+    """CSS Selector bulma kılavuzu"""
+    return render_template('selector_guide_page.html')
+
+@app.route('/debug/test_add_source', methods=['POST'])
+@login_required
+def debug_test_add_source():
+    """Kaynak ekleme işlemini debug et"""
+    try:
+        # Form verilerini al
+        form_data = dict(request.form)
+        
+        terminal_log("=== KAYNAK EKLEME DEBUG ===", "info")
+        terminal_log(f"Form verileri: {form_data}", "debug")
+        
+        # Checkbox değerini kontrol et
+        auto_detect_value = request.form.get('auto_detect')
+        auto_detect = auto_detect_value == 'on'
+        
+        terminal_log(f"auto_detect_value: {auto_detect_value}", "debug")
+        terminal_log(f"auto_detect: {auto_detect}", "debug")
+        
+        # Manuel selector'ları kontrol et
+        if not auto_detect:
+            manual_selectors = {
+                'article_container': request.form.get('article_container', '').strip(),
+                'title_selector': request.form.get('title_selector', '').strip(),
+                'link_selector': request.form.get('link_selector', '').strip(),
+                'date_selector': request.form.get('date_selector', '').strip(),
+                'summary_selector': request.form.get('summary_selector', '').strip(),
+                'base_url': request.form.get('base_url', '').strip()
+            }
+            terminal_log(f"Manuel selector'lar: {manual_selectors}", "debug")
+        else:
+            terminal_log("Otomatik tespit modu - Manuel selector'lar atlanıyor", "info")
+        
+        terminal_log("=== DEBUG TAMAMLANDI ===", "info")
+        
+        return jsonify({
+            "success": True,
+            "message": "Debug tamamlandı - Terminal loglarını kontrol edin",
+            "form_data": form_data,
+            "auto_detect": auto_detect
+        })
+        
+    except Exception as e:
+        terminal_log(f"Debug hatası: {e}", "error")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+@app.route('/test_advanced_scraper', methods=['POST'])
+@login_required
+def test_advanced_scraper():
+    """Gelişmiş scraper'ı test et"""
+    try:
+        data = request.get_json()
+        url = data.get('url', '').strip()
+        
+        if not url:
+            return jsonify({
+                'success': False,
+                'error': 'URL gerekli'
+            })
+        
+        # URL formatını kontrol et
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+        
+        terminal_log(f"🧪 Gelişmiş scraper test ediliyor: {url}", "info")
+        
+        from utils import advanced_web_scraper, mcp_firecrawl_scrape
+        
+        # Test sonuçları
+        test_results = {
+            "url": url,
+            "timestamp": datetime.now().isoformat(),
+            "tests": {}
+        }
+        
+        # Test 1: Gelişmiş scraper (JavaScript ile)
+        try:
+            terminal_log("🚀 Test 1: Gelişmiş scraper (JavaScript)", "info")
+            result1 = advanced_web_scraper(url, wait_time=3, use_js=True)
+            
+            test_results["tests"]["advanced_js"] = {
+                "success": result1.get("success", False),
+                "method": result1.get("method", "unknown"),
+                "content_length": len(result1.get("content", "")),
+                "error": result1.get("error") if not result1.get("success") else None
+            }
+            
+            if result1.get("success"):
+                terminal_log(f"✅ Test 1 başarılı: {result1.get('method')} - {len(result1.get('content', ''))} karakter", "success")
+            else:
+                terminal_log(f"❌ Test 1 başarısız: {result1.get('error', 'Bilinmeyen hata')}", "error")
+                
+        except Exception as e:
+            test_results["tests"]["advanced_js"] = {
+                "success": False,
+                "error": str(e)
+            }
+            terminal_log(f"❌ Test 1 hatası: {e}", "error")
+        
+        # Test 2: Gelişmiş scraper (JavaScript olmadan)
+        try:
+            terminal_log("🔄 Test 2: Gelişmiş scraper (JavaScript olmadan)", "info")
+            result2 = advanced_web_scraper(url, wait_time=1, use_js=False)
+            
+            test_results["tests"]["advanced_no_js"] = {
+                "success": result2.get("success", False),
+                "method": result2.get("method", "unknown"),
+                "content_length": len(result2.get("content", "")),
+                "error": result2.get("error") if not result2.get("success") else None
+            }
+            
+            if result2.get("success"):
+                terminal_log(f"✅ Test 2 başarılı: {result2.get('method')} - {len(result2.get('content', ''))} karakter", "success")
+            else:
+                terminal_log(f"❌ Test 2 başarısız: {result2.get('error', 'Bilinmeyen hata')}", "error")
+                
+        except Exception as e:
+            test_results["tests"]["advanced_no_js"] = {
+                "success": False,
+                "error": str(e)
+            }
+            terminal_log(f"❌ Test 2 hatası: {e}", "error")
+        
+        # Test 3: MCP Firecrawl (gelişmiş fallback sistemi)
+        try:
+            terminal_log("🔧 Test 3: MCP Firecrawl (gelişmiş fallback)", "info")
+            result3 = mcp_firecrawl_scrape({
+                "url": url,
+                "formats": ["markdown"],
+                "onlyMainContent": True,
+                "waitFor": 2000
+            })
+            
+            test_results["tests"]["mcp_firecrawl"] = {
+                "success": result3.get("success", False),
+                "source": result3.get("source", "unknown"),
+                "content_length": len(result3.get("content", "")),
+                "error": result3.get("error") if not result3.get("success") else None
+            }
+            
+            if result3.get("success"):
+                terminal_log(f"✅ Test 3 başarılı: {result3.get('source')} - {len(result3.get('content', ''))} karakter", "success")
+            else:
+                terminal_log(f"❌ Test 3 başarısız: {result3.get('error', 'Bilinmeyen hata')}", "error")
+                
+        except Exception as e:
+            test_results["tests"]["mcp_firecrawl"] = {
+                "success": False,
+                "error": str(e)
+            }
+            terminal_log(f"❌ Test 3 hatası: {e}", "error")
+        
+        # Genel sonuç
+        successful_tests = sum(1 for test in test_results["tests"].values() if test.get("success", False))
+        total_tests = len(test_results["tests"])
+        
+        test_results["summary"] = {
+            "successful_tests": successful_tests,
+            "total_tests": total_tests,
+            "success_rate": f"{(successful_tests/total_tests)*100:.1f}%" if total_tests > 0 else "0%",
+            "best_method": None
+        }
+        
+        # En iyi yöntemi belirle
+        best_content_length = 0
+        best_method = None
+        
+        for test_name, test_result in test_results["tests"].items():
+            if test_result.get("success") and test_result.get("content_length", 0) > best_content_length:
+                best_content_length = test_result.get("content_length", 0)
+                best_method = test_name
+        
+        test_results["summary"]["best_method"] = best_method
+        
+        terminal_log(f"🏁 Test tamamlandı: {successful_tests}/{total_tests} başarılı", "info")
+        if best_method:
+            terminal_log(f"🏆 En iyi yöntem: {best_method} ({best_content_length} karakter)", "success")
+        
+        return jsonify({
+            "success": True,
+            "message": f"Test tamamlandı: {successful_tests}/{total_tests} başarılı",
+            "results": test_results
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Test hatası: {e}", "error")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+@app.route('/analyze_page_source', methods=['POST'])
+@login_required
+def analyze_page_source():
+    """Sayfa kaynağını AI ile analiz et ve selector'ları tespit et"""
+    try:
+        data = request.get_json()
+        url = data.get('url', '').strip()
+        
+        if not url:
+            return jsonify({
+                'success': False,
+                'error': 'URL gerekli'
+            })
+        
+        # URL formatını kontrol et
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+        
+        terminal_log(f"🔍 Sayfa kaynağı analiz ediliyor: {url}", "info")
+        
+        from utils import advanced_web_scraper, gemini_call
+        
+        # Sayfa kaynağını çek
+        scrape_result = advanced_web_scraper(url, wait_time=3, use_js=True, return_html=True)
+        
+        if not scrape_result.get("success"):
+            return jsonify({
+                'success': False,
+                'error': f'Sayfa kaynağı çekilemedi: {scrape_result.get("error", "Bilinmeyen hata")}'
+            })
+        
+        html_content = scrape_result.get("html", "")
+        if not html_content:
+            return jsonify({
+                'success': False,
+                'error': 'HTML içeriği bulunamadı'
+            })
+        
+        # HTML'i temizle ve kısalt (AI analizi için)
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(html_content, 'html.parser')
+        
+        # Script ve style taglarını kaldır
+        for script in soup(["script", "style", "noscript"]):
+            script.decompose()
+        
+        # Sadece body kısmını al
+        body = soup.find('body')
+        if body:
+            clean_html = str(body)[:15000]  # İlk 15KB
+        else:
+            clean_html = str(soup)[:15000]
+        
+        # AI ile analiz et
+        api_key = os.environ.get('GOOGLE_API_KEY')
+        if not api_key:
+            return jsonify({
+                'success': False,
+                'error': 'Google API anahtarı bulunamadı'
+            })
+        
+        analysis_prompt = f"""
+Bu HTML sayfa kaynağını analiz et ve haber makalelerini çekmek için en uygun CSS selector'ları belirle:
+
+URL: {url}
+
+HTML İçeriği:
+{clean_html}
+
+Lütfen şu bilgileri JSON formatında döndür:
+{{
+    "analysis": "Sayfa yapısı hakkında kısa analiz",
+    "selectors": {{
+        "article_container": "Her makaleyi içeren ana konteyner selector",
+        "title_selector": "Makale başlığı selector",
+        "link_selector": "Makale linki selector", 
+        "date_selector": "Tarih selector (varsa)",
+        "summary_selector": "Özet selector (varsa)"
+    }},
+    "confidence": "Yüksek/Orta/Düşük",
+    "notes": "Ek notlar ve öneriler"
+}}
+
+Sadece JSON döndür, başka açıklama ekleme.
+"""
+        
+        terminal_log("🤖 AI analizi başlatılıyor...", "info")
+        ai_response = gemini_call(analysis_prompt, api_key)
+        
+        if not ai_response:
+            return jsonify({
+                'success': False,
+                'error': 'AI analizi başarısız oldu'
+            })
+        
+        # JSON parse et
+        try:
+            import json
+            # AI response'dan JSON kısmını çıkar
+            json_start = ai_response.find('{')
+            json_end = ai_response.rfind('}') + 1
+            
+            if json_start != -1 and json_end != -1:
+                json_str = ai_response[json_start:json_end]
+                ai_analysis = json.loads(json_str)
+            else:
+                raise ValueError("JSON bulunamadı")
+                
+        except Exception as e:
+            terminal_log(f"❌ AI response parse hatası: {e}", "error")
+            # Fallback analiz
+            ai_analysis = {
+                "analysis": "Otomatik analiz yapıldı",
+                "selectors": {
+                    "article_container": ".article, .post, .entry",
+                    "title_selector": "h1, h2, h3",
+                    "link_selector": "a",
+                    "date_selector": ".date, time, .published",
+                    "summary_selector": ".excerpt, .summary, p"
+                },
+                "confidence": "Düşük",
+                "notes": "AI analizi başarısız, genel selector'lar önerildi"
+            }
+        
+        # HTML'i highlight'la (selector'ları işaretle)
+        highlighted_html = highlight_selectors_in_html(html_content, ai_analysis.get("selectors", {}))
+        
+        terminal_log("✅ AI analizi tamamlandı", "success")
+        
+        return jsonify({
+            'success': True,
+            'url': url,
+            'html_content': highlighted_html[:50000],  # İlk 50KB
+            'ai_analysis': ai_analysis,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Sayfa analizi hatası: {e}", "error")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })
+
+def highlight_selectors_in_html(html_content, selectors):
+    """HTML içeriğinde selector'ları renklendir"""
+    try:
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(html_content, 'html.parser')
+        
+        # Selector renkleri
+        selector_colors = {
+            'article_container': '#ff6b6b',  # Kırmızı
+            'title_selector': '#4ecdc4',    # Turkuaz
+            'link_selector': '#45b7d1',     # Mavi
+            'date_selector': '#96ceb4',     # Yeşil
+            'summary_selector': '#feca57'   # Sarı
+        }
+        
+        # Her selector için elementleri bul ve işaretle
+        for selector_name, selector in selectors.items():
+            if not selector:
+                continue
+                
+            color = selector_colors.get(selector_name, '#cccccc')
+            
+            try:
+                # CSS selector'ı parse et
+                elements = soup.select(selector)
+                
+                for element in elements[:10]:  # İlk 10 elementi işaretle
+                    # Mevcut style'ı koru ve yeni style ekle
+                    current_style = element.get('style', '')
+                    new_style = f"{current_style}; background-color: {color}; border: 2px solid {color}; opacity: 0.8;"
+                    element['style'] = new_style
+                    element['data-selector'] = selector_name
+                    element['data-selector-value'] = selector
+                    element['title'] = f"{selector_name}: {selector}"
+                    
+            except Exception as e:
+                terminal_log(f"⚠️ Selector işaretleme hatası ({selector}): {e}", "warning")
+                continue
+        
+        return str(soup)
+        
+    except Exception as e:
+        terminal_log(f"❌ HTML highlight hatası: {e}", "error")
+        return html_content
 
 if __name__ == '__main__':
     # Arka plan zamanlayıcısını başlat

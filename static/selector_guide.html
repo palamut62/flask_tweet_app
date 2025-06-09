@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Selector Bulma Kılavuzu</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .step { background: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin: 15px 0; }
+        .code { background: #f1f3f4; padding: 10px; border-radius: 5px; font-family: monospace; }
+        .example { background: #e8f5e8; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; }
+        .tip { background: #d1ecf1; border: 1px solid #bee5eb; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🎯 CSS Selector Bulma Kılavuzu</h1>
+    
+    <h2>1. Tarayıcı Developer Tools ile Selector Bulma</h2>
+    
+    <div class="step">
+        <h3>Adım 1: Developer Tools'u Açın</h3>
+        <p><strong>F12</strong> tuşuna basın veya sağ tıklayıp <strong>"İncele"</strong> seçin</p>
+    </div>
+    
+    <div class="step">
+        <h3>Adım 2: Element'i Seçin</h3>
+        <p>Makale başlığına sağ tıklayıp <strong>"Inspect Element"</strong> seçin</p>
+    </div>
+    
+    <div class="step">
+        <h3>Adım 3: Selector'ı Kopyalayın</h3>
+        <p>Seçilen element üzerinde sağ tıklayıp:</p>
+        <ul>
+            <li><strong>Copy → Copy selector</strong> (Chrome/Edge)</li>
+            <li><strong>Copy → CSS Selector</strong> (Firefox)</li>
+        </ul>
+    </div>
+    
+    <h2>2. CSS Class Türleri ve Kullanımı</h2>
+    
+    <div class="example">
+        <h3>Tek Class</h3>
+        <div class="code">.article-title</div>
+        <p>Tek bir CSS class'ı seçer</p>
+    </div>
+    
+    <div class="example">
+        <h3>Birden Fazla Class</h3>
+        <div class="code">.article-item.featured</div>
+        <p>Hem "article-item" hem de "featured" class'ına sahip elementleri seçer</p>
+    </div>
+    
+    <div class="example">
+        <h3>Alt Element Seçimi</h3>
+        <div class="code">.article-container .title</div>
+        <p>"article-container" class'ı içindeki "title" class'ına sahip elementleri seçer</p>
+    </div>
+    
+    <div class="example">
+        <h3>Direkt Alt Element</h3>
+        <div class="code">.article-list > .article-item</div>
+        <p>"article-list" class'ının direkt alt elementlerinden "article-item" class'ına sahip olanları seçer</p>
+    </div>
+    
+    <h2>3. Popüler Haber Sitelerinde Gerçek Örnekler</h2>
+    
+    <div class="example">
+        <h3>TechCrunch</h3>
+        <div class="code">
+Makale Konteyner: .post-block<br>
+Başlık Selector: h2.post-block__title a<br>
+Link Selector: h2.post-block__title a<br>
+Tarih Selector: .river-byline time<br>
+Özet Selector: .post-block__content
+        </div>
+    </div>
+    
+    <div class="example">
+        <h3>The Verge</h3>
+        <div class="code">
+Makale Konteyner: .c-entry-box<br>
+Başlık Selector: h2 a<br>
+Link Selector: h2 a<br>
+Tarih Selector: .c-byline time<br>
+Özet Selector: .c-entry-summary p
+        </div>
+    </div>
+    
+    <div class="example">
+        <h3>Wired</h3>
+        <div class="code">
+Makale Konteyner: .SummaryItemWrapper<br>
+Başlık Selector: h3 a<br>
+Link Selector: h3 a<br>
+Tarih Selector: .SummaryItemPublishDate<br>
+Özet Selector: .SummaryItemDek
+        </div>
+    </div>
+    
+    <h2>4. Selector Optimizasyonu</h2>
+    
+    <div class="tip">
+        <h3>💡 İyi Selector Özellikleri</h3>
+        <ul>
+            <li><strong>Kısa ve öz:</strong> <code>.article h2</code> yerine <code>.article-title</code></li>
+            <li><strong>Stabil:</strong> Sayfa güncellemelerinde değişmeyen class'lar</li>
+            <li><strong>Benzersiz:</strong> Sadece istenen elementleri seçen</li>
+            <li><strong>Genel:</strong> Tüm makaleler için çalışan</li>
+        </ul>
+    </div>
+    
+    <div class="warning">
+        <h3>⚠️ Kaçınılması Gerekenler</h3>
+        <ul>
+            <li><strong>Çok uzun selector'lar:</strong> <code>body > div > div > div > article</code></li>
+            <li><strong>ID'ler:</strong> <code>#article-123</code> (her makale için farklı)</li>
+            <li><strong>Pozisyon bazlı:</strong> <code>:nth-child(3)</code> (değişken)</li>
+            <li><strong>Inline style'lar:</strong> <code>[style="color: red"]</code></li>
+        </ul>
+    </div>
+    
+    <h2>5. Test ve Doğrulama</h2>
+    
+    <div class="step">
+        <h3>Console'da Test Etme</h3>
+        <p>Developer Tools'da Console sekmesine geçin ve şu komutu çalıştırın:</p>
+        <div class="code">document.querySelectorAll('.your-selector')</div>
+        <p>Bu komut selector'ınızın kaç element bulduğunu gösterir.</p>
+    </div>
+    
+    <div class="step">
+        <h3>Uygulama İçi Test</h3>
+        <p>Haber kaynağı formunda <strong>"Manuel Selector'ları Test Et"</strong> butonunu kullanın.</p>
+    </div>
+    
+    <h2>6. Yaygın Sorunlar ve Çözümleri</h2>
+    
+    <div class="warning">
+        <h3>Problem: Hiç Element Bulunamıyor</h3>
+        <ul>
+            <li>Selector'da yazım hatası var mı kontrol edin</li>
+            <li>Class adında nokta (.) var mı kontrol edin</li>
+            <li>Element dinamik olarak yükleniyor olabilir</li>
+        </ul>
+    </div>
+    
+    <div class="warning">
+        <h3>Problem: Çok Fazla Element Buluyor</h3>
+        <ul>
+            <li>Daha spesifik bir selector kullanın</li>
+            <li>Parent element ile birleştirin</li>
+            <li>Ek class'lar ekleyin</li>
+        </ul>
+    </div>
+    
+    <div class="warning">
+        <h3>Problem: Linkler Çalışmıyor</h3>
+        <ul>
+            <li>Base URL'yi doğru ayarlayın</li>
+            <li>Relative linkler için domain ekleyin</li>
+            <li>href attribute'unu kontrol edin</li>
+        </ul>
+    </div>
+    
+    <h2>7. Pratik Örnekler</h2>
+    
+    <div class="example">
+        <h3>Örnek 1: Blog Sitesi</h3>
+        <p><strong>HTML Yapısı:</strong></p>
+        <div class="code">
+&lt;article class="post"&gt;<br>
+&nbsp;&nbsp;&lt;h2 class="post-title"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;a href="/article-url"&gt;Makale Başlığı&lt;/a&gt;<br>
+&nbsp;&nbsp;&lt;/h2&gt;<br>
+&nbsp;&nbsp;&lt;div class="post-meta"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;time class="post-date"&gt;2025-01-08&lt;/time&gt;<br>
+&nbsp;&nbsp;&lt;/div&gt;<br>
+&nbsp;&nbsp;&lt;p class="post-excerpt"&gt;Makale özeti...&lt;/p&gt;<br>
+&lt;/article&gt;
+        </div>
+        <p><strong>Selector'lar:</strong></p>
+        <div class="code">
+Konteyner: .post<br>
+Başlık: .post-title a<br>
+Link: .post-title a<br>
+Tarih: .post-date<br>
+Özet: .post-excerpt
+        </div>
+    </div>
+    
+    <div class="example">
+        <h3>Örnek 2: Haber Sitesi</h3>
+        <p><strong>HTML Yapısı:</strong></p>
+        <div class="code">
+&lt;div class="news-item featured"&gt;<br>
+&nbsp;&nbsp;&lt;h3&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;a href="/news/123" class="news-link"&gt;Haber Başlığı&lt;/a&gt;<br>
+&nbsp;&nbsp;&lt;/h3&gt;<br>
+&nbsp;&nbsp;&lt;span class="news-date"&gt;8 Ocak 2025&lt;/span&gt;<br>
+&nbsp;&nbsp;&lt;div class="news-summary"&gt;Haber özeti...&lt;/div&gt;<br>
+&lt;/div&gt;
+        </div>
+        <p><strong>Selector'lar:</strong></p>
+        <div class="code">
+Konteyner: .news-item<br>
+Başlık: h3 .news-link<br>
+Link: .news-link<br>
+Tarih: .news-date<br>
+Özet: .news-summary
+        </div>
+    </div>
+    
+    <h2>8. Gelişmiş Selector Teknikleri</h2>
+    
+    <div class="tip">
+        <h3>Attribute Selector'ları</h3>
+        <div class="code">
+a[href*="/article/"]  /* href'inde "/article/" geçen linkler */<br>
+div[class*="post"]    /* class'ında "post" geçen div'ler */<br>
+img[alt]              /* alt attribute'u olan resimler */
+        </div>
+    </div>
+    
+    <div class="tip">
+        <h3>Pseudo-class'lar</h3>
+        <div class="code">
+.article:first-child   /* İlk makale */<br>
+.article:last-child    /* Son makale */<br>
+.article:nth-child(2)  /* İkinci makale */<br>
+a:not(.external)       /* external class'ı olmayan linkler */
+        </div>
+    </div>
+    
+    <div class="tip">
+        <h3>Kombinasyonlar</h3>
+        <div class="code">
+.article h2, .article h3     /* h2 VEYA h3 */<br>
+.article.featured            /* article VE featured class'ı */<br>
+.article > .title            /* article'ın direkt alt elementi title */
+        </div>
+    </div>
+    
+    <p style="text-align: center; margin-top: 40px; color: #666;">
+        <strong>Bu kılavuzu kullanarak herhangi bir haber sitesi için doğru selector'ları bulabilirsiniz!</strong>
+    </p>
+</body>
+</html> 

@@ -56,7 +56,7 @@
                 <h2 class="text-2xl font-bold text-gray-900">Yeni Haber Kaynağı Ekle</h2>
             </div>
             
-            <form method="POST" action="{{ url_for('add_news_source_route') }}" class="space-y-6" id="addSourceForm">
+            <form method="POST" action="{{ url_for('add_news_source_route') }}" class="space-y-6" id="addSourceForm" onsubmit="debugFormSubmit(event)">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="space-y-2">
                         <label for="name" class="block text-sm font-medium text-gray-700">
@@ -79,13 +79,24 @@
                                    name="url" 
                                    required 
                                    placeholder="https://example.com/ai-news"
-                                   class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
-                            <button type="button" 
-                                    id="testUrlBtn"
-                                    onclick="testUrlBeforeAdd()"
-                                    class="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200 transition-all duration-200">
-                                <i class="fas fa-vial"></i>
-                            </button>
+                                   onchange="onUrlChange()"
+                                   class="w-full px-4 py-3 pr-24 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
+                            <div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-1">
+                                <button type="button" 
+                                        id="analyzePageBtn"
+                                        onclick="analyzePageSource()"
+                                        class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 transition-all duration-200"
+                                        title="Sayfa kaynağını AI ile analiz et">
+                                    <i class="fas fa-brain"></i>
+                                </button>
+                                <button type="button" 
+                                        id="testUrlBtn"
+                                        onclick="testUrlBeforeAdd()"
+                                        class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition-all duration-200"
+                                        title="URL'yi test et">
+                                    <i class="fas fa-vial"></i>
+                                </button>
+                            </div>
                         </div>
                         <div id="urlTestResult" class="text-sm mt-1 hidden"></div>
                     </div>
@@ -107,24 +118,174 @@
                         <input type="checkbox" 
                                id="auto_detect" 
                                name="auto_detect" 
+                               value="on"
                                checked 
+                               onchange="toggleManualSelectors()"
                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
                         <label for="auto_detect" class="text-sm font-medium text-gray-700">
                             Otomatik Selector Tespiti
                         </label>
                         <i class="fas fa-info-circle text-blue-500" title="Sayfa yapısını otomatik analiz ederek en uygun selector'ları bulur"></i>
+                        
+                        <!-- Debug Butonu -->
+                        <button type="button" 
+                                onclick="debugToggle()" 
+                                class="ml-4 px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs hover:bg-gray-300">
+                            Debug
+                        </button>
                     </div>
                     <p class="text-xs text-gray-600 mt-2 ml-7">
                         Önerilen: Sayfa yapısını otomatik analiz ederek makale selector'larını tespit eder. 
-                        Bu seçenek kapalıysa genel selector'lar kullanılır.
+                        Bu seçenek kapalıysa manuel selector'lar kullanılır.
                     </p>
+                    
+                    <!-- Debug Bilgisi -->
+                    <div id="debugInfo" class="mt-3 p-2 bg-gray-100 border border-gray-300 rounded text-xs text-gray-700 hidden">
+                        <strong>Debug:</strong> 
+                        <span id="debugStatus">Checkbox durumu kontrol ediliyor...</span>
+                    </div>
+                </div>
+
+                <!-- Manuel Selector'lar (Otomatik tespit kapalıysa gösterilir) -->
+                <div id="manualSelectorsSection" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 hidden">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <i class="fas fa-code text-yellow-600"></i>
+                        <h3 class="text-lg font-medium text-gray-900">Manuel CSS Selector'ları</h3>
+                        <button type="button" 
+                                onclick="showSelectorHelp()" 
+                                class="text-yellow-600 hover:text-yellow-800">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                        <a href="{{ url_for('selector_guide') }}" 
+                           target="_blank"
+                           class="text-blue-600 hover:text-blue-800 text-sm">
+                            <i class="fas fa-external-link-alt mr-1"></i>
+                            Detaylı Kılavuz
+                        </a>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label for="article_container" class="block text-sm font-medium text-gray-700">
+                                Makale Konteyner Selector *
+                            </label>
+                            <input type="text" 
+                                   id="article_container" 
+                                   name="article_container" 
+                                   placeholder="örn: .article-item, article, .post"
+                                   class="manual-selector-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
+                            <p class="text-xs text-gray-600">Her makaleyi içeren ana konteyner</p>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="title_selector" class="block text-sm font-medium text-gray-700">
+                                Başlık Selector *
+                            </label>
+                            <input type="text" 
+                                   id="title_selector" 
+                                   name="title_selector" 
+                                   placeholder="örn: h2 a, .title, h3"
+                                   class="manual-selector-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
+                            <p class="text-xs text-gray-600">Makale başlığını içeren element</p>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="link_selector" class="block text-sm font-medium text-gray-700">
+                                Link Selector *
+                            </label>
+                            <input type="text" 
+                                   id="link_selector" 
+                                   name="link_selector" 
+                                   placeholder="örn: a, .read-more, h2 a"
+                                   class="manual-selector-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
+                            <p class="text-xs text-gray-600">Makale linkini içeren element</p>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="date_selector" class="block text-sm font-medium text-gray-700">
+                                Tarih Selector
+                            </label>
+                            <input type="text" 
+                                   id="date_selector" 
+                                   name="date_selector" 
+                                   placeholder="örn: .date, time, .published"
+                                   class="manual-selector-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
+                            <p class="text-xs text-gray-600">Yayın tarihini içeren element (opsiyonel)</p>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="summary_selector" class="block text-sm font-medium text-gray-700">
+                                Özet Selector
+                            </label>
+                            <input type="text" 
+                                   id="summary_selector" 
+                                   name="summary_selector" 
+                                   placeholder="örn: .excerpt, .summary, p"
+                                   class="manual-selector-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
+                            <p class="text-xs text-gray-600">Makale özetini içeren element (opsiyonel)</p>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label for="base_url" class="block text-sm font-medium text-gray-700">
+                                Base URL
+                            </label>
+                            <input type="text" 
+                                   id="base_url" 
+                                   name="base_url" 
+                                   placeholder="örn: https://example.com"
+                                   class="manual-selector-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
+                            <p class="text-xs text-gray-600">Relative linkler için base URL (opsiyonel)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-lightbulb text-yellow-600 mt-0.5"></i>
+                            <div class="text-sm text-yellow-800">
+                                <p class="font-medium mb-1">💡 Selector Bulma İpuçları:</p>
+                                <ul class="text-xs space-y-1">
+                                    <li>• <strong>F12</strong> ile Developer Tools'u açın</li>
+                                    <li>• Makale elementine sağ tıklayıp <strong>"Inspect"</strong> seçin</li>
+                                    <li>• Element üzerinde sağ tıklayıp <strong>"Copy → Copy selector"</strong> seçin</li>
+                                    <li>• Birden fazla makale için ortak selector kullanın</li>
+                                    <li>• <strong>Class'lar:</strong> <code>.article-title</code>, <code>.post h2</code></li>
+                                    <li>• <strong>Kombinasyonlar:</strong> <code>.container .title a</code></li>
+                                </ul>
+                                <div class="mt-2 pt-2 border-t border-yellow-200">
+                                    <a href="{{ url_for('selector_guide') }}" 
+                                       target="_blank"
+                                       class="text-blue-700 hover:text-blue-900 font-medium">
+                                        📖 Detaylı Kılavuz ve Örnekler →
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex justify-end">
+                        <button type="button" 
+                                onclick="testManualSelectors()" 
+                                class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-all duration-200 text-sm">
+                            <i class="fas fa-vial mr-2"></i>
+                            Manuel Selector'ları Test Et
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-                    <button type="submit" class="btn-primary flex items-center space-x-2" id="submitBtn">
-                        <i class="fas fa-plus"></i>
-                        <span>Kaynak Ekle</span>
-                    </button>
+                    <div class="flex space-x-3">
+                        <button type="submit" class="btn-primary flex items-center space-x-2" id="submitBtn">
+                            <i class="fas fa-plus"></i>
+                            <span>Kaynak Ekle</span>
+                        </button>
+                        
+                        <button type="button" 
+                                onclick="debugAddSource()" 
+                                class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 text-sm">
+                            <i class="fas fa-bug mr-2"></i>
+                            Debug
+                        </button>
+                    </div>
                     
                     <div class="text-sm text-gray-600">
                         <i class="fas fa-info-circle mr-2"></i>
@@ -233,7 +394,7 @@
 
 <!-- Test Sonucu Modal -->
 <div id="testModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+    <div class="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">Test Sonucu</h3>
             <button onclick="closeTestModal()" class="text-gray-400 hover:text-gray-600">
@@ -249,7 +410,434 @@
     </div>
 </div>
 
+<!-- Sayfa Kaynağı Analiz Modal -->
+<div id="pageSourceModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl max-w-7xl w-full mx-4 max-h-[95vh] flex flex-col">
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center p-6 border-b border-gray-200">
+            <div>
+                <h3 class="text-xl font-semibold text-gray-900">🧠 AI Sayfa Kaynağı Analizi</h3>
+                <p class="text-sm text-gray-600 mt-1">Sayfa yapısı analiz ediliyor ve selector'lar otomatik tespit ediliyor</p>
+            </div>
+            <button onclick="closePageSourceModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <!-- Modal Content -->
+        <div class="flex-1 flex overflow-hidden">
+            <!-- Sol Panel: AI Analizi -->
+            <div class="w-1/3 p-6 border-r border-gray-200 overflow-y-auto">
+                <div id="aiAnalysisContent">
+                    <div class="text-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                        <p class="text-gray-600">AI analizi yapılıyor...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sağ Panel: HTML Kaynağı -->
+            <div class="w-2/3 flex flex-col">
+                <!-- Toolbar -->
+                <div class="p-4 border-b border-gray-200 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-medium text-gray-900">Sayfa Kaynağı (Renklendirilmiş)</h4>
+                        <div class="flex items-center space-x-2">
+                            <div class="flex items-center space-x-4 text-xs">
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 bg-red-400 rounded mr-1"></div>
+                                    <span>Konteyner</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 bg-teal-400 rounded mr-1"></div>
+                                    <span>Başlık</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 bg-blue-400 rounded mr-1"></div>
+                                    <span>Link</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 bg-green-400 rounded mr-1"></div>
+                                    <span>Tarih</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-3 h-3 bg-yellow-400 rounded mr-1"></div>
+                                    <span>Özet</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- HTML Content -->
+                <div class="flex-1 overflow-y-auto">
+                    <div id="htmlSourceContent" class="p-4 font-mono text-xs bg-gray-900 text-green-400 min-h-full">
+                        <div class="text-center py-8">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-400 mx-auto mb-4"></div>
+                            <p class="text-green-400">Sayfa kaynağı yükleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Footer -->
+        <div class="p-6 border-t border-gray-200 bg-gray-50">
+            <div class="flex justify-between items-center">
+                <div class="text-sm text-gray-600">
+                    💡 Renkli alanlar tıklanabilir - Selector'ı kopyalamak için tıklayın
+                </div>
+                <div class="flex space-x-3">
+                    <button onclick="applyDetectedSelectors()" 
+                            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200">
+                        <i class="fas fa-magic mr-2"></i>
+                        Tespit Edilen Selector'ları Uygula
+                    </button>
+                    <button onclick="closePageSourceModal()" 
+                            class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200">
+                        Kapat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Selector Yardım Modal -->
+<div id="selectorHelpModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">CSS Selector Yardımı</h3>
+            <button onclick="closeSelectorHelpModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="space-y-6">
+            <!-- Temel Selector'lar -->
+            <div>
+                <h4 class="text-md font-semibold text-gray-900 mb-3">🎯 Temel CSS Selector'ları</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <code class="text-sm font-mono text-blue-600">.class-name</code>
+                        <p class="text-xs text-gray-600 mt-1">Class ile seçim</p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <code class="text-sm font-mono text-blue-600">#id-name</code>
+                        <p class="text-xs text-gray-600 mt-1">ID ile seçim</p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <code class="text-sm font-mono text-blue-600">tag</code>
+                        <p class="text-xs text-gray-600 mt-1">HTML tag ile seçim</p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <code class="text-sm font-mono text-blue-600">parent child</code>
+                        <p class="text-xs text-gray-600 mt-1">Alt element seçimi</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Örnek Siteler -->
+            <div>
+                <h4 class="text-md font-semibold text-gray-900 mb-3">📰 Popüler Haber Sitelerinde Örnek Selector'lar</h4>
+                <div class="space-y-3">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h5 class="font-medium text-gray-900 mb-2">TechCrunch</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                            <div><strong>Konteyner:</strong> <code class="text-blue-600">.post-block</code></div>
+                            <div><strong>Başlık:</strong> <code class="text-blue-600">h2 a</code></div>
+                            <div><strong>Link:</strong> <code class="text-blue-600">h2 a</code></div>
+                            <div><strong>Tarih:</strong> <code class="text-blue-600">.river-byline time</code></div>
+                        </div>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h5 class="font-medium text-gray-900 mb-2">The Verge</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                            <div><strong>Konteyner:</strong> <code class="text-blue-600">.c-entry-box</code></div>
+                            <div><strong>Başlık:</strong> <code class="text-blue-600">h2 a</code></div>
+                            <div><strong>Link:</strong> <code class="text-blue-600">h2 a</code></div>
+                            <div><strong>Tarih:</strong> <code class="text-blue-600">.c-byline time</code></div>
+                        </div>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h5 class="font-medium text-gray-900 mb-2">Wired</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                            <div><strong>Konteyner:</strong> <code class="text-blue-600">.SummaryItemWrapper</code></div>
+                            <div><strong>Başlık:</strong> <code class="text-blue-600">h3 a</code></div>
+                            <div><strong>Link:</strong> <code class="text-blue-600">h3 a</code></div>
+                            <div><strong>Tarih:</strong> <code class="text-blue-600">.SummaryItemPublishDate</code></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Adım Adım Kılavuz -->
+            <div>
+                <h4 class="text-md font-semibold text-gray-900 mb-3">🔍 Adım Adım Selector Bulma</h4>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <ol class="text-sm space-y-2">
+                        <li><strong>1.</strong> Hedef siteyi tarayıcıda açın</li>
+                        <li><strong>2.</strong> F12 tuşuna basarak Developer Tools'u açın</li>
+                        <li><strong>3.</strong> Bir makale başlığına sağ tıklayıp "Inspect" seçin</li>
+                        <li><strong>4.</strong> Seçilen element üzerinde sağ tıklayıp "Copy → Copy selector" seçin</li>
+                        <li><strong>5.</strong> Kopyalanan selector'ı test edin</li>
+                        <li><strong>6.</strong> Gerekirse selector'ı sadeleştirin (çok uzunsa)</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <!-- İpuçları -->
+            <div>
+                <h4 class="text-md font-semibold text-gray-900 mb-3">💡 İpuçları</h4>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <ul class="text-sm space-y-1">
+                        <li>• Çok spesifik selector'lar yerine genel olanları tercih edin</li>
+                        <li>• Birden fazla makale için çalıştığından emin olun</li>
+                        <li>• Relative linkler için base URL'yi unutmayın</li>
+                        <li>• Tarih ve özet selector'ları opsiyoneldir</li>
+                        <li>• Test butonunu kullanarak selector'ları doğrulayın</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-6 text-right">
+            <button onclick="closeSelectorHelpModal()" class="btn-primary">Anladım</button>
+        </div>
+    </div>
+</div>
+
 <script>
+// Debug fonksiyonu
+function debugToggle() {
+    const debugInfo = document.getElementById('debugInfo');
+    const debugStatus = document.getElementById('debugStatus');
+    const autoDetect = document.getElementById('auto_detect');
+    const manualSection = document.getElementById('manualSelectorsSection');
+    
+    if (debugInfo.classList.contains('hidden')) {
+        debugInfo.classList.remove('hidden');
+        updateDebugStatus();
+    } else {
+        debugInfo.classList.add('hidden');
+    }
+}
+
+function updateDebugStatus() {
+    const debugStatus = document.getElementById('debugStatus');
+    const autoDetect = document.getElementById('auto_detect');
+    const manualSection = document.getElementById('manualSelectorsSection');
+    
+    const status = {
+        'Checkbox checked': autoDetect ? autoDetect.checked : 'Element bulunamadı',
+        'Manuel section exists': manualSection ? 'Var' : 'Yok',
+        'Manuel section hidden': manualSection ? manualSection.classList.contains('hidden') : 'Element yok',
+        'Manuel section classes': manualSection ? manualSection.className : 'Element yok'
+    };
+    
+    debugStatus.innerHTML = Object.entries(status).map(([key, value]) => 
+        `${key}: <strong>${value}</strong>`
+    ).join('<br>');
+}
+
+// Manuel selector'ları göster/gizle
+function toggleManualSelectors() {
+    const autoDetect = document.getElementById('auto_detect');
+    const manualSection = document.getElementById('manualSelectorsSection');
+    
+    console.log('toggleManualSelectors çağrıldı');
+    console.log('autoDetect:', autoDetect);
+    console.log('autoDetect.checked:', autoDetect ? autoDetect.checked : 'Element yok');
+    console.log('manualSection:', manualSection);
+    
+    if (!autoDetect || !manualSection) {
+        console.error('Gerekli elementler bulunamadı!');
+        return;
+    }
+    
+    if (autoDetect.checked) {
+        console.log('Otomatik tespit aktif - Manuel bölüm gizleniyor');
+        manualSection.classList.add('hidden');
+        // Manuel selector'ları temizle ve disable et
+        clearManualSelectors();
+    } else {
+        console.log('Manuel mod aktif - Manuel bölüm gösteriliyor');
+        manualSection.classList.remove('hidden');
+        // Manuel selector'ları aktif et
+        enableManualSelectors();
+    }
+    
+    // Debug bilgisini güncelle
+    if (!document.getElementById('debugInfo').classList.contains('hidden')) {
+        updateDebugStatus();
+    }
+}
+
+// Manuel selector'ları temizle ve disable et
+function clearManualSelectors() {
+    const manualInputs = document.querySelectorAll('.manual-selector-input');
+    manualInputs.forEach(input => {
+        input.value = '';
+        // Disabled yerine readonly kullan (form'a dahil olsun ama düzenlenemesin)
+        input.readOnly = true;
+        input.style.backgroundColor = '#f9fafb';
+        input.style.color = '#9ca3af';
+        input.style.cursor = 'not-allowed';
+    });
+}
+
+// Manuel selector'ları aktif et
+function enableManualSelectors() {
+    const manualInputs = document.querySelectorAll('.manual-selector-input');
+    manualInputs.forEach(input => {
+        input.readOnly = false;
+        input.style.backgroundColor = '';
+        input.style.color = '';
+        input.style.cursor = '';
+    });
+}
+
+// Selector yardım modalını göster
+function showSelectorHelp() {
+    const modal = document.getElementById('selectorHelpModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeSelectorHelpModal() {
+    const modal = document.getElementById('selectorHelpModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Manuel selector'ları test et
+function testManualSelectors() {
+    const url = document.getElementById('url').value.trim();
+    const articleContainer = document.getElementById('article_container').value.trim();
+    const titleSelector = document.getElementById('title_selector').value.trim();
+    const linkSelector = document.getElementById('link_selector').value.trim();
+    const dateSelector = document.getElementById('date_selector').value.trim();
+    const summarySelector = document.getElementById('summary_selector').value.trim();
+    const baseUrl = document.getElementById('base_url').value.trim();
+    
+    if (!url) {
+        alert('Önce URL girin!');
+        return;
+    }
+    
+    if (!articleContainer || !titleSelector || !linkSelector) {
+        alert('Konteyner, başlık ve link selector\'ları zorunludur!');
+        return;
+    }
+    
+    // Test butonunu disable et
+    const testBtn = event.target;
+    testBtn.disabled = true;
+    testBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Test Ediliyor...';
+    
+    fetch('/test_manual_selectors', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            url: url,
+            selectors: {
+                article_container: articleContainer,
+                title_selector: titleSelector,
+                link_selector: linkSelector,
+                date_selector: dateSelector,
+                summary_selector: summarySelector,
+                base_url: baseUrl
+            }
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        showManualTestResult(data);
+        // Test butonunu tekrar aktif et
+        testBtn.disabled = false;
+        testBtn.innerHTML = '<i class="fas fa-vial mr-2"></i>Manuel Selector\'ları Test Et';
+    })
+    .catch(error => {
+        showManualTestResult({success: false, error: 'Test sırasında hata oluştu: ' + error});
+        // Test butonunu tekrar aktif et
+        testBtn.disabled = false;
+        testBtn.innerHTML = '<i class="fas fa-vial mr-2"></i>Manuel Selector\'ları Test Et';
+    });
+}
+
+function showManualTestResult(data) {
+    const modal = document.getElementById('testModal');
+    const resultDiv = document.getElementById('testResult');
+    
+    if (data.success) {
+        resultDiv.innerHTML = `
+            <div class="flex items-center space-x-2 text-green-600">
+                <i class="fas fa-check-circle"></i>
+                <span class="font-medium">Manuel Selector Test Başarılı!</span>
+            </div>
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p class="text-sm text-green-800 mb-3">
+                    <strong>Bulunan Makale Sayısı:</strong> ${data.article_count}
+                </p>
+                ${data.articles && data.articles.length > 0 ? `
+                    <div class="space-y-2">
+                        <p class="text-sm font-medium text-green-800">Tespit Edilen Makaleler:</p>
+                        <div class="space-y-2 max-h-60 overflow-y-auto">
+                            ${data.articles.map(article => `
+                                <div class="bg-white border border-green-200 rounded p-3">
+                                    <h4 class="text-sm font-medium text-gray-900">${article.title || 'Başlık bulunamadı'}</h4>
+                                    <p class="text-xs text-gray-600 mt-1">
+                                        <strong>Link:</strong> ${article.url || 'Link bulunamadı'}
+                                    </p>
+                                    ${article.date ? `<p class="text-xs text-gray-600"><strong>Tarih:</strong> ${article.date}</p>` : ''}
+                                    ${article.summary ? `<p class="text-xs text-gray-600"><strong>Özet:</strong> ${article.summary.substring(0, 100)}...</p>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                <div class="mt-3 p-2 bg-green-100 rounded">
+                    <p class="text-xs text-green-700">
+                        ✅ Selector'larınız doğru çalışıyor! Kaynağı ekleyebilirsiniz.
+                    </p>
+                </div>
+            </div>
+        `;
+    } else {
+        resultDiv.innerHTML = `
+            <div class="flex items-center space-x-2 text-red-600">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span class="font-medium">Manuel Selector Test Başarısız!</span>
+            </div>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p class="text-sm text-red-800 mb-3">${data.error}</p>
+                ${data.details ? `
+                    <div class="mt-3">
+                        <p class="text-sm font-medium text-red-800">Detaylar:</p>
+                        <ul class="text-xs text-red-700 mt-1 space-y-1">
+                            ${Object.entries(data.details).map(([key, value]) => 
+                                `<li><strong>${key}:</strong> ${value}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                <div class="mt-3 p-2 bg-red-100 rounded">
+                    <p class="text-xs text-red-700">
+                        ❌ Selector'larınızı kontrol edin ve tekrar deneyin.
+                    </p>
+                </div>
+            </div>
+        `;
+    }
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
 // URL test fonksiyonu (kaynak eklemeden önce)
 function testUrlBeforeAdd() {
     const urlInput = document.getElementById('url');
@@ -404,6 +992,80 @@ function closeTestModal() {
 document.getElementById('testModal').addEventListener('click', function(e) {
     if (e.target === this) {
         closeTestModal();
+    }
+});
+
+// Selector yardım modalı için de aynı
+document.getElementById('selectorHelpModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeSelectorHelpModal();
+    }
+});
+
+// Debug add source fonksiyonu
+function debugAddSource() {
+    const form = document.getElementById('addSourceForm');
+    const formData = new FormData(form);
+    
+    console.log('=== DEBUG ADD SOURCE ===');
+    
+    fetch('/debug/test_add_source', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Debug sonucu:', data);
+        alert('Debug tamamlandı! Console ve Terminal loglarını kontrol edin.');
+    })
+    .catch(error => {
+        console.error('Debug hatası:', error);
+        alert('Debug hatası: ' + error);
+    });
+}
+
+// Form submit debug fonksiyonu
+function debugFormSubmit(event) {
+    const autoDetect = document.getElementById('auto_detect');
+    const manualInputs = document.querySelectorAll('.manual-selector-input');
+    
+    console.log('=== FORM SUBMIT DEBUG ===');
+    console.log('auto_detect element:', autoDetect);
+    console.log('auto_detect.checked:', autoDetect ? autoDetect.checked : 'Element yok');
+    console.log('auto_detect.value:', autoDetect ? autoDetect.value : 'Element yok');
+    console.log('auto_detect.name:', autoDetect ? autoDetect.name : 'Element yok');
+    
+    // Manuel input değerlerini kontrol et
+    console.log('Manuel input değerleri:');
+    manualInputs.forEach(input => {
+        console.log(`${input.id}: "${input.value}" (readOnly: ${input.readOnly}, disabled: ${input.disabled})`);
+    });
+    
+    // Form data'yı kontrol et
+    const formData = new FormData(event.target);
+    console.log('Form data:');
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: "${value}"`);
+    }
+    
+    console.log('=== FORM SUBMIT DEBUG END ===');
+    
+    // Form submit'e devam et
+    return true;
+}
+
+// Sayfa yüklendiğinde manuel selector'ları gizle
+document.addEventListener('DOMContentLoaded', function() {
+    const autoDetect = document.getElementById('auto_detect');
+    const manualSection = document.getElementById('manualSelectorsSection');
+    
+    console.log('Sayfa yüklendi, başlangıç durumu ayarlanıyor');
+    
+    if (autoDetect && autoDetect.checked) {
+        manualSection.classList.add('hidden');
+        clearManualSelectors(); // Başlangıçta disable et
+    } else {
+        enableManualSelectors(); // Manuel modda aktif et
     }
 });
 </script>

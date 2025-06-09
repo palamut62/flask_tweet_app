@@ -1,6 +1,7 @@
 {
   "tweets": {
-    "requests": 5,
-    "reset_time": 1749388347.5072992
+    "requests": 1,
+    "reset_time": 1749458822.4704785,
+    "last_request": 1749457922.4704785
   }
 }

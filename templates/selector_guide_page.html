@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}CSS Selector Kılavuzu - AI Tweet Bot{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8">
+    <!-- Sayfa Başlığı -->
+    <div class="text-center">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            🎯 CSS Selector Bulma Kılavuzu
+        </h1>
+        <p class="text-gray-600">Haber sitelerinden makale çekmek için doğru CSS selector'larını nasıl bulacağınızı öğrenin</p>
+    </div>
+
+    <!-- Hızlı Başlangıç -->
+    <div class="card-modern">
+        <div class="p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-rocket text-blue-600 mr-3"></i>
+                Hızlı Başlangıç
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <span class="text-white font-bold">1</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Developer Tools Açın</h3>
+                        <p class="text-sm text-gray-600">F12 tuşuna basın veya sağ tıklayıp "İncele" seçin</p>
+                    </div>
+                </div>
+                
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <span class="text-white font-bold">2</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Element Seçin</h3>
+                        <p class="text-sm text-gray-600">Makale başlığına sağ tıklayıp "Inspect Element" seçin</p>
+                    </div>
+                </div>
+                
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <span class="text-white font-bold">3</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Selector Kopyalayın</h3>
+                        <p class="text-sm text-gray-600">Element üzerinde sağ tıklayıp "Copy → Copy selector" seçin</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSS Selector Türleri -->
+    <div class="card-modern">
+        <div class="p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-code text-green-600 mr-3"></i>
+                CSS Selector Türleri
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">Tek Class</h3>
+                        <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">.article-title</code>
+                        <p class="text-sm text-gray-600 mt-2">Tek bir CSS class'ı seçer</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">Birden Fazla Class</h3>
+                        <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">.article-item.featured</code>
+                        <p class="text-sm text-gray-600 mt-2">Hem "article-item" hem de "featured" class'ına sahip elementleri seçer</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">Alt Element Seçimi</h3>
+                        <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">.article-container .title</code>
+                        <p class="text-sm text-gray-600 mt-2">"article-container" class'ı içindeki "title" class'ına sahip elementleri seçer</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">Direkt Alt Element</h3>
+                        <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">.article-list > .article-item</code>
+                        <p class="text-sm text-gray-600 mt-2">"article-list" class'ının direkt alt elementlerinden "article-item" class'ına sahip olanları seçer</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popüler Siteler -->
+    <div class="card-modern">
+        <div class="p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-newspaper text-purple-600 mr-3"></i>
+                Popüler Haber Sitelerinde Örnekler
+            </h2>
+            
+            <div class="space-y-6">
+                <div class="border border-gray-200 rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <img src="https://techcrunch.com/favicon.ico" alt="TechCrunch" class="w-6 h-6 mr-3" onerror="this.style.display='none'">
+                        <h3 class="text-lg font-semibold text-gray-900">TechCrunch</h3>
+                        <span class="ml-auto text-sm text-gray-500">techcrunch.com</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="space-y-2">
+                            <div><strong>Konteyner:</strong> <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">.post-block</code></div>
+                            <div><strong>Başlık:</strong> <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">h2.post-block__title a</code></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div><strong>Link:</strong> <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">h2.post-block__title a</code></div>
+                            <div><strong>Tarih:</strong> <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">.river-byline time</code></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border border-gray-200 rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <img src="https://www.theverge.com/favicon.ico" alt="The Verge" class="w-6 h-6 mr-3" onerror="this.style.display='none'">
+                        <h3 class="text-lg font-semibold text-gray-900">The Verge</h3>
+                        <span class="ml-auto text-sm text-gray-500">theverge.com</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="space-y-2">
+                            <div><strong>Konteyner:</strong> <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">.c-entry-box</code></div>
+                            <div><strong>Başlık:</strong> <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">h2 a</code></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div><strong>Link:</strong> <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">h2 a</code></div>
+                            <div><strong>Tarih:</strong> <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">.c-byline time</code></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border border-gray-200 rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <img src="https://www.wired.com/favicon.ico" alt="Wired" class="w-6 h-6 mr-3" onerror="this.style.display='none'">
+                        <h3 class="text-lg font-semibold text-gray-900">Wired</h3>
+                        <span class="ml-auto text-sm text-gray-500">wired.com</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="space-y-2">
+                            <div><strong>Konteyner:</strong> <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">.SummaryItemWrapper</code></div>
+                            <div><strong>Başlık:</strong> <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">h3 a</code></div>
+                        </div>
+                        <div class="space-y-2">
+                            <div><strong>Link:</strong> <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">h3 a</code></div>
+                            <div><strong>Tarih:</strong> <code class="text-blue-600 bg-blue-50 px-2 py-1 rounded">.SummaryItemPublishDate</code></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İpuçları ve Uyarılar -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- İyi Practices -->
+        <div class="card-modern">
+            <div class="p-6">
+                <h3 class="text-lg font-bold text-green-700 mb-4 flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    İyi Practices
+                </h3>
+                <ul class="space-y-2 text-sm">
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mt-1 mr-2"></i>
+                        <span><strong>Kısa ve öz:</strong> <code>.article-title</code> yerine <code>.article h2</code></span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mt-1 mr-2"></i>
+                        <span><strong>Stabil:</strong> Sayfa güncellemelerinde değişmeyen class'lar</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mt-1 mr-2"></i>
+                        <span><strong>Benzersiz:</strong> Sadece istenen elementleri seçen</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mt-1 mr-2"></i>
+                        <span><strong>Genel:</strong> Tüm makaleler için çalışan</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Kaçınılması Gerekenler -->
+        <div class="card-modern">
+            <div class="p-6">
+                <h3 class="text-lg font-bold text-red-700 mb-4 flex items-center">
+                    <i class="fas fa-times-circle mr-2"></i>
+                    Kaçınılması Gerekenler
+                </h3>
+                <ul class="space-y-2 text-sm">
+                    <li class="flex items-start">
+                        <i class="fas fa-times text-red-600 mt-1 mr-2"></i>
+                        <span><strong>Çok uzun:</strong> <code>body > div > div > div > article</code></span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-times text-red-600 mt-1 mr-2"></i>
+                        <span><strong>ID'ler:</strong> <code>#article-123</code> (her makale için farklı)</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-times text-red-600 mt-1 mr-2"></i>
+                        <span><strong>Pozisyon bazlı:</strong> <code>:nth-child(3)</code> (değişken)</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-times text-red-600 mt-1 mr-2"></i>
+                        <span><strong>Inline style'lar:</strong> <code>[style="color: red"]</code></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test ve Doğrulama -->
+    <div class="card-modern">
+        <div class="p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-vial text-orange-600 mr-3"></i>
+                Test ve Doğrulama
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 mb-3">Console'da Test Etme</h3>
+                    <p class="text-sm text-gray-600 mb-3">Developer Tools'da Console sekmesine geçin ve şu komutu çalıştırın:</p>
+                    <code class="block bg-gray-800 text-green-400 p-3 rounded text-sm">document.querySelectorAll('.your-selector')</code>
+                    <p class="text-xs text-gray-600 mt-2">Bu komut selector'ınızın kaç element bulduğunu gösterir.</p>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 mb-3">Uygulama İçi Test</h3>
+                    <p class="text-sm text-gray-600 mb-3">Haber kaynağı formunda test butonunu kullanın:</p>
+                    <div class="flex items-center space-x-2">
+                        <button class="px-3 py-2 bg-yellow-600 text-white rounded text-sm">
+                            <i class="fas fa-vial mr-1"></i>
+                            Manuel Selector'ları Test Et
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-600 mt-2">Gerçek zamanlı olarak selector'larınızı test edin.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Geri Dön Butonu -->
+    <div class="text-center">
+        <a href="{{ url_for('news_sources') }}" class="btn-primary inline-flex items-center space-x-2">
+            <i class="fas fa-arrow-left"></i>
+            <span>Haber Kaynakları Sayfasına Dön</span>
+        </a>
+    </div>
+</div>
+{% endblock %} 

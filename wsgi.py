@@ -9,7 +9,7 @@ import sys
 import os
 
 # Proje dizinini Python path'ine ekle
-project_home = '/home/yourusername/ai_tweet_bot_pythonanywhere'
+project_home = os.path.dirname(os.path.abspath(__file__))
 if project_home not in sys.path:
     sys.path = [project_home] + sys.path
 

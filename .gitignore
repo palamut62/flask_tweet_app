@@ -43,6 +43,7 @@ venv/
 env/
 ENV/
 .venv/
+.env/
 
 # IDE
 .vscode/
@@ -51,40 +52,56 @@ ENV/
 *.swo
 *~
 
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
 # Logs
 *.log
 logs/
-debug.log
 
 # Database
 *.db
 *.sqlite
 *.sqlite3
 
-# Temporary files
+# JSON Data Files (Opsiyonel - production'da tutmak isteyebilirsiniz)
+# posted_articles.json
+# pending_tweets.json
+# rate_limit_status.json
+# automation_settings.json
+# summaries.json
+# hashtags.json
+# news_sources.json
+# accounts.json
+# scheduler_config.json
+
+# Temporary Files
 *.tmp
 *.temp
-.DS_Store
-Thumbs.db
+temp/
+tmp/
 
-# Upload files
-static/uploads/*
-!static/uploads/.gitkeep
+# PythonAnywhere Specific
+.pythonanywhere/
 
-# Backup files
-*.bak
-*.backup
+# Flask
+instance/
+.webassets-cache
 
-# Test files
-test_*.py
-*_test.py
-tests/
-
-# Coverage reports
+# Coverage
 htmlcov/
 .coverage
 .coverage.*
 coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -92,30 +109,9 @@ coverage.xml
 # pyenv
 .python-version
 
-# pipenv
-Pipfile.lock
+# Backup files
+*.bak
+*.backup
 
-# PEP 582
-__pypackages__/
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+# Documentation
+docs/_build/

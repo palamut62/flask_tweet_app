@@ -18,21 +18,140 @@ from difflib import SequenceMatcher
 # .env dosyasını yükle
 load_dotenv()
 
+# Web scraping için alternatif kütüphaneler (opsiyonel)
+try:
+    import requests_html  # type: ignore
+    REQUESTS_HTML_AVAILABLE = True
+except ImportError:
+    REQUESTS_HTML_AVAILABLE = False
+    requests_html = None  # type: ignore
+
+try:
+    from selenium import webdriver  # type: ignore
+    from selenium.webdriver.chrome.options import Options  # type: ignore
+    from selenium.webdriver.common.by import By  # type: ignore
+    from selenium.webdriver.support.ui import WebDriverWait  # type: ignore
+    from selenium.webdriver.support import expected_conditions as EC  # type: ignore
+    SELENIUM_AVAILABLE = True
+except ImportError:
+    SELENIUM_AVAILABLE = False
+    webdriver = None  # type: ignore
+    Options = None  # type: ignore
+    By = None  # type: ignore
+    WebDriverWait = None  # type: ignore
+    EC = None  # type: ignore
+
+# .env dosyasını yükle
+load_dotenv()
+
 # Firecrawl MCP fonksiyonları için placeholder
 def mcp_firecrawl_scrape(params):
-    """Firecrawl MCP scrape fonksiyonu - Bu fonksiyon artık gerçek MCP araçları kullanılarak çağrılacak"""
+    """Firecrawl MCP scrape fonksiyonu - Gelişmiş alternatif sistemli"""
     try:
         print(f"[MCP] Firecrawl scrape çağrısı: {params.get('url', 'unknown')}")
         
-        # Bu fonksiyon artık app.py içinde gerçek MCP araçları ile çağrılacak
-        # Şimdilik fallback kullanılacak ama MCP entegrasyonu hazır
-        return {
-            "success": False,
-            "reason": "MCP araçları app.py seviyesinde çağrılacak"
-        }
+        url = params.get('url', '')
+        if not url:
+            return {"success": False, "error": "URL gerekli"}
+        
+        # JavaScript gerekli mi kontrol et
+        use_js = any(domain in url.lower() for domain in [
+            'techcrunch.com', 'theverge.com', 'wired.com', 
+            'arstechnica.com', 'venturebeat.com'
+        ])
+        
+        # Önce gelişmiş scraper dene
+        try:
+            print(f"[MCP] Gelişmiş scraper deneniyor (JS: {use_js})...")
+            result = advanced_web_scraper(url, wait_time=3, use_js=use_js)
+            
+            if result.get("success") and result.get("content"):
+                content = result.get("content", "")
+                
+                print(f"[MCP] Gelişmiş scraper başarılı: {len(content)} karakter ({result.get('method', 'unknown')})")
+                
+                return {
+                    "success": True,
+                    "content": content,
+                    "markdown": content,
+                    "source": f"advanced_scraper_{result.get('method', 'unknown')}",
+                    "method": result.get('method', 'unknown')
+                }
+            else:
+                print(f"[MCP] Gelişmiş scraper başarısız: {result.get('error', 'Bilinmeyen hata')}")
+                
+        except Exception as advanced_error:
+            print(f"[MCP] Gelişmiş scraper hatası: {advanced_error}")
+        
+        # Fallback: Basit HTTP request
+        try:
+            print(f"[MCP] Basit fallback deneniyor...")
+            
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate',
+                'Connection': 'keep-alive'
+            }
+            
+            session = requests.Session()
+            session.headers.update(headers)
+            
+            response = session.get(url, timeout=30, allow_redirects=True)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            content = extract_main_content(soup)
+            
+            if content and len(content) > 100:
+                print(f"[MCP] Basit fallback başarılı: {len(content)} karakter")
+                
+                return {
+                    "success": True,
+                    "content": content,
+                    "markdown": content,
+                    "source": "simple_fallback"
+                }
+            else:
+                print(f"[MCP] Basit fallback yetersiz içerik: {len(content) if content else 0} karakter")
+                
+        except Exception as fallback_error:
+            print(f"[MCP] Basit fallback hatası: {fallback_error}")
+        
+        # Son çare: Sadece başlık çek
+        try:
+            print(f"[MCP] Son çare: Sadece başlık çekiliyor...")
+            
+            response = requests.get(url, timeout=15)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            title = ""
+            title_selectors = ['title', 'h1', 'h2', '.title', '.headline']
+            
+            for selector in title_selectors:
+                elem = soup.select_one(selector)
+                if elem:
+                    title = elem.get_text(strip=True)
+                    if len(title) > 10:
+                        break
+            
+            if title:
+                print(f"[MCP] Son çare başarılı: Başlık çekildi")
+                return {
+                    "success": True,
+                    "content": title,
+                    "markdown": title,
+                    "source": "title_only"
+                }
+                
+        except Exception as title_error:
+            print(f"[MCP] Son çare hatası: {title_error}")
+        
+        return {"success": False, "error": "Tüm yöntemler başarısız"}
         
     except Exception as e:
-        print(f"[MCP] Firecrawl scrape hatası: {e}")
+        print(f"[MCP] Genel hata: {e}")
         return {"success": False, "error": str(e)}
 
 HISTORY_FILE = "posted_articles.json"
@@ -150,21 +269,45 @@ def fetch_latest_ai_articles_with_firecrawl():
         return fetch_latest_ai_articles_fallback()
 
 def fetch_latest_ai_articles():
-    """Ana haber çekme fonksiyonu - Firecrawl MCP öncelikli"""
+    """Ana haber çekme fonksiyonu - PythonAnywhere için optimize edilmiş"""
     try:
-        # Önce Firecrawl MCP ile dene
-        articles = fetch_latest_ai_articles_with_firecrawl()
+        # Önce özel haber kaynaklarından dene (en güvenilir)
+        try:
+            custom_articles = fetch_articles_from_custom_sources()
+            if custom_articles and len(custom_articles) > 0:
+                print(f"✅ Özel kaynaklardan {len(custom_articles)} makale bulundu")
+                return custom_articles[:10]  # İlk 10 makaleyi döndür
+        except Exception as custom_error:
+            print(f"⚠️ Özel kaynaklardan makale çekme hatası: {custom_error}")
         
-        # Eğer Firecrawl'dan makale gelmezse fallback kullan
-        if not articles:
-            print("🔄 Firecrawl'dan makale gelmedi, fallback yöntemi deneniyor...")
-            articles = fetch_latest_ai_articles_fallback()
+        # Eğer özel kaynaklardan makale gelmezse Firecrawl MCP dene
+        try:
+            articles = fetch_latest_ai_articles_with_firecrawl()
+            if articles and len(articles) > 0:
+                print(f"✅ Firecrawl MCP ile {len(articles)} makale bulundu")
+                return articles
+        except Exception as firecrawl_error:
+            print(f"⚠️ Firecrawl MCP hatası: {firecrawl_error}")
         
-        return articles
+        # Son çare olarak fallback kullan
+        print("🔄 Fallback yöntemi deneniyor...")
+        articles = fetch_latest_ai_articles_fallback()
+        
+        if articles and len(articles) > 0:
+            print(f"✅ Fallback ile {len(articles)} makale bulundu")
+            return articles
+        else:
+            print("❌ Hiçbir yöntemle makale bulunamadı")
+            return []
         
     except Exception as e:
-        print(f"Ana haber çekme hatası: {e}")
-        return fetch_latest_ai_articles_fallback()
+        print(f"❌ Ana haber çekme hatası: {e}")
+        print("🔄 Son çare fallback deneniyor...")
+        try:
+            return fetch_latest_ai_articles_fallback()
+        except Exception as fallback_error:
+            print(f"❌ Fallback da başarısız: {fallback_error}")
+            return []
 
 def fetch_latest_ai_articles_fallback():
     """Fallback haber çekme yöntemi - BeautifulSoup ile"""
@@ -2671,74 +2814,401 @@ def save_news_sources(config):
         return {"success": False, "message": f"❌ Kaydetme hatası: {e}"}
 
 def test_selectors_for_url(url):
-    """URL için selector'ları test et ve önerilerde bulun"""
+    """URL için selector'ları test et ve otomatik tespit et - Gelişmiş sistem"""
     try:
-        import requests
-        from bs4 import BeautifulSoup
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
         
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
+        print(f"🧪 URL test ediliyor: {url}")
         
-        response = requests.get(url, headers=headers, timeout=30)
-        response.raise_for_status()
+        # Gelişmiş scraper ile sayfayı çek
+        scrape_result = advanced_web_scraper(url, wait_time=3, use_js=True)
         
-        soup = BeautifulSoup(response.content, 'html.parser')
+        if not scrape_result.get("success"):
+            # Fallback: Basit HTTP request
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+            
+            response = requests.get(url, headers=headers, timeout=30)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            scrape_method = "simple_request"
+        else:
+            soup = BeautifulSoup(scrape_result.get("html", ""), 'html.parser')
+            scrape_method = scrape_result.get("method", "advanced")
+        
+        print(f"✅ Sayfa çekildi ({scrape_method})")
         
         # Otomatik selector tespiti
-        auto_selectors, container_count = auto_detect_selectors(soup, url)
+        print("🔍 Otomatik selector tespiti başlatılıyor...")
+        selectors, container_count = auto_detect_selectors(soup, url)
         
-        # Selector'ları doğrula
-        is_valid, validation_msg = validate_selectors(soup, auto_selectors)
+        # Tespit edilen selector'ları doğrula
+        print("✅ Selector'lar doğrulanıyor...")
+        is_valid, validation_msg = validate_selectors(soup, selectors)
         
         if is_valid:
-            # Örnek makaleler çek
+            # Örnek makaleleri çek
+            print("📰 Örnek makaleler çekiliyor...")
+            containers = soup.select(selectors["container"])
             sample_articles = []
-            containers = soup.select(auto_selectors["container"])
             
-            for container in containers[:3]:  # İlk 3 makale
+            for i, container in enumerate(containers[:5]):  # İlk 5 makale
                 try:
-                    title_elem = container.select_one(auto_selectors["title"])
-                    if title_elem:
+                    print(f"🔍 Makale {i+1} işleniyor...")
+                    
+                    # Başlık ve link çek
+                    title_elem = container.select_one(selectors["title"])
+                    link_elem = container.select_one(selectors["link"])
+                    
+                    if title_elem and link_elem:
                         title = title_elem.get_text(strip=True)
-                        link_elem = title_elem if title_elem.name == 'a' else title_elem.find('a')
-                        link = link_elem.get('href', '') if link_elem else ''
+                        link = link_elem.get('href', '')
                         
+                        # Relative URL'leri absolute yap
                         if link.startswith('/'):
                             from urllib.parse import urljoin
                             link = urljoin(url, link)
                         
-                        sample_articles.append({
-                            'title': title[:100] + '...' if len(title) > 100 else title,
-                            'link': link
-                        })
-                except:
+                        # Tarih çek (opsiyonel)
+                        date_text = ""
+                        if selectors.get("date"):
+                            date_elem = container.select_one(selectors["date"])
+                            if date_elem:
+                                date_text = date_elem.get_text(strip=True)
+                        
+                        # Özet çek (opsiyonel)
+                        excerpt_text = ""
+                        if selectors.get("excerpt"):
+                            excerpt_elem = container.select_one(selectors["excerpt"])
+                            if excerpt_elem:
+                                excerpt_text = excerpt_elem.get_text(strip=True)[:200]
+                        
+                        if title and link and len(title) > 10:
+                            sample_articles.append({
+                                "title": title,
+                                "url": link,
+                                "date": date_text,
+                                "excerpt": excerpt_text
+                            })
+                            print(f"✅ Makale {i+1}: {title[:50]}...")
+                        
+                except Exception as article_error:
+                    print(f"⚠️ Makale {i+1} hatası: {article_error}")
                     continue
             
+            # Site türü tespiti
+            site_info = detect_site_type(url, soup)
+            
+            # Başarı mesajı
+            success_msg = f"✅ {container_count} konteyner bulundu, {len(sample_articles)} örnek makale çekildi"
+            
             return {
-                'success': True,
-                'message': validation_msg,
-                'selectors': auto_selectors,
-                'container_count': container_count,
-                'sample_articles': sample_articles
+                "success": True,
+                "message": success_msg,
+                "selectors": selectors,
+                "container_count": container_count,
+                "sample_articles": sample_articles,
+                "validation_message": validation_msg,
+                "scrape_method": scrape_method,
+                "site_info": site_info,
+                "test_details": {
+                    "total_containers": container_count,
+                    "successful_articles": len(sample_articles),
+                    "selector_quality": "high" if len(sample_articles) >= 3 else "medium" if len(sample_articles) >= 1 else "low"
+                }
             }
         else:
             return {
-                'success': False,
-                'message': validation_msg,
-                'selectors': auto_selectors,
-                'container_count': container_count
+                "success": False,
+                "message": f"❌ Selector tespiti başarısız: {validation_msg}",
+                "selectors": selectors,
+                "container_count": container_count,
+                "scrape_method": scrape_method,
+                "test_details": {
+                    "error": validation_msg,
+                    "total_containers": container_count
+                }
             }
             
     except Exception as e:
+        print(f"❌ URL test hatası: {e}")
         return {
-            'success': False,
-            'message': f'Test hatası: {str(e)}'
+            "success": False,
+            "message": f"❌ URL test hatası: {str(e)}",
+            "test_details": {
+                "error": str(e)
+            }
         }
 
-def add_news_source_with_validation(name, url, description="", auto_detect=True):
+def detect_site_type(url, soup):
+    """Site türünü ve CMS'ini tespit et"""
+    try:
+        site_info = {
+            "cms": "unknown",
+            "type": "unknown",
+            "features": []
+        }
+        
+        # WordPress tespiti
+        wp_indicators = [
+            'wp-content', 'wp-includes', 'wp-json',
+            'class*="wp-"', 'id*="wp-"'
+        ]
+        
+        for indicator in wp_indicators:
+            if indicator in str(soup).lower():
+                site_info["cms"] = "wordpress"
+                site_info["features"].append("WordPress")
+                break
+        
+        # Site türü tespiti
+        if any(domain in url.lower() for domain in ['techcrunch', 'theverge', 'wired', 'arstechnica']):
+            site_info["type"] = "tech_news"
+            site_info["features"].append("Tech News Site")
+        elif any(keyword in str(soup).lower() for keyword in ['news', 'article', 'story', 'journalism']):
+            site_info["type"] = "news"
+            site_info["features"].append("News Site")
+        elif any(keyword in str(soup).lower() for keyword in ['blog', 'post', 'author']):
+            site_info["type"] = "blog"
+            site_info["features"].append("Blog")
+        
+        # JavaScript framework tespiti
+        if 'react' in str(soup).lower():
+            site_info["features"].append("React")
+        if 'vue' in str(soup).lower():
+            site_info["features"].append("Vue.js")
+        if 'angular' in str(soup).lower():
+            site_info["features"].append("Angular")
+        
+        return site_info
+        
+    except Exception as e:
+        return {"cms": "unknown", "type": "unknown", "features": [], "error": str(e)}
+
+def test_manual_selectors_for_url(url, selectors):
+    """Manuel selector'ları test et"""
+    try:
+        safe_log(f"Manuel selector test ediliyor: {url}", "INFO")
+        
+        # Selector'ları temizle
+        article_container = selectors.get('article_container', '').strip()
+        title_selector = selectors.get('title_selector', '').strip()
+        link_selector = selectors.get('link_selector', '').strip()
+        date_selector = selectors.get('date_selector', '').strip()
+        summary_selector = selectors.get('summary_selector', '').strip()
+        base_url = selectors.get('base_url', '').strip()
+        
+        if not base_url:
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            base_url = f"{parsed.scheme}://{parsed.netloc}"
+        
+        # Sayfayı çek
+        try:
+            response = requests.get(url, headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }, timeout=15)
+            
+            if response.status_code != 200:
+                return {
+                    'success': False,
+                    'error': f'Sayfa yüklenemedi (HTTP {response.status_code})',
+                    'details': {
+                        'status_code': response.status_code,
+                        'url': url
+                    }
+                }
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Sayfa çekme hatası: {str(e)}',
+                'details': {
+                    'error_type': type(e).__name__,
+                    'url': url
+                }
+            }
+        
+        # Makale konteynerlerini bul
+        try:
+            containers = soup.select(article_container)
+            
+            if not containers:
+                return {
+                    'success': False,
+                    'error': f'Makale konteyneri bulunamadı',
+                    'details': {
+                        'article_container': article_container,
+                        'page_title': soup.title.get_text() if soup.title else 'Başlık yok',
+                        'total_elements': len(soup.find_all())
+                    }
+                }
+            
+            safe_log(f"Bulunan konteyner sayısı: {len(containers)}", "INFO")
+            
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Konteyner selector hatası: {str(e)}',
+                'details': {
+                    'article_container': article_container,
+                    'error_type': type(e).__name__
+                }
+            }
+        
+        # Her konteynerden makale bilgilerini çek
+        articles = []
+        test_details = {
+            'container_count': len(containers),
+            'successful_extractions': 0,
+            'failed_extractions': 0
+        }
+        
+        for i, container in enumerate(containers[:5]):  # İlk 5 konteyner
+            try:
+                article_data = {}
+                extraction_success = True
+                
+                # Başlık çek
+                try:
+                    title_elem = container.select_one(title_selector)
+                    if title_elem:
+                        article_data['title'] = title_elem.get_text(strip=True)
+                    else:
+                        article_data['title'] = None
+                        extraction_success = False
+                except Exception as e:
+                    article_data['title'] = None
+                    extraction_success = False
+                    safe_log(f"Başlık çekme hatası (konteyner {i+1}): {e}", "WARNING")
+                
+                # Link çek
+                try:
+                    link_elem = container.select_one(link_selector)
+                    if link_elem:
+                        href = link_elem.get('href', '')
+                        if href:
+                            # Relative link kontrolü
+                            if href.startswith('/'):
+                                from urllib.parse import urljoin
+                                href = urljoin(base_url, href)
+                            elif not href.startswith(('http://', 'https://')):
+                                href = base_url + '/' + href.lstrip('/')
+                            article_data['url'] = href
+                        else:
+                            article_data['url'] = None
+                            extraction_success = False
+                    else:
+                        article_data['url'] = None
+                        extraction_success = False
+                except Exception as e:
+                    article_data['url'] = None
+                    extraction_success = False
+                    safe_log(f"Link çekme hatası (konteyner {i+1}): {e}", "WARNING")
+                
+                # Tarih çek (opsiyonel)
+                if date_selector:
+                    try:
+                        date_elem = container.select_one(date_selector)
+                        if date_elem:
+                            article_data['date'] = date_elem.get_text(strip=True)
+                        else:
+                            article_data['date'] = None
+                    except Exception as e:
+                        article_data['date'] = None
+                        safe_log(f"Tarih çekme hatası (konteyner {i+1}): {e}", "WARNING")
+                
+                # Özet çek (opsiyonel)
+                if summary_selector:
+                    try:
+                        summary_elem = container.select_one(summary_selector)
+                        if summary_elem:
+                            summary_text = summary_elem.get_text(strip=True)
+                            article_data['summary'] = summary_text[:200] + '...' if len(summary_text) > 200 else summary_text
+                        else:
+                            article_data['summary'] = None
+                    except Exception as e:
+                        article_data['summary'] = None
+                        safe_log(f"Özet çekme hatası (konteyner {i+1}): {e}", "WARNING")
+                
+                # Başarı kontrolü
+                if extraction_success and article_data.get('title') and article_data.get('url'):
+                    articles.append(article_data)
+                    test_details['successful_extractions'] += 1
+                else:
+                    test_details['failed_extractions'] += 1
+                    safe_log(f"Konteyner {i+1} başarısız: title={bool(article_data.get('title'))}, url={bool(article_data.get('url'))}", "WARNING")
+                
+            except Exception as e:
+                test_details['failed_extractions'] += 1
+                safe_log(f"Konteyner {i+1} işleme hatası: {e}", "ERROR")
+                continue
+        
+        # Sonuç değerlendirmesi
+        if not articles:
+            return {
+                'success': False,
+                'error': 'Hiçbir makale çekilemedi',
+                'details': {
+                    **test_details,
+                    'selectors_used': {
+                        'article_container': article_container,
+                        'title_selector': title_selector,
+                        'link_selector': link_selector,
+                        'date_selector': date_selector,
+                        'summary_selector': summary_selector
+                    }
+                }
+            }
+        
+        success_rate = (test_details['successful_extractions'] / test_details['container_count']) * 100
+        
+        return {
+            'success': True,
+            'message': f'Manuel selector test başarılı',
+            'article_count': len(articles),
+            'articles': articles,
+            'test_details': test_details,
+            'success_rate': round(success_rate, 1),
+            'selectors_used': {
+                'article_container': article_container,
+                'title_selector': title_selector,
+                'link_selector': link_selector,
+                'date_selector': date_selector,
+                'summary_selector': summary_selector,
+                'base_url': base_url
+            }
+        }
+        
+    except Exception as e:
+        safe_log(f"Manuel selector test hatası: {e}", "ERROR")
+        return {
+            'success': False,
+            'error': f'Test hatası: {str(e)}',
+            'details': {
+                'error_type': type(e).__name__,
+                'url': url
+            }
+        }
+
+def add_news_source_with_validation(name, url, description="", auto_detect=True, manual_selectors=None):
     """Doğrulama ile yeni haber kaynağı ekle"""
     try:
+        # Terminal log için import
+        try:
+            from app import terminal_log
+        except ImportError:
+            # Eğer app.py'den import edilemezse normal print kullan
+            def terminal_log(msg, level='info'):
+                print(f"[{level.upper()}] {msg}")
+        
+        terminal_log(f"🔍 Kaynak ekleme başlatıldı - Name: {name}, URL: {url}, Auto: {auto_detect}", "debug")
+        
         config = load_news_sources()
         
         # URL'yi temizle ve doğrula
@@ -2761,30 +3231,51 @@ def add_news_source_with_validation(name, url, description="", auto_detect=True)
         
         # URL'yi test et
         if auto_detect:
-            print(f"🔍 {name} kaynağı test ediliyor...")
+            terminal_log(f"🔍 {name} kaynağı otomatik tespit ile test ediliyor...", "info")
             test_result = test_selectors_for_url(url)
             
             if not test_result['success']:
+                terminal_log(f"❌ {name} otomatik tespit başarısız: {test_result['message']}", "error")
                 return {
                     "success": False,
-                    "message": f"❌ URL test başarısız: {test_result['message']}",
+                    "message": f"❌ Otomatik tespit başarısız: {test_result['message']}",
                     "test_details": test_result
                 }
             
             selectors = test_result['selectors']
             selector_type = "auto_detected"
-            print(f"✅ {name}: {test_result['container_count']} konteyner bulundu")
+            terminal_log(f"✅ {name}: {test_result['container_count']} konteyner bulundu", "success")
             
         else:
-            # Manuel selector'lar
+            # Manuel selector'ları test et
+            if not manual_selectors:
+                terminal_log(f"❌ {name} manuel mod için selector'lar eksik", "error")
+                return {
+                    "success": False,
+                    "message": "❌ Manuel mod için selector'lar gerekli"
+                }
+            
+            terminal_log(f"🔍 {name} kaynağı manuel selector'larla test ediliyor...", "info")
+            test_result = test_manual_selectors_for_url(url, manual_selectors)
+            
+            if not test_result['success']:
+                terminal_log(f"❌ {name} manuel selector test başarısız: {test_result.get('error', 'Bilinmeyen hata')}", "error")
+                return {
+                    "success": False,
+                    "message": f"❌ Manuel selector test başarısız: {test_result.get('error', 'Bilinmeyen hata')}",
+                    "test_details": test_result
+                }
+            
+            # Manuel selector'ları uygun formata çevir
             selectors = {
-                "container": "article, .article, .post, .news-item",
-                "title": "h1, h2, h3, .title, .headline",
-                "link": "a",
-                "date": "time, .date, .published",
-                "excerpt": ".excerpt, .summary, p"
+                "container": manual_selectors['article_container'],
+                "title": manual_selectors['title_selector'],
+                "link": manual_selectors['link_selector'],
+                "date": manual_selectors.get('date_selector', ''),
+                "excerpt": manual_selectors.get('summary_selector', '')
             }
             selector_type = "manual"
+            terminal_log(f"✅ {name}: {test_result['article_count']} makale bulundu", "success")
         
         # Benzersiz ID oluştur
         import random
@@ -2813,6 +3304,7 @@ def add_news_source_with_validation(name, url, description="", auto_detect=True)
         result = save_news_sources(config)
         
         if result["success"]:
+            terminal_log(f"✅ '{name}' kaynağı başarıyla eklendi", "success")
             response = {
                 "success": True,
                 "message": f"✅ '{name}' kaynağı başarıyla eklendi",
@@ -2825,9 +3317,11 @@ def add_news_source_with_validation(name, url, description="", auto_detect=True)
             
             return response
         else:
+            terminal_log(f"❌ '{name}' kaynağı kaydedilemedi: {result.get('message', 'Bilinmeyen hata')}", "error")
             return result
         
     except Exception as e:
+        terminal_log(f"❌ Kaynak ekleme hatası: {str(e)}", "error")
         return {
             "success": False,
             "message": f"❌ Kaynak ekleme hatası: {str(e)}"
@@ -2945,35 +3439,88 @@ def fetch_articles_from_custom_sources():
         return []
 
 def auto_detect_selectors(soup, url):
-    """Sayfadan otomatik olarak en iyi selector'ları tespit et"""
+    """Sayfadan otomatik olarak en iyi selector'ları tespit et - Gelişmiş AI destekli"""
+    
+    print(f"🔍 Otomatik selector tespiti başlatılıyor: {url}")
+    
+    # Site türüne göre özel pattern'ler
+    site_patterns = {
+        'techcrunch.com': {
+            'containers': ["li.wp-block-post", "article.wp-block-post", ".loop-card"],
+            'titles': ["h3.loop-card__title a", "h2.loop-card__title a"],
+            'dates': ["time.loop-card__time", ".loop-card__time"]
+        },
+        'theverge.com': {
+            'containers': [
+                "article[data-testid='story-card']", 
+                ".duet--content-cards--content-card",
+                ".c-entry-box", 
+                ".c-compact-river__entry",
+                "[data-testid*='story']",
+                "[data-testid*='card']",
+                ".group-hover",
+                "article"
+            ],
+            'titles': [
+                "h2 a", 
+                "h3 a", 
+                ".c-entry-box__title a", 
+                "[data-testid*='headline'] a",
+                ".font-polysans a",
+                "a[href*='/2025/']",
+                "a[href*='/2024/']"
+            ],
+            'dates': [
+                ".c-byline__item time", 
+                "time", 
+                "[datetime]",
+                ".text-gray-31"
+            ]
+        },
+        'wired.com': {
+            'containers': ["article", ".archive-item-component", ".card-component"],
+            'titles': ["h3 a", "h2 a", ".card-component__title a"],
+            'dates': ["time", ".publish-date"]
+        }
+    }
+    
+    # URL'den site türünü tespit et
+    site_type = None
+    for domain in site_patterns:
+        if domain in url.lower():
+            site_type = domain
+            break
     
     # Yaygın makale konteyner pattern'leri (öncelik sırasına göre)
-    container_patterns = [
-        # Modern WordPress (TechCrunch tarzı)
-        "li.wp-block-post",
-        "article.wp-block-post", 
-        ".loop-card",
+    container_patterns = []
+    
+    # Site özel pattern'leri önce ekle
+    if site_type and site_type in site_patterns:
+        container_patterns.extend(site_patterns[site_type]['containers'])
+        print(f"✅ Site özel pattern'ler eklendi: {site_type}")
+    
+    # Genel pattern'leri ekle
+    container_patterns.extend([
+        # Modern WordPress
+        "li.wp-block-post", "article.wp-block-post", ".loop-card",
         
         # Modern haber siteleri
-        "article[data-testid*='story']",
-        "article[data-testid*='card']",
-        ".story-card",
-        ".news-item",
+        "article[data-testid*='story']", "article[data-testid*='card']",
+        ".story-card", ".news-item", ".article-card",
         
-        # Genel WordPress
-        "article.post",
-        ".post-item",
-        ".entry",
+        # Yaygın CMS pattern'leri
+        ".post-item", ".entry-item", ".news-entry",
+        ".content-item", ".article-item",
         
-        # Klasik yapılar
-        "article",
-        ".article",
-        ".post",
-        "[class*='article']",
-        "[class*='post']",
-        "[class*='story']",
-        "[class*='news']"
-    ]
+        # Genel yapılar
+        "article.post", "article", ".article", ".post",
+        ".entry", ".story", ".news",
+        
+        # Class içeren genel pattern'ler
+        "[class*='article']", "[class*='post']", 
+        "[class*='story']", "[class*='news']",
+        "[class*='item']", "[class*='card']"
+    ])
     
     best_selectors = {
         "container": "article",
@@ -2984,53 +3531,164 @@ def auto_detect_selectors(soup, url):
     }
     
     max_containers = 0
+    best_score = 0
     
-    # En çok konteyner bulan selector'ı seç (ama çok fazla olmasın)
-    for pattern in container_patterns:
-        containers = soup.select(pattern)
-        container_count = len(containers)
-        
-        # İdeal aralık: 3-50 konteyner
-        if 3 <= container_count <= 50 and container_count > max_containers:
-            max_containers = container_count
-            best_selectors["container"] = pattern
+    print(f"🔍 {len(container_patterns)} farklı pattern test ediliyor...")
+    
+    # Her pattern'i test et
+    for i, pattern in enumerate(container_patterns):
+        try:
+            containers = soup.select(pattern)
+            container_count = len(containers)
             
-            # Bu konteyner için en iyi title selector'ını bul
-            if containers:
-                sample_container = containers[0]
+            # İdeal aralık: 2-100 konteyner
+            if 2 <= container_count <= 100:
                 
-                title_patterns = [
-                    "h3.loop-card__title a",  # TechCrunch modern
-                    "h2 a", "h3 a", "h1 a",
-                    ".title a", ".headline a",
-                    "[class*='title'] a",
-                    "[class*='headline'] a",
-                    "a[href*='article']",
-                    "a[href*='post']",
-                    "a"  # Son çare
-                ]
+                # Kalite skoru hesapla
+                quality_score = calculate_selector_quality(containers, pattern, url)
                 
-                for title_pattern in title_patterns:
-                    title_elem = sample_container.select_one(title_pattern)
-                    if title_elem and title_elem.get_text(strip=True):
-                        best_selectors["title"] = title_pattern
-                        best_selectors["link"] = title_pattern
-                        break
+                print(f"📊 Pattern {i+1}: {pattern} -> {container_count} konteyner, skor: {quality_score}")
                 
-                # Date selector
-                date_patterns = [
-                    "time.loop-card__time",
-                    "time", ".date", ".published",
-                    "[class*='date']", "[class*='time']",
-                    "[datetime]"
-                ]
-                
-                for date_pattern in date_patterns:
-                    if sample_container.select_one(date_pattern):
-                        best_selectors["date"] = date_pattern
-                        break
+                if quality_score > best_score:
+                    best_score = quality_score
+                    max_containers = container_count
+                    best_selectors["container"] = pattern
+                    
+                    # Bu konteyner için en iyi title selector'ını bul
+                    if containers:
+                        sample_container = containers[0]
+                        
+                        # Site özel title pattern'leri önce dene
+                        title_patterns = []
+                        if site_type and site_type in site_patterns:
+                            title_patterns.extend(site_patterns[site_type]['titles'])
+                        
+                        # Genel title pattern'leri ekle
+                        title_patterns.extend([
+                            "h3 a", "h2 a", "h1 a", "h4 a",
+                            ".title a", ".headline a", ".entry-title a",
+                            "[class*='title'] a", "[class*='headline'] a",
+                            "a[href*='article']", "a[href*='post']",
+                            "a[href*='/20']",  # Tarih içeren URL'ler
+                            "a"  # Son çare
+                        ])
+                        
+                        for title_pattern in title_patterns:
+                            title_elem = sample_container.select_one(title_pattern)
+                            if title_elem and title_elem.get_text(strip=True) and len(title_elem.get_text(strip=True)) > 10:
+                                best_selectors["title"] = title_pattern
+                                best_selectors["link"] = title_pattern
+                                print(f"✅ Title pattern bulundu: {title_pattern}")
+                                break
+                        
+                        # Date selector
+                        date_patterns = []
+                        if site_type and site_type in site_patterns:
+                            date_patterns.extend(site_patterns[site_type]['dates'])
+                        
+                        date_patterns.extend([
+                            "time", ".date", ".published", ".publish-date",
+                            "[class*='date']", "[class*='time']",
+                            "[datetime]", ".meta-date"
+                        ])
+                        
+                        for date_pattern in date_patterns:
+                            if sample_container.select_one(date_pattern):
+                                best_selectors["date"] = date_pattern
+                                print(f"✅ Date pattern bulundu: {date_pattern}")
+                                break
+                        
+                        # Excerpt selector
+                        excerpt_patterns = [
+                            ".excerpt", ".summary", ".description",
+                            ".entry-summary", ".post-excerpt",
+                            "p", ".content p"
+                        ]
+                        
+                        for excerpt_pattern in excerpt_patterns:
+                            excerpt_elem = sample_container.select_one(excerpt_pattern)
+                            if excerpt_elem and len(excerpt_elem.get_text(strip=True)) > 20:
+                                best_selectors["excerpt"] = excerpt_pattern
+                                print(f"✅ Excerpt pattern bulundu: {excerpt_pattern}")
+                                break
+                        
+        except Exception as pattern_error:
+            print(f"⚠️ Pattern test hatası ({pattern}): {pattern_error}")
+            continue
+    
+    print(f"🏁 En iyi selector bulundu: {best_selectors['container']} ({max_containers} konteyner, skor: {best_score})")
     
     return best_selectors, max_containers
+
+def calculate_selector_quality(containers, pattern, url):
+    """Selector kalitesini hesapla"""
+    try:
+        if not containers:
+            return 0
+        
+        score = 0
+        sample_size = min(3, len(containers))  # İlk 3 konteyner test et
+        
+        for container in containers[:sample_size]:
+            # Başlık var mı?
+            title_found = False
+            title_selectors = ["h1", "h2", "h3", "h4", ".title", ".headline", "a"]
+            
+            for ts in title_selectors:
+                title_elem = container.select_one(ts)
+                if title_elem and len(title_elem.get_text(strip=True)) > 10:
+                    title_found = True
+                    score += 10
+                    break
+            
+            # Link var mı?
+            link_found = False
+            links = container.select("a[href]")
+            for link in links:
+                href = link.get('href', '')
+                if href and (href.startswith('http') or href.startswith('/')):
+                    link_found = True
+                    score += 10
+                    break
+            
+            # Tarih var mı?
+            date_selectors = ["time", ".date", "[datetime]", "[class*='date']"]
+            for ds in date_selectors:
+                if container.select_one(ds):
+                    score += 5
+                    break
+            
+            # İçerik var mı?
+            content_length = len(container.get_text(strip=True))
+            if content_length > 50:
+                score += 5
+            if content_length > 200:
+                score += 5
+        
+        # Konteyner sayısı bonusu (ideal aralık)
+        container_count = len(containers)
+        if 5 <= container_count <= 20:
+            score += 20
+        elif 3 <= container_count <= 30:
+            score += 10
+        elif container_count > 100:
+            score -= 20  # Çok fazla konteyner ceza
+        
+        # Pattern spesifik bonuslar
+        if 'article' in pattern.lower():
+            score += 10
+        if 'post' in pattern.lower():
+            score += 8
+        if 'story' in pattern.lower():
+            score += 8
+        if 'card' in pattern.lower():
+            score += 5
+        
+        return score / sample_size  # Ortalama skor
+        
+    except Exception as e:
+        print(f"❌ Kalite hesaplama hatası: {e}")
+        return 0
 
 def validate_selectors(soup, selectors):
     """Selector'ların çalışıp çalışmadığını kontrol et"""
@@ -3044,25 +3702,51 @@ def validate_selectors(soup, selectors):
     if len(containers) > 100:
         return False, f"Çok fazla konteyner ({len(containers)}), selector çok genel"
     
-    # İlk konteynerden örnek al
-    sample_container = containers[0]
+    # Birden fazla konteyner test et
+    valid_containers = 0
+    sample_titles = []
     
-    title_selector = selectors.get("title", "h2 a")
-    title_elem = sample_container.select_one(title_selector)
+    for i, container in enumerate(containers[:5]):  # İlk 5 konteyner test et
+        title_selector = selectors.get("title", "h2 a")
+        title_elem = container.select_one(title_selector)
+        
+        # Alternatif title selector'ları dene
+        if not title_elem:
+            alt_title_selectors = [
+                "h1 a", "h2 a", "h3 a", "h4 a",
+                ".title a", ".headline a", 
+                "[class*='title'] a", "[class*='headline'] a",
+                "a[href*='article']", "a[href*='post']",
+                "a[href*='/20']",  # Tarih içeren URL'ler
+                "a"  # Son çare
+            ]
+            
+            for alt_selector in alt_title_selectors:
+                title_elem = container.select_one(alt_selector)
+                if title_elem and title_elem.get_text(strip=True) and len(title_elem.get_text(strip=True)) > 10:
+                    # Başarılı selector'ı güncelle
+                    selectors["title"] = alt_selector
+                    selectors["link"] = alt_selector
+                    break
+        
+        if title_elem:
+            title_text = title_elem.get_text(strip=True)
+            if len(title_text) >= 10:
+                # Link kontrolü
+                link_elem = title_elem if title_elem.name == 'a' else title_elem.find('a')
+                if link_elem and link_elem.get('href'):
+                    valid_containers += 1
+                    sample_titles.append(title_text[:50])
     
-    if not title_elem:
-        return False, "Başlık elementi bulunamadı"
+    if valid_containers == 0:
+        return False, "Hiçbir konteynerde geçerli başlık/link bulunamadı"
     
-    title_text = title_elem.get_text(strip=True)
-    if len(title_text) < 10:
-        return False, "Başlık çok kısa"
+    success_rate = (valid_containers / min(len(containers), 5)) * 100
     
-    # Link kontrolü
-    link_elem = title_elem if title_elem.name == 'a' else title_elem.find('a')
-    if not link_elem or not link_elem.get('href'):
-        return False, "Link bulunamadı"
+    if success_rate < 40:  # %40'dan az başarı oranı
+        return False, f"Düşük başarı oranı: %{success_rate:.1f} ({valid_containers}/{min(len(containers), 5)})"
     
-    return True, f"✅ {len(containers)} konteyner, örnek başlık: {title_text[:50]}..."
+    return True, f"✅ {len(containers)} konteyner, {valid_containers} geçerli, örnek: {sample_titles[0] if sample_titles else 'N/A'}..."
 
 def fetch_articles_from_single_source(source):
     """Tek bir kaynaktan makale çek"""
@@ -3193,11 +3877,52 @@ def fetch_articles_from_single_source(source):
                 date_str = date_elem.get_text(strip=True) if date_elem else ""
                 
                 if title and link:
+                    # Makale içeriğini çek (basit yöntem)
+                    try:
+                        content_response = requests.get(link, headers=headers, timeout=15)
+                        content_soup = BeautifulSoup(content_response.text, 'html.parser')
+                        
+                        # Ana içeriği çıkar
+                        content_text = ""
+                        content_selectors = [
+                            'article', '.post-content', '.entry-content', 
+                            '.article-content', '.content', 'main', '.story-body'
+                        ]
+                        
+                        for cs in content_selectors:
+                            content_elem = content_soup.select_one(cs)
+                            if content_elem:
+                                # Script ve style taglarını kaldır
+                                for script in content_elem(["script", "style", "nav", "footer", "header"]):
+                                    script.decompose()
+                                content_text = content_elem.get_text(strip=True)
+                                break
+                        
+                        # Eğer ana içerik bulunamazsa body'den al
+                        if not content_text:
+                            body = content_soup.find('body')
+                            if body:
+                                for script in body(["script", "style", "nav", "footer", "header"]):
+                                    script.decompose()
+                                content_text = body.get_text(strip=True)
+                        
+                        # İçeriği temizle ve sınırla
+                        content_text = ' '.join(content_text.split())[:2000]
+                        
+                    except Exception as content_error:
+                        print(f"⚠️ İçerik çekme hatası: {content_error}")
+                        content_text = excerpt or title  # Fallback olarak özet veya başlığı kullan
+                    
+                    # Hash oluştur
+                    article_hash = hashlib.md5(title.encode()).hexdigest()
+                    
                     articles.append({
                         "title": title,
                         "url": link,
+                        "content": content_text or excerpt or title,
                         "excerpt": excerpt,
                         "date": date_str,
+                        "hash": article_hash,
                         "source": source["name"],
                         "source_id": source["id"],
                         "fetch_date": datetime.now().isoformat(),
@@ -3982,3 +4707,180 @@ def terminal_log(message, level='info'):
     except Exception as e:
         # Herhangi bir hata durumunda normal print kullan
         print(f"[{level.upper()}] {message}")
+
+def advanced_web_scraper(url, wait_time=3, use_js=False, return_html=False):
+    """Gelişmiş web scraping - MCP'ye alternatif"""
+    try:
+        print(f"🔍 Gelişmiş scraper ile çekiliyor: {url}")
+        
+        # Kullanılabilir yöntemleri kontrol et
+        available_methods = []
+        if REQUESTS_HTML_AVAILABLE and requests_html:
+            available_methods.append("requests-html")
+        if SELENIUM_AVAILABLE and webdriver:
+            available_methods.append("selenium")
+        available_methods.append("requests")  # Her zaman mevcut
+        
+        print(f"📋 Kullanılabilir yöntemler: {', '.join(available_methods)}")
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9,tr;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Cache-Control': 'max-age=0'
+        }
+        
+        # Yöntem 1: requests-html (JavaScript desteği ile)
+        if REQUESTS_HTML_AVAILABLE and use_js and requests_html:
+            try:
+                from requests_html import HTMLSession  # type: ignore
+                session = HTMLSession()
+                
+                print("🚀 requests-html ile JavaScript render ediliyor...")
+                r = session.get(url, headers=headers, timeout=30)
+                r.html.render(wait=wait_time, timeout=20)
+                
+                content = r.html.html
+                soup = BeautifulSoup(content, 'html.parser')
+                
+                print(f"✅ requests-html başarılı: {len(content)} karakter")
+                return {
+                    "success": True,
+                    "content": extract_main_content(soup),
+                    "html": content,
+                    "method": "requests-html"
+                }
+                
+            except Exception as rh_error:
+                print(f"⚠️ requests-html hatası: {rh_error}")
+        
+        # Yöntem 2: Selenium (headless Chrome)
+        if SELENIUM_AVAILABLE and use_js and webdriver and Options:
+            try:
+                print("🚀 Selenium ile JavaScript render ediliyor...")
+                
+                chrome_options = Options()
+                chrome_options.add_argument('--headless')
+                chrome_options.add_argument('--no-sandbox')
+                chrome_options.add_argument('--disable-dev-shm-usage')
+                chrome_options.add_argument('--disable-gpu')
+                chrome_options.add_argument('--window-size=1920,1080')
+                chrome_options.add_argument(f'--user-agent={headers["User-Agent"]}')
+                
+                driver = webdriver.Chrome(options=chrome_options)
+                driver.set_page_load_timeout(30)
+                
+                driver.get(url)
+                
+                # Sayfanın yüklenmesini bekle
+                if WebDriverWait and EC and By:
+                    WebDriverWait(driver, wait_time).until(
+                        EC.presence_of_element_located((By.TAG_NAME, "body"))
+                    )
+                else:
+                    time.sleep(wait_time)
+                
+                # Biraz daha bekle (dinamik içerik için)
+                time.sleep(wait_time)
+                
+                content = driver.page_source
+                driver.quit()
+                
+                soup = BeautifulSoup(content, 'html.parser')
+                
+                print(f"✅ Selenium başarılı: {len(content)} karakter")
+                return {
+                    "success": True,
+                    "content": extract_main_content(soup),
+                    "html": content,
+                    "method": "selenium"
+                }
+                
+            except Exception as selenium_error:
+                print(f"⚠️ Selenium hatası: {selenium_error}")
+                try:
+                    driver.quit()
+                except:
+                    pass
+        
+        # Yöntem 3: Basit requests (fallback)
+        print("🔄 Basit HTTP request ile deneniyor...")
+        
+        session = requests.Session()
+        session.headers.update(headers)
+        
+        response = session.get(url, timeout=30, allow_redirects=True)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        print(f"✅ Basit request başarılı: {len(response.text)} karakter")
+        return {
+            "success": True,
+            "content": extract_main_content(soup),
+            "html": response.text,
+            "method": "requests"
+        }
+        
+    except Exception as e:
+        print(f"❌ Gelişmiş scraper hatası: {e}")
+        return {"success": False, "error": str(e)}
+
+def extract_main_content(soup):
+    """Sayfadan ana içeriği çıkar"""
+    try:
+        # Ana içerik selector'ları (öncelik sırasına göre)
+        main_content_selectors = [
+            'article',
+            '[role="main"]',
+            'main',
+            '.post-content',
+            '.entry-content',
+            '.article-content',
+            '.content',
+            '.story-body',
+            '.article-body',
+            '#content',
+            '.main-content'
+        ]
+        
+        content_text = ""
+        
+        for selector in main_content_selectors:
+            elements = soup.select(selector)
+            if elements:
+                element = elements[0]
+                
+                # Gereksiz elementleri kaldır
+                for unwanted in element(["script", "style", "nav", "footer", "header", "aside", ".advertisement", ".ads", ".social-share"]):
+                    unwanted.decompose()
+                
+                content_text = element.get_text(strip=True)
+                if len(content_text) > 200:  # Yeterli içerik varsa
+                    break
+        
+        # Eğer ana içerik bulunamazsa body'den al
+        if not content_text or len(content_text) < 200:
+            body = soup.find('body')
+            if body:
+                # Gereksiz elementleri kaldır
+                for unwanted in body(["script", "style", "nav", "footer", "header", "aside", ".advertisement", ".ads", ".social-share", ".menu", ".sidebar"]):
+                    unwanted.decompose()
+                
+                content_text = body.get_text(strip=True)
+        
+        # İçeriği temizle
+        content_text = ' '.join(content_text.split())
+        content_text = content_text[:3000]  # İlk 3000 karakter
+        
+        return content_text
+        
+    except Exception as e:
+        print(f"❌ İçerik çıkarma hatası: {e}")
+        return ""

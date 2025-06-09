@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manuel Selector Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex items-center justify-between mb-8">
+            <h1 class="text-3xl font-bold">Manuel Selector Test</h1>
+            <a href="{{ url_for('news_sources') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Haber Kaynaklarına Dön
+            </a>
+        </div>
+        
+        <!-- Otomatik Tespit Checkbox -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center space-x-3">
+                <input type="checkbox" 
+                       id="auto_detect" 
+                       name="auto_detect" 
+                       checked 
+                       onchange="toggleManualSelectors()"
+                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                <label for="auto_detect" class="text-sm font-medium text-gray-700">
+                    Otomatik Selector Tespiti
+                </label>
+                <i class="fas fa-info-circle text-blue-500"></i>
+                
+                <button type="button" 
+                        onclick="debugToggle()" 
+                        class="ml-4 px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs hover:bg-gray-300">
+                    Debug
+                </button>
+            </div>
+            <p class="text-xs text-gray-600 mt-2 ml-7">
+                Bu seçeneği kapatarak manuel selector'ları görebilirsiniz.
+            </p>
+            
+            <!-- Debug Bilgisi -->
+            <div id="debugInfo" class="mt-3 p-2 bg-gray-100 border border-gray-300 rounded text-xs text-gray-700 hidden">
+                <strong>Debug:</strong> 
+                <span id="debugStatus">Checkbox durumu kontrol ediliyor...</span>
+            </div>
+        </div>
+
+        <!-- Manuel Selector'lar -->
+        <div id="manualSelectorsSection" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 hidden">
+            <div class="flex items-center space-x-3 mb-4">
+                <i class="fas fa-code text-yellow-600"></i>
+                <h3 class="text-lg font-medium text-gray-900">Manuel CSS Selector'ları</h3>
+                <button type="button" 
+                        onclick="showSelectorHelp()" 
+                        class="text-yellow-600 hover:text-yellow-800">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Makale Konteyner Selector *
+                    </label>
+                    <input type="text" 
+                           id="article_container"
+                           placeholder="örn: .article-item, article, .post"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
+                    <p class="text-xs text-gray-600">Her makaleyi içeren ana konteyner</p>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Başlık Selector *
+                    </label>
+                    <input type="text" 
+                           id="title_selector"
+                           placeholder="örn: h2 a, .title, h3"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
+                    <p class="text-xs text-gray-600">Makale başlığını içeren element</p>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Link Selector *
+                    </label>
+                    <input type="text" 
+                           id="link_selector"
+                           placeholder="örn: a, .read-more, h2 a"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
+                    <p class="text-xs text-gray-600">Makale linkini içeren element</p>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                        Tarih Selector
+                    </label>
+                    <input type="text" 
+                           id="date_selector"
+                           placeholder="örn: .date, time, .published"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
+                    <p class="text-xs text-gray-600">Yayın tarihini içeren element (opsiyonel)</p>
+                </div>
+            </div>
+            
+            <div class="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
+                <div class="flex items-start space-x-2">
+                    <i class="fas fa-lightbulb text-yellow-600 mt-0.5"></i>
+                    <div class="text-sm text-yellow-800">
+                        <p class="font-medium mb-1">💡 Selector Bulma İpuçları:</p>
+                        <ul class="text-xs space-y-1">
+                            <li>• Tarayıcıda F12 ile Developer Tools'u açın</li>
+                            <li>• Makale elementine sağ tıklayıp "Inspect" seçin</li>
+                            <li>• Element üzerinde sağ tıklayıp "Copy → Copy selector" seçin</li>
+                            <li>• Birden fazla makale için ortak selector kullanın</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 flex justify-end">
+                <button type="button" 
+                        onclick="testManualSelectors()" 
+                        class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-all duration-200 text-sm">
+                    <i class="fas fa-vial mr-2"></i>
+                    Manuel Selector'ları Test Et
+                </button>
+            </div>
+        </div>
+        
+        <div class="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <h3 class="font-medium text-green-800 mb-2">Test Durumu:</h3>
+            <p id="testStatus" class="text-sm text-green-700">Otomatik tespit checkbox'ını kapatarak manuel selector'ları görebilirsiniz.</p>
+        </div>
+        
+        <!-- Console Log Görüntüleyici -->
+        <div class="mt-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <h3 class="font-medium text-gray-800 mb-2">Console Logları:</h3>
+            <div id="consoleLog" class="text-xs text-gray-600 font-mono bg-white p-3 rounded border max-h-40 overflow-y-auto">
+                Sayfa yüklendiğinde loglar burada görünecek...
+            </div>
+            <button onclick="clearConsoleLog()" class="mt-2 px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs hover:bg-gray-300">
+                Logları Temizle
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Console log yakalayıcı
+        const originalLog = console.log;
+        const originalError = console.error;
+        const consoleLogDiv = document.getElementById('consoleLog');
+        
+        function addToConsoleLog(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'text-red-600' : 'text-gray-700';
+            consoleLogDiv.innerHTML += `<div class="${color}">[${timestamp}] ${message}</div>`;
+            consoleLogDiv.scrollTop = consoleLogDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsoleLog(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsoleLog(args.join(' '), 'error');
+        };
+        
+        function clearConsoleLog() {
+            consoleLogDiv.innerHTML = 'Console logları temizlendi...';
+        }
+
+        // Debug fonksiyonu
+        function debugToggle() {
+            const debugInfo = document.getElementById('debugInfo');
+            
+            if (debugInfo.classList.contains('hidden')) {
+                debugInfo.classList.remove('hidden');
+                updateDebugStatus();
+            } else {
+                debugInfo.classList.add('hidden');
+            }
+        }
+
+        function updateDebugStatus() {
+            const debugStatus = document.getElementById('debugStatus');
+            const autoDetect = document.getElementById('auto_detect');
+            const manualSection = document.getElementById('manualSelectorsSection');
+            
+            const status = {
+                'Checkbox checked': autoDetect ? autoDetect.checked : 'Element bulunamadı',
+                'Manuel section exists': manualSection ? 'Var' : 'Yok',
+                'Manuel section hidden': manualSection ? manualSection.classList.contains('hidden') : 'Element yok',
+                'Manuel section classes': manualSection ? manualSection.className : 'Element yok'
+            };
+            
+            debugStatus.innerHTML = Object.entries(status).map(([key, value]) => 
+                `${key}: <strong>${value}</strong>`
+            ).join('<br>');
+        }
+
+        // Manuel selector'ları göster/gizle
+        function toggleManualSelectors() {
+            const autoDetect = document.getElementById('auto_detect');
+            const manualSection = document.getElementById('manualSelectorsSection');
+            const testStatus = document.getElementById('testStatus');
+            
+            console.log('toggleManualSelectors çağrıldı');
+            console.log('autoDetect:', autoDetect);
+            console.log('autoDetect.checked:', autoDetect ? autoDetect.checked : 'Element yok');
+            console.log('manualSection:', manualSection);
+            
+            if (!autoDetect || !manualSection) {
+                console.error('Gerekli elementler bulunamadı!');
+                return;
+            }
+            
+            if (autoDetect.checked) {
+                console.log('Otomatik tespit aktif - Manuel bölüm gizleniyor');
+                manualSection.classList.add('hidden');
+                testStatus.textContent = 'Otomatik tespit aktif - Manuel selector\'lar gizli';
+                testStatus.className = 'text-sm text-green-700';
+            } else {
+                console.log('Manuel mod aktif - Manuel bölüm gösteriliyor');
+                manualSection.classList.remove('hidden');
+                testStatus.textContent = 'Manuel mod aktif - Selector\'ları girebilirsiniz';
+                testStatus.className = 'text-sm text-yellow-700';
+            }
+            
+            // Debug bilgisini güncelle
+            if (!document.getElementById('debugInfo').classList.contains('hidden')) {
+                updateDebugStatus();
+            }
+        }
+
+        function showSelectorHelp() {
+            alert('Selector yardımı açılacak (bu test sayfasında sadece alert)');
+        }
+        
+        function testManualSelectors() {
+            const url = 'https://techcrunch.com/category/artificial-intelligence/';
+            const selectors = {
+                article_container: document.getElementById('article_container').value,
+                title_selector: document.getElementById('title_selector').value,
+                link_selector: document.getElementById('link_selector').value,
+                date_selector: document.getElementById('date_selector').value
+            };
+            
+            console.log('Manuel selector test:', selectors);
+            alert('Manuel selector test başlatıldı (console\'a bakın)');
+        }
+
+        // Sayfa yüklendiğinde durumu ayarla
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Sayfa yüklendi, başlangıç durumu ayarlanıyor');
+            toggleManualSelectors();
+        });
+    </script>
+</body>
+</html> 

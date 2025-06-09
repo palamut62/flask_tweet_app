@@ -15,9 +15,28 @@
         "excerpt": ".loop-card__content"
       },
       "added_date": "2025-01-08T10:00:00",
-      "last_checked": "2025-06-08T15:47:02.685563",
+      "last_checked": "2025-06-09T12:40:00.064838",
       "article_count": 5,
       "success_rate": 100
+    },
+    {
+      "id": "custom_2_5333836092",
+      "name": "Venturebat",
+      "url": "https://venturebeat.com/category/ai/",
+      "description": "",
+      "enabled": true,
+      "selector_type": "manual",
+      "article_selectors": {
+        "container": "article, .article, .post, .news-item",
+        "title": "h1, h2, h3, .title, .headline",
+        "link": "a",
+        "date": "time, .date, .published",
+        "excerpt": ".excerpt, .summary, p"
+      },
+      "added_date": "2025-06-09T11:31:21.185447",
+      "last_checked": "2025-06-09T12:40:06.699759",
+      "article_count": 5,
+      "success_rate": 60
     }
   ],
   "settings": {
@@ -25,6 +44,6 @@
     "check_all_sources": true,
     "source_timeout": 30,
     "articles_per_source": 5,
-    "last_updated": "2025-06-08T15:47:02.685563"
+    "last_updated": "2025-06-09T12:42:06.590894"
   }
 }

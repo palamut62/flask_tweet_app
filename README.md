@@ -40,6 +40,22 @@ workon ai_tweet_bot
 pip install -r requirements.txt
 ```
 
+### 2.1. Opsiyonel Gelişmiş Özellikler
+
+Gelişmiş web scraping özellikleri için (opsiyonel):
+
+```bash
+# Opsiyonel kütüphaneleri kur
+python install_optional.py
+```
+
+**Opsiyonel Kütüphaneler:**
+- **requests-html**: JavaScript rendering desteği
+- **selenium**: Browser automation (Chrome gerektirir)
+- **pyppeteer**: Selenium alternatifi
+
+**Not:** Bu kütüphaneler PythonAnywhere'de çalışmayabilir. Temel sistem bunlar olmadan da tam olarak çalışır.
+
 ### 3. Environment Değişkenlerini Ayarla
 
 **⚠️ GÜVENLİK UYARISI:**

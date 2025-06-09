@@ -194,5 +194,59 @@
     "deleted_date": "2025-06-08T15:20:40.257728",
     "tweet_text": "😇🤖🧠 DeepMind CEO predicts AI will lessen human selfishness by solving resource scarcity & boosting our understanding of complex systems. #AISelfishness #DeepMind #AIImpact\n\n🔗 https://www.wired.com/story/google-deepminds-ceo-demis-hassabis-thinks-ai-will-make-humans-less-selfish/",
     "deletion_reason": "Manuel olarak silindi"
+  },
+  {
+    "title": "Meta reportedly in talks to invest billions of dollars in Scale AI",
+    "url": "https://techcrunch.com/2025/06/08/meta-reportedly-in-talks-to-invest-billions-of-dollars-in-scale-ai/",
+    "hash": "5cb941b3ce234881d4e9bfb0413d32f4",
+    "posted_date": "2025-06-09T11:08:04.637945",
+    "tweet_id": "1931986633621962819",
+    "tweet_url": "https://twitter.com/user/status/1931986633621962819",
+    "manual_post": false,
+    "post_method": "api"
+  },
+  {
+    "title": "Like humans, AI is forcing institutions to rethink their purpose",
+    "url": "https://venturebeat.com/ai/like-humans-ai-is-forcing-institutions-to-rethink-their-purpose/",
+    "hash": "d156562edd64d2ba122d0e23e2092f49",
+    "posted_date": "2025-06-09T11:32:04.071867",
+    "tweet_id": "1931992671481909326",
+    "tweet_url": "https://twitter.com/user/status/1931992671481909326",
+    "manual_post": false,
+    "post_method": "api"
+  },
+  {
+    "title": "Try for free",
+    "url": "https://www.economist.com/api/auth/subscribe",
+    "content": "Loading×Sorry to interruptCSS ErrorRefresh",
+    "excerpt": "",
+    "date": "",
+    "hash": "5f5a437935e0f86107dd9339a2fa3f65",
+    "source": "Economist",
+    "source_id": "custom_3_9465951101",
+    "fetch_date": "2025-06-09T12:40:11.353914",
+    "is_new": true,
+    "already_posted": false,
+    "deleted": true,
+    "deleted_date": "2025-06-09T12:41:52.227396",
+    "tweet_text": "⚠️🚀 Since no specific AI/tech breakthrough information was provided, I cannot create a tweet. Please provide the details of the innovation, its capabilities, and any relevant numbers or companies involved. #Free #Error #Website\n\n🔗 https://www.economist.com/api/auth/subscribe",
+    "deletion_reason": "Manuel olarak silindi"
+  },
+  {
+    "title": "The world in brief",
+    "url": "https://www.economist.com/the-world-in-brief",
+    "content": "The world in briefCatch up quickly on the global stories that matterUpdated1 hour agoGavin Newsom, California’s governor, said the state would sue the Trump administrationfor sendingNational Guardtroops toLos Angelesamid violent anti-deportation protests. Demonstrators hurled fireworks and stones while officers responded with tear gas and rubber bullets, marking the third day of such clashes. Mr Trump, who called the protesters “violent mobs”, said the troops would restore “order”. Mr Newsom said the Trump administration wanted a “spectacle”.Israelseized a boat carrying activists and aid as it headed towardsGaza. TheMadleen, a British-flagged yacht, was intercepted by forces as it tried to break Israel’s naval blockade of the territory. The Freedom Flotilla Coalition, the pro-Palestinian group operatingMadleen, said the ship was “unlawfully boarded”.Israelcalled the vessel a “selfie yacht” and said that its passengers (who include Greta Thunberg, a Swedish climate activist) would “return to their home countries”.",
+    "excerpt": "Catch up on global daily news",
+    "date": "",
+    "hash": "3812a95b1c5863f0c7529332f4040797",
+    "source": "Economist",
+    "source_id": "custom_3_9465951101",
+    "fetch_date": "2025-06-09T12:40:14.868958",
+    "is_new": true,
+    "already_posted": false,
+    "deleted": true,
+    "deleted_date": "2025-06-09T12:41:57.470181",
+    "tweet_text": "📢⚖🤖 National Guard deployed amidst escalating tensions. Trump administration faces renewed scrutiny. Political landscape shifts dramatically. #CaliforniaProtests #IsraelGaza #WorldNews\n\n🔗 https://www.economist.com/the-world-in-brief",
+    "deletion_reason": "Manuel olarak silindi"
   }
 ]
