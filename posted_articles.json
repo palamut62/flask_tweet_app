@@ -526,5 +526,60 @@
     "tweet_url": "https://twitter.com/user/status/1932413745617088941",
     "manual_post": false,
     "post_method": "api"
+  },
+  {
+    "title": "Google’s AI Overviews are killing traffic for publishers",
+    "url": "https://techcrunch.com/2025/06/10/googles-ai-overviews-are-killing-traffic-for-publishers/",
+    "hash": "728632ab4490433d9d20da0d3882ff48",
+    "posted_date": "2025-06-10T16:06:09.646133",
+    "tweet_id": "1932424035599532497",
+    "tweet_url": "https://twitter.com/user/status/1932424035599532497",
+    "manual_post": false,
+    "post_method": "api"
+  },
+  {
+    "title": "OpenAI: Introducing Codex (Software Engineering Agent)",
+    "url": "https://openai.com/index/introducing-codex/",
+    "content": "OpenAI: Introducing Codex (Software Engineering Agent)",
+    "score": 319,
+    "hash": "ca000123469b6952bf988dfe74495c0a",
+    "source": "Reddit - r/singularity",
+    "fetch_date": "2025-06-10T16:05:00.653138",
+    "is_new": true,
+    "already_posted": false,
+    "deleted": true,
+    "deleted_date": "2025-06-10T16:06:26.742852",
+    "tweet_text": "💻✨🤖 OpenAI's Codex translates your words into code! Build apps effortlessly. Natural language now powers software creation. #OpenAI #Codex #SoftwareEngineering\n\n🔗 https://openai.com/index/introducing-codex/",
+    "deletion_reason": "Manuel olarak silindi"
+  },
+  {
+    "title": "Baby Is Healed With World’s First Personalized Gene-Editing Treatment",
+    "url": "https://www.nytimes.com/2025/05/15/health/gene-editing-personalized-rare-disorders.html?unlocked_article_code=1.HU8.gaAI.Z1ak7dLgE3tE&amp;smid=url-share",
+    "content": "Baby Is Healed With World’s First Personalized Gene-Editing Treatment",
+    "score": 400,
+    "hash": "8c959fae4f60195e1c18352b9ae67f5b",
+    "source": "Reddit - r/singularity",
+    "fetch_date": "2025-06-10T16:05:00.653138",
+    "is_new": true,
+    "already_posted": false,
+    "deleted": true,
+    "deleted_date": "2025-06-10T16:06:36.937965",
+    "tweet_text": "🚀💻🌟 While the provided content doesn't explicitly name any companies unvei... #Innovation #Technology #DigitalTransformation\n\n🔗 https://www.nytimes.com/2025/05/15/health/gene-editing-personalized-rare-disorders.html?unlocked_article_code=1.HU8.gaAI.Z1ak7dLgE3tE&amp;smid=url-share",
+    "deletion_reason": "Manuel olarak silindi"
+  },
+  {
+    "title": "Jensen Huang “To me, AI is moving at just the right speed. The speed I'm making it go.”",
+    "url": "https://v.redd.it/1if2u1ra136f1",
+    "content": "\nJensen Huang says AI has advanced a million-fold in a decade.\n\n“To me, AI is moving at just the right speed. The speed I'm making it go.”\n\nTo survive, he says, you need to get on the rocketship -- then everything else slows down.\n\nHis advice? Engage it deeply. And fast.\n\nhttps://x.com/vitrupo/status/1932065111750951227#m",
+    "score": 159,
+    "hash": "d60a9f865d683c50cb1d18aeaeab4d23",
+    "source": "Reddit - r/singularity",
+    "fetch_date": "2025-06-10T16:05:00.653138",
+    "is_new": true,
+    "already_posted": false,
+    "deleted": true,
+    "deleted_date": "2025-06-10T16:07:03.160536",
+    "tweet_text": "🤖🧠⚡ Breaking: Technology innovation #ArtificialIntelligence #MachineLearning #DeepLearning\n\n🔗 https://v.redd.it/1if2u1ra136f1",
+    "deletion_reason": "Manuel olarak silindi"
   }
 ]

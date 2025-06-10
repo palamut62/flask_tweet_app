@@ -222,14 +222,19 @@ def index():
     """Ana sayfa"""
     try:
         # Sayfa verilerini hazırla (otomatik kontrol yok)
-        articles = load_json("posted_articles.json")
+        all_articles = load_json("posted_articles.json")
         pending_tweets = load_json("pending_tweets.json")
+        
+        # Silinmiş tweetleri filtrele - sadece gerçekten paylaşılan tweetleri göster
+        articles = [article for article in all_articles if not article.get('deleted', False)]
+        
         stats = get_data_statistics()
         automation_status = get_automation_status()
         
         # Debug için istatistikleri logla (güvenli)
         from utils import safe_log
         safe_log(f"Ana sayfa istatistikleri: {stats}", "DEBUG")
+        safe_log(f"Toplam makale: {len(all_articles)}, Gösterilen: {len(articles)}, Silinmiş: {len(all_articles) - len(articles)}", "DEBUG")
         
         # API durumunu kontrol et (ana sayfa için basit kontrol)
         api_check = {

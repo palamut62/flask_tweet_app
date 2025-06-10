@@ -2,6 +2,84 @@
 
 {% block title %}AI Tweet Bot - Ana Sayfa{% endblock %}
 
+<!-- Haber kaynağı gösterimi için makro -->
+{% macro render_source_badge(source, source_id, url, badge_type='primary') %}
+    {% if source %}
+        {% set source_class = 'source-badge-' + badge_type %}
+        {% if 'techcrunch' in source.lower() %}
+            {% set source_class = 'source-techcrunch' %}
+        {% elif 'venturebeat' in source.lower() %}
+            {% set source_class = 'source-venturebeat' %}
+        {% elif 'wired' in source.lower() %}
+            {% set source_class = 'source-wired' %}
+        {% elif 'reddit' in source.lower() %}
+            {% set source_class = 'source-reddit' %}
+        {% elif 'economist' in source.lower() %}
+            {% set source_class = 'source-economist' %}
+        {% elif 'atlantic' in source.lower() %}
+            {% set source_class = 'source-atlantic' %}
+        {% elif 'guardian' in source.lower() %}
+            {% set source_class = 'source-guardian' %}
+        {% elif 'apple' in source.lower() %}
+            {% set source_class = 'source-apple' %}
+        {% elif 'hacker news' in source.lower() %}
+            {% set source_class = 'source-hackernews' %}
+        {% endif %}
+        
+        <div class="mb-4">
+            <div class="source-badge {{ source_class }}">
+                <i class="fas fa-newspaper source-icon"></i>
+                <span>Kaynak:</span>
+                <span class="source-name">{{ source }}</span>
+                {% if source_id %}
+                <span class="source-id">{{ source_id }}</span>
+                {% endif %}
+            </div>
+        </div>
+    {% elif url %}
+        <!-- Fallback: URL'den kaynak adını çıkar -->
+        {% set fallback_source = '' %}
+        {% set fallback_class = 'source-badge-fallback' %}
+        
+        {% if 'techcrunch.com' in url %}
+            {% set fallback_source = 'TechCrunch' %}
+            {% set fallback_class = 'source-techcrunch' %}
+        {% elif 'venturebeat.com' in url %}
+            {% set fallback_source = 'VentureBeat' %}
+            {% set fallback_class = 'source-venturebeat' %}
+        {% elif 'wired.com' in url %}
+            {% set fallback_source = 'WIRED' %}
+            {% set fallback_class = 'source-wired' %}
+        {% elif 'reddit.com' in url %}
+            {% set fallback_source = 'Reddit' %}
+            {% set fallback_class = 'source-reddit' %}
+        {% elif 'economist.com' in url %}
+            {% set fallback_source = 'The Economist' %}
+            {% set fallback_class = 'source-economist' %}
+        {% elif 'theatlantic.com' in url %}
+            {% set fallback_source = 'The Atlantic' %}
+            {% set fallback_class = 'source-atlantic' %}
+        {% elif 'theguardian.com' in url %}
+            {% set fallback_source = 'The Guardian' %}
+            {% set fallback_class = 'source-guardian' %}
+        {% elif 'apple.com' in url %}
+            {% set fallback_source = 'Apple Newsroom' %}
+            {% set fallback_class = 'source-apple' %}
+        {% else %}
+            {% set fallback_source = url.split('//')[1].split('/')[0] if '//' in url else 'Bilinmeyen' %}
+        {% endif %}
+        
+        <div class="mb-4">
+            <div class="source-badge {{ fallback_class }}">
+                <i class="fas fa-globe source-icon"></i>
+                <span>Kaynak:</span>
+                <span class="source-name">{{ fallback_source }}</span>
+                <span class="source-id">URL'den tespit</span>
+            </div>
+        </div>
+    {% endif %}
+{% endmacro %}
+
 {% block content %}
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
     <!-- Sol Sidebar - Durum ve Kontroller -->
@@ -269,6 +347,9 @@
                             </div>
                         </div>
                         
+                        <!-- Haber Kaynağı Bilgisi -->
+                        {{ render_source_badge(tweet.article.source, tweet.article.source_id, tweet.article.url) }}
+                        
                         {% if tweet.error_reason %}
                         <div class="mb-4 p-3 {% if 'rate limit' in tweet.error_reason.lower() %}bg-yellow-50 border border-yellow-200{% else %}bg-red-50 border border-red-200{% endif %} rounded-lg">
                             <div class="flex items-center space-x-2">
@@ -333,6 +414,14 @@
                             <div class="flex justify-between items-start mb-4">
                                 <h4 class="text-lg font-medium text-gray-900 line-clamp-2">{{ article.title }}</h4>
                                 <div class="flex items-center space-x-2 ml-4 flex-shrink-0">
+                                    {% if article.deleted %}
+                                    <span class="px-3 py-1 bg-red-500 text-white rounded-full text-sm font-medium">
+                                        Silindi
+                                    </span>
+                                    <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                                        Silindi
+                                    </span>
+                                    {% else %}
                                     <span class="px-3 py-1 bg-green-500 text-white rounded-full text-sm font-medium">
                                         Paylaşıldı
                                     </span>
@@ -344,6 +433,7 @@
                                     <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
                                         API
                                     </span>
+                                    {% endif %}
                                     {% endif %}
                                 </div>
                             </div>
@@ -369,6 +459,9 @@
                                 </div>
                                 {% endif %}
                             </div>
+                            
+                            <!-- Haber Kaynağı Bilgisi -->
+                            {{ render_source_badge(article.source, article.source_id, article.url) }}
                             
                             <div class="flex flex-wrap gap-3">
                                 <a href="{{ article.url }}" target="_blank" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 font-medium flex items-center space-x-2">
