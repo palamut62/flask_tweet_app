@@ -269,36 +269,10 @@ def fetch_latest_ai_articles_with_firecrawl():
         return fetch_latest_ai_articles_fallback()
 
 def fetch_latest_ai_articles():
-    """Ana haber çekme fonksiyonu - PythonAnywhere için optimize edilmiş"""
+    """Ana haber çekme fonksiyonu - Akıllı sistem ile"""
     try:
-        # Önce özel haber kaynaklarından dene (en güvenilir)
-        try:
-            custom_articles = fetch_articles_from_custom_sources()
-            if custom_articles and len(custom_articles) > 0:
-                print(f"✅ Özel kaynaklardan {len(custom_articles)} makale bulundu")
-                return custom_articles[:10]  # İlk 10 makaleyi döndür
-        except Exception as custom_error:
-            print(f"⚠️ Özel kaynaklardan makale çekme hatası: {custom_error}")
-        
-        # Eğer özel kaynaklardan makale gelmezse Firecrawl MCP dene
-        try:
-            articles = fetch_latest_ai_articles_with_firecrawl()
-            if articles and len(articles) > 0:
-                print(f"✅ Firecrawl MCP ile {len(articles)} makale bulundu")
-                return articles
-        except Exception as firecrawl_error:
-            print(f"⚠️ Firecrawl MCP hatası: {firecrawl_error}")
-        
-        # Son çare olarak fallback kullan
-        print("🔄 Fallback yöntemi deneniyor...")
-        articles = fetch_latest_ai_articles_fallback()
-        
-        if articles and len(articles) > 0:
-            print(f"✅ Fallback ile {len(articles)} makale bulundu")
-            return articles
-        else:
-            print("❌ Hiçbir yöntemle makale bulunamadı")
-            return []
+        # Yeni akıllı haber çekme sistemini kullan
+        return fetch_latest_ai_articles_smart()
         
     except Exception as e:
         print(f"❌ Ana haber çekme hatası: {e}")
@@ -3353,10 +3327,11 @@ def remove_news_source(source_id):
         return {"success": False, "message": f"❌ Kaynak kaldırma hatası: {e}"}
 
 def toggle_news_source(source_id, enabled=None):
-    """Haber kaynağını aktif/pasif yap"""
+    """Haber kaynağını aktif/pasif yap - RSS dahil"""
     try:
         config = load_news_sources()
         
+        # Normal kaynaklarda ara
         for source in config["sources"]:
             if source["id"] == source_id:
                 if enabled is None:
@@ -3371,10 +3346,108 @@ def toggle_news_source(source_id, enabled=None):
                 else:
                     return result
         
+        # RSS kaynaklarında ara
+        for rss_source in config.get("rss_sources", []):
+            if rss_source["id"] == source_id:
+                if enabled is None:
+                    rss_source["enabled"] = not rss_source["enabled"]
+                else:
+                    rss_source["enabled"] = bool(enabled)
+                
+                result = save_news_sources(config)
+                if result["success"]:
+                    status = "aktif" if rss_source["enabled"] else "pasif"
+                    return {"success": True, "message": f"✅ '{rss_source['name']}' RSS kaynağı {status} yapıldı"}
+                else:
+                    return result
+        
         return {"success": False, "message": "❌ Kaynak bulunamadı"}
         
     except Exception as e:
         return {"success": False, "message": f"❌ Durum değiştirme hatası: {e}"}
+
+def remove_rss_source(source_id):
+    """RSS kaynağını kaldır"""
+    try:
+        config = load_news_sources()
+        
+        # RSS kaynağını bul ve kaldır
+        original_count = len(config.get("rss_sources", []))
+        config["rss_sources"] = [s for s in config.get("rss_sources", []) if s["id"] != source_id]
+        
+        if len(config.get("rss_sources", [])) == original_count:
+            return {"success": False, "message": "❌ RSS kaynağı bulunamadı"}
+        
+        result = save_news_sources(config)
+        if result["success"]:
+            return {"success": True, "message": "✅ RSS kaynağı başarıyla kaldırıldı"}
+        else:
+            return result
+            
+    except Exception as e:
+        return {"success": False, "message": f"❌ RSS kaynağı kaldırma hatası: {e}"}
+
+def add_rss_source(name, url, description=""):
+    """Yeni RSS kaynağı ekle"""
+    try:
+        config = load_news_sources()
+        
+        # RSS kaynakları listesi yoksa oluştur
+        if "rss_sources" not in config:
+            config["rss_sources"] = []
+        
+        # URL'yi temizle ve doğrula
+        url = url.strip()
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+        
+        # Aynı URL var mı kontrol et
+        for rss_source in config["rss_sources"]:
+            if rss_source["url"] == url:
+                return {
+                    "success": False,
+                    "message": f"❌ Bu RSS URL'si zaten mevcut: {rss_source['name']}"
+                }
+        
+        # Benzersiz ID oluştur
+        import random
+        source_id = f"rss_{len(config['rss_sources']) + 1}_{random.randint(1000000000, 9999999999)}"
+        
+        # Yeni RSS kaynağı oluştur
+        new_rss_source = {
+            "id": source_id,
+            "name": name.strip(),
+            "url": url,
+            "description": description.strip(),
+            "enabled": True,
+            "type": "rss",
+            "added_date": datetime.now().isoformat(),
+            "last_checked": None,
+            "article_count": 0,
+            "success_rate": 100
+        }
+        
+        # RSS kaynağını ekle
+        config["rss_sources"].append(new_rss_source)
+        config["settings"]["last_updated"] = datetime.now().isoformat()
+        
+        # Kaydet
+        result = save_news_sources(config)
+        
+        if result["success"]:
+            return {
+                "success": True,
+                "message": f"✅ '{name}' RSS kaynağı başarıyla eklendi",
+                "source": new_rss_source
+            }
+        else:
+            return result
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"❌ RSS kaynağı ekleme hatası: {str(e)}"
+        }
 
 def fetch_articles_from_custom_sources():
     """Özel haber kaynaklarından makale çek"""
@@ -3446,9 +3519,9 @@ def auto_detect_selectors(soup, url):
     # Site türüne göre özel pattern'ler
     site_patterns = {
         'techcrunch.com': {
-            'containers': ["li.wp-block-post", "article.wp-block-post", ".loop-card"],
-            'titles': ["h3.loop-card__title a", "h2.loop-card__title a"],
-            'dates': ["time.loop-card__time", ".loop-card__time"]
+            'containers': [".loop-card", "li.wp-block-post", "article.wp-block-post"],
+            'titles': ["h3", "h2", "h3 a", "h2 a", ".loop-card__title a"],
+            'dates': ["time", "[datetime]", ".loop-card__time"]
         },
         'theverge.com': {
             'containers': [
@@ -3941,14 +4014,64 @@ def fetch_articles_from_single_source(source):
         return []
 
 def get_news_sources_stats():
-    """Haber kaynakları istatistiklerini al"""
+    """Haber kaynakları istatistiklerini al - RSS dahil"""
     try:
         config = load_news_sources()
         
-        total_sources = len(config["sources"])
-        enabled_sources = len([s for s in config["sources"] if s.get("enabled", True)])
-        total_articles = sum(s.get("article_count", 0) for s in config["sources"])
-        avg_success_rate = sum(s.get("success_rate", 0) for s in config["sources"]) / max(1, total_sources)
+        # Normal kaynaklar
+        sources = config.get("sources", [])
+        rss_sources = config.get("rss_sources", [])
+        
+        # Tüm kaynakları birleştir
+        all_sources = []
+        
+        # Normal kaynakları ekle
+        for source in sources:
+            source_copy = source.copy()
+            source_copy["type"] = "scraping"
+            source_copy["total_articles"] = source.get("article_count", 0)
+            
+            # Son kontrol zamanını hesapla
+            last_checked = source.get("last_checked")
+            if last_checked:
+                try:
+                    from datetime import datetime
+                    last_check_time = datetime.fromisoformat(last_checked.replace('Z', '+00:00'))
+                    hours_ago = (datetime.now() - last_check_time).total_seconds() / 3600
+                    source_copy["last_check_hours"] = int(hours_ago)
+                except:
+                    source_copy["last_check_hours"] = 999
+            else:
+                source_copy["last_check_hours"] = 999
+                
+            all_sources.append(source_copy)
+        
+        # RSS kaynaklarını ekle
+        for rss_source in rss_sources:
+            rss_copy = rss_source.copy()
+            rss_copy["type"] = "rss"
+            rss_copy["total_articles"] = rss_source.get("article_count", 0)
+            
+            # Son kontrol zamanını hesapla
+            last_checked = rss_source.get("last_checked")
+            if last_checked:
+                try:
+                    from datetime import datetime
+                    last_check_time = datetime.fromisoformat(last_checked.replace('Z', '+00:00'))
+                    hours_ago = (datetime.now() - last_check_time).total_seconds() / 3600
+                    rss_copy["last_check_hours"] = int(hours_ago)
+                except:
+                    rss_copy["last_check_hours"] = 999
+            else:
+                rss_copy["last_check_hours"] = 999
+                
+            all_sources.append(rss_copy)
+        
+        # İstatistikleri hesapla
+        total_sources = len(all_sources)
+        enabled_sources = len([s for s in all_sources if s.get("enabled", True)])
+        total_articles = sum(s.get("total_articles", 0) for s in all_sources)
+        avg_success_rate = sum(s.get("success_rate", 0) for s in all_sources) / max(1, total_sources)
         
         return {
             "total_sources": total_sources,
@@ -3956,7 +4079,9 @@ def get_news_sources_stats():
             "disabled_sources": total_sources - enabled_sources,
             "total_articles_fetched": total_articles,
             "average_success_rate": round(avg_success_rate, 1),
-            "sources": config["sources"],
+            "sources": all_sources,  # Birleştirilmiş kaynaklar
+            "scraping_sources": sources,  # Sadece scraping kaynakları
+            "rss_sources": rss_sources,  # Sadece RSS kaynakları
             "settings": config["settings"]
         }
         
@@ -3968,6 +4093,8 @@ def get_news_sources_stats():
             "total_articles_fetched": 0,
             "average_success_rate": 0,
             "sources": [],
+            "scraping_sources": [],
+            "rss_sources": [],
             "settings": {},
             "error": str(e)
         }
@@ -4916,10 +5043,1345 @@ def extract_main_content(soup):
         
         # İçeriği temizle
         content_text = ' '.join(content_text.split())
-        content_text = content_text[:3000]  # İlk 3000 karakter
+        # content_text = content_text[:3000]  # İlk 3000 karakter sınırı kaldırıldı
         
         return content_text
         
     except Exception as e:
         print(f"❌ İçerik çıkarma hatası: {e}")
         return ""
+
+# ==========================================
+# PYTHONANYWHERE UYUMLU HABER ÇEKME SİSTEMİ
+# ==========================================
+
+def fetch_latest_ai_articles_pythonanywhere():
+    """PythonAnywhere için optimize edilmiş haber çekme sistemi - Özel kaynaklar + API'ler"""
+    try:
+        # Önce mevcut yayınlanan makaleleri yükle
+        posted_articles = load_json(HISTORY_FILE)
+        posted_urls = [article.get('url', '') for article in posted_articles]
+        posted_hashes = [article.get('hash', '') for article in posted_articles]
+        
+        print("🔍 PythonAnywhere uyumlu haber çekme sistemi başlatılıyor...")
+        
+        all_articles = []
+        
+        # 1. Önce özel haber kaynaklarından çek (news_sources.json)
+        try:
+            custom_articles = fetch_articles_from_custom_sources_pythonanywhere()
+            if custom_articles:
+                all_articles.extend(custom_articles)
+                print(f"✅ Özel kaynaklardan {len(custom_articles)} makale bulundu")
+        except Exception as custom_error:
+            print(f"⚠️ Özel kaynaklar hatası: {custom_error}")
+        
+        # 2. RSS Feed'lerden makale çek (sadece özel kaynaklarda RSS yoksa)
+        try:
+            rss_articles = fetch_articles_from_rss_feeds()
+            if rss_articles:
+                all_articles.extend(rss_articles)
+                print(f"✅ RSS'den {len(rss_articles)} makale bulundu")
+        except Exception as rss_error:
+            print(f"⚠️ RSS çekme hatası: {rss_error}")
+        
+        # 3. Hacker News API'den AI ile ilgili haberleri çek
+        try:
+            hn_articles = fetch_articles_from_hackernews()
+            if hn_articles:
+                all_articles.extend(hn_articles)
+                print(f"✅ Hacker News'den {len(hn_articles)} makale bulundu")
+        except Exception as hn_error:
+            print(f"⚠️ Hacker News hatası: {hn_error}")
+        
+        # 4. Reddit API'den AI subreddit'lerinden makale çek
+        try:
+            reddit_articles = fetch_articles_from_reddit()
+            if reddit_articles:
+                all_articles.extend(reddit_articles)
+                print(f"✅ Reddit'den {len(reddit_articles)} makale bulundu")
+        except Exception as reddit_error:
+            print(f"⚠️ Reddit hatası: {reddit_error}")
+        
+        # Duplikat filtreleme
+        unique_articles = []
+        seen_hashes = set()
+        seen_urls = set()
+        
+        for article in all_articles:
+            article_hash = article.get('hash', '')
+            article_url = article.get('url', '')
+            
+            # Zaten paylaşılmış mı kontrol et
+            if (article_hash not in posted_hashes and 
+                article_url not in posted_urls and
+                article_hash not in seen_hashes and
+                article_url not in seen_urls):
+                
+                unique_articles.append(article)
+                seen_hashes.add(article_hash)
+                seen_urls.add(article_url)
+        
+        # En yeni makaleleri önce getir
+        unique_articles.sort(key=lambda x: x.get('fetch_date', ''), reverse=True)
+        
+        print(f"📊 PythonAnywhere sistemi ile toplam {len(unique_articles)} benzersiz makale bulundu")
+        
+        return unique_articles[:10]  # En fazla 10 makale döndür
+        
+    except Exception as e:
+        print(f"❌ PythonAnywhere haber çekme hatası: {e}")
+        return []
+
+def fetch_articles_from_custom_sources_pythonanywhere():
+    """PythonAnywhere uyumlu özel haber kaynakları çekme"""
+    try:
+        config = load_news_sources()
+        all_articles = []
+        
+        enabled_sources = [s for s in config["sources"] if s.get("enabled", True)]
+        
+        if not enabled_sources:
+            print("⚠️ Aktif haber kaynağı bulunamadı")
+            return []
+        
+        print(f"🔍 {len(enabled_sources)} özel haber kaynağından makale çekiliyor (PythonAnywhere uyumlu)...")
+        
+        for source in enabled_sources:
+            try:
+                print(f"📰 {source['name']} kaynağı kontrol ediliyor...")
+                
+                # PythonAnywhere uyumlu basit scraping kullan
+                articles = fetch_articles_from_single_source_pythonanywhere(source)
+                
+                if articles:
+                    all_articles.extend(articles)
+                    source["article_count"] = len(articles)
+                    source["success_rate"] = min(100, source.get("success_rate", 0) + 10)
+                    print(f"✅ {source['name']}: {len(articles)} makale bulundu")
+                else:
+                    source["success_rate"] = max(0, source.get("success_rate", 100) - 20)
+                    print(f"⚠️ {source['name']}: Makale bulunamadı")
+                
+                source["last_checked"] = datetime.now().isoformat()
+                
+            except Exception as e:
+                print(f"❌ {source['name']} hatası: {e}")
+                source["success_rate"] = max(0, source.get("success_rate", 100) - 30)
+                source["last_checked"] = datetime.now().isoformat()
+        
+        # Güncellenmiş config'i kaydet
+        try:
+            save_json(NEWS_SOURCES_FILE, config)
+        except Exception as save_error:
+            print(f"⚠️ Haber kaynakları kaydetme hatası: {save_error}")
+        
+        print(f"📊 Özel kaynaklardan toplam {len(all_articles)} makale bulundu")
+        return all_articles
+        
+    except Exception as e:
+        print(f"❌ Özel kaynaklar genel hatası: {e}")
+        return []
+
+def fetch_articles_from_single_source_pythonanywhere(source):
+    """PythonAnywhere uyumlu tek kaynak makale çekme"""
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        
+        # Timeout ile güvenli istek
+        response = requests.get(source['url'], headers=headers, timeout=15)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Makale container'larını bul
+        selectors = source.get('article_selectors', {})
+        container_selector = selectors.get('container', 'article')
+        
+        articles = soup.select(container_selector)[:5]  # En fazla 5 makale
+        
+        if not articles:
+            # Fallback selector'ları dene
+            fallback_selectors = ['article', '.post', '.news-item', '.article-item', 'li']
+            for fallback in fallback_selectors:
+                articles = soup.select(fallback)[:5]
+                if articles:
+                    break
+        
+        parsed_articles = []
+        
+        for article in articles:
+            try:
+                # Başlık bul
+                title_selector = selectors.get('title', 'h1, h2, h3, .title')
+                title_elem = article.select_one(title_selector)
+                
+                if not title_elem:
+                    continue
+                
+                title = title_elem.get_text().strip()
+                
+                # Link bul
+                link_selector = selectors.get('link', 'a')
+                link_elem = article.select_one(link_selector)
+                
+                if not link_elem:
+                    link_elem = title_elem.find('a') or title_elem.find_parent('a')
+                
+                if not link_elem:
+                    continue
+                
+                link = link_elem.get('href', '')
+                
+                # TechCrunch için özel düzeltme
+                if 'techcrunch.com' in source['url'] and not link:
+                    # Başlık içindeki a tag'ını bul
+                    title_link = title_elem.find('a')
+                    if title_link:
+                        link = title_link.get('href', '')
+                
+                # Relative URL'leri absolute yap
+                if link.startswith('/'):
+                    from urllib.parse import urljoin
+                    link = urljoin(source['url'], link)
+                elif not link.startswith('http'):
+                    continue
+                
+                # AI ile ilgili mi kontrol et
+                title_lower = title.lower()
+                ai_keywords = ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'neural', 'gpt', 'llm', 'chatbot', 'automation', 'anthropic', 'openai', 'claude', 'gemini', 'copilot']
+                is_ai_related = any(keyword in title_lower for keyword in ai_keywords)
+                
+                if not is_ai_related:
+                    continue
+                
+                # Özet bul
+                excerpt_selector = selectors.get('excerpt', '.excerpt, .summary, p')
+                excerpt_elem = article.select_one(excerpt_selector)
+                excerpt = excerpt_elem.get_text().strip()[:500] if excerpt_elem else ""
+                
+                # Tarih bul
+                date_selector = selectors.get('date', 'time, .date, .published')
+                date_elem = article.select_one(date_selector)
+                date_str = date_elem.get_text().strip() if date_elem else ""
+                
+                # Hash oluştur
+                article_hash = hashlib.md5(title.encode()).hexdigest()
+                
+                parsed_articles.append({
+                    "title": title,
+                    "url": link,
+                    "content": excerpt or title,
+                    "excerpt": excerpt,
+                    "date": date_str,
+                    "hash": article_hash,
+                    "source": f"{source['name']} (PA)",
+                    "source_id": source["id"],
+                    "fetch_date": datetime.now().isoformat(),
+                    "is_new": True,
+                    "already_posted": False
+                })
+                
+            except Exception as article_error:
+                print(f"⚠️ Makale parse hatası: {article_error}")
+                continue
+        
+        return parsed_articles
+        
+    except Exception as e:
+        print(f"❌ {source.get('name', 'Bilinmeyen')} kaynak hatası: {e}")
+        return []
+
+def fetch_articles_with_rss_only():
+    """Sadece RSS yöntemi ile haber kaynaklarından makale çekme - Son 24 saat filtreli"""
+    try:
+        print("🔍 RSS yöntemi ile haber çekme başlatılıyor (Son 24 saat)...")
+        
+        # Bugünün tarih ve saatini al
+        now = datetime.now()
+        twenty_four_hours_ago = now - timedelta(hours=24)
+        
+        print(f"📅 Bugün: {now.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"⏰ 24 saat öncesi: {twenty_four_hours_ago.strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        # Önce mevcut yayınlanan makaleleri yükle
+        posted_articles = load_json(HISTORY_FILE)
+        posted_urls = [article.get('url', '') for article in posted_articles]
+        posted_hashes = [article.get('hash', '') for article in posted_articles]
+        
+        # Son 24 saat içinde paylaşılan makaleleri de kontrol et
+        recent_posted_urls = []
+        recent_posted_hashes = []
+        
+        for article in posted_articles:
+            posted_date_str = article.get('posted_date') or article.get('fetch_date')
+            if posted_date_str:
+                try:
+                    posted_date = datetime.fromisoformat(posted_date_str.replace('Z', '+00:00').replace('+00:00', ''))
+                    if posted_date >= twenty_four_hours_ago:
+                        recent_posted_urls.append(article.get('url', ''))
+                        recent_posted_hashes.append(article.get('hash', ''))
+                except Exception as date_error:
+                    print(f"⚠️ Tarih parse hatası: {date_error}")
+                    continue
+        
+        print(f"📊 Son 24 saatte paylaşılan makale sayısı: {len(recent_posted_urls)}")
+        
+        # RSS kaynaklarını yükle
+        config = load_news_sources()
+        rss_sources = config.get("rss_sources", [])
+        enabled_rss_sources = [s for s in rss_sources if s.get("enabled", True)]
+        
+        if not enabled_rss_sources:
+            print("⚠️ Aktif RSS kaynağı bulunamadı")
+            return []
+        
+        print(f"📰 {len(enabled_rss_sources)} RSS kaynağından makale çekiliyor...")
+        
+        all_articles = []
+        
+        for rss_source in enabled_rss_sources:
+            try:
+                print(f"🔍 RSS çekiliyor: {rss_source['name']}")
+                
+                # RSS feed'i parse et
+                import feedparser
+                feed = feedparser.parse(rss_source['url'])
+                
+                if not feed.entries:
+                    print(f"⚠️ {rss_source['name']}: RSS feed'de entry bulunamadı")
+                    rss_source["success_rate"] = max(0, rss_source.get("success_rate", 100) - 20)
+                    continue
+                
+                source_articles = []
+                
+                for entry in feed.entries[:10]:  # Her feed'den en fazla 10 makale kontrol et
+                    try:
+                        title = getattr(entry, 'title', '')
+                        url = getattr(entry, 'link', '')
+                        
+                        if not title or not url:
+                            continue
+                        
+                        # URL kontrolü
+                        if url in posted_urls or url in recent_posted_urls:
+                            print(f"✅ RSS makale zaten paylaşılmış: {title[:50]}...")
+                            continue
+                        
+                        # Tarih kontrolü
+                        entry_date = None
+                        date_str = ""
+                        
+                        # RSS entry'den tarih al
+                        if hasattr(entry, 'published_parsed') and entry.published_parsed:
+                            try:
+                                import time
+                                entry_date = datetime(*entry.published_parsed[:6])
+                                date_str = entry.published
+                            except:
+                                pass
+                        elif hasattr(entry, 'published'):
+                            try:
+                                # RFC 2822 formatını parse et
+                                from email.utils import parsedate_to_datetime
+                                entry_date = parsedate_to_datetime(entry.published)
+                                date_str = entry.published
+                            except:
+                                pass
+                        
+                        # 24 saat kontrolü
+                        if entry_date:
+                            if entry_date < twenty_four_hours_ago:
+                                print(f"⏰ RSS makale 24 saatten eski: {entry_date.strftime('%Y-%m-%d %H:%M')} - {title[:50]}...")
+                            continue
+                        
+                        # İçerik al
+                        content = ""
+                        if hasattr(entry, 'summary'):
+                            content = entry.summary
+                        elif hasattr(entry, 'description'):
+                            content = entry.description
+                        elif hasattr(entry, 'content'):
+                            if isinstance(entry.content, list) and len(entry.content) > 0:
+                                content = entry.content[0].value
+                            else:
+                                content = str(entry.content)
+                        
+                        # HTML etiketlerini temizle
+                        if content:
+                            from bs4 import BeautifulSoup
+                            content = BeautifulSoup(content, 'html.parser').get_text()
+                            content = ' '.join(content.split())[:2000]
+                        
+                        # Eğer içerik yoksa başlığı kullan
+                        if not content:
+                            content = title
+                        
+                        # Hash oluştur
+                        article_hash = hashlib.md5(title.encode()).hexdigest()
+                        
+                        # Tekrar kontrolü
+                        if (article_hash not in posted_hashes and 
+                            article_hash not in recent_posted_hashes):
+                            
+                            source_articles.append({
+                            "title": title,
+                            "url": url,
+                                "content": content,
+                            "hash": article_hash,
+                            "fetch_date": datetime.now().isoformat(),
+                            "is_new": True,
+                                "already_posted": False,
+                                "source": f"RSS - {rss_source['name']}",
+                                "source_id": rss_source["id"],
+                                "article_date": entry_date.isoformat() if entry_date else datetime.now().isoformat(),
+                                "is_within_24h": True,
+                                "rss_published": date_str
+                            })
+                            print(f"🆕 RSS ile yeni makale (24h içinde): {title[:50]}...")
+                        else:
+                            if article_hash in recent_posted_hashes:
+                                print(f"⏰ Son 24 saatte paylaşılmış: {title[:50]}...")
+                            else:
+                                print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
+                        
+                        # En fazla 5 makale al
+                        if len(source_articles) >= 5:
+                            break
+                        
+                    except Exception as entry_error:
+                        print(f"⚠️ RSS entry hatası: {entry_error}")
+                        continue
+                        
+                if source_articles:
+                    all_articles.extend(source_articles)
+                    rss_source["article_count"] = len(source_articles)
+                    rss_source["success_rate"] = min(100, rss_source.get("success_rate", 0) + 10)
+                    print(f"✅ {rss_source['name']}: {len(source_articles)} yeni makale bulundu")
+                else:
+                    rss_source["success_rate"] = max(0, rss_source.get("success_rate", 100) - 10)
+                    print(f"⚠️ {rss_source['name']}: Yeni makale bulunamadı")
+                
+                rss_source["last_checked"] = datetime.now().isoformat()
+                
+            except Exception as source_error:
+                print(f"❌ {rss_source['name']} RSS hatası: {source_error}")
+                rss_source["success_rate"] = max(0, rss_source.get("success_rate", 100) - 30)
+                rss_source["last_checked"] = datetime.now().isoformat()
+        
+        # Güncellenmiş config'i kaydet
+        try:
+            save_json(NEWS_SOURCES_FILE, config)
+        except Exception as save_error:
+            print(f"⚠️ RSS kaynakları kaydetme hatası: {save_error}")
+        
+        print(f"📊 RSS ile toplam {len(all_articles)} yeni makale bulundu (Son 24 saat filtreli)")
+        
+        # Duplikat filtreleme uygula
+        if all_articles:
+            all_articles = filter_duplicate_articles(all_articles)
+            print(f"🔄 Duplikat filtreleme sonrası: {len(all_articles)} benzersiz makale")
+        
+        # 24 saat içindeki makaleleri işaretle
+        for article in all_articles:
+            article['filtered_by_24h'] = True
+            article['filter_applied_at'] = datetime.now().isoformat()
+            article['method'] = 'rss'
+        
+        return all_articles
+        
+    except ImportError:
+        print("⚠️ feedparser modülü bulunamadı, RSS atlanıyor")
+        return []
+    except Exception as e:
+        print(f"❌ RSS haber çekme genel hatası: {e}")
+        return []
+
+def fetch_articles_hybrid_mcp_rss():
+    """Hibrit sistem: MCP + RSS fallback ile haber çekme"""
+    try:
+        print("🔄 Hibrit haber çekme sistemi başlatılıyor (MCP + RSS)...")
+        
+        all_articles = []
+        
+        # 1. Önce MCP ile dene
+        try:
+            print("🤖 MCP yöntemi deneniyor...")
+            mcp_articles = fetch_articles_with_mcp_only()
+            
+            if mcp_articles:
+                all_articles.extend(mcp_articles)
+                print(f"✅ MCP ile {len(mcp_articles)} makale bulundu")
+            else:
+                print("⚠️ MCP ile makale bulunamadı")
+                
+        except Exception as mcp_error:
+            print(f"❌ MCP hatası: {mcp_error}")
+        
+        # 2. Eğer MCP'den yeterli makale gelmezse RSS dene
+        if len(all_articles) < 3:  # 3'ten az makale varsa RSS'yi de dene
+            try:
+                print("📡 RSS yöntemi devreye giriyor...")
+                rss_articles = fetch_articles_with_rss_only()
+                
+                if rss_articles:
+                    # RSS makalelerini ekle (duplikat kontrolü ile)
+                    existing_urls = [article.get('url', '') for article in all_articles]
+                    existing_hashes = [article.get('hash', '') for article in all_articles]
+                    
+                    new_rss_articles = []
+                    for rss_article in rss_articles:
+                        if (rss_article.get('url', '') not in existing_urls and 
+                            rss_article.get('hash', '') not in existing_hashes):
+                            new_rss_articles.append(rss_article)
+                    
+                    all_articles.extend(new_rss_articles)
+                    print(f"✅ RSS ile {len(new_rss_articles)} ek makale bulundu")
+                else:
+                    print("⚠️ RSS ile de makale bulunamadı")
+                    
+            except Exception as rss_error:
+                print(f"❌ RSS hatası: {rss_error}")
+        else:
+            print(f"✅ MCP'den yeterli makale var ({len(all_articles)}), RSS atlanıyor")
+        
+        # 3. Sonuçları birleştir ve filtrele
+        if all_articles:
+            # Duplikat filtreleme
+            all_articles = filter_duplicate_articles(all_articles)
+            
+            # Hibrit işareti ekle
+            for article in all_articles:
+                article['hybrid_method'] = True
+                article['methods_used'] = 'MCP+RSS' if any('RSS' in a.get('source', '') for a in all_articles) else 'MCP'
+            
+            print(f"🎯 Hibrit sistem sonucu: {len(all_articles)} benzersiz makale")
+            
+            # Kaynak dağılımını göster
+            mcp_count = len([a for a in all_articles if 'MCP' in a.get('source', '')])
+            rss_count = len([a for a in all_articles if 'RSS' in a.get('source', '')])
+            print(f"📊 Kaynak dağılımı: MCP={mcp_count}, RSS={rss_count}")
+            
+        return all_articles
+        
+    except Exception as e:
+        print(f"❌ Hibrit sistem hatası: {e}")
+        return []
+
+def fetch_articles_from_rss_feeds():
+    """Eski RSS fonksiyonu - geriye uyumluluk için"""
+    return fetch_articles_with_rss_only()
+
+def fetch_articles_with_simple_scraping():
+    """Basit web scraping ile makale çek"""
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        
+        # Scraping hedefleri
+        scraping_targets = [
+            {
+                "url": "https://techcrunch.com/category/artificial-intelligence/",
+                "name": "TechCrunch AI",
+                "article_selector": "article.post-block",
+                "title_selector": "h2.post-block__title a",
+                "link_selector": "h2.post-block__title a",
+                "excerpt_selector": ".post-block__content"
+            },
+            {
+                "url": "https://www.theverge.com/ai-artificial-intelligence",
+                "name": "The Verge AI",
+                "article_selector": "article",
+                "title_selector": "h2 a",
+                "link_selector": "h2 a",
+                "excerpt_selector": "p"
+            }
+        ]
+        
+        all_articles = []
+        
+        for target in scraping_targets:
+            try:
+                print(f"🔍 Web scraping: {target['name']}")
+                
+                response = requests.get(target['url'], headers=headers, timeout=15)
+                response.raise_for_status()
+                
+                soup = BeautifulSoup(response.text, 'html.parser')
+                articles = soup.select(target['article_selector'])[:5]
+                
+                for article in articles:
+                    try:
+                        title_elem = article.select_one(target['title_selector'])
+                        if not title_elem:
+                            continue
+                        
+                        title = title_elem.get_text().strip()
+                        link = title_elem.get('href', '')
+                        
+                        # Relative URL'leri absolute yap
+                        if link.startswith('/'):
+                            from urllib.parse import urljoin
+                            link = urljoin(target['url'], link)
+                        
+                        # Excerpt al
+                        excerpt = ""
+                        excerpt_elem = article.select_one(target['excerpt_selector'])
+                        if excerpt_elem:
+                            excerpt = excerpt_elem.get_text().strip()[:500]
+                        
+                        # Hash oluştur
+                        article_hash = hashlib.md5(title.encode()).hexdigest()
+                        
+                        all_articles.append({
+                            "title": title,
+                            "url": link,
+                            "content": excerpt or title,
+                            "excerpt": excerpt,
+                            "hash": article_hash,
+                            "source": f"Scraping - {target['name']}",
+                            "fetch_date": datetime.now().isoformat(),
+                            "is_new": True,
+                            "already_posted": False
+                        })
+                        
+                    except Exception as article_error:
+                        print(f"⚠️ Makale parse hatası: {article_error}")
+                        continue
+                        
+            except Exception as target_error:
+                print(f"⚠️ Scraping hatası ({target['name']}): {target_error}")
+                continue
+        
+        return all_articles
+        
+    except Exception as e:
+        print(f"❌ Web scraping genel hatası: {e}")
+        return []
+
+def fetch_articles_from_hackernews():
+    """Hacker News API'den AI ile ilgili haberleri çek"""
+    try:
+        # Hacker News API'den top stories al
+        top_stories_url = "https://hacker-news.firebaseio.com/v0/topstories.json"
+        response = requests.get(top_stories_url, timeout=10)
+        story_ids = response.json()[:50]  # İlk 50 hikaye
+        
+        ai_articles = []
+        ai_keywords = ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'neural', 'gpt', 'llm']
+        
+        for story_id in story_ids[:20]:  # İlk 20'sini kontrol et
+            try:
+                story_url = f"https://hacker-news.firebaseio.com/v0/item/{story_id}.json"
+                story_response = requests.get(story_url, timeout=5)
+                story = story_response.json()
+                
+                if not story or story.get('type') != 'story':
+                    continue
+                
+                title = story.get('title', '')
+                url = story.get('url', '')
+                
+                # AI ile ilgili mi kontrol et
+                title_lower = title.lower()
+                is_ai_related = any(keyword in title_lower for keyword in ai_keywords)
+                
+                if not is_ai_related or not url:
+                    continue
+                
+                # Hash oluştur
+                article_hash = hashlib.md5(title.encode()).hexdigest()
+                
+                ai_articles.append({
+                    "title": title,
+                    "url": url,
+                    "content": title,  # HN'de sadece başlık var
+                    "score": story.get('score', 0),
+                    "hash": article_hash,
+                    "source": "Hacker News",
+                    "fetch_date": datetime.now().isoformat(),
+                    "is_new": True,
+                    "already_posted": False
+                })
+                
+                if len(ai_articles) >= 5:  # En fazla 5 makale
+                    break
+                    
+            except Exception as story_error:
+                print(f"⚠️ HN story hatası: {story_error}")
+                continue
+        
+        return ai_articles
+        
+    except Exception as e:
+        print(f"❌ Hacker News API hatası: {e}")
+        return []
+
+def fetch_articles_from_reddit():
+    """Reddit'den AI subreddit'lerinden makale çek"""
+    try:
+        # Reddit JSON API kullan (auth gerektirmez)
+        subreddits = ['artificial', 'MachineLearning', 'deeplearning', 'singularity']
+        all_articles = []
+        
+        for subreddit in subreddits:
+            try:
+                url = f"https://www.reddit.com/r/{subreddit}/hot.json?limit=10"
+                headers = {'User-Agent': 'AI News Bot 1.0'}
+                
+                response = requests.get(url, headers=headers, timeout=10)
+                data = response.json()
+                
+                posts = data.get('data', {}).get('children', [])
+                
+                for post in posts[:3]:  # Her subreddit'den 3 post
+                    try:
+                        post_data = post.get('data', {})
+                        
+                        title = post_data.get('title', '')
+                        url = post_data.get('url', '')
+                        selftext = post_data.get('selftext', '')
+                        score = post_data.get('score', 0)
+                        
+                        # Sadece external link'leri al (reddit post'ları değil)
+                        if not url or 'reddit.com' in url or score < 10:
+                            continue
+                        
+                        # İçerik oluştur
+                        content = selftext[:500] if selftext else title
+                        
+                        # Hash oluştur
+                        article_hash = hashlib.md5(title.encode()).hexdigest()
+                        
+                        all_articles.append({
+                            "title": title,
+                            "url": url,
+                            "content": content,
+                            "score": score,
+                            "hash": article_hash,
+                            "source": f"Reddit - r/{subreddit}",
+                            "fetch_date": datetime.now().isoformat(),
+                            "is_new": True,
+                            "already_posted": False
+                        })
+                        
+                    except Exception as post_error:
+                        print(f"⚠️ Reddit post hatası: {post_error}")
+                        continue
+                        
+            except Exception as subreddit_error:
+                print(f"⚠️ Reddit subreddit hatası ({subreddit}): {subreddit_error}")
+                continue
+        
+        return all_articles
+        
+    except Exception as e:
+        print(f"❌ Reddit API hatası: {e}")
+        return []
+
+# ==========================================
+# HABER ÇEKME YÖNTEMİ SEÇİCİ
+# ==========================================
+
+def get_news_fetching_method():
+    """Ayarlardan haber çekme yöntemini al"""
+    try:
+        # Automation settings'den kontrol et
+        settings = load_automation_settings()
+        method = settings.get('news_fetching_method', 'auto')
+        
+        # MCP config'den de kontrol et
+        mcp_config = load_json(MCP_CONFIG_FILE) if os.path.exists(MCP_CONFIG_FILE) else {}
+        mcp_enabled = mcp_config.get('mcp_enabled', False)
+        
+        return {
+            'method': method,
+            'mcp_enabled': mcp_enabled,
+            'available_methods': ['auto', 'mcp_only', 'pythonanywhere_only', 'custom_sources_only']
+        }
+    except Exception as e:
+        print(f"Haber çekme yöntemi alma hatası: {e}")
+        return {
+            'method': 'auto',
+            'mcp_enabled': False,
+            'available_methods': ['auto', 'mcp_only', 'pythonanywhere_only', 'custom_sources_only']
+        }
+
+def fetch_latest_ai_articles_smart():
+    """Akıllı haber çekme - Ayarlara göre yöntem seçer"""
+    try:
+        method_info = get_news_fetching_method()
+        method = method_info['method']
+        mcp_enabled = method_info['mcp_enabled']
+        
+        print(f"🎯 Haber çekme yöntemi: {method} (MCP: {'Aktif' if mcp_enabled else 'Pasif'})")
+        
+        if method == 'mcp_only' and mcp_enabled:
+            # Sadece MCP kullan
+            return fetch_latest_ai_articles_with_firecrawl()
+            
+        elif method == 'pythonanywhere_only':
+            # Sadece PythonAnywhere uyumlu sistem kullan
+            return fetch_latest_ai_articles_pythonanywhere()
+            
+        elif method == 'custom_sources_only':
+            # Sadece özel kaynakları kullan
+            return fetch_articles_from_custom_sources()
+            
+        else:  # method == 'auto'
+            # Otomatik seçim - Öncelik sırasına göre dene
+            all_articles = []
+            
+            # 1. Önce özel kaynakları dene
+            try:
+                custom_articles = fetch_articles_from_custom_sources()
+                if custom_articles:
+                    all_articles.extend(custom_articles)
+                    print(f"✅ Özel kaynaklardan {len(custom_articles)} makale")
+            except Exception as e:
+                print(f"⚠️ Özel kaynaklar hatası: {e}")
+            
+            # 2. PythonAnywhere sistemini dene
+            try:
+                pa_articles = fetch_latest_ai_articles_pythonanywhere()
+                if pa_articles:
+                    all_articles.extend(pa_articles)
+                    print(f"✅ PythonAnywhere sisteminden {len(pa_articles)} makale")
+            except Exception as e:
+                print(f"⚠️ PythonAnywhere sistemi hatası: {e}")
+            
+            # 3. MCP varsa onu da dene
+            if mcp_enabled:
+                try:
+                    mcp_articles = fetch_latest_ai_articles_with_firecrawl()
+                    if mcp_articles:
+                        all_articles.extend(mcp_articles)
+                        print(f"✅ MCP'den {len(mcp_articles)} makale")
+                except Exception as e:
+                    print(f"⚠️ MCP hatası: {e}")
+            
+            # 4. Son çare fallback
+            if not all_articles:
+                try:
+                    fallback_articles = fetch_latest_ai_articles_fallback()
+                    if fallback_articles:
+                        all_articles.extend(fallback_articles)
+                        print(f"✅ Fallback'den {len(fallback_articles)} makale")
+                except Exception as e:
+                    print(f"⚠️ Fallback hatası: {e}")
+            
+            # Duplikat temizleme
+            if all_articles:
+                unique_articles = filter_duplicate_articles(all_articles)
+                print(f"📊 Toplam {len(unique_articles)} benzersiz makale bulundu")
+                return unique_articles[:10]
+            
+            return []
+        
+    except Exception as e:
+        print(f"❌ Akıllı haber çekme hatası: {e}")
+        # Son çare fallback
+        return fetch_latest_ai_articles_fallback()
+
+def fetch_articles_with_mcp_only():
+    """Sadece MCP yöntemi ile haber kaynaklarından makale çekme - Son 24 saat filtreli"""
+    try:
+        print("🔍 MCP yöntemi ile haber çekme başlatılıyor (Son 24 saat)...")
+        
+        # Bugünün tarih ve saatini al
+        now = datetime.now()
+        twenty_four_hours_ago = now - timedelta(hours=24)
+        
+        print(f"📅 Bugün: {now.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"⏰ 24 saat öncesi: {twenty_four_hours_ago.strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        # Önce mevcut yayınlanan makaleleri yükle
+        posted_articles = load_json(HISTORY_FILE)
+        posted_urls = [article.get('url', '') for article in posted_articles]
+        posted_hashes = [article.get('hash', '') for article in posted_articles]
+        
+        # Son 24 saat içinde paylaşılan makaleleri de kontrol et
+        recent_posted_urls = []
+        recent_posted_hashes = []
+        
+        for article in posted_articles:
+            posted_date_str = article.get('posted_date') or article.get('fetch_date')
+            if posted_date_str:
+                try:
+                    # ISO format tarih parse et
+                    posted_date = datetime.fromisoformat(posted_date_str.replace('Z', '+00:00').replace('+00:00', ''))
+                    if posted_date >= twenty_four_hours_ago:
+                        recent_posted_urls.append(article.get('url', ''))
+                        recent_posted_hashes.append(article.get('hash', ''))
+                except Exception as date_error:
+                    print(f"⚠️ Tarih parse hatası: {date_error}")
+                    continue
+        
+        print(f"📊 Son 24 saatte paylaşılan makale sayısı: {len(recent_posted_urls)}")
+        
+        # Haber kaynaklarını yükle
+        config = load_news_sources()
+        enabled_sources = [s for s in config.get("sources", []) if s.get("enabled", True)]
+        
+        if not enabled_sources:
+            print("⚠️ Aktif haber kaynağı bulunamadı")
+            return []
+        
+        print(f"📰 {len(enabled_sources)} haber kaynağından MCP ile makale çekiliyor...")
+        
+        all_articles = []
+        
+        for source in enabled_sources:
+            try:
+                print(f"🔍 MCP ile çekiliyor: {source['name']}")
+                
+                # Gelişmiş scraper ile ana sayfa çek (MCP fallback)
+                try:
+                    scrape_result = advanced_web_scraper(source['url'], wait_time=5, use_js=True, return_html=True)
+                    
+                    if not scrape_result or 'html' not in scrape_result:
+                        print(f"[MCP] Gelişmiş scraper deneniyor (JS: True)...")
+                        scrape_result = mcp_firecrawl_scrape({
+                            "url": source['url'],
+                            "formats": ["markdown", "links"],
+                            "onlyMainContent": True,
+                            "waitFor": 2000
+                        })
+                        
+                        if not scrape_result.get("success", False):
+                            print(f"⚠️ {source['name']} MCP ile çekilemedi")
+                            source["success_rate"] = max(0, source.get("success_rate", 100) - 20)
+                            continue
+                        
+                        # Markdown içeriğinden makale linklerini çıkar
+                        markdown_content = scrape_result.get("markdown", "")
+                        print(f"[MCP] Firecrawl scrape başarılı: {len(markdown_content)} karakter (firecrawl)")
+                    else:
+                        # HTML'den BeautifulSoup ile parse et
+                        html_content = scrape_result['html']
+                        soup = BeautifulSoup(html_content, 'html.parser')
+                        
+                                                 # TechCrunch için özel parsing
+                        if 'techcrunch.com' in source['url']:
+                            # .loop-card elementlerini bul
+                            loop_cards = soup.select('.loop-card')
+                            print(f"[MCP] TechCrunch: {len(loop_cards)} loop-card bulundu")
+                            
+                            article_urls = []
+                            for card in loop_cards:
+                                title_link = card.select_one('h3 a, h2 a, .loop-card__title a')
+                                if title_link:
+                                    href = title_link.get('href', '')
+                                    title = title_link.get_text().strip()
+                                    
+                                    if href and title:
+                                        if href.startswith('/'):
+                                            href = 'https://techcrunch.com' + href
+                                        article_urls.append(href)
+                                        print(f"   📰 {title[:50]}... -> {href}")
+                            
+                            # TechCrunch kategorilerini de kontrol et
+                            category_links = soup.find_all('a', href=True)
+                            for link in category_links:
+                                href = link.get('href', '')
+                                text = link.get_text().strip()
+                                
+                                # AI, Apps, Robotics gibi kategorilerdeki makaleleri de al
+                                if (href and 'techcrunch.com' in href and 
+                                    ('2025' in href or '2024' in href) and
+                                    text and len(text) > 15 and
+                                    href not in article_urls):
+                                    
+                                    # AI ile ilgili kategorileri kontrol et
+                                    ai_keywords = ['ai', 'artificial', 'machine learning', 'robotics', 'automation', 'chatgpt', 'openai']
+                                    if any(keyword in text.lower() for keyword in ai_keywords):
+                                        article_urls.append(href)
+                                        print(f"   🤖 Kategori makalesi: {text[:50]}... -> {href}")
+                            
+                            # Markdown content simülasyonu
+                            markdown_content = '\n'.join([f"[Article]({url})" for url in article_urls])
+                        else:
+                            # Diğer siteler için genel parsing
+                            all_links = soup.find_all('a', href=True)
+                            article_urls = []
+                            
+                            for link in all_links:
+                                href = link.get('href', '')
+                                text = link.get_text().strip()
+                                
+                                if (href and text and len(text) > 15 and
+                                    ('2025' in href or '2024' in href) and
+                                    source['url'].split('/')[2] in href):
+                                    
+                                    if href.startswith('/'):
+                                        base_url = f"https://{source['url'].split('/')[2]}"
+                                        href = base_url + href
+                                    
+                                    article_urls.append(href)
+                            
+                            markdown_content = '\n'.join([f"[Article]({url})" for url in article_urls])
+                        
+                        print(f"[MCP] Gelişmiş scraper başarılı: {len(markdown_content)} karakter (selenium)")
+                        
+                except Exception as scraper_error:
+                    print(f"❌ Scraper hatası: {scraper_error}")
+                    continue
+                
+                # Makale URL'lerini bul
+                import re
+                
+                # Kaynak URL'sinin domain'ini al
+                from urllib.parse import urlparse
+                source_domain = urlparse(source['url']).netloc
+                
+                # Bu domain'e ait makale URL'lerini bul
+                url_patterns = [
+                    rf'https?://{re.escape(source_domain)}/[^\s\)\]]+',
+                    rf'https?://www\.{re.escape(source_domain)}/[^\s\)\]]+',
+                ]
+                
+                article_urls = []
+                for pattern in url_patterns:
+                    found_urls = re.findall(pattern, markdown_content)
+                    article_urls.extend(found_urls)
+                
+                # URL'leri temizle ve filtrele (24 saat kontrolü ile)
+                clean_urls = []
+                for url in article_urls:
+                    url = url.rstrip(')')
+                    
+                    # Makale URL'si olup olmadığını kontrol et
+                    if (url not in posted_urls and 
+                        url not in recent_posted_urls and  # Son 24 saat kontrolü
+                        url not in clean_urls and
+                        len(url) > 30 and  # Çok kısa URL'leri filtrele
+                        not any(skip in url.lower() for skip in ['category', 'tag', 'author', 'page', 'search'])):
+                        
+                        # URL'den makale tarihini çıkarmaya çalış (TechCrunch, The Verge gibi siteler için)
+                        is_recent_article = check_article_url_date(url, twenty_four_hours_ago)
+                        
+                        # 24 saat filtresi yerine 48 saat (2 gün) yapalım - daha fazla makale için
+                        forty_eight_hours_ago = now - timedelta(hours=48)
+                        is_recent_48h = check_article_url_date(url, forty_eight_hours_ago)
+                        
+                        if is_recent_48h:  # 48 saat içindeki makaleleri al
+                            clean_urls.append(url)
+                        else:
+                            print(f"⏰ Eski makale atlandı (48h+): {url}")
+                
+                # Makale sayısını artır (5 -> 15)
+                clean_urls = clean_urls[:15]
+                print(f"🔗 {source['name']}: {len(clean_urls)} makale URL'si bulundu")
+                
+                # Her makaleyi MCP ile çek
+                source_articles = []
+                for url in clean_urls:
+                    try:
+                        article_content = fetch_article_content_with_mcp_only(url)
+                        
+                        if article_content and len(article_content.get("content", "")) > 100:
+                            title = article_content.get("title", "")
+                            content = article_content.get("content", "")
+                            publish_date = article_content.get("publish_date")
+                            
+                            # Makale yayın tarihini kontrol et
+                            is_article_recent = True
+                            if publish_date:
+                                try:
+                                    article_pub_date = datetime.fromisoformat(publish_date.replace('Z', ''))
+                                    is_article_recent = article_pub_date >= twenty_four_hours_ago
+                                    
+                                    if not is_article_recent:
+                                        print(f"⏰ Makale 24 saatten eski: {article_pub_date.strftime('%Y-%m-%d %H:%M')} - {title[:50]}...")
+                                        continue
+                                except Exception as date_error:
+                                    print(f"⚠️ Makale tarih parse hatası: {date_error}")
+                            
+                            # Makale hash'i oluştur
+                            article_hash = hashlib.md5(title.encode()).hexdigest()
+                            
+                            # Tekrar kontrolü (hem genel hem de son 24 saat)
+                            if (article_hash not in posted_hashes and 
+                                article_hash not in recent_posted_hashes and
+                                is_article_recent):
+                                
+                                source_articles.append({
+                                    "title": title,
+                                    "url": url,
+                                    "content": content,
+                                    "hash": article_hash,
+                                    "fetch_date": datetime.now().isoformat(),
+                                    "is_new": True,
+                                    "already_posted": False,
+                                    "source": f"MCP - {source['name']}",
+                                    "source_id": source["id"],
+                                    "article_date": publish_date or datetime.now().isoformat(),
+                                    "is_within_24h": True
+                                })
+                                print(f"🆕 MCP ile yeni makale (24h içinde): {title[:50]}...")
+                            else:
+                                if article_hash in recent_posted_hashes:
+                                    print(f"⏰ Son 24 saatte paylaşılmış: {title[:50]}...")
+                                elif not is_article_recent:
+                                    print(f"📅 24 saatten eski makale: {title[:50]}...")
+                                else:
+                                    print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
+                        else:
+                            print(f"⚠️ İçerik yetersiz: {url}")
+                            
+                    except Exception as article_error:
+                        print(f"❌ Makale çekme hatası ({url}): {article_error}")
+                        continue
+                
+                if source_articles:
+                    all_articles.extend(source_articles)
+                    source["article_count"] = len(source_articles)
+                    source["success_rate"] = min(100, source.get("success_rate", 0) + 10)
+                    print(f"✅ {source['name']}: {len(source_articles)} yeni makale bulundu")
+                else:
+                    source["success_rate"] = max(0, source.get("success_rate", 100) - 10)
+                    print(f"⚠️ {source['name']}: Yeni makale bulunamadı")
+                
+                source["last_checked"] = datetime.now().isoformat()
+                
+            except Exception as source_error:
+                print(f"❌ {source['name']} kaynak hatası: {source_error}")
+                source["success_rate"] = max(0, source.get("success_rate", 100) - 30)
+                source["last_checked"] = datetime.now().isoformat()
+        
+        # Güncellenmiş config'i kaydet
+        try:
+            save_json(NEWS_SOURCES_FILE, config)
+        except Exception as save_error:
+            print(f"⚠️ Haber kaynakları kaydetme hatası: {save_error}")
+        
+        print(f"📊 MCP ile toplam {len(all_articles)} yeni makale bulundu (Son 24 saat filtreli)")
+        
+        # Duplikat filtreleme uygula
+        if all_articles:
+            all_articles = filter_duplicate_articles(all_articles)
+            print(f"🔄 Duplikat filtreleme sonrası: {len(all_articles)} benzersiz makale")
+        
+        # 24 saat içindeki makaleleri işaretle
+        for article in all_articles:
+            article['filtered_by_24h'] = True
+            article['filter_applied_at'] = datetime.now().isoformat()
+        
+        return all_articles
+        
+    except Exception as e:
+        print(f"❌ MCP haber çekme genel hatası: {e}")
+        return []
+
+def check_article_url_date(url, cutoff_date):
+    """URL'den makale tarihini çıkarıp son 24 saat içinde olup olmadığını kontrol et"""
+    try:
+        import re
+        
+        # TechCrunch URL formatı: https://techcrunch.com/2025/01/09/article-name/
+        techcrunch_pattern = r'/(\d{4})/(\d{2})/(\d{2})/'
+        match = re.search(techcrunch_pattern, url)
+        
+        if match:
+            year, month, day = match.groups()
+            try:
+                article_date = datetime(int(year), int(month), int(day))
+                
+                # Makale tarihi son 24 saat içinde mi?
+                is_recent = article_date >= cutoff_date.replace(hour=0, minute=0, second=0, microsecond=0)
+                
+                if is_recent:
+                    print(f"📅 Güncel makale: {article_date.strftime('%Y-%m-%d')} - {url[:60]}...")
+                else:
+                    print(f"📅 Eski makale: {article_date.strftime('%Y-%m-%d')} - {url[:60]}...")
+                
+                return is_recent
+                
+            except ValueError as date_error:
+                print(f"⚠️ Tarih parse hatası: {date_error}")
+                return True  # Hata durumunda makaleyi dahil et
+        
+        # The Verge URL formatı: https://www.theverge.com/2025/1/9/article-name
+        verge_pattern = r'/(\d{4})/(\d{1,2})/(\d{1,2})/'
+        match = re.search(verge_pattern, url)
+        
+        if match:
+            year, month, day = match.groups()
+            try:
+                article_date = datetime(int(year), int(month), int(day))
+                
+                # Makale tarihi son 24 saat içinde mi?
+                is_recent = article_date >= cutoff_date.replace(hour=0, minute=0, second=0, microsecond=0)
+                
+                if is_recent:
+                    print(f"📅 Güncel makale: {article_date.strftime('%Y-%m-%d')} - {url[:60]}...")
+                else:
+                    print(f"📅 Eski makale: {article_date.strftime('%Y-%m-%d')} - {url[:60]}...")
+                
+                return is_recent
+                
+            except ValueError as date_error:
+                print(f"⚠️ Tarih parse hatası: {date_error}")
+                return True  # Hata durumunda makaleyi dahil et
+        
+        # Diğer siteler için - URL'de tarih bulunamazsa güncel kabul et
+        print(f"📅 Tarih tespit edilemedi, güncel kabul ediliyor: {url[:60]}...")
+        return True
+        
+    except Exception as e:
+        print(f"⚠️ URL tarih kontrolü hatası: {e}")
+        return True  # Hata durumunda makaleyi dahil et
+
+def extract_article_date_from_content(content):
+    """Makale içeriğinden yayın tarihini çıkarmaya çalış"""
+    try:
+        import re
+        
+        # Çeşitli tarih formatlarını ara
+        date_patterns = [
+            # ISO format: 2025-01-09T10:30:00
+            r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})',
+            # Date format: January 9, 2025
+            r'(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),?\s+(\d{4})',
+            # Date format: 9 January 2025
+            r'(\d{1,2})\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})',
+            # Date format: 2025-01-09
+            r'(\d{4}-\d{2}-\d{2})',
+            # Date format: 01/09/2025
+            r'(\d{2}/\d{2}/\d{4})',
+            # Time ago format: "2 hours ago", "1 day ago"
+            r'(\d+)\s+(hour|hours|day|days)\s+ago'
+        ]
+        
+        now = datetime.now()
+        
+        for pattern in date_patterns:
+            matches = re.findall(pattern, content, re.IGNORECASE)
+            
+            for match in matches:
+                try:
+                    if isinstance(match, tuple):
+                        if len(match) == 1:  # ISO format veya basit tarih
+                            date_str = match[0]
+                            if 'T' in date_str:
+                                # ISO format
+                                return datetime.fromisoformat(date_str.replace('Z', ''))
+                            else:
+                                # Basit tarih formatı
+                                return datetime.strptime(date_str, '%Y-%m-%d')
+                        
+                        elif len(match) == 3:  # Month day, year format
+                            if match[0].isdigit():  # Day month year
+                                day, month_name, year = match
+                                month_map = {
+                                    'january': 1, 'february': 2, 'march': 3, 'april': 4,
+                                    'may': 5, 'june': 6, 'july': 7, 'august': 8,
+                                    'september': 9, 'october': 10, 'november': 11, 'december': 12
+                                }
+                                month = month_map.get(month_name.lower())
+                                if month:
+                                    return datetime(int(year), month, int(day))
+                            else:  # Month day, year
+                                month_name, day, year = match
+                                month_map = {
+                                    'january': 1, 'february': 2, 'march': 3, 'april': 4,
+                                    'may': 5, 'june': 6, 'july': 7, 'august': 8,
+                                    'september': 9, 'october': 10, 'november': 11, 'december': 12
+                                }
+                                month = month_map.get(month_name.lower())
+                                if month:
+                                    return datetime(int(year), month, int(day))
+                        
+                        elif len(match) == 2:  # Time ago format
+                            amount, unit = match
+                            amount = int(amount)
+                            
+                            if 'hour' in unit:
+                                return now - timedelta(hours=amount)
+                            elif 'day' in unit:
+                                return now - timedelta(days=amount)
+                    
+                    else:  # Single string match
+                        if '/' in match:  # MM/DD/YYYY format
+                            return datetime.strptime(match, '%m/%d/%Y')
+                        elif '-' in match:  # YYYY-MM-DD format
+                            return datetime.strptime(match, '%Y-%m-%d')
+                
+                except (ValueError, TypeError) as parse_error:
+                    continue
+        
+        return None
+        
+    except Exception as e:
+        print(f"⚠️ Tarih çıkarma hatası: {e}")
+        return None
+
+def fetch_article_content_with_mcp_only(url):
+    """Sadece MCP ile makale içeriği çekme"""
+    try:
+        print(f"🔍 MCP ile makale çekiliyor: {url[:50]}...")
+        
+        # MCP scrape fonksiyonunu kullan
+        scrape_result = mcp_firecrawl_scrape({
+            "url": url,
+            "formats": ["markdown"],
+            "onlyMainContent": True,
+            "waitFor": 3000,
+            "removeBase64Images": True
+        })
+        
+        if not scrape_result.get("success", False):
+            print(f"⚠️ MCP ile çekilemedi: {url}")
+            return None
+        
+        # Markdown içeriğini al
+        markdown_content = scrape_result.get("markdown", "")
+        
+        if not markdown_content or len(markdown_content) < 100:
+            print(f"⚠️ MCP'den yetersiz içerik: {len(markdown_content) if markdown_content else 0} karakter")
+            return None
+        
+        # Başlığı çıkar (genellikle ilk # ile başlar)
+        lines = markdown_content.split('\n')
+        title = ""
+        content_lines = []
+        
+        for line in lines:
+            line = line.strip()
+            if line.startswith('# ') and not title:
+                title = line[2:].strip()
+            elif line and not line.startswith('#') and len(line) > 20:
+                content_lines.append(line)
+        
+        # İçeriği birleştir ve temizle
+        content = '\n'.join(content_lines)
+        
+        # Gereksiz karakterleri temizle
+        content = content.replace('*', '').replace('**', '').replace('_', '')
+        content = ' '.join(content.split())  # Çoklu boşlukları tek boşluğa çevir
+        
+        # İçeriği sınırla
+        content = content[:2500]
+        
+        # Makale tarihini içerikten çıkarmaya çalış
+        article_publish_date = extract_article_date_from_content(markdown_content)
+        
+        print(f"✅ MCP ile içerik çekildi: {len(content)} karakter")
+        if article_publish_date:
+            print(f"📅 Makale yayın tarihi: {article_publish_date.strftime('%Y-%m-%d %H:%M')}")
+        
+        return {
+            "title": title or "Başlık bulunamadı",
+            "content": content,
+            "source": "mcp_only",
+            "publish_date": article_publish_date.isoformat() if article_publish_date else None
+        }
+        
+    except Exception as e:
+        print(f"❌ MCP makale içeriği çekme hatası ({url}): {e}")
+        return None
+
+# ... existing code ...

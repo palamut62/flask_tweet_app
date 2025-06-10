@@ -10,5 +10,6 @@
   "enable_duplicate_detection": true,
   "title_similarity_threshold": 0.8,
   "content_similarity_threshold": 0.7,
-  "last_updated": "2025-06-08T15:21:40.916469"
+  "news_fetching_method": "mcp_only",
+  "last_updated": "2025-06-10T04:52:23.178066"
 }

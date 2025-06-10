@@ -434,8 +434,9 @@ def check_and_post_articles():
         if not api_key:
             return {"success": False, "message": "Google API anahtarı bulunamadı"}
         
-        # Yeni makaleleri çek (özel kaynaklardan)
-        articles = fetch_latest_ai_articles_with_mcp()
+        # Yeni makaleleri çek (akıllı sistem ile)
+        from utils import fetch_latest_ai_articles_smart
+        articles = fetch_latest_ai_articles_smart()
         
         if not articles:
             return {"success": True, "message": "Yeni makale bulunamadı"}
@@ -812,6 +813,10 @@ def settings():
             "gmail_password": os.environ.get('GMAIL_APP_PASSWORD') is not None
         }
         
+        # MCP durumunu kontrol et
+        from utils import get_news_fetching_method
+        mcp_status = get_news_fetching_method()
+        
         # Gemini API test
         try:
             from utils import gemini_call
@@ -829,7 +834,8 @@ def settings():
                              settings=automation_settings,
                              telegram_config=telegram_config,
                              gmail_config=gmail_config,
-                             api_status=api_status)
+                             api_status=api_status,
+                             mcp_status=mcp_status)
     except Exception as e:
         return render_template('settings.html', 
                              settings={},
@@ -854,6 +860,7 @@ def save_settings():
             'enable_duplicate_detection': request.form.get('enable_duplicate_detection') == 'on',
             'title_similarity_threshold': float(request.form.get('title_similarity_threshold', 80)) / 100.0,
             'content_similarity_threshold': float(request.form.get('content_similarity_threshold', 60)) / 100.0,
+            'news_fetching_method': request.form.get('news_fetching_method', 'auto'),
             'last_updated': datetime.now().isoformat()
         }
         
@@ -1378,16 +1385,21 @@ def test_manual_selectors():
 @app.route('/remove_news_source', methods=['POST'])
 @login_required
 def remove_news_source_route():
-    """Haber kaynağını kaldır"""
+    """Haber kaynağını kaldır - RSS dahil"""
     try:
-        from utils import remove_news_source
+        from utils import remove_news_source, remove_rss_source
         
         source_id = request.form.get('source_id')
+        source_type = request.form.get('source_type', 'scraping')
+        
         if not source_id:
             flash('Kaynak ID gerekli!', 'error')
             return redirect(url_for('news_sources'))
         
-        result = remove_news_source(source_id)
+        if source_type == 'rss':
+            result = remove_rss_source(source_id)
+        else:
+            result = remove_news_source(source_id)
         
         if result['success']:
             flash(result['message'], 'success')
@@ -1396,6 +1408,33 @@ def remove_news_source_route():
             
     except Exception as e:
         flash(f'Kaynak kaldırma hatası: {str(e)}', 'error')
+    
+    return redirect(url_for('news_sources'))
+
+@app.route('/add_rss_source', methods=['POST'])
+@login_required
+def add_rss_source_route():
+    """Yeni RSS kaynağı ekle"""
+    try:
+        from utils import add_rss_source
+        
+        name = request.form.get('rss_name', '').strip()
+        url = request.form.get('rss_url', '').strip()
+        description = request.form.get('rss_description', '').strip()
+        
+        if not name or not url:
+            flash('RSS kaynak adı ve URL gerekli!', 'error')
+            return redirect(url_for('news_sources'))
+        
+        result = add_rss_source(name, url, description)
+        
+        if result['success']:
+            flash(result['message'], 'success')
+        else:
+            flash(result['message'], 'error')
+            
+    except Exception as e:
+        flash(f'RSS kaynağı ekleme hatası: {str(e)}', 'error')
     
     return redirect(url_for('news_sources'))
 
@@ -1747,6 +1786,93 @@ def retry_rate_limited_tweets():
         flash(f'Retry işlemi hatası: {str(e)}', 'error')
     
     return redirect(url_for('index'))
+
+@app.route('/test_news_fetching_methods')
+@login_required
+def test_news_fetching_methods():
+    """Haber çekme yöntemlerini test et"""
+    try:
+        from utils import (
+            fetch_latest_ai_articles_pythonanywhere,
+            fetch_latest_ai_articles_with_firecrawl,
+            fetch_articles_from_custom_sources,
+            fetch_latest_ai_articles_smart,
+            get_news_fetching_method
+        )
+        
+        results = {}
+        method_info = get_news_fetching_method()
+        
+        # PythonAnywhere sistemi test
+        try:
+            terminal_log("🐍 PythonAnywhere sistemi test ediliyor (Özel kaynaklar + API'ler)...", "info")
+            pa_articles = fetch_latest_ai_articles_pythonanywhere()
+            results['pythonanywhere'] = {
+                'success': True,
+                'count': len(pa_articles) if pa_articles else 0,
+                'articles': pa_articles[:3] if pa_articles else [],
+                'description': 'Özel haber kaynakları + RSS + Hacker News + Reddit'
+            }
+            terminal_log(f"✅ PythonAnywhere (Entegre): {len(pa_articles) if pa_articles else 0} makale", "success")
+        except Exception as e:
+            results['pythonanywhere'] = {'success': False, 'error': str(e)}
+            terminal_log(f"❌ PythonAnywhere hatası: {e}", "error")
+        
+        # Özel kaynaklar test
+        try:
+            terminal_log("📰 Özel kaynaklar test ediliyor...", "info")
+            custom_articles = fetch_articles_from_custom_sources()
+            results['custom_sources'] = {
+                'success': True,
+                'count': len(custom_articles) if custom_articles else 0,
+                'articles': custom_articles[:3] if custom_articles else []
+            }
+            terminal_log(f"✅ Özel kaynaklar: {len(custom_articles) if custom_articles else 0} makale", "success")
+        except Exception as e:
+            results['custom_sources'] = {'success': False, 'error': str(e)}
+            terminal_log(f"❌ Özel kaynaklar hatası: {e}", "error")
+        
+        # MCP test (eğer aktifse)
+        if method_info.get('mcp_enabled'):
+            try:
+                terminal_log("🔧 MCP sistemi test ediliyor...", "info")
+                mcp_articles = fetch_latest_ai_articles_with_firecrawl()
+                results['mcp'] = {
+                    'success': True,
+                    'count': len(mcp_articles) if mcp_articles else 0,
+                    'articles': mcp_articles[:3] if mcp_articles else []
+                }
+                terminal_log(f"✅ MCP: {len(mcp_articles) if mcp_articles else 0} makale", "success")
+            except Exception as e:
+                results['mcp'] = {'success': False, 'error': str(e)}
+                terminal_log(f"❌ MCP hatası: {e}", "error")
+        else:
+            results['mcp'] = {'success': False, 'error': 'MCP devre dışı'}
+            terminal_log("⚠️ MCP devre dışı", "warning")
+        
+        # Akıllı sistem test
+        try:
+            terminal_log("🎯 Akıllı sistem test ediliyor...", "info")
+            smart_articles = fetch_latest_ai_articles_smart()
+            results['smart_system'] = {
+                'success': True,
+                'count': len(smart_articles) if smart_articles else 0,
+                'articles': smart_articles[:3] if smart_articles else []
+            }
+            terminal_log(f"✅ Akıllı sistem: {len(smart_articles) if smart_articles else 0} makale", "success")
+        except Exception as e:
+            results['smart_system'] = {'success': False, 'error': str(e)}
+            terminal_log(f"❌ Akıllı sistem hatası: {e}", "error")
+        
+        results['method_info'] = method_info
+        results['test_time'] = datetime.now().isoformat()
+        
+        flash('Haber çekme yöntemleri test edildi! Terminal sayfasından detayları görebilirsiniz.', 'success')
+        return jsonify(results)
+        
+    except Exception as e:
+        terminal_log(f"❌ Test hatası: {e}", "error")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/debug/test_article_fetch')
 @login_required

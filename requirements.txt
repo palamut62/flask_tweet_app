@@ -6,6 +6,7 @@ Werkzeug==3.0.1
 requests==2.31.0
 beautifulsoup4==4.12.2
 lxml==4.9.3
+feedparser==6.0.10
 
 # Advanced Web Scraping (Optional - for enhanced functionality)
 # requests-html==0.10.0  # JavaScript rendering support
