@@ -2512,6 +2512,112 @@ def highlight_selectors_in_html(html_content, selectors):
         traceback.print_exc()
         return html_content
 
+@app.route('/deleted_tweets')
+@login_required
+def deleted_tweets():
+    """Silinmiş tweetler sayfası"""
+    try:
+        # Tüm makaleleri yükle
+        all_articles = load_json("posted_articles.json")
+        
+        # Sadece silinmiş olanları filtrele
+        deleted_articles = [article for article in all_articles if article.get('deleted', False)]
+        
+        # Tarihe göre sırala (en yeni önce)
+        deleted_articles.sort(key=lambda x: x.get('deleted_date', ''), reverse=True)
+        
+        # İstatistikler
+        stats = {
+            'total_deleted': len(deleted_articles),
+            'deleted_today': 0,
+            'deleted_this_week': 0,
+            'deleted_this_month': 0
+        }
+        
+        # Tarih bazlı istatistikler
+        from datetime import datetime, timedelta
+        today = datetime.now().date()
+        week_ago = today - timedelta(days=7)
+        month_ago = today - timedelta(days=30)
+        
+        for article in deleted_articles:
+            deleted_date_str = article.get('deleted_date', '')
+            if deleted_date_str:
+                try:
+                    deleted_date = datetime.fromisoformat(deleted_date_str.replace('Z', '+00:00')).date()
+                    
+                    if deleted_date == today:
+                        stats['deleted_today'] += 1
+                    if deleted_date >= week_ago:
+                        stats['deleted_this_week'] += 1
+                    if deleted_date >= month_ago:
+                        stats['deleted_this_month'] += 1
+                        
+                except Exception as e:
+                    continue
+        
+        # Debug için log
+        from utils import safe_log
+        safe_log(f"Silinmiş tweetler sayfası: {len(deleted_articles)} silinmiş tweet", "DEBUG")
+        
+        return render_template('deleted_tweets.html', 
+                             deleted_articles=deleted_articles,
+                             stats=stats)
+                             
+    except Exception as e:
+        from utils import safe_log
+        safe_log(f"Silinmiş tweetler sayfası hatası: {str(e)}", "ERROR")
+        return render_template('deleted_tweets.html', 
+                             deleted_articles=[],
+                             stats={},
+                             error=str(e))
+
+@app.route('/restore_deleted_tweet', methods=['POST'])
+@login_required
+def restore_deleted_tweet():
+    """Silinmiş tweet'i geri yükle"""
+    try:
+        data = request.get_json()
+        article_hash = data.get('article_hash')
+        
+        if not article_hash:
+            return jsonify({"success": False, "error": "Makale hash'i gerekli"})
+        
+        # Tüm makaleleri yükle
+        all_articles = load_json("posted_articles.json")
+        
+        # Silinmiş makaleyi bul
+        restored_article = None
+        updated_articles = []
+        
+        for article in all_articles:
+            if article.get('hash') == article_hash and article.get('deleted', False):
+                # Makaleyi geri yükle
+                article['deleted'] = False
+                article['restored'] = True
+                article['restored_date'] = datetime.now().isoformat()
+                article.pop('deleted_date', None)
+                article.pop('deletion_reason', None)
+                restored_article = article
+                terminal_log(f"📝 Makale geri yüklendi: {article.get('title', '')[:50]}...", "info")
+            
+            updated_articles.append(article)
+        
+        if restored_article:
+            # Güncellenmiş listeyi kaydet
+            save_json("posted_articles.json", updated_articles)
+            
+            return jsonify({
+                "success": True, 
+                "message": "Tweet başarıyla geri yüklendi",
+                "article_title": restored_article.get('title', '')
+            })
+        else:
+            return jsonify({"success": False, "error": "Silinmiş tweet bulunamadı"})
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
 if __name__ == '__main__':
     # Arka plan zamanlayıcısını başlat
     start_background_scheduler()

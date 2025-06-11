@@ -404,6 +404,13 @@
                         <span>İstatistikler</span>
                     </a>
                     
+                    <a href="{{ url_for('deleted_tweets') }}" class="nav-item {% if request.endpoint == 'deleted_tweets' %}nav-item-active{% endif %}">
+                        <div class="nav-icon bg-red-100 text-red-600">
+                            <i class="fas fa-trash"></i>
+                        </div>
+                        <span>Silinmiş Tweetler</span>
+                    </a>
+                    
                     <a href="{{ url_for('news_sources') }}" class="nav-item {% if request.endpoint == 'news_sources' %}nav-item-active{% endif %}">
                         <div class="nav-icon bg-purple-100 text-purple-600">
                             <i class="fas fa-newspaper"></i>
@@ -476,6 +483,12 @@
                         <i class="fas fa-chart-bar text-sm"></i>
                     </div>
                     <span>İstatistikler</span>
+                </a>
+                <a href="{{ url_for('deleted_tweets') }}" class="mobile-nav-link {% if request.endpoint == 'deleted_tweets' %}bg-red-50 text-red-700{% endif %}">
+                    <div class="w-8 h-8 bg-red-100 text-red-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-trash text-sm"></i>
+                    </div>
+                    <span>Silinmiş Tweetler</span>
                 </a>
                 <a href="{{ url_for('news_sources') }}" class="mobile-nav-link {% if request.endpoint == 'news_sources' %}bg-purple-50 text-purple-700{% endif %}">
                     <div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
