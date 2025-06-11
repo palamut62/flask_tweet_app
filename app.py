@@ -109,8 +109,9 @@ def send_otp():
         if email != admin_email:
             return jsonify({"success": False, "error": "Yetkisiz e-posta adresi"})
         
-        # 6 haneli rastgele kod oluştur
-        otp_code = str(random.randint(100000, 999999))
+        # 6 haneli güvenli rastgele kod oluştur
+        import secrets
+        otp_code = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
         
         # E-posta gönder
         success, message = send_otp_email(email, otp_code)
@@ -140,50 +141,79 @@ def login():
             email = request.form.get('email', '').strip().lower()
             otp_code = request.form.get('otp_code', '').strip()
             
-            if not email or not otp_code:
-                flash('E-posta ve doğrulama kodu gerekli!', 'error')
-                return render_template('login.html', error='Eksik bilgi')
+            # Giriş verilerini kontrol et
+            if not email:
+                flash('E-posta adresi gerekli!', 'error')
+                return render_template('login.html', error='E-posta adresi eksik')
+            
+            if not otp_code:
+                flash('Doğrulama kodu gerekli!', 'error')
+                return render_template('login.html', error='Doğrulama kodu eksik')
+            
+            # OTP kod formatını kontrol et
+            if len(otp_code) != 6 or not otp_code.isdigit():
+                flash('Doğrulama kodu 6 haneli rakam olmalıdır!', 'error')
+                return render_template('login.html', error='Geçersiz kod formatı')
             
             # Admin e-posta kontrolü
             admin_email = EMAIL_SETTINGS['admin_email'].lower()
+            if not admin_email:
+                flash('Sistem yapılandırma hatası!', 'error')
+                return render_template('login.html', error='Admin e-posta yapılandırılmamış')
+            
             if email != admin_email:
-                flash('Yetkisiz e-posta adresi!', 'error')
-                return render_template('login.html', error='Yetkisiz erişim')
+                flash('Bu e-posta adresi ile giriş yetkiniz yok!', 'error')
+                return render_template('login.html', error='Yetkisiz e-posta adresi')
             
             # OTP kontrolü
-            if email in email_otp_codes:
-                otp_data = email_otp_codes[email]
+            if email not in email_otp_codes:
+                flash('Geçersiz veya süresi dolmuş doğrulama kodu! Yeni kod talep edin.', 'error')
+                return render_template('login.html', error='Kod bulunamadı')
+            
+            otp_data = email_otp_codes[email]
+            
+            # Süre kontrolü (5 dakika = 300 saniye)
+            time_elapsed = (datetime.now() - otp_data['timestamp']).total_seconds()
+            if time_elapsed > 300:
+                del email_otp_codes[email]
+                flash('Doğrulama kodunun süresi doldu! Yeni kod talep edin.', 'error')
+                return render_template('login.html', error='Kod süresi doldu')
+            
+            # Deneme sayısı kontrolü
+            if otp_data['attempts'] >= 3:
+                del email_otp_codes[email]
+                flash('Çok fazla hatalı deneme! Güvenlik nedeniyle kod iptal edildi.', 'error')
+                return render_template('login.html', error='Çok fazla hatalı deneme')
+            
+            # Kod kontrolü
+            if otp_code == otp_data['code']:
+                # Başarılı giriş
+                del email_otp_codes[email]
+                session['logged_in'] = True
+                session['login_time'] = datetime.now().isoformat()
+                session['auth_method'] = 'email_otp'
+                session['user_email'] = email
                 
-                # Süre kontrolü (5 dakika)
-                if (datetime.now() - otp_data['timestamp']).seconds > 300:
-                    del email_otp_codes[email]
-                    flash('Doğrulama kodunun süresi doldu!', 'error')
-                    return render_template('login.html', error='Kod süresi doldu')
+                # Terminal log
+                terminal_log(f"✅ Başarılı giriş: {email}", "success")
                 
-                # Deneme sayısı kontrolü
-                if otp_data['attempts'] >= 3:
-                    del email_otp_codes[email]
-                    flash('Çok fazla hatalı deneme!', 'error')
-                    return render_template('login.html', error='Çok fazla deneme')
-                
-                # Kod kontrolü
-                if otp_code == otp_data['code']:
-                    # Başarılı giriş
-                    del email_otp_codes[email]
-                    session['logged_in'] = True
-                    session['login_time'] = datetime.now().isoformat()
-                    session['auth_method'] = 'email_otp'
-                    session['user_email'] = email
-                    flash('E-posta doğrulama ile başarıyla giriş yaptınız!', 'success')
-                    return redirect(url_for('index'))
-                else:
-                    # Hatalı kod
-                    otp_data['attempts'] += 1
-                    flash(f'Hatalı doğrulama kodu! ({3 - otp_data["attempts"]} deneme hakkınız kaldı)', 'error')
-                    return render_template('login.html', error='Hatalı kod')
+                flash('E-posta doğrulama ile başarıyla giriş yaptınız!', 'success')
+                return redirect(url_for('index'))
             else:
-                flash('Geçersiz veya süresi dolmuş doğrulama kodu!', 'error')
-                return render_template('login.html', error='Geçersiz kod')
+                # Hatalı kod
+                otp_data['attempts'] += 1
+                remaining_attempts = 3 - otp_data['attempts']
+                
+                # Terminal log
+                terminal_log(f"❌ Hatalı giriş denemesi: {email} - Kalan deneme: {remaining_attempts}", "warning")
+                
+                if remaining_attempts > 0:
+                    flash(f'Hatalı doğrulama kodu! {remaining_attempts} deneme hakkınız kaldı.', 'error')
+                    return render_template('login.html', error=f'Hatalı kod - {remaining_attempts} deneme kaldı')
+                else:
+                    del email_otp_codes[email]
+                    flash('Çok fazla hatalı deneme! Yeni kod talep edin.', 'error')
+                    return render_template('login.html', error='Deneme hakkı bitti')
     
     # Eğer zaten giriş yapmışsa ana sayfaya yönlendir
     if 'logged_in' in session:

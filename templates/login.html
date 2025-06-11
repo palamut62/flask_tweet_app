@@ -212,7 +212,16 @@
                         {% if error %}
                             <div class="alert alert-danger" role="alert">
                                 <i class="fas fa-exclamation-triangle me-2"></i>
-                                {{ error }}
+                                <strong>Giriş Hatası:</strong> {{ error }}
+                                {% if 'süresi doldu' in error or 'Kod bulunamadı' in error %}
+                                <div class="mt-2">
+                                    <small><i class="fas fa-info-circle me-1"></i>Yeni doğrulama kodu talep etmek için "Şifre Gönder" butonunu kullanın.</small>
+                                </div>
+                                {% elif 'hatalı' in error.lower() %}
+                                <div class="mt-2">
+                                    <small><i class="fas fa-info-circle me-1"></i>Doğrulama kodunu e-postanızdan kontrol edin ve dikkatli girin.</small>
+                                </div>
+                                {% endif %}
                             </div>
                         {% endif %}
                         
@@ -260,6 +269,8 @@
                                            maxlength="6"
                                            pattern="[0-9]{6}"
                                            style="font-size: 1.5rem; letter-spacing: 5px;"
+                                           autocomplete="one-time-code"
+                                           inputmode="numeric"
                                            required
                                            autofocus>
                                 </div>
@@ -437,10 +448,59 @@
                      // Sadece rakam girişine izin ver
                      this.value = this.value.replace(/[^0-9]/g, '');
                      
-                     // 6 hane tamamlandığında otomatik submit
+                     // Giriş butonunu aktif/pasif yap
+                     const submitBtn = document.querySelector('button[type="submit"]');
                      if (this.value.length === 6) {
-                         this.closest('form').submit();
+                         submitBtn.disabled = false;
+                         submitBtn.classList.remove('btn-secondary');
+                         submitBtn.classList.add('btn-success');
+                         submitBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Giriş Yap';
+                     } else {
+                         submitBtn.disabled = true;
+                         submitBtn.classList.remove('btn-success');
+                         submitBtn.classList.add('btn-secondary');
+                         submitBtn.innerHTML = '<i class="fas fa-key me-2"></i>6 Haneli Şifre Girin';
                      }
+                 });
+                 
+                 // Enter tuşu ile submit'i engelle
+                 otpInput.addEventListener('keydown', function(e) {
+                     if (e.key === 'Enter') {
+                         e.preventDefault();
+                         if (this.value.length === 6) {
+                             document.querySelector('button[type="submit"]').click();
+                         } else {
+                             showNotification('Lütfen 6 haneli şifreyi tam olarak girin', 'warning');
+                         }
+                     }
+                 });
+                 
+                 // Başlangıçta butonu pasif yap
+                 const submitBtn = document.querySelector('button[type="submit"]');
+                 if (submitBtn) {
+                     submitBtn.disabled = true;
+                     submitBtn.classList.remove('btn-success');
+                     submitBtn.classList.add('btn-secondary');
+                     submitBtn.innerHTML = '<i class="fas fa-key me-2"></i>6 Haneli Şifre Girin';
+                 }
+             }
+             
+             // Form submit kontrolü
+             const loginForm = document.querySelector('form[method="POST"]');
+             if (loginForm) {
+                 loginForm.addEventListener('submit', function(e) {
+                     const otpCode = document.getElementById('otp_code').value;
+                     
+                     if (otpCode.length !== 6) {
+                         e.preventDefault();
+                         showNotification('Lütfen 6 haneli şifreyi tam olarak girin', 'error');
+                         return false;
+                     }
+                     
+                     // Submit butonunu loading durumuna getir
+                     const submitBtn = this.querySelector('button[type="submit"]');
+                     submitBtn.disabled = true;
+                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Giriş Yapılıyor...';
                  });
              }
          });
