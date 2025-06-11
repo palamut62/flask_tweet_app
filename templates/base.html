@@ -181,6 +181,55 @@
             @apply transform translate-x-1;
         }
         
+        /* Dropdown Styles */
+        .dropdown-container:hover .dropdown-menu {
+            @apply opacity-100 visible transform scale-100;
+        }
+        
+        .dropdown-trigger:hover .fa-chevron-down {
+            @apply transform rotate-180;
+        }
+        
+        .dropdown-item {
+            @apply flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium rounded-lg;
+            min-height: 56px; /* Daha büyük dokunma alanı */
+            margin: 4px 12px; /* Kenarlardan boşluk */
+        }
+        
+        .dropdown-item:hover {
+            @apply transform translate-x-1;
+        }
+        
+        .dropdown-menu {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Responsive dropdown positioning */
+        @media (max-width: 1024px) {
+            .dropdown-menu {
+                position: fixed !important;
+                top: auto !important;
+                left: 50% !important;
+                transform: translateX(-50%) scale(0.95);
+                width: 90vw;
+                max-width: 340px;
+                margin-top: 1rem;
+            }
+            
+            .dropdown-container:hover .dropdown-menu,
+            .dropdown-menu.opacity-100 {
+                transform: translateX(-50%) scale(1);
+            }
+            
+            .dropdown-item {
+                padding: 16px 20px;
+                min-height: 64px;
+                margin: 6px 16px; /* Mobile'da daha fazla kenar boşluğu */
+            }
+        }
+        
         /* Mobil optimizasyonları - Tüm sayfalar için */
         @media (max-width: 768px) {
             .card-modern {
@@ -383,6 +432,7 @@
 
                 <!-- Desktop Navigation -->
                 <div class="hidden lg:flex items-center space-x-2">
+                    <!-- Ana Sayfa -->
                     <a href="{{ url_for('index') }}" class="nav-item {% if request.endpoint == 'index' %}nav-item-active{% endif %}">
                         <div class="nav-icon bg-blue-100 text-blue-600">
                             <i class="fas fa-home"></i>
@@ -390,63 +440,121 @@
                         <span>Ana Sayfa</span>
                     </a>
                     
-                    <a href="{{ url_for('settings') }}" class="nav-item {% if request.endpoint == 'settings' %}nav-item-active{% endif %}">
-                        <div class="nav-icon bg-gray-100 text-gray-600">
-                            <i class="fas fa-cog"></i>
+                    <!-- Tweet İşlemleri Dropdown -->
+                    <div class="relative dropdown-container">
+                        <button class="nav-item dropdown-trigger {% if request.endpoint in ['create_tweet'] %}nav-item-active{% endif %}">
+                            <div class="nav-icon bg-green-100 text-green-600">
+                                <i class="fas fa-pen-nib"></i>
+                            </div>
+                            <span>Tweet İşlemleri</span>
+                            <i class="fas fa-chevron-down text-xs ml-1 transition-transform duration-200"></i>
+                        </button>
+                        <div class="dropdown-menu absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200/50 py-4 px-2 z-50 opacity-0 invisible transform scale-95 transition-all duration-200">
+                            <a href="{{ url_for('create_tweet') }}" class="dropdown-item {% if request.endpoint == 'create_tweet' %}bg-green-50 text-green-700{% endif %}">
+                                <div class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-pen-nib"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">Tweet Oluştur</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Manuel tweet yazma</div>
+                                </div>
+                            </a>
+                            <div class="border-t border-gray-100 my-2 mx-3"></div>
+                            <a href="{{ url_for('check_articles') }}" class="dropdown-item">
+                                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-sync-alt"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">Şimdi Kontrol Et</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Yeni makaleleri kontrol et</div>
+                                </div>
+                            </a>
                         </div>
-                        <span>Ayarlar</span>
-                    </a>
+                    </div>
                     
-                    <a href="{{ url_for('statistics') }}" class="nav-item {% if request.endpoint == 'statistics' %}nav-item-active{% endif %}">
-                        <div class="nav-icon bg-indigo-100 text-indigo-600">
-                            <i class="fas fa-chart-bar"></i>
+                    <!-- Yönetim Dropdown -->
+                    <div class="relative dropdown-container">
+                        <button class="nav-item dropdown-trigger {% if request.endpoint in ['settings', 'news_sources', 'security_check'] %}nav-item-active{% endif %}">
+                            <div class="nav-icon bg-gray-100 text-gray-600">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <span>Yönetim</span>
+                            <i class="fas fa-chevron-down text-xs ml-1 transition-transform duration-200"></i>
+                        </button>
+                        <div class="dropdown-menu absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200/50 py-4 px-2 z-50 opacity-0 invisible transform scale-95 transition-all duration-200">
+                            <a href="{{ url_for('settings') }}" class="dropdown-item {% if request.endpoint == 'settings' %}bg-gray-50 text-gray-700{% endif %}">
+                                <div class="w-10 h-10 bg-gray-100 text-gray-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-cog"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">Ayarlar</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Sistem yapılandırması</div>
+                                </div>
+                            </a>
+                            <a href="{{ url_for('news_sources') }}" class="dropdown-item {% if request.endpoint == 'news_sources' %}bg-purple-50 text-purple-700{% endif %}">
+                                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-newspaper"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">Haber Kaynakları</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Kaynak yönetimi</div>
+                                </div>
+                            </a>
+                            <a href="{{ url_for('security_check') }}" class="dropdown-item {% if request.endpoint == 'security_check' %}bg-red-50 text-red-700{% endif %}">
+                                <div class="w-10 h-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">Güvenlik</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Güvenlik kontrolleri</div>
+                                </div>
+                            </a>
                         </div>
-                        <span>İstatistikler</span>
-                    </a>
+                    </div>
                     
-                    <a href="{{ url_for('deleted_tweets') }}" class="nav-item {% if request.endpoint == 'deleted_tweets' %}nav-item-active{% endif %}">
-                        <div class="nav-icon bg-red-100 text-red-600">
-                            <i class="fas fa-trash"></i>
+                    <!-- Analiz & Raporlar Dropdown -->
+                    <div class="relative dropdown-container">
+                        <button class="nav-item dropdown-trigger {% if request.endpoint in ['statistics', 'deleted_tweets', 'terminal_page'] %}nav-item-active{% endif %}">
+                            <div class="nav-icon bg-indigo-100 text-indigo-600">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <span>Analiz & Raporlar</span>
+                            <i class="fas fa-chevron-down text-xs ml-1 transition-transform duration-200"></i>
+                        </button>
+                        <div class="dropdown-menu absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200/50 py-4 px-2 z-50 opacity-0 invisible transform scale-95 transition-all duration-200">
+                            <a href="{{ url_for('statistics') }}" class="dropdown-item {% if request.endpoint == 'statistics' %}bg-indigo-50 text-indigo-700{% endif %}">
+                                <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">İstatistikler</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Performans metrikleri</div>
+                                </div>
+                            </a>
+                            <a href="{{ url_for('deleted_tweets') }}" class="dropdown-item {% if request.endpoint == 'deleted_tweets' %}bg-red-50 text-red-700{% endif %}">
+                                <div class="w-10 h-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-trash"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">Silinmiş Tweetler</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Arşiv görüntüleme</div>
+                                </div>
+                            </a>
+                            <a href="{{ url_for('terminal_page') }}" class="dropdown-item {% if request.endpoint == 'terminal_page' %}bg-green-50 text-green-700{% endif %}">
+                                <div class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-terminal"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">Terminal</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Canlı sistem logları</div>
+                                </div>
+                            </a>
                         </div>
-                        <span>Silinmiş Tweetler</span>
-                    </a>
-                    
-                    <a href="{{ url_for('news_sources') }}" class="nav-item {% if request.endpoint == 'news_sources' %}nav-item-active{% endif %}">
-                        <div class="nav-icon bg-purple-100 text-purple-600">
-                            <i class="fas fa-newspaper"></i>
-                        </div>
-                        <span>Haber Kaynakları</span>
-                    </a>
-                    
-                    <a href="{{ url_for('create_tweet') }}" class="nav-item {% if request.endpoint == 'create_tweet' %}nav-item-active{% endif %}">
-                        <div class="nav-icon bg-green-100 text-green-600">
-                            <i class="fas fa-pen-nib"></i>
-                        </div>
-                        <span>Tweet Oluştur</span>
-                    </a>
-                    
-                    <a href="{{ url_for('security_check') }}" class="nav-item {% if request.endpoint == 'security_check' %}nav-item-active{% endif %}">
-                        <div class="nav-icon bg-red-100 text-red-600">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <span>Güvenlik</span>
-                    </a>
-                    
-                    <a href="{{ url_for('terminal_page') }}" class="nav-item {% if request.endpoint == 'terminal_page' %}nav-item-active{% endif %}">
-                        <div class="nav-icon bg-green-100 text-green-600">
-                            <i class="fas fa-terminal"></i>
-                        </div>
-                        <span>Terminal</span>
-                    </a>
+                    </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-4">
-                    <a href="{{ url_for('check_articles') }}" 
-                       class="hidden sm:flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium">
-                        <i class="fas fa-sync-alt"></i>
-                        <span>Kontrol Et</span>
-                    </a>
                     
                     <!-- Mobile Menu Button -->
                     <button id="mobile-menu-btn" class="lg:hidden p-3 rounded-xl hover:bg-gray-100 transition-colors">
@@ -466,54 +574,70 @@
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="lg:hidden hidden bg-white/95 backdrop-blur-lg border-t border-gray-200/50">
             <div class="px-6 py-4 space-y-2">
+                <!-- Ana Sayfa -->
                 <a href="{{ url_for('index') }}" class="mobile-nav-link {% if request.endpoint == 'index' %}bg-blue-50 text-blue-700{% endif %}">
                     <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
                         <i class="fas fa-home text-sm"></i>
                     </div>
                     <span>Ana Sayfa</span>
                 </a>
-                <a href="{{ url_for('settings') }}" class="mobile-nav-link {% if request.endpoint == 'settings' %}bg-gray-50 text-gray-700{% endif %}">
-                    <div class="w-8 h-8 bg-gray-100 text-gray-600 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-cog text-sm"></i>
-                    </div>
-                    <span>Ayarlar</span>
-                </a>
-                <a href="{{ url_for('statistics') }}" class="mobile-nav-link {% if request.endpoint == 'statistics' %}bg-indigo-50 text-indigo-700{% endif %}">
-                    <div class="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-chart-bar text-sm"></i>
-                    </div>
-                    <span>İstatistikler</span>
-                </a>
-                <a href="{{ url_for('deleted_tweets') }}" class="mobile-nav-link {% if request.endpoint == 'deleted_tweets' %}bg-red-50 text-red-700{% endif %}">
-                    <div class="w-8 h-8 bg-red-100 text-red-600 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-trash text-sm"></i>
-                    </div>
-                    <span>Silinmiş Tweetler</span>
-                </a>
-                <a href="{{ url_for('news_sources') }}" class="mobile-nav-link {% if request.endpoint == 'news_sources' %}bg-purple-50 text-purple-700{% endif %}">
-                    <div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-newspaper text-sm"></i>
-                    </div>
-                    <span>Haber Kaynakları</span>
-                </a>
-                <a href="{{ url_for('create_tweet') }}" class="mobile-nav-link {% if request.endpoint == 'create_tweet' %}bg-green-50 text-green-700{% endif %}">
-                    <div class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-pen-nib text-sm"></i>
-                    </div>
-                    <span>Tweet Oluştur</span>
-                </a>
-                <a href="{{ url_for('security_check') }}" class="mobile-nav-link {% if request.endpoint == 'security_check' %}bg-red-50 text-red-700{% endif %}">
-                    <div class="w-8 h-8 bg-red-100 text-red-600 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-shield-alt text-sm"></i>
-                    </div>
-                    <span>Güvenlik</span>
-                </a>
-                <a href="{{ url_for('terminal_page') }}" class="mobile-nav-link {% if request.endpoint == 'terminal_page' %}bg-green-50 text-green-700{% endif %}">
-                    <div class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-terminal text-sm"></i>
-                    </div>
-                    <span>Terminal</span>
-                </a>
+                
+                <!-- Tweet İşlemleri Bölümü -->
+                <div class="pt-2">
+                    <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-2 mb-2">Tweet İşlemleri</div>
+                    <a href="{{ url_for('create_tweet') }}" class="mobile-nav-link {% if request.endpoint == 'create_tweet' %}bg-green-50 text-green-700{% endif %}">
+                        <div class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-pen-nib text-sm"></i>
+                        </div>
+                        <span>Tweet Oluştur</span>
+                    </a>
+                </div>
+                
+                <!-- Yönetim Bölümü -->
+                <div class="pt-2">
+                    <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-2 mb-2">Yönetim</div>
+                    <a href="{{ url_for('settings') }}" class="mobile-nav-link {% if request.endpoint == 'settings' %}bg-gray-50 text-gray-700{% endif %}">
+                        <div class="w-8 h-8 bg-gray-100 text-gray-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-cog text-sm"></i>
+                        </div>
+                        <span>Ayarlar</span>
+                    </a>
+                    <a href="{{ url_for('news_sources') }}" class="mobile-nav-link {% if request.endpoint == 'news_sources' %}bg-purple-50 text-purple-700{% endif %}">
+                        <div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-newspaper text-sm"></i>
+                        </div>
+                        <span>Haber Kaynakları</span>
+                    </a>
+                    <a href="{{ url_for('security_check') }}" class="mobile-nav-link {% if request.endpoint == 'security_check' %}bg-red-50 text-red-700{% endif %}">
+                        <div class="w-8 h-8 bg-red-100 text-red-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-sm"></i>
+                        </div>
+                        <span>Güvenlik</span>
+                    </a>
+                </div>
+                
+                <!-- Analiz & Raporlar Bölümü -->
+                <div class="pt-2">
+                    <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-2 mb-2">Analiz & Raporlar</div>
+                    <a href="{{ url_for('statistics') }}" class="mobile-nav-link {% if request.endpoint == 'statistics' %}bg-indigo-50 text-indigo-700{% endif %}">
+                        <div class="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-bar text-sm"></i>
+                        </div>
+                        <span>İstatistikler</span>
+                    </a>
+                    <a href="{{ url_for('deleted_tweets') }}" class="mobile-nav-link {% if request.endpoint == 'deleted_tweets' %}bg-red-50 text-red-700{% endif %}">
+                        <div class="w-8 h-8 bg-red-100 text-red-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-trash text-sm"></i>
+                        </div>
+                        <span>Silinmiş Tweetler</span>
+                    </a>
+                    <a href="{{ url_for('terminal_page') }}" class="mobile-nav-link {% if request.endpoint == 'terminal_page' %}bg-green-50 text-green-700{% endif %}">
+                        <div class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-terminal text-sm"></i>
+                        </div>
+                        <span>Terminal</span>
+                    </a>
+                </div>
                 
                 <div class="border-t border-gray-200 pt-3 mt-3">
                     <a href="{{ url_for('check_articles') }}" class="mobile-nav-link text-green-600 bg-green-50">
@@ -586,6 +710,70 @@
         document.getElementById('mobile-menu-btn').addEventListener('click', function() {
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
+        });
+
+        // Dropdown menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownContainers = document.querySelectorAll('.dropdown-container');
+            
+            dropdownContainers.forEach(container => {
+                const trigger = container.querySelector('.dropdown-trigger');
+                const menu = container.querySelector('.dropdown-menu');
+                
+                // Mouse enter/leave events for hover effect
+                container.addEventListener('mouseenter', function() {
+                    menu.classList.remove('opacity-0', 'invisible', 'scale-95');
+                    menu.classList.add('opacity-100', 'visible', 'scale-100');
+                    trigger.querySelector('.fa-chevron-down').classList.add('rotate-180');
+                });
+                
+                container.addEventListener('mouseleave', function() {
+                    menu.classList.remove('opacity-100', 'visible', 'scale-100');
+                    menu.classList.add('opacity-0', 'invisible', 'scale-95');
+                    trigger.querySelector('.fa-chevron-down').classList.remove('rotate-180');
+                });
+                
+                // Click event for mobile/touch devices
+                trigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const isVisible = menu.classList.contains('opacity-100');
+                    
+                    // Close all other dropdowns
+                    dropdownContainers.forEach(otherContainer => {
+                        if (otherContainer !== container) {
+                            const otherMenu = otherContainer.querySelector('.dropdown-menu');
+                            const otherTrigger = otherContainer.querySelector('.dropdown-trigger');
+                            otherMenu.classList.remove('opacity-100', 'visible', 'scale-100');
+                            otherMenu.classList.add('opacity-0', 'invisible', 'scale-95');
+                            otherTrigger.querySelector('.fa-chevron-down').classList.remove('rotate-180');
+                        }
+                    });
+                    
+                    // Toggle current dropdown
+                    if (isVisible) {
+                        menu.classList.remove('opacity-100', 'visible', 'scale-100');
+                        menu.classList.add('opacity-0', 'invisible', 'scale-95');
+                        trigger.querySelector('.fa-chevron-down').classList.remove('rotate-180');
+                    } else {
+                        menu.classList.remove('opacity-0', 'invisible', 'scale-95');
+                        menu.classList.add('opacity-100', 'visible', 'scale-100');
+                        trigger.querySelector('.fa-chevron-down').classList.add('rotate-180');
+                    }
+                });
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown-container')) {
+                    dropdownContainers.forEach(container => {
+                        const menu = container.querySelector('.dropdown-menu');
+                        const trigger = container.querySelector('.dropdown-trigger');
+                        menu.classList.remove('opacity-100', 'visible', 'scale-100');
+                        menu.classList.add('opacity-0', 'invisible', 'scale-95');
+                        trigger.querySelector('.fa-chevron-down').classList.remove('rotate-180');
+                    });
+                }
+            });
         });
 
         // Auto refresh every 5 minutes
