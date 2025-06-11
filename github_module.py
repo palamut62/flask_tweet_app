@@ -41,6 +41,124 @@ except ImportError as e:
     
     HISTORY_FILE = "posted_articles.json"
 
+def load_github_settings():
+    """GitHub ayarlarını yükle"""
+    try:
+        return load_json("github_settings.json", {
+            "default_language": "python",
+            "default_time_period": "weekly", 
+            "default_limit": 10,
+            "search_topics": ["ai", "machine-learning", "deep-learning"],
+            "custom_search_queries": [],
+            "languages": ["python", "javascript", "typescript"],
+            "time_periods": ["daily", "weekly", "monthly"]
+        })
+    except Exception as e:
+        terminal_log(f"❌ GitHub ayarları yükleme hatası: {e}", "error")
+        return {}
+
+def save_github_settings(settings):
+    """GitHub ayarlarını kaydet"""
+    try:
+        settings["last_updated"] = datetime.now().isoformat()
+        save_json("github_settings.json", settings)
+        terminal_log("✅ GitHub ayarları kaydedildi", "success")
+        return True
+    except Exception as e:
+        terminal_log(f"❌ GitHub ayarları kaydetme hatası: {e}", "error")
+        return False
+
+def search_github_repos_by_topics(topics=None, language="python", time_period="weekly", limit=10):
+    """Konulara göre GitHub repoları ara"""
+    try:
+        terminal_log(f"🔍 GitHub repoları konulara göre aranıyor: {topics}", "info")
+        
+        base_url = "https://api.github.com/search/repositories"
+        
+        # Tarih hesaplama
+        if time_period == "daily":
+            since_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+        elif time_period == "weekly":
+            since_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+        else:  # monthly
+            since_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+        
+        # Arama sorgusu oluştur
+        query_parts = [f"language:{language}", f"created:>{since_date}"]
+        
+        if topics:
+            # Konuları arama sorgusuna ekle
+            if isinstance(topics, str):
+                topics = [topics]
+            
+            topic_queries = []
+            for topic in topics:
+                # Hem topic hem de description/name'de ara
+                topic_queries.append(f'topic:"{topic}"')
+                topic_queries.append(f'"{topic}" in:name,description')
+            
+            if topic_queries:
+                query_parts.append(f"({' OR '.join(topic_queries)})")
+        
+        query = " ".join(query_parts)
+        
+        params = {
+            "q": query,
+            "sort": "stars",
+            "order": "desc",
+            "per_page": limit
+        }
+        
+        headers = {
+            "Accept": "application/vnd.github.v3+json",
+            "User-Agent": "AI-Tweet-Bot/1.0"
+        }
+        
+        # GitHub token varsa ekle
+        github_token = os.environ.get('GITHUB_TOKEN')
+        if github_token:
+            headers["Authorization"] = f"token {github_token}"
+        
+        response = requests.get(base_url, params=params, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        data = response.json()
+        repos = []
+        
+        for repo in data.get("items", []):
+            repo_data = {
+                "id": repo["id"],
+                "name": repo["name"],
+                "full_name": repo["full_name"],
+                "description": repo.get("description", ""),
+                "url": repo["html_url"],
+                "stars": repo["stargazers_count"],
+                "forks": repo["forks_count"],
+                "language": repo.get("language", ""),
+                "created_at": repo["created_at"],
+                "updated_at": repo["updated_at"],
+                "owner": {
+                    "login": repo["owner"]["login"],
+                    "avatar_url": repo["owner"]["avatar_url"]
+                },
+                "topics": repo.get("topics", []),
+                "license": repo.get("license", {}).get("name", "") if repo.get("license") else "",
+                "open_issues": repo.get("open_issues_count", 0),
+                "watchers": repo.get("watchers_count", 0),
+                "search_topics": topics  # Hangi konularla bulunduğunu kaydet
+            }
+            repos.append(repo_data)
+        
+        terminal_log(f"✅ {len(repos)} GitHub repo bulundu (konular: {topics})", "success")
+        return repos
+        
+    except requests.exceptions.RequestException as e:
+        terminal_log(f"❌ GitHub API hatası: {e}", "error")
+        return []
+    except Exception as e:
+        terminal_log(f"❌ GitHub konu araması hatası: {e}", "error")
+        return []
+
 def fetch_trending_github_repos(language="python", time_period="daily", limit=10):
     """GitHub'dan trend olan repoları çek"""
     try:

@@ -1,0 +1,27 @@
+{
+  "default_language": "python",
+  "default_time_period": "daily",
+  "default_limit": 10,
+  "search_topics": [
+    "ai"
+  ],
+  "custom_search_queries": [],
+  "languages": [
+    "python",
+    "javascript",
+    "typescript",
+    "go",
+    "rust",
+    "java",
+    "cpp",
+    "csharp",
+    "swift",
+    "kotlin"
+  ],
+  "time_periods": [
+    "daily",
+    "weekly",
+    "monthly"
+  ],
+  "last_updated": "2025-06-11T15:13:17.006727"
+}

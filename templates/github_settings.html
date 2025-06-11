@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Ayarları - AI Tweet Bot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .settings-card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .settings-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            padding: 20px;
+        }
+        .topic-tag {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fab fa-github me-2"></i>AI Tweet Bot - GitHub Ayarları
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('index') }}">
+                    <i class="fas fa-home me-1"></i>Ana Sayfa
+                </a>
+                <a class="nav-link" href="{{ url_for('github_repos') }}">
+                    <i class="fab fa-github me-1"></i>GitHub Repos
+                </a>
+                <a class="nav-link" href="{{ url_for('settings') }}">
+                    <i class="fas fa-cog me-1"></i>Genel Ayarlar
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Ana Ayarlar -->
+                <div class="card settings-card">
+                    <div class="settings-header">
+                        <h4 class="mb-0">
+                            <i class="fab fa-github me-2"></i>GitHub Repo Çekme Ayarları
+                        </h4>
+                        <p class="mb-0 mt-2 opacity-75">GitHub repolarını çekmek için varsayılan ayarları yapılandırın</p>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('save_github_settings_route') }}">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="default_language" class="form-label">
+                                            <i class="fas fa-code me-1"></i>Varsayılan Programlama Dili
+                                        </label>
+                                        <select class="form-select" id="default_language" name="default_language">
+                                            <option value="python" {{ 'selected' if settings.get('default_language') == 'python' else '' }}>Python</option>
+                                            <option value="javascript" {{ 'selected' if settings.get('default_language') == 'javascript' else '' }}>JavaScript</option>
+                                            <option value="typescript" {{ 'selected' if settings.get('default_language') == 'typescript' else '' }}>TypeScript</option>
+                                            <option value="go" {{ 'selected' if settings.get('default_language') == 'go' else '' }}>Go</option>
+                                            <option value="rust" {{ 'selected' if settings.get('default_language') == 'rust' else '' }}>Rust</option>
+                                            <option value="java" {{ 'selected' if settings.get('default_language') == 'java' else '' }}>Java</option>
+                                            <option value="cpp" {{ 'selected' if settings.get('default_language') == 'cpp' else '' }}>C++</option>
+                                            <option value="csharp" {{ 'selected' if settings.get('default_language') == 'csharp' else '' }}>C#</option>
+                                            <option value="swift" {{ 'selected' if settings.get('default_language') == 'swift' else '' }}>Swift</option>
+                                            <option value="kotlin" {{ 'selected' if settings.get('default_language') == 'kotlin' else '' }}>Kotlin</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="default_time_period" class="form-label">
+                                            <i class="fas fa-calendar me-1"></i>Varsayılan Zaman Aralığı
+                                        </label>
+                                        <select class="form-select" id="default_time_period" name="default_time_period">
+                                            <option value="daily" {{ 'selected' if settings.get('default_time_period') == 'daily' else '' }}>Günlük</option>
+                                            <option value="weekly" {{ 'selected' if settings.get('default_time_period') == 'weekly' else '' }}>Haftalık</option>
+                                            <option value="monthly" {{ 'selected' if settings.get('default_time_period') == 'monthly' else '' }}>Aylık</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="default_limit" class="form-label">
+                                    <i class="fas fa-hashtag me-1"></i>Varsayılan Repo Sayısı
+                                </label>
+                                <input type="number" class="form-control" id="default_limit" name="default_limit" 
+                                       value="{{ settings.get('default_limit', 10) }}" min="1" max="20">
+                                <div class="form-text">Bir seferde çekilecek maksimum repo sayısı (1-20 arası)</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="search_topics" class="form-label">
+                                    <i class="fas fa-tags me-1"></i>Arama Konuları
+                                </label>
+                                <input type="text" class="form-control" id="search_topics" name="search_topics" 
+                                       value="{{ settings.get('search_topics', [])|join(', ') }}" 
+                                       placeholder="ai, machine-learning, deep-learning, openai, claude">
+                                <div class="form-text">Virgülle ayırarak birden fazla konu ekleyebilirsiniz</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="custom_search_queries" class="form-label">
+                                    <i class="fas fa-search me-1"></i>Özel Arama Sorguları
+                                </label>
+                                <input type="text" class="form-control" id="custom_search_queries" name="custom_search_queries" 
+                                       value="{{ settings.get('custom_search_queries', [])|join(', ') }}" 
+                                       placeholder="ai tools, chatbot framework, neural network">
+                                <div class="form-text">Özel arama terimleri (virgülle ayırın)</div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save me-2"></i>Ayarları Kaydet
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Mevcut Ayarlar Özeti -->
+                <div class="card settings-card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Mevcut Ayarlar
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <strong>Varsayılan Dil:</strong>
+                            <span class="badge bg-primary">{{ settings.get('default_language', 'python') }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Zaman Aralığı:</strong>
+                            <span class="badge bg-success">{{ settings.get('default_time_period', 'weekly') }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Repo Sayısı:</strong>
+                            <span class="badge bg-warning text-dark">{{ settings.get('default_limit', 10) }}</span>
+                        </div>
+                        
+                        {% if settings.get('search_topics') %}
+                        <div class="mb-3">
+                            <strong>Arama Konuları:</strong><br>
+                            {% for topic in settings.get('search_topics', []) %}
+                                <span class="topic-tag">{{ topic }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if settings.get('custom_search_queries') %}
+                        <div class="mb-3">
+                            <strong>Özel Sorgular:</strong><br>
+                            {% for query in settings.get('custom_search_queries', []) %}
+                                <span class="topic-tag">{{ query }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if settings.get('last_updated') %}
+                        <div class="text-muted small">
+                            <i class="fas fa-clock me-1"></i>
+                            Son güncelleme: {{ settings.get('last_updated', '')[:19] }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Hızlı Test -->
+                <div class="card settings-card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-rocket me-2"></i>Hızlı Test
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Ayarlarınızı test etmek için GitHub repo çekme işlemini deneyin:</p>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('github_repos') }}" class="btn btn-outline-success">
+                                <i class="fab fa-github me-2"></i>GitHub Repos Sayfası
+                            </a>
+                            
+                            <button type="button" class="btn btn-outline-primary" onclick="testGitHubAPI()">
+                                <i class="fas fa-vial me-2"></i>API Bağlantısını Test Et
+                            </button>
+                        </div>
+
+                        <div id="test-result" class="mt-3"></div>
+                    </div>
+                </div>
+
+                <!-- Bilgi Kutusu -->
+                <div class="info-box">
+                    <h6><i class="fas fa-lightbulb me-2"></i>İpuçları</h6>
+                    <ul class="mb-0 small">
+                        <li><strong>Konular:</strong> GitHub'da popüler olan topic'leri kullanın</li>
+                        <li><strong>Dil:</strong> AI/ML projeleri için Python en popüler seçimdir</li>
+                        <li><strong>Zaman:</strong> Haftalık arama daha kaliteli sonuçlar verir</li>
+                        <li><strong>Limit:</strong> Çok yüksek sayılar API limitine takılabilir</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function testGitHubAPI() {
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Test ediliyor...';
+            
+            fetch('/test_github_api')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        resultDiv.innerHTML = `
+                            <div class="alert alert-success alert-sm">
+                                <i class="fas fa-check-circle me-2"></i>
+                                ${data.message}
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="alert alert-danger alert-sm">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                ${data.error}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger alert-sm">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Test hatası: ${error.message}
+                        </div>
+                    `;
+                });
+        }
+
+        // Form submit sonrası scroll to top
+        document.querySelector('form').addEventListener('submit', function() {
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 100);
+        });
+    </script>
+</body>
+</html> 
