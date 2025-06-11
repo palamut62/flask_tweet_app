@@ -51,6 +51,28 @@ last_check_time = None
 automation_running = False
 background_scheduler_running = False
 
+def ensure_tweet_ids(pending_tweets):
+    """Pending tweets'lerin ID'lerini güvenli şekilde kontrol et ve düzelt"""
+    try:
+        for i, tweet in enumerate(pending_tweets):
+            if isinstance(tweet, dict):
+                if 'id' not in tweet or tweet['id'] is None:
+                    tweet['id'] = i + 1
+            else:
+                # Object ise dict'e çevir
+                try:
+                    tweet_dict = dict(tweet) if hasattr(tweet, '__dict__') else {}
+                    tweet_dict['id'] = i + 1
+                    pending_tweets[i] = tweet_dict
+                except:
+                    # Son çare: yeni dict oluştur
+                    pending_tweets[i] = {'id': i + 1, 'error': 'Tweet format hatası'}
+        
+        return pending_tweets
+    except Exception as e:
+        terminal_log(f"❌ Tweet ID düzeltme hatası: {e}", "error")
+        return pending_tweets
+
 # Giriş kontrolü decorator'ı
 def login_required(f):
     @wraps(f)
@@ -270,14 +292,35 @@ def index():
         # Silinmiş tweetleri filtrele - sadece gerçekten paylaşılan tweetleri göster
         articles = [article for article in all_articles if not article.get('deleted', False)]
         
+        # Tweet ID'lerini güvenli şekilde kontrol et
+        pending_tweets = ensure_tweet_ids(pending_tweets)
+        
         # Tweet'leri kaynak türüne göre ayır ve sırala
         news_tweets = []
         github_tweets = []
         
         for tweet in pending_tweets:
+            
+            # Tweet içeriğini düzenle (template uyumluluğu için)
+            if 'tweet_data' in tweet and 'tweet' in tweet['tweet_data']:
+                tweet['content'] = tweet['tweet_data']['tweet']
+            elif 'content' not in tweet and 'article' in tweet:
+                tweet['content'] = tweet['article'].get('title', 'İçerik bulunamadı')
+            
+            # Başlık ekle
+            if 'title' not in tweet and 'article' in tweet:
+                tweet['title'] = tweet['article'].get('title', 'Başlık bulunamadı')
+            
+            # URL ekle
+            if 'url' not in tweet and 'article' in tweet:
+                tweet['url'] = tweet['article'].get('url', '')
+            
+            # Kaynak türünü belirle
             if tweet.get('source_type') == 'github':
                 github_tweets.append(tweet)
             else:
+                # Varsayılan olarak news
+                tweet['source_type'] = 'news'
                 news_tweets.append(tweet)
         
         # Tarihe göre sırala (en yeni önce)
@@ -286,6 +329,9 @@ def index():
         
         # Tüm tweet'leri birleştir (GitHub tweet'leri önce)
         all_pending_tweets = github_tweets + news_tweets
+        
+        # Güncellenmiş pending tweets'i kaydet
+        save_json("pending_tweets.json", pending_tweets)
         
         stats = get_data_statistics()
         automation_status = get_automation_status()
@@ -299,6 +345,10 @@ def index():
         safe_log(f"Ana sayfa istatistikleri: {stats}", "DEBUG")
         safe_log(f"Toplam makale: {len(all_articles)}, Gösterilen: {len(articles)}, Silinmiş: {len(all_articles) - len(articles)}", "DEBUG")
         safe_log(f"Bekleyen tweet'ler: {len(all_pending_tweets)} ({news_count} haber, {github_count} GitHub)", "DEBUG")
+        
+        # Terminal log ekle
+        terminal_log(f"📊 Ana sayfa yüklendi: {len(all_pending_tweets)} bekleyen tweet, {len(articles)} son makale", "info")
+        terminal_log(f"📈 Bugünkü istatistikler: {stats.get('today_articles', 0)} paylaşım, {stats.get('today_pending', 0)} bekleyen", "info")
         
         # API durumunu kontrol et (ana sayfa için basit kontrol)
         api_check = {
@@ -523,13 +573,17 @@ def check_and_post_articles():
         for article in articles[:max_articles]:
             try:
                 # Tweet oluştur
+                terminal_log(f"🤖 Tweet oluşturuluyor: {article['title'][:50]}...", "info")
                 tweet_data = generate_ai_tweet_with_mcp_analysis(article, api_key)
                 
                 if not tweet_data or not tweet_data.get('tweet'):
+                    terminal_log(f"❌ Tweet oluşturulamadı: {article['title'][:50]}...", "error")
                     continue
                 
                 # Skor kontrolü
                 impact_score = tweet_data.get('impact_score', 0)
+                terminal_log(f"📊 Tweet skoru: {impact_score} (minimum: {min_score})", "info")
+                
                 if impact_score < min_score:
                     terminal_log(f"⚠️ Düşük skor ({impact_score}), atlanıyor: {article['title'][:50]}...", "warning")
                     continue
@@ -618,11 +672,13 @@ def check_and_post_articles():
                             break
                     
                     if not is_duplicate:
+                        # ID ekle
+                        new_tweet['id'] = len(pending_tweets) + 1
                         pending_tweets.append(new_tweet)
                         save_json("pending_tweets.json", pending_tweets)
-                        terminal_log(f"📝 Tweet onay bekliyor: {article['title'][:50]}...", "info")
+                        terminal_log(f"📝 Tweet onay bekliyor: {article['title'][:50]}... (ID: {new_tweet['id']})", "success")
                     else:
-                        terminal_log(f"🔄 Duplikat tweet onay listesine eklenmedi", "info")
+                        terminal_log(f"🔄 Duplikat tweet onay listesine eklenmedi: {article['title'][:50]}...", "warning")
 
                 
             except Exception as article_error:
@@ -650,14 +706,30 @@ def post_tweet_route():
         
         # Pending tweet'i bul
         pending_tweets = load_json("pending_tweets.json")
+        pending_tweets = ensure_tweet_ids(pending_tweets)
         tweet_to_post = None
         tweet_index = None
         
         for i, pending in enumerate(pending_tweets):
-            if str(pending.get('id', i)) == str(tweet_id):
-                tweet_to_post = pending
-                tweet_index = i
-                break
+            # Güvenli ID kontrolü
+            try:
+                pending_id = pending.get('id') if isinstance(pending, dict) else getattr(pending, 'id', None)
+                if pending_id is None:
+                    pending_id = i + 1
+                    # ID yoksa ekle
+                    if isinstance(pending, dict):
+                        pending['id'] = pending_id
+                
+                if str(pending_id) == str(tweet_id):
+                    tweet_to_post = pending
+                    tweet_index = i
+                    break
+            except (AttributeError, TypeError):
+                # Fallback: index kullan
+                if str(i + 1) == str(tweet_id):
+                    tweet_to_post = pending
+                    tweet_index = i
+                    break
         
         if not tweet_to_post:
             return jsonify({"success": False, "error": "Tweet bulunamadı"})
@@ -750,14 +822,30 @@ def delete_tweet_route():
         
         # Pending tweet'i bul
         pending_tweets = load_json("pending_tweets.json")
+        pending_tweets = ensure_tweet_ids(pending_tweets)
         deleted_tweet = None
         tweet_index = None
         
         for i, pending in enumerate(pending_tweets):
-            if str(pending.get('id', i)) == str(tweet_id):
-                deleted_tweet = pending
-                tweet_index = i
-                break
+            # Güvenli ID kontrolü
+            try:
+                pending_id = pending.get('id') if isinstance(pending, dict) else getattr(pending, 'id', None)
+                if pending_id is None:
+                    pending_id = i + 1
+                    # ID yoksa ekle
+                    if isinstance(pending, dict):
+                        pending['id'] = pending_id
+                
+                if str(pending_id) == str(tweet_id):
+                    deleted_tweet = pending
+                    tweet_index = i
+                    break
+            except (AttributeError, TypeError):
+                # Fallback: index kullan
+                if str(i + 1) == str(tweet_id):
+                    deleted_tweet = pending
+                    tweet_index = i
+                    break
         
         if deleted_tweet:
             # Makaleyi "silindi" olarak işaretle
@@ -820,14 +908,30 @@ def manual_post_tweet_route():
         
         # Pending tweet'i bul
         pending_tweets = load_json("pending_tweets.json")
+        pending_tweets = ensure_tweet_ids(pending_tweets)
         tweet_to_post = None
         tweet_index = None
         
         for i, pending in enumerate(pending_tweets):
-            if str(pending.get('id', i)) == str(tweet_id):
-                tweet_to_post = pending
-                tweet_index = i
-                break
+            # Güvenli ID kontrolü
+            try:
+                pending_id = pending.get('id') if isinstance(pending, dict) else getattr(pending, 'id', None)
+                if pending_id is None:
+                    pending_id = i + 1
+                    # ID yoksa ekle
+                    if isinstance(pending, dict):
+                        pending['id'] = pending_id
+                
+                if str(pending_id) == str(tweet_id):
+                    tweet_to_post = pending
+                    tweet_index = i
+                    break
+            except (AttributeError, TypeError):
+                # Fallback: index kullan
+                if str(i + 1) == str(tweet_id):
+                    tweet_to_post = pending
+                    tweet_index = i
+                    break
         
         if not tweet_to_post:
             return jsonify({"success": False, "error": "Tweet bulunamadı"})
@@ -878,6 +982,7 @@ def confirm_manual_post():
         
         # Pending tweet'i bul
         pending_tweets = load_json("pending_tweets.json")
+        pending_tweets = ensure_tweet_ids(pending_tweets)
         tweet_to_post = None
         tweet_index = None
         
@@ -1748,6 +1853,7 @@ def manual_post_confirmation(tweet_id):
     try:
         # Pending tweet'i bul
         pending_tweets = load_json("pending_tweets.json")
+        pending_tweets = ensure_tweet_ids(pending_tweets)
         
         # Tweet ID'yi pending tweets listesinde ara
         tweet_to_confirm = None

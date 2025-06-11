@@ -663,6 +663,25 @@ def generate_comprehensive_analysis(article_data, api_key):
     
     print(f"🔍 Kapsamlı AI analizi başlatılıyor...")
     
+    # AI ile ilgili olmayan içerikleri kontrol et
+    title_lower = title.lower()
+    content_lower = content.lower()
+    
+    # AI anahtar kelimeleri
+    ai_keywords = ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'neural', 'gpt', 'llm', 'openai', 'anthropic', 'claude', 'chatgpt', 'algorithm', 'automation', 'robot', 'tech', 'software', 'data', 'computer']
+    
+    # AI ile ilgili olmayan anahtar kelimeler
+    non_ai_keywords = ['wood', 'dried', 'kiln', 'furniture', 'cooking', 'recipe', 'travel', 'music', 'art', 'painting', 'photography', 'sports', 'fashion', 'food', 'health', 'medicine', 'politics', 'economy', 'finance', 'real estate']
+    
+    # AI ile ilgili mi kontrol et
+    has_ai_content = any(keyword in title_lower or keyword in content_lower for keyword in ai_keywords)
+    has_non_ai_content = any(keyword in title_lower or keyword in content_lower for keyword in non_ai_keywords)
+    
+    # Eğer AI ile ilgili değilse veya AI olmayan içerik varsa uyarı ver
+    if not has_ai_content or has_non_ai_content:
+        print(f"⚠️ Bu içerik AI/teknoloji ile ilgili görünmüyor: {title[:50]}...")
+        print(f"🔍 AI içerik: {has_ai_content}, AI olmayan içerik: {has_non_ai_content}")
+    
     analysis_result = {
         "innovation": "",
         "companies": [],
@@ -908,6 +927,7 @@ Tweet text:"""
         print(f"😊 AI Emojiler: {emoji_text} ({len(emoji_text)} karakter)")
         print(f"🔗 URL kısmı: {len(url_part)} karakter")
         print(f"🎯 Hedef Kitle: {analysis['audience']}")
+        print(f"📊 Impact Score: 8 (varsayılan)")
         
         # Dictionary formatında döndür
         return {
@@ -1684,15 +1704,22 @@ def get_data_statistics():
         # Bugünkü bekleyen tweet'ler
         today_pending = []
         for tweet in pending_tweets:
-            if tweet.get("created_date"):
+            # created_date veya created_at alanını kontrol et
+            date_field = tweet.get("created_date") or tweet.get("created_at")
+            if date_field:
                 try:
-                    created_date = datetime.fromisoformat(tweet["created_date"].replace('Z', '+00:00'))
-                    if created_date.date() == today and tweet.get("status") == "pending":
+                    created_date = datetime.fromisoformat(date_field.replace('Z', '+00:00'))
+                    # Status kontrolü - eğer status yoksa pending kabul et
+                    tweet_status = tweet.get("status", "pending")
+                    if created_date.date() == today and tweet_status == "pending":
                         today_pending.append(tweet)
                 except (ValueError, TypeError):
                     continue
         
         stats["today_pending"] = len(today_pending)
+        
+        # Debug için log ekle
+        print(f"[DEBUG] Bugünkü pending tweet'ler: {len(today_pending)} / {len(pending_tweets)} toplam")
         
         # Özetler
         summaries = load_json("summaries.json")
@@ -5766,7 +5793,7 @@ def fetch_articles_with_simple_scraping():
         return []
 
 def fetch_articles_from_hackernews():
-    """Hacker News API'den AI ile ilgili haberleri çek"""
+    """Hacker News API'den AI ile ilgili haberleri çek - Gelişmiş içerik çekme ile"""
     try:
         # Hacker News API'den top stories al
         top_stories_url = "https://hacker-news.firebaseio.com/v0/topstories.json"
@@ -5774,7 +5801,7 @@ def fetch_articles_from_hackernews():
         story_ids = response.json()[:50]  # İlk 50 hikaye
         
         ai_articles = []
-        ai_keywords = ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'neural', 'gpt', 'llm']
+        ai_keywords = ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'neural', 'gpt', 'llm', 'openai', 'anthropic', 'claude', 'chatgpt']
         
         for story_id in story_ids[:20]:  # İlk 20'sini kontrol et
             try:
@@ -5788,12 +5815,62 @@ def fetch_articles_from_hackernews():
                 title = story.get('title', '')
                 url = story.get('url', '')
                 
-                # AI ile ilgili mi kontrol et
+                # AI ile ilgili mi kontrol et - Daha sıkı filtreleme
                 title_lower = title.lower()
                 is_ai_related = any(keyword in title_lower for keyword in ai_keywords)
                 
-                if not is_ai_related or not url:
+                # AI ile ilgili olmayan konuları filtrele
+                non_ai_keywords = ['wood', 'dried', 'kiln', 'furniture', 'cooking', 'recipe', 'travel', 'music', 'art', 'painting', 'photography']
+                has_non_ai_content = any(keyword in title_lower for keyword in non_ai_keywords)
+                
+                if not is_ai_related or not url or has_non_ai_content:
+                    if has_non_ai_content:
+                        terminal_log(f"⚠️ AI olmayan içerik filtrelendi: {title[:50]}...", "warning")
                     continue
+                
+                # Gerçek makale içeriğini çekmeye çalış
+                article_content = title  # Fallback olarak başlık
+                
+                try:
+                    # Gelişmiş scraper ile içerik çek
+                    content_result = advanced_web_scraper(url, wait_time=2, use_js=False)
+                    
+                    if content_result.get("success") and content_result.get("content"):
+                        scraped_content = content_result["content"]
+                        
+                        # İçeriği temizle ve kısalt
+                        if len(scraped_content) > 500:
+                            article_content = scraped_content[:500] + "..."
+                        else:
+                            article_content = scraped_content
+                        
+                        terminal_log(f"✅ HN makale içeriği çekildi: {title[:50]}... ({len(scraped_content)} karakter)", "success")
+                    else:
+                        # MCP fallback dene
+                        try:
+                            mcp_result = mcp_firecrawl_scrape({
+                                "url": url,
+                                "formats": ["markdown"],
+                                "onlyMainContent": True,
+                                "waitFor": 1000
+                            })
+                            
+                            if mcp_result.get("success") and mcp_result.get("content"):
+                                mcp_content = mcp_result["content"]
+                                if len(mcp_content) > 500:
+                                    article_content = mcp_content[:500] + "..."
+                                else:
+                                    article_content = mcp_content
+                                
+                                terminal_log(f"✅ HN makale içeriği MCP ile çekildi: {title[:50]}...", "success")
+                            else:
+                                terminal_log(f"⚠️ HN makale içeriği çekilemedi, başlık kullanılıyor: {title[:50]}...", "warning")
+                                
+                        except Exception as mcp_error:
+                            terminal_log(f"⚠️ HN MCP fallback hatası: {mcp_error}", "warning")
+                            
+                except Exception as content_error:
+                    terminal_log(f"⚠️ HN içerik çekme hatası: {content_error}", "warning")
                 
                 # Hash oluştur
                 article_hash = hashlib.md5(title.encode()).hexdigest()
@@ -5801,7 +5878,7 @@ def fetch_articles_from_hackernews():
                 ai_articles.append({
                     "title": title,
                     "url": url,
-                    "content": title,  # HN'de sadece başlık var
+                    "content": article_content,  # Gerçek içerik veya başlık
                     "score": story.get('score', 0),
                     "hash": article_hash,
                     "source": "Hacker News",
@@ -5814,17 +5891,18 @@ def fetch_articles_from_hackernews():
                     break
                     
             except Exception as story_error:
-                print(f"⚠️ HN story hatası: {story_error}")
+                terminal_log(f"⚠️ HN story hatası: {story_error}", "warning")
                 continue
         
+        terminal_log(f"📊 Hacker News'den {len(ai_articles)} AI makalesi bulundu", "info")
         return ai_articles
         
     except Exception as e:
-        print(f"❌ Hacker News API hatası: {e}")
+        terminal_log(f"❌ Hacker News API hatası: {e}", "error")
         return []
 
 def fetch_articles_from_reddit():
-    """Reddit'den AI subreddit'lerinden makale çek"""
+    """Reddit'den AI subreddit'lerinden makale çek - Gelişmiş içerik çekme ile"""
     try:
         # Reddit JSON API kullan (auth gerektirmez)
         subreddits = ['artificial', 'MachineLearning', 'deeplearning', 'singularity']
@@ -5853,8 +5931,51 @@ def fetch_articles_from_reddit():
                         if not url or 'reddit.com' in url or score < 10:
                             continue
                         
-                        # İçerik oluştur
-                        content = selftext[:500] if selftext else title
+                        # İçerik oluştur - Önce selftext, sonra gerçek makale içeriği
+                        article_content = selftext[:500] if selftext else title
+                        
+                        # Eğer selftext yoksa veya çok kısaysa, gerçek makale içeriğini çekmeye çalış
+                        if not selftext or len(selftext) < 100:
+                            try:
+                                # Gelişmiş scraper ile içerik çek
+                                content_result = advanced_web_scraper(url, wait_time=2, use_js=False)
+                                
+                                if content_result.get("success") and content_result.get("content"):
+                                    scraped_content = content_result["content"]
+                                    
+                                    # İçeriği temizle ve kısalt
+                                    if len(scraped_content) > 500:
+                                        article_content = scraped_content[:500] + "..."
+                                    else:
+                                        article_content = scraped_content
+                                    
+                                    terminal_log(f"✅ Reddit makale içeriği çekildi: {title[:50]}... ({len(scraped_content)} karakter)", "success")
+                                else:
+                                    # MCP fallback dene
+                                    try:
+                                        mcp_result = mcp_firecrawl_scrape({
+                                            "url": url,
+                                            "formats": ["markdown"],
+                                            "onlyMainContent": True,
+                                            "waitFor": 1000
+                                        })
+                                        
+                                        if mcp_result.get("success") and mcp_result.get("content"):
+                                            mcp_content = mcp_result["content"]
+                                            if len(mcp_content) > 500:
+                                                article_content = mcp_content[:500] + "..."
+                                            else:
+                                                article_content = mcp_content
+                                            
+                                            terminal_log(f"✅ Reddit makale içeriği MCP ile çekildi: {title[:50]}...", "success")
+                                        else:
+                                            terminal_log(f"⚠️ Reddit makale içeriği çekilemedi, başlık kullanılıyor: {title[:50]}...", "warning")
+                                            
+                                    except Exception as mcp_error:
+                                        terminal_log(f"⚠️ Reddit MCP fallback hatası: {mcp_error}", "warning")
+                                        
+                            except Exception as content_error:
+                                terminal_log(f"⚠️ Reddit içerik çekme hatası: {content_error}", "warning")
                         
                         # Hash oluştur
                         article_hash = hashlib.md5(title.encode()).hexdigest()
@@ -5862,7 +5983,7 @@ def fetch_articles_from_reddit():
                         all_articles.append({
                             "title": title,
                             "url": url,
-                            "content": content,
+                            "content": article_content,
                             "score": score,
                             "hash": article_hash,
                             "source": f"Reddit - r/{subreddit}",
@@ -5872,17 +5993,18 @@ def fetch_articles_from_reddit():
                         })
                         
                     except Exception as post_error:
-                        print(f"⚠️ Reddit post hatası: {post_error}")
+                        terminal_log(f"⚠️ Reddit post hatası: {post_error}", "warning")
                         continue
                         
             except Exception as subreddit_error:
-                print(f"⚠️ Reddit subreddit hatası ({subreddit}): {subreddit_error}")
+                terminal_log(f"⚠️ Reddit subreddit hatası ({subreddit}): {subreddit_error}", "warning")
                 continue
         
+        terminal_log(f"📊 Reddit'den {len(all_articles)} AI makalesi bulundu", "info")
         return all_articles
         
     except Exception as e:
-        print(f"❌ Reddit API hatası: {e}")
+        terminal_log(f"❌ Reddit API hatası: {e}", "error")
         return []
 
 # ==========================================
