@@ -14,14 +14,15 @@
 
     <!-- Ana İstatistik Kartları -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Toplam Makale -->
+        <!-- Aktif Makaleler -->
         <div class="card-modern gradient-bg text-white">
             <div class="p-6 text-center">
                 <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-newspaper text-2xl"></i>
                 </div>
-                <h3 class="text-3xl font-bold mb-2">{{ stats.total_articles or 0 }}</h3>
-                <p class="text-white/90">Toplam Makale</p>
+                <h3 class="text-3xl font-bold mb-2">{{ stats.active_articles or 0 }}</h3>
+                <p class="text-white/90">Aktif Makale</p>
+                <p class="text-white/70 text-sm mt-1">{{ stats.deleted_articles or 0 }} silinmiş</p>
             </div>
         </div>
         
@@ -77,13 +78,13 @@
                             <div class="bg-blue-50 rounded-lg p-4">
                                 <div class="flex justify-between items-center">
                                     <span class="text-gray-600">Bugün:</span>
-                                    <span class="font-bold text-blue-600">{{ stats.today_articles or summary.today_articles or 0 }} makale</span>
+                                    <span class="font-bold text-blue-600">{{ stats.today_articles or 0 }} makale</span>
                                 </div>
                             </div>
                             <div class="bg-green-50 rounded-lg p-4">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-gray-600">Bu hafta:</span>
-                                    <span class="font-bold text-green-600">{{ summary.week_articles or 0 }} makale</span>
+                                    <span class="text-gray-600">Dün:</span>
+                                    <span class="font-bold text-green-600">{{ stats.yesterday_articles or 0 }} makale</span>
                                 </div>
                             </div>
                         </div>
@@ -246,7 +247,7 @@
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Tehlikeli İşlemler</h3>
                     <div class="space-y-3">
-                        <form method="POST" action="{{ url_for('reset_data') }}" onsubmit="return confirm('Tüm veriler silinecek! Emin misiniz?')">
+                        <form method="POST" action="{{ url_for('reset_data') }}" onsubmit="return confirmReset()">
                             <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium flex items-center justify-center space-x-2">
                                 <i class="fas fa-trash-alt"></i>
                                 <span>Tüm Verileri Sıfırla</span>
@@ -285,4 +286,20 @@
     </div>
 </div>
 {% endif %}
+
+<script>
+function confirmReset() {
+    const confirmation1 = confirm('⚠️ DİKKAT! Tüm veriler kalıcı olarak silinecek!\n\n• Tüm paylaşılan makaleler\n• Bekleyen tweet\'ler\n• İstatistikler\n• Ayarlar\n\nBu işlem GERİ ALINAMAZ!\n\nDevam etmek istediğinizden emin misiniz?');
+    
+    if (!confirmation1) return false;
+    
+    const confirmation2 = confirm('Son uyarı! Bu işlem tüm verilerinizi kalıcı olarak silecek.\n\nGerçekten devam etmek istiyor musunuz?');
+    
+    if (!confirmation2) return false;
+    
+    const userInput = prompt('Onaylamak için "SIFIRLA" yazın (büyük harflerle):');
+    
+    return userInput === 'SIFIRLA';
+}
+</script>
 {% endblock %} 

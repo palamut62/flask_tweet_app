@@ -1484,17 +1484,78 @@ def get_posted_articles_summary():
             "last_check_time": "Henüz yok"
         }
 
-def reset_all_data():
-    """Tüm uygulama verilerini sıfırla"""
+def create_automatic_backup():
+    """Günlük otomatik yedekleme oluştur"""
     try:
+        import shutil
+        from datetime import datetime
+        
+        # Bugünün tarihi
+        today = datetime.now().strftime('%Y%m%d')
+        backup_dir = f"daily_backup_{today}"
+        
+        # Eğer bugünkü yedekleme zaten varsa atla
+        if os.path.exists(backup_dir):
+            return {"success": True, "message": "Bugünkü yedekleme zaten mevcut", "backup_dir": backup_dir}
+        
+        os.makedirs(backup_dir, exist_ok=True)
+        
+        files_to_backup = [
+            "posted_articles.json",
+            "pending_tweets.json", 
+            "automation_settings.json",
+            "news_sources.json"
+        ]
+        
+        backup_count = 0
+        for file_path in files_to_backup:
+            if os.path.exists(file_path):
+                backup_path = os.path.join(backup_dir, file_path)
+                shutil.copy2(file_path, backup_path)
+                backup_count += 1
+        
+        return {
+            "success": True,
+            "message": f"✅ Günlük yedekleme oluşturuldu: {backup_count} dosya",
+            "backup_dir": backup_dir
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"❌ Yedekleme hatası: {str(e)}"
+        }
+
+def reset_all_data():
+    """Tüm uygulama verilerini sıfırla - Otomatik yedekleme ile"""
+    try:
+        import shutil
+        from datetime import datetime
+        
+        # Yedekleme klasörü oluştur
+        backup_dir = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        os.makedirs(backup_dir, exist_ok=True)
+        
         files_to_reset = [
             "posted_articles.json",
             "pending_tweets.json", 
             "summaries.json",
             "hashtags.json",
-            "accounts.json"
+            "accounts.json",
+            "automation_settings.json",
+            "news_sources.json"
         ]
         
+        # Önce yedekle
+        backup_count = 0
+        for file_path in files_to_reset:
+            if os.path.exists(file_path):
+                backup_path = os.path.join(backup_dir, file_path)
+                shutil.copy2(file_path, backup_path)
+                backup_count += 1
+                print(f"📦 {file_path} yedeklendi -> {backup_path}")
+        
+        # Sonra sıfırla
         reset_count = 0
         for file_path in files_to_reset:
             if os.path.exists(file_path):
@@ -1508,8 +1569,9 @@ def reset_all_data():
         
         return {
             "success": True,
-            "message": f"✅ {reset_count} dosya sıfırlandı",
-            "reset_files": files_to_reset
+            "message": f"✅ {reset_count} dosya sıfırlandı, {backup_count} dosya yedeklendi ({backup_dir})",
+            "reset_files": files_to_reset,
+            "backup_dir": backup_dir
         }
         
     except Exception as e:
@@ -1547,7 +1609,7 @@ def clear_pending_tweets():
 def get_data_statistics():
     """Veri istatistiklerini döndür - bugünkü analizler dahil"""
     try:
-        from datetime import datetime, date
+        from datetime import datetime, date, timedelta
         today = date.today()
         stats = {}
         
@@ -1556,20 +1618,61 @@ def get_data_statistics():
         stats["posted_articles"] = len(posted_articles)
         stats["total_articles"] = len(posted_articles)  # Template uyumluluğu için
         
-        # Bugünkü paylaşılan makaleler
+        # Bugünkü paylaşılan makaleler (silinmemiş olanlar)
         today_articles = []
+        active_articles = []
+        deleted_articles = []
+        
         for article in posted_articles:
-            if article.get("posted_date"):
+            # Silinmiş/aktif ayrımı
+            if article.get("deleted", False):
+                deleted_articles.append(article)
+            else:
+                active_articles.append(article)
+            
+            # Bugünkü makaleler (sadece aktif olanlar)
+            if article.get("posted_date") and not article.get("deleted", False):
                 try:
                     # ISO format tarihini parse et
-                    posted_date = datetime.fromisoformat(article["posted_date"].replace('Z', '+00:00'))
-                    if posted_date.date() == today:
+                    posted_date_str = article["posted_date"]
+                    # Z suffix'ini kaldır ve parse et
+                    if posted_date_str.endswith('Z'):
+                        posted_date_str = posted_date_str[:-1] + '+00:00'
+                    
+                    posted_date = datetime.fromisoformat(posted_date_str)
+                    article_date = posted_date.date()
+                    
+                    if article_date == today:
                         today_articles.append(article)
+                        
                 except (ValueError, TypeError) as e:
                     print(f"[DEBUG] Tarih parse hatası: {e} - {article.get('posted_date')}")
                     continue
         
+        # Dünkü makaleler de hesapla
+        yesterday = today - timedelta(days=1)
+        yesterday_articles = []
+        
+        for article in active_articles:
+            if article.get("posted_date"):
+                try:
+                    posted_date_str = article["posted_date"]
+                    if posted_date_str.endswith('Z'):
+                        posted_date_str = posted_date_str[:-1] + '+00:00'
+                    
+                    posted_date = datetime.fromisoformat(posted_date_str)
+                    article_date = posted_date.date()
+                    
+                    if article_date == yesterday:
+                        yesterday_articles.append(article)
+                        
+                except (ValueError, TypeError):
+                    continue
+        
         stats["today_articles"] = len(today_articles)
+        stats["yesterday_articles"] = len(yesterday_articles)
+        stats["active_articles"] = len(active_articles)
+        stats["deleted_articles"] = len(deleted_articles)
         
         # Bekleyen tweet'ler
         pending_tweets = load_json("pending_tweets.json")
@@ -1606,7 +1709,7 @@ def get_data_statistics():
         # Bugünkü toplam aktivite
         stats["today_total_activity"] = stats["today_articles"] + stats["today_pending"]
         
-        print(f"[DEBUG] İstatistikler: Bugün {stats['today_articles']} makale, {stats['today_pending']} bekleyen")
+        print(f"[DEBUG] İstatistikler: Bugün {stats['today_articles']} paylaşım, {stats['today_pending']} bekleyen (Paylaşım tarihine göre)")
         
         return stats
         

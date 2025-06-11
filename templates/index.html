@@ -326,33 +326,33 @@
                     {% for tweet in pending_tweets %}
                     <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
                         <div class="flex justify-between items-start mb-4">
-                            <h4 class="text-lg font-medium text-gray-900 line-clamp-2">{{ tweet.article.title }}</h4>
+                            <h4 class="text-lg font-medium text-gray-900 line-clamp-2">{{ tweet.article.title if tweet.article else tweet.content[:100] + '...' if tweet.content else 'Başlık bulunamadı' }}</h4>
                             <span class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-medium ml-4 flex-shrink-0">
                                 Bekliyor
                             </span>
                         </div>
                         
                         <div class="bg-white/80 backdrop-blur-sm rounded-lg p-4 mb-4 border border-gray-200">
-                            <p class="text-gray-800 leading-relaxed">{{ tweet.tweet_data.tweet }}</p>
+                            <p class="text-gray-800 leading-relaxed">{{ tweet.tweet_data.tweet if tweet.tweet_data else tweet.content if tweet.content else 'Tweet metni bulunamadı' }}</p>
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 text-sm text-gray-600">
                             <div class="flex items-center space-x-2">
                                 <i class="fas fa-chart-line text-blue-500"></i>
-                                <span>Etki: <span class="font-medium">{{ tweet.tweet_data.impact_score or 'N/A' }}/10</span></span>
+                                <span>Etki: <span class="font-medium">{{ tweet.tweet_data.impact_score if tweet.tweet_data else 'N/A' }}/10</span></span>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <i class="fas fa-users text-green-500"></i>
-                                <span>Kitle: <span class="font-medium">{{ tweet.tweet_data.analysis.audience if tweet.tweet_data.analysis else 'Genel' }}</span></span>
+                                <span>Kitle: <span class="font-medium">{{ tweet.tweet_data.analysis.audience if tweet.tweet_data and tweet.tweet_data.analysis else 'Genel' }}</span></span>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <i class="fas fa-calendar-alt text-purple-500"></i>
-                                <span>Yayın: <span class="font-medium">{{ tweet.article.fetch_date[:10] if tweet.article.fetch_date else 'Tarih yok' }}</span></span>
+                                <span>Yayın: <span class="font-medium">{{ tweet.article.fetch_date[:10] if tweet.article and tweet.article.fetch_date else tweet.created_at[:10] if tweet.created_at else 'Tarih yok' }}</span></span>
                             </div>
                         </div>
                         
                         <!-- Haber Kaynağı Bilgisi -->
-                        {{ render_source_badge(tweet.article.source, tweet.article.source_id, tweet.article.url) }}
+                        {{ render_source_badge(tweet.article.source if tweet.article else tweet.source, tweet.article.source_id if tweet.article else None, tweet.article.url if tweet.article else None) }}
                         
                         {% if tweet.error_reason %}
                         <div class="mb-4 p-3 {% if 'rate limit' in tweet.error_reason.lower() %}bg-yellow-50 border border-yellow-200{% else %}bg-red-50 border border-red-200{% endif %} rounded-lg">
@@ -389,7 +389,7 @@
                                 <i class="fas fa-trash"></i>
                                 <span>Sil</span>
                             </button>
-                            <a href="{{ tweet.article.url }}" target="_blank" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium flex items-center space-x-2">
+                            <a href="{{ tweet.article.url if tweet.article else '#' }}" target="_blank" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium flex items-center space-x-2 {{ 'opacity-50 cursor-not-allowed' if not tweet.article or not tweet.article.url else '' }}">
                                 <i class="fas fa-external-link-alt"></i>
                                 <span>Makaleyi Oku</span>
                             </a>

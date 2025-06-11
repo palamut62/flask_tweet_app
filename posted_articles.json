@@ -581,5 +581,54 @@
     "deleted_date": "2025-06-10T16:07:03.160536",
     "tweet_text": "🤖🧠⚡ Breaking: Technology innovation #ArtificialIntelligence #MachineLearning #DeepLearning\n\n🔗 https://v.redd.it/1if2u1ra136f1",
     "deletion_reason": "Manuel olarak silindi"
+  },
+  {
+    "title": "OpenAI’s open model is delayed",
+    "url": "https://techcrunch.com/2025/06/10/openais-open-model-is-delayed/",
+    "hash": "b02a98bf9eac7e39e7723a123de72690",
+    "posted_date": "2025-06-11T09:56:20.331947",
+    "tweet_id": "1932693355235844143",
+    "tweet_url": "https://twitter.com/user/status/1932693355235844143",
+    "manual_post": false,
+    "post_method": "api"
+  },
+  {
+    "title": "AI storage platform Vast Data aimed for $25B valuation in new round, sources say",
+    "url": "https://techcrunch.com/2025/06/10/ai-storage-platform-vast-data-aimed-for-25b-valuation-in-new-round-sources-say/",
+    "hash": "ef65b9109a513fcef2fb1b8a7d2c3476",
+    "posted_date": "2025-06-11T09:56:35.513491",
+    "tweet_id": "1932693418787934336",
+    "tweet_url": "https://twitter.com/user/status/1932693418787934336",
+    "manual_post": false,
+    "post_method": "api"
+  },
+  {
+    "title": "Apple Intelligence: Everything you need to know about Apple’s AI model and services",
+    "url": "https://techcrunch.com/2025/06/10/apple-intelligence-everything-you-need-to-know-about-apples-ai-model-and-services/",
+    "hash": "c0c13666dc20a08125e9fac056eb9b58",
+    "posted_date": "2025-06-11T09:57:26.450452",
+    "tweet_id": "manual_1749625046",
+    "tweet_url": "https://x.com/search?q=%F0%9F%A4%96%F0%9F%A7%A0%E2%9A%A1%20Apple%20unveils%20Apple%20Intelligence%20integrates%20ge",
+    "manual_post": true,
+    "post_method": "manuel",
+    "tweet_text": "🤖🧠⚡ Apple unveils Apple Intelligence integrates generative AI into core apps like Messages and Mail, e... #ArtificialIntelligence #MachineLearning #DeepLearning\n\n🔗 https://techcrunch.com/2025/06/10/apple-intelligence-everything-you-need-to-know-about-apples-ai-model-and-services/",
+    "manual_posted_at": "2025-06-11T09:57:26.449445"
+  },
+  {
+    "title": "OpenAI releases o3-pro, a souped-up version of its o3 AI reasoning model",
+    "url": "https://techcrunch.com/2025/06/10/openai-releases-o3-pro-a-souped-up-version-of-its-o3-ai-reasoning-model/",
+    "content": "OpenAI haslaunchedo3-pro, an AI model that the company claims is its most capable yet.O3-pro is a version of OpenAI’so3, a reasoning model that the startup launched earlier this year. As opposed to conventional AI models, reasoning models work through problems step by step, enabling them to perform more reliably in domains like physics, math, and coding.O3-pro is available for ChatGPT Pro and Team users starting Tuesday, replacing theo1-promodel. Enterprise and Edu users will get access the week after, OpenAI says. O3-pro is also live in OpenAI’s developer API as of this afternoon.O3-pro is priced at $20 per million input tokens and $80 per million output tokens in the API. Input tokens are tokens fed into the model, while output tokens are tokens that the model generates based on the input tokens.A million input tokens is equivalent to about 750,000 words, a bit longer than “War and Peace.”OpenAI o3-pro is available in the model picker for Pro and Team users starting today, replacing OpenAI o1-pro.Enterprise and Edu users will get access the week after.As o3-pro uses the same underlying model as o3, full safety details can be found in the o3 system card.…— OpenAI (@OpenAI)June 10, 2025“In expert evaluations, reviewers consistently prefer o3-pro over o3 in every tested category and especially in key domains like science, education, programming, business, and writing help,” OpenAI writes in a changelog. “Reviewers also rated o3-pro consistently higher for clarity, comprehensiveness, instruction-following, and accuracy.”O3-pro has access to tools, according to OpenAI, allowing it to search the web, analyze files, reason about visual inputs, use Python, personalize its responses leveraging memory, and more. As a drawback, the model’s responses typically take longer than o1-pro to complete, according to OpenAI.Techcrunch eventSave $200+ on your TechCrunch All Stage passBuild smarter. Scale faster. Connect deeper. Join visionaries from Precursor Ventures, NEA, Index Vent",
+    "excerpt": "AIOpenAI releases o3-pro, a souped-up version of its o3 AI reasoning modelKyle Wiggers11 hours ago",
+    "date": "11 hours ago",
+    "hash": "ce1f77f12ac38fdadbc53f8d1b2e6457",
+    "source": "TechCrunch AI",
+    "source_id": "techcrunch_ai",
+    "fetch_date": "2025-06-11T09:54:30.405945",
+    "is_new": true,
+    "already_posted": false,
+    "deleted": true,
+    "deleted_date": "2025-06-11T09:57:45.661608",
+    "tweet_text": "🤖🧠⚡ Breaking: Technology innovation #ArtificialIntelligence #MachineLearning #DeepLearning\n\n🔗 https://techcrunch.com/2025/06/10/openai-releases-o3-pro-a-souped-up-version-of-its-o3-ai-reasoning-model/",
+    "deletion_reason": "Manuel olarak silindi"
   }
 ]

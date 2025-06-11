@@ -28,7 +28,8 @@ from utils import (
     get_automation_status, send_telegram_notification, test_telegram_connection,
     check_telegram_configuration, auto_detect_and_save_chat_id,
     setup_twitter_api, send_gmail_notification, test_gmail_connection,
-    check_gmail_configuration, get_rate_limit_info, terminal_log
+    check_gmail_configuration, get_rate_limit_info, terminal_log,
+    create_automatic_backup
 )
 
 app = Flask(__name__)
