@@ -16,10 +16,63 @@
             <h2 class="text-xl font-semibold text-gray-800 mb-4">📋 Paylaşılan Tweet</h2>
             
             <!-- Tweet İçeriği -->
-            <div class="bg-gray-50 rounded-lg p-4 mb-4 border-l-4 border-blue-500">
-                <p class="text-gray-800 whitespace-pre-wrap">{{ tweet.tweet_data.tweet }}</p>
+            <div class="bg-gray-50 rounded-lg p-4 mb-4 border-l-4 {% if is_github_tweet %}border-purple-500{% else %}border-blue-500{% endif %}">
+                <p class="text-gray-800 whitespace-pre-wrap">{% if is_github_tweet %}{{ tweet.content }}{% else %}{{ tweet.tweet_data.tweet }}{% endif %}</p>
             </div>
 
+            {% if is_github_tweet %}
+            <!-- GitHub Repo Bilgileri -->
+            <div class="bg-purple-50 rounded-lg p-4 mb-4">
+                <h3 class="font-semibold text-purple-800 mb-2">
+                    <i class="fab fa-github mr-2"></i>GitHub Repository Bilgileri
+                </h3>
+                <p class="text-purple-700 font-medium">{{ tweet.title }}</p>
+                <p class="text-purple-600 text-sm mt-1">{{ tweet.source }} - {{ tweet.created_at[:10] if tweet.created_at else 'Tarih yok' }}</p>
+                <a href="{{ tweet.url }}" target="_blank" class="text-purple-500 hover:text-purple-700 text-sm underline">
+                    🔗 Repository'yi Görüntüle
+                </a>
+                
+                <!-- GitHub Detayları -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 text-sm">
+                    {% if tweet.language %}
+                    <div>
+                        <span class="font-medium text-purple-700">Dil:</span>
+                        <span class="text-purple-600">{{ tweet.language }}</span>
+                    </div>
+                    {% endif %}
+                    {% if tweet.stars %}
+                    <div>
+                        <span class="font-medium text-purple-700">Yıldız:</span>
+                        <span class="text-purple-600">{{ tweet.stars }}</span>
+                    </div>
+                    {% endif %}
+                    {% if tweet.forks %}
+                    <div>
+                        <span class="font-medium text-purple-700">Fork:</span>
+                        <span class="text-purple-600">{{ tweet.forks }}</span>
+                    </div>
+                    {% endif %}
+                    {% if tweet.owner %}
+                    <div>
+                        <span class="font-medium text-purple-700">Sahip:</span>
+                        <span class="text-purple-600">{{ tweet.owner }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- GitHub Konuları -->
+                {% if tweet.topics %}
+                <div class="mt-4">
+                    <span class="font-medium text-purple-700">Konular:</span>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        {% for topic in tweet.topics[:5] %}
+                        <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">{{ topic }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
             <!-- Makale Bilgileri -->
             <div class="bg-blue-50 rounded-lg p-4 mb-4">
                 <h3 class="font-semibold text-blue-800 mb-2">📰 Makale Bilgileri</h3>
@@ -51,6 +104,7 @@
                     {% endif %}
                 </div>
             </div>
+            {% endif %}
             {% endif %}
         </div>
 

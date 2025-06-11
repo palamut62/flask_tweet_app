@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}GitHub Repoları - AI Tweet Bot{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Başlık ve İstatistikler -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                    <i class="fab fa-github text-gray-800 mr-3"></i>
+                    GitHub Repoları
+                </h1>
+                <p class="text-gray-600">Trend GitHub repolarını keşfedin ve tweet olarak paylaşın</p>
+            </div>
+            
+            <!-- GitHub API Test Butonu -->
+            <div class="mt-4 lg:mt-0">
+                <button onclick="testGitHubAPI()" class="btn-secondary mr-3">
+                    <i class="fas fa-flask mr-2"></i>
+                    API Test
+                </button>
+                <button onclick="showFetchModal()" class="btn-primary">
+                    <i class="fas fa-download mr-2"></i>
+                    Repo Çek
+                </button>
+            </div>
+        </div>
+        
+        <!-- İstatistik Kartları -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-4 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-100 text-sm">Toplam Repo</p>
+                        <p class="text-2xl font-bold">{{ stats.total_repos }}</p>
+                    </div>
+                    <i class="fab fa-github text-3xl text-blue-200"></i>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-4 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-green-100 text-sm">Bu Hafta</p>
+                        <p class="text-2xl font-bold">{{ stats.recent_repos }}</p>
+                    </div>
+                    <i class="fas fa-calendar-week text-3xl text-green-200"></i>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-4 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-purple-100 text-sm">Dil Çeşidi</p>
+                        <p class="text-2xl font-bold">{{ stats.languages|length }}</p>
+                    </div>
+                    <i class="fas fa-code text-3xl text-purple-200"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dil Dağılımı -->
+    {% if stats.languages %}
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">
+            <i class="fas fa-chart-pie text-purple-600 mr-2"></i>
+            Programlama Dili Dağılımı
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {% for language, count in stats.languages.items() %}
+            <div class="bg-gray-50 rounded-lg p-3 text-center">
+                <div class="text-lg font-bold text-gray-900">{{ count }}</div>
+                <div class="text-sm text-gray-600">{{ language }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Son GitHub Repoları -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">
+            <i class="fas fa-history text-blue-600 mr-2"></i>
+            Son Paylaşılan GitHub Repoları
+        </h2>
+        
+        {% if recent_repos %}
+        <div class="space-y-4">
+            {% for repo in recent_repos %}
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-3 mb-2">
+                            <h3 class="text-lg font-semibold text-gray-900">
+                                {{ repo.title }}
+                            </h3>
+                            {% if repo.repo_data and repo.repo_data.language %}
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                {{ repo.repo_data.language }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if repo.content %}
+                        <p class="text-gray-600 text-sm mb-2">{{ repo.content[:150] }}...</p>
+                        {% endif %}
+                        
+                        <div class="flex items-center space-x-4 text-sm text-gray-500">
+                            <span>
+                                <i class="fas fa-calendar mr-1"></i>
+                                {{ repo.posted_date[:10] if repo.posted_date else 'Bilinmiyor' }}
+                            </span>
+                            {% if repo.repo_data %}
+                            <span>
+                                <i class="fas fa-star mr-1"></i>
+                                {{ repo.repo_data.stars }} stars
+                            </span>
+                            <span>
+                                <i class="fas fa-code-branch mr-1"></i>
+                                {{ repo.repo_data.forks }} forks
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 lg:mt-0 lg:ml-4 flex space-x-2">
+                        <a href="{{ repo.url }}" target="_blank" class="btn-secondary text-sm">
+                            <i class="fab fa-github mr-1"></i>
+                            Repo
+                        </a>
+                        {% if repo.tweet_url %}
+                        <a href="{{ repo.tweet_url }}" target="_blank" class="btn-primary text-sm">
+                            <i class="fab fa-twitter mr-1"></i>
+                            Tweet
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+            <i class="fab fa-github text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg">Henüz GitHub repo paylaşılmamış</p>
+            <p class="text-gray-400 text-sm">Yeni repolar çekmek için "Repo Çek" butonunu kullanın</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- GitHub Repo Çekme Modal -->
+<div id="fetchModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-900">GitHub Repo Çek</h3>
+                <button onclick="closeFetchModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="fetchForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Programlama Dili
+                    </label>
+                    <select id="language" class="input-mobile w-full">
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="typescript">TypeScript</option>
+                        <option value="java">Java</option>
+                        <option value="go">Go</option>
+                        <option value="rust">Rust</option>
+                        <option value="cpp">C++</option>
+                        <option value="csharp">C#</option>
+                        <option value="php">PHP</option>
+                        <option value="ruby">Ruby</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Zaman Aralığı
+                    </label>
+                    <select id="timePeriod" class="input-mobile w-full">
+                        <option value="daily">Günlük</option>
+                        <option value="weekly" selected>Haftalık</option>
+                        <option value="monthly">Aylık</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Repo Sayısı
+                    </label>
+                    <input type="number" id="limit" value="10" min="1" max="20" class="input-mobile w-full">
+                </div>
+                
+                <div class="flex space-x-3 pt-4">
+                    <button type="button" onclick="closeFetchModal()" class="btn-secondary flex-1">
+                        İptal
+                    </button>
+                    <button type="submit" class="btn-primary flex-1">
+                        <i class="fas fa-download mr-2"></i>
+                        Çek
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showFetchModal() {
+    document.getElementById('fetchModal').classList.remove('hidden');
+}
+
+function closeFetchModal() {
+    document.getElementById('fetchModal').classList.add('hidden');
+}
+
+function testGitHubAPI() {
+    fetch('/test_github_api')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message, 'success');
+                console.log('Sample repos:', data.sample_repos);
+            } else {
+                showNotification('GitHub API Hatası: ' + data.error, 'error');
+            }
+        })
+        .catch(error => {
+            showNotification('Bağlantı hatası: ' + error, 'error');
+        });
+}
+
+document.getElementById('fetchForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const language = document.getElementById('language').value;
+    const timePeriod = document.getElementById('timePeriod').value;
+    const limit = document.getElementById('limit').value;
+    
+    // Loading state
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Çekiliyor...';
+    submitBtn.disabled = true;
+    
+    fetch('/fetch_github_repos', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            language: language,
+            time_period: timePeriod,
+            limit: parseInt(limit)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            closeFetchModal();
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showNotification('Hata: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Bağlantı hatası: ' + error, 'error');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+// Modal dışına tıklayınca kapat
+document.getElementById('fetchModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeFetchModal();
+    }
+});
+</script>
+{% endblock %} 

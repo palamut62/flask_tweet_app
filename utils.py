@@ -6487,4 +6487,404 @@ def fetch_article_content_with_mcp_only(url):
         print(f"❌ MCP makale içeriği çekme hatası ({url}): {e}")
         return None
 
-# ... existing code ...
+# GitHub MCP Modülü
+def fetch_trending_github_repos(language="python", time_period="daily", limit=10):
+    """GitHub'dan trend olan repoları çek"""
+    try:
+        terminal_log("🔍 GitHub trending repoları çekiliyor...", "info")
+        
+        # GitHub API endpoint'i
+        base_url = "https://api.github.com/search/repositories"
+        
+        # Tarih hesaplama
+        if time_period == "daily":
+            since_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+        elif time_period == "weekly":
+            since_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+        else:  # monthly
+            since_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+        
+        # Arama parametreleri
+        params = {
+            "q": f"language:{language} created:>{since_date}",
+            "sort": "stars",
+            "order": "desc",
+            "per_page": limit
+        }
+        
+        headers = {
+            "Accept": "application/vnd.github.v3+json",
+            "User-Agent": "AI-Tweet-Bot/1.0"
+        }
+        
+        # GitHub token varsa ekle
+        github_token = os.environ.get('GITHUB_TOKEN')
+        if github_token:
+            headers["Authorization"] = f"token {github_token}"
+        
+        response = requests.get(base_url, params=params, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        data = response.json()
+        repos = []
+        
+        for repo in data.get("items", []):
+            repo_data = {
+                "id": repo["id"],
+                "name": repo["name"],
+                "full_name": repo["full_name"],
+                "description": repo.get("description", ""),
+                "url": repo["html_url"],
+                "stars": repo["stargazers_count"],
+                "forks": repo["forks_count"],
+                "language": repo.get("language", ""),
+                "created_at": repo["created_at"],
+                "updated_at": repo["updated_at"],
+                "owner": {
+                    "login": repo["owner"]["login"],
+                    "avatar_url": repo["owner"]["avatar_url"]
+                },
+                "topics": repo.get("topics", []),
+                "license": repo.get("license", {}).get("name", "") if repo.get("license") else "",
+                "open_issues": repo.get("open_issues_count", 0),
+                "watchers": repo.get("watchers_count", 0)
+            }
+            repos.append(repo_data)
+        
+        terminal_log(f"✅ {len(repos)} GitHub repo çekildi", "success")
+        return repos
+        
+    except requests.exceptions.RequestException as e:
+        terminal_log(f"❌ GitHub API hatası: {e}", "error")
+        return []
+    except Exception as e:
+        terminal_log(f"❌ GitHub repo çekme hatası: {e}", "error")
+        return []
+
+def fetch_github_repo_details_with_mcp(repo_url):
+    """MCP ile GitHub repo detaylarını çek"""
+    try:
+        terminal_log(f"🔍 GitHub repo detayları çekiliyor: {repo_url}", "info")
+        
+        # MCP ile repo sayfasını çek
+        scrape_result = mcp_firecrawl_scrape({
+            "url": repo_url,
+            "formats": ["markdown"],
+            "onlyMainContent": True,
+            "waitFor": 2000
+        })
+        
+        if not scrape_result.get("success", False):
+            terminal_log("⚠️ MCP ile repo çekilemedi, fallback yönteme geçiliyor...", "warning")
+            return fetch_github_repo_details_fallback(repo_url)
+        
+        content = scrape_result.get("markdown", "")
+        
+        # README içeriğini çıkar
+        readme_content = ""
+        if "README" in content:
+            readme_start = content.find("README")
+            if readme_start != -1:
+                readme_content = content[readme_start:readme_start+2000]  # İlk 2000 karakter
+        
+        terminal_log("✅ GitHub repo detayları MCP ile çekildi", "success")
+        return {
+            "success": True,
+            "content": content,
+            "readme": readme_content,
+            "method": "mcp"
+        }
+        
+    except Exception as e:
+        terminal_log(f"❌ MCP GitHub repo detay hatası: {e}", "error")
+        return fetch_github_repo_details_fallback(repo_url)
+
+def fetch_github_repo_details_fallback(repo_url):
+    """Fallback yöntemi ile GitHub repo detaylarını çek"""
+    try:
+        terminal_log(f"🔄 Fallback ile GitHub repo detayları çekiliyor: {repo_url}", "info")
+        
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        }
+        
+        response = requests.get(repo_url, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # README içeriğini çıkar
+        readme_element = soup.find('article', class_='markdown-body')
+        readme_content = ""
+        if readme_element:
+            readme_content = readme_element.get_text(strip=True)[:2000]
+        
+        # Repo açıklamasını çıkar
+        description_element = soup.find('p', class_='f4')
+        description = ""
+        if description_element:
+            description = description_element.get_text(strip=True)
+        
+        content = f"Repository: {repo_url}\n"
+        if description:
+            content += f"Description: {description}\n"
+        if readme_content:
+            content += f"README: {readme_content}\n"
+        
+        terminal_log("✅ GitHub repo detayları fallback ile çekildi", "success")
+        return {
+            "success": True,
+            "content": content,
+            "readme": readme_content,
+            "description": description,
+            "method": "fallback"
+        }
+        
+    except Exception as e:
+        terminal_log(f"❌ Fallback GitHub repo detay hatası: {e}", "error")
+        return {
+            "success": False,
+            "error": str(e),
+            "method": "fallback"
+        }
+
+def generate_github_tweet(repo_data, api_key):
+    """GitHub repo için AI tweet oluştur"""
+    try:
+        terminal_log(f"🤖 GitHub repo için tweet oluşturuluyor: {repo_data['name']}", "info")
+        
+        # Repo detaylarını çek
+        repo_details = fetch_github_repo_details_with_mcp(repo_data["url"])
+        
+        # Tweet için prompt hazırla
+        prompt = f"""
+        GitHub Repository Tweet Oluştur:
+        
+        Repo Bilgileri:
+        - İsim: {repo_data['name']}
+        - Açıklama: {repo_data['description']}
+        - Dil: {repo_data['language']}
+        - Yıldız: {repo_data['stars']}
+        - Fork: {repo_data['forks']}
+        - Konular: {', '.join(repo_data['topics'][:5])}
+        - Sahip: {repo_data['owner']['login']}
+        - URL: {repo_data['url']}
+        
+        README İçeriği:
+        {repo_details.get('readme', '')[:1000]}
+        
+        Lütfen bu GitHub repository için:
+        1. Türkçe bir tweet yazın (280 karakter sınırı)
+        2. Repo'nun öne çıkan özelliklerini vurgulayın
+        3. Geliştiriciler için neden ilginç olduğunu açıklayın
+        4. Uygun hashtag'ler ekleyin (#GitHub #OpenSource #Programming)
+        5. Emoji kullanarak görsel çekicilik katın
+        
+        Tweet formatı:
+        [Tweet metni]
+        
+        [Hashtag'ler]
+        
+        URL: {repo_data['url']}
+        """
+        
+        # Gemini API ile tweet oluştur
+        tweet_response = gemini_call(prompt, api_key, max_tokens=200)
+        
+        if not tweet_response:
+            # Fallback tweet
+            tweet_text = create_fallback_github_tweet(repo_data)
+        else:
+            tweet_text = tweet_response.strip()
+        
+        # Tweet'i temizle ve formatla
+        if len(tweet_text) > 280:
+            tweet_text = tweet_text[:277] + "..."
+        
+        terminal_log("✅ GitHub tweet oluşturuldu", "success")
+        
+        return {
+            "success": True,
+            "tweet": tweet_text,
+            "repo_data": repo_data,
+            "repo_details": repo_details
+        }
+        
+    except Exception as e:
+        terminal_log(f"❌ GitHub tweet oluşturma hatası: {e}", "error")
+        
+        # Fallback tweet
+        tweet_text = create_fallback_github_tweet(repo_data)
+        
+        return {
+            "success": False,
+            "tweet": tweet_text,
+            "repo_data": repo_data,
+            "error": str(e)
+        }
+
+def create_fallback_github_tweet(repo_data):
+    """GitHub repo için basit fallback tweet"""
+    try:
+        name = repo_data.get('name', 'Unknown')
+        description = repo_data.get('description', '')[:100]
+        language = repo_data.get('language', '')
+        stars = repo_data.get('stars', 0)
+        url = repo_data.get('url', '')
+        
+        # Basit tweet formatı
+        tweet = f"🚀 {name}\n"
+        
+        if description:
+            tweet += f"{description}\n"
+        
+        if language:
+            tweet += f"💻 {language} "
+        
+        if stars > 0:
+            tweet += f"⭐ {stars} stars"
+        
+        tweet += f"\n\n#GitHub #OpenSource #Programming"
+        
+        if language:
+            tweet += f" #{language}"
+        
+        tweet += f"\n\n{url}"
+        
+        # 280 karakter sınırı
+        if len(tweet) > 280:
+            tweet = tweet[:277] + "..."
+        
+        return tweet
+        
+    except Exception as e:
+        return f"🚀 Yeni GitHub projesi keşfedildi!\n\n#GitHub #OpenSource #Programming\n\n{repo_data.get('url', '')}"
+
+def fetch_github_articles_for_tweets():
+    """Tweet için GitHub repolarını çek ve işle"""
+    try:
+        terminal_log("🔍 GitHub repoları tweet için çekiliyor...", "info")
+        
+        # Farklı dillerde trend repoları çek
+        languages = ["python", "javascript", "typescript", "go", "rust", "java"]
+        all_repos = []
+        
+        for language in languages[:3]:  # İlk 3 dil
+            repos = fetch_trending_github_repos(language=language, time_period="weekly", limit=5)
+            all_repos.extend(repos)
+        
+        if not all_repos:
+            terminal_log("❌ GitHub repo bulunamadı", "warning")
+            return []
+        
+        # Mevcut paylaşılan repoları kontrol et
+        posted_articles = load_json(HISTORY_FILE)
+        posted_urls = [article.get('url', '') for article in posted_articles]
+        
+        # Yeni repoları filtrele
+        new_repos = []
+        for repo in all_repos:
+            if repo['url'] not in posted_urls:
+                new_repos.append(repo)
+        
+        terminal_log(f"✅ {len(new_repos)} yeni GitHub repo bulundu", "success")
+        
+        # Tweet formatına dönüştür
+        github_articles = []
+        for repo in new_repos[:5]:  # İlk 5 repo
+            article = {
+                "title": f"{repo['name']} - {repo['description'][:100]}",
+                "url": repo['url'],
+                "content": f"GitHub Repository: {repo['full_name']}\n"
+                          f"Description: {repo['description']}\n"
+                          f"Language: {repo['language']}\n"
+                          f"Stars: {repo['stars']}\n"
+                          f"Forks: {repo['forks']}\n"
+                          f"Topics: {', '.join(repo['topics'][:5])}",
+                "source": "GitHub",
+                "published_date": repo['created_at'],
+                "hash": hashlib.md5(repo['url'].encode()).hexdigest(),
+                "repo_data": repo
+            }
+            github_articles.append(article)
+        
+        terminal_log(f"✅ {len(github_articles)} GitHub makalesi hazırlandı", "success")
+        return github_articles
+        
+    except Exception as e:
+        terminal_log(f"❌ GitHub makalesi çekme hatası: {e}", "error")
+        return []
+
+def save_github_repo_history(repo_data, tweet_result):
+    """GitHub repo paylaşım geçmişini kaydet"""
+    try:
+        # Mevcut geçmişi yükle
+        posted_articles = load_json(HISTORY_FILE)
+        
+        # Yeni kayıt oluştur
+        new_record = {
+            "title": f"{repo_data['name']} - GitHub Repository",
+            "url": repo_data['url'],
+            "content": repo_data.get('description', ''),
+            "source": "GitHub",
+            "published_date": repo_data.get('created_at', datetime.now().isoformat()),
+            "posted_date": datetime.now().isoformat(),
+            "hash": hashlib.md5(repo_data['url'].encode()).hexdigest(),
+            "tweet_id": tweet_result.get('tweet_id'),
+            "tweet_url": tweet_result.get('tweet_url', ''),
+            "repo_data": repo_data,
+            "type": "github_repo"
+        }
+        
+        # Listeye ekle
+        posted_articles.append(new_record)
+        
+        # Kaydet
+        save_json(HISTORY_FILE, posted_articles)
+        
+        terminal_log(f"✅ GitHub repo geçmişi kaydedildi: {repo_data['name']}", "success")
+        
+    except Exception as e:
+        terminal_log(f"❌ GitHub repo geçmişi kaydetme hatası: {e}", "error")
+
+def get_github_stats():
+    """GitHub modülü istatistiklerini getir"""
+    try:
+        posted_articles = load_json(HISTORY_FILE)
+        
+        # GitHub repolarını filtrele
+        github_repos = [article for article in posted_articles if article.get('type') == 'github_repo']
+        
+        # İstatistikleri hesapla
+        total_repos = len(github_repos)
+        
+        # Dil dağılımı
+        languages = {}
+        for repo in github_repos:
+            repo_data = repo.get('repo_data', {})
+            lang = repo_data.get('language', 'Unknown')
+            languages[lang] = languages.get(lang, 0) + 1
+        
+        # Son 7 günde paylaşılan
+        week_ago = datetime.now() - timedelta(days=7)
+        recent_repos = [
+            repo for repo in github_repos 
+            if datetime.fromisoformat(repo.get('posted_date', '2020-01-01')) > week_ago
+        ]
+        
+        return {
+            "total_repos": total_repos,
+            "recent_repos": len(recent_repos),
+            "languages": languages,
+            "last_repo": github_repos[-1] if github_repos else None
+        }
+        
+    except Exception as e:
+        terminal_log(f"❌ GitHub istatistik hatası: {e}", "error")
+        return {
+            "total_repos": 0,
+            "recent_repos": 0,
+            "languages": {},
+            "last_repo": None
+        }

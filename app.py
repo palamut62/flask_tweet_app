@@ -13,6 +13,7 @@ import random
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from bs4 import BeautifulSoup
+import hashlib
 
 # .env dosyasını yükle
 load_dotenv()
@@ -31,6 +32,16 @@ from utils import (
     check_gmail_configuration, get_rate_limit_info, terminal_log,
     create_automatic_backup
 )
+
+# GitHub modülünü import et
+try:
+    from github_module import (
+        fetch_trending_github_repos, create_fallback_github_tweet, generate_github_tweet
+    )
+    GITHUB_MODULE_AVAILABLE = True
+except ImportError:
+    GITHUB_MODULE_AVAILABLE = False
+    terminal_log("⚠️ GitHub modülü yüklenemedi", "warning")
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
@@ -243,7 +254,7 @@ EMAIL_SETTINGS = {
 
 # Terminal log sistemi için global değişkenler
 import queue
-log_queue = queue.Queue(maxsize=100)
+log_queue = queue.Queue(maxsize=1000)
 
 
 
@@ -259,19 +270,42 @@ def index():
         # Silinmiş tweetleri filtrele - sadece gerçekten paylaşılan tweetleri göster
         articles = [article for article in all_articles if not article.get('deleted', False)]
         
+        # Tweet'leri kaynak türüne göre ayır ve sırala
+        news_tweets = []
+        github_tweets = []
+        
+        for tweet in pending_tweets:
+            if tweet.get('source_type') == 'github':
+                github_tweets.append(tweet)
+            else:
+                news_tweets.append(tweet)
+        
+        # Tarihe göre sırala (en yeni önce)
+        news_tweets.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        github_tweets.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        
+        # Tüm tweet'leri birleştir (GitHub tweet'leri önce)
+        all_pending_tweets = github_tweets + news_tweets
+        
         stats = get_data_statistics()
         automation_status = get_automation_status()
+        
+        # Kaynak türü istatistikleri
+        news_count = len(news_tweets)
+        github_count = len(github_tweets)
         
         # Debug için istatistikleri logla (güvenli)
         from utils import safe_log
         safe_log(f"Ana sayfa istatistikleri: {stats}", "DEBUG")
         safe_log(f"Toplam makale: {len(all_articles)}, Gösterilen: {len(articles)}, Silinmiş: {len(all_articles) - len(articles)}", "DEBUG")
+        safe_log(f"Bekleyen tweet'ler: {len(all_pending_tweets)} ({news_count} haber, {github_count} GitHub)", "DEBUG")
         
         # API durumunu kontrol et (ana sayfa için basit kontrol)
         api_check = {
             "google_api_available": bool(os.environ.get('GOOGLE_API_KEY')),
             "twitter_api_available": bool(os.environ.get('TWITTER_BEARER_TOKEN') and os.environ.get('TWITTER_API_KEY')),
-            "telegram_available": bool(os.environ.get('TELEGRAM_BOT_TOKEN'))
+            "telegram_available": bool(os.environ.get('TELEGRAM_BOT_TOKEN')),
+            "github_available": GITHUB_MODULE_AVAILABLE and bool(os.environ.get('GITHUB_TOKEN'))
         }
         
         # Ayarları yükle
@@ -279,12 +313,14 @@ def index():
         
         return render_template('index.html', 
                              articles=articles[-10:], 
-                             pending_tweets=pending_tweets,
+                             pending_tweets=all_pending_tweets,
                              stats=stats,
                              automation_status=automation_status,
                              api_check=api_check,
                              settings=settings,
-                             last_check=last_check_time)
+                             last_check=last_check_time,
+                             news_count=news_count,
+                             github_count=github_count)
     except Exception as e:
         from utils import safe_log
         safe_log(f"Ana sayfa hatası: {str(e)}", "ERROR")
@@ -295,7 +331,9 @@ def index():
                              automation_status={},
                              api_check={},
                              settings={},
-                             error=str(e))
+                             error=str(e),
+                             news_count=0,
+                             github_count=0)
 
 @app.route('/check_articles')
 @login_required
@@ -613,37 +651,71 @@ def post_tweet_route():
         # Pending tweet'i bul
         pending_tweets = load_json("pending_tweets.json")
         tweet_to_post = None
+        tweet_index = None
         
         for i, pending in enumerate(pending_tweets):
-            if str(i) == str(tweet_id):
+            if str(pending.get('id', i)) == str(tweet_id):
                 tweet_to_post = pending
+                tweet_index = i
                 break
         
         if not tweet_to_post:
             return jsonify({"success": False, "error": "Tweet bulunamadı"})
         
         # Tweet'i paylaş
-        tweet_result = post_tweet(
-            tweet_to_post['tweet_data']['tweet'], 
-            tweet_to_post['article']['title']
-        )
+        tweet_text = tweet_to_post.get('content', '')
+        title = tweet_to_post.get('title', '')
+        
+        tweet_result = post_tweet(tweet_text, title)
         
         if tweet_result.get('success'):
-            # Başarılı paylaşım
-            mark_article_as_posted(tweet_to_post['article'], tweet_result)
+            # Başarılı paylaşım - posted_articles.json'a ekle
+            article_data = {
+                "title": title,
+                "url": tweet_to_post.get('url', ''),
+                "content": tweet_text,
+                "source": tweet_to_post.get('source', ''),
+                "source_type": tweet_to_post.get('source_type', 'news'),
+                "published_date": tweet_to_post.get('created_at', datetime.now().isoformat()),
+                "posted_date": datetime.now().isoformat(),
+                "hash": tweet_to_post.get('hash', ''),
+                "tweet_id": tweet_result.get('tweet_id', ''),
+                "tweet_url": tweet_result.get('tweet_url', ''),
+                "is_posted": True
+            }
+            
+            # GitHub repo ise ek bilgileri ekle
+            if tweet_to_post.get('source_type') == 'github':
+                article_data.update({
+                    "type": "github_repo",
+                    "repo_data": tweet_to_post.get('repo_data', {}),
+                    "language": tweet_to_post.get('language', ''),
+                    "stars": tweet_to_post.get('stars', 0),
+                    "forks": tweet_to_post.get('forks', 0),
+                    "owner": tweet_to_post.get('owner', ''),
+                    "topics": tweet_to_post.get('topics', [])
+                })
+            
+            # Posted articles'a ekle
+            posted_articles = load_json("posted_articles.json")
+            posted_articles.append(article_data)
+            save_json("posted_articles.json", posted_articles)
             
             # Pending listesinden kaldır
-            pending_tweets = [p for i, p in enumerate(pending_tweets) if str(i) != str(tweet_id)]
-            save_json("pending_tweets.json", pending_tweets)
+            if tweet_index is not None:
+                pending_tweets.pop(tweet_index)
+                save_json("pending_tweets.json", pending_tweets)
             
             # Telegram bildirimi
             settings = load_automation_settings()
             if settings.get('telegram_notifications', False):
                 send_telegram_notification(
-                    f"✅ Tweet manuel olarak paylaşıldı!\n\n{tweet_to_post['tweet_data']['tweet'][:100]}...",
+                    f"✅ Tweet manuel olarak paylaşıldı!\n\n{tweet_text[:100]}...",
                     tweet_result.get('tweet_url', ''),
-                    tweet_to_post['article']['title']
+                    title
                 )
+            
+            terminal_log(f"✅ Tweet başarıyla paylaşıldı: {title[:50]}...", "success")
             
             return jsonify({
                 "success": True, 
@@ -651,12 +723,18 @@ def post_tweet_route():
                 "tweet_url": tweet_result.get('tweet_url', '')
             })
         else:
+            # Rate limit kontrolü
+            error_msg = tweet_result.get('error', 'Bilinmeyen hata')
+            is_rate_limited = 'rate limit' in error_msg.lower() or 'too many requests' in error_msg.lower()
+            
             return jsonify({
                 "success": False, 
-                "error": tweet_result.get('error', 'Bilinmeyen hata')
+                "error": error_msg,
+                "rate_limited": is_rate_limited
             })
             
     except Exception as e:
+        terminal_log(f"❌ Tweet paylaşım hatası: {e}", "error")
         return jsonify({"success": False, "error": str(e)})
 
 @app.route('/delete_tweet', methods=['POST'])
@@ -673,34 +751,60 @@ def delete_tweet_route():
         # Pending tweet'i bul
         pending_tweets = load_json("pending_tweets.json")
         deleted_tweet = None
+        tweet_index = None
         
         for i, pending in enumerate(pending_tweets):
-            if str(i) == str(tweet_id):
+            if str(pending.get('id', i)) == str(tweet_id):
                 deleted_tweet = pending
+                tweet_index = i
                 break
         
         if deleted_tweet:
             # Makaleyi "silindi" olarak işaretle
-            article = deleted_tweet['article']
-            article['deleted'] = True
-            article['deleted_date'] = datetime.now().isoformat()
-            article['tweet_text'] = deleted_tweet['tweet_data']['tweet']
-            article['deletion_reason'] = 'Manuel olarak silindi'
+            article_data = {
+                "title": deleted_tweet.get('title', ''),
+                "url": deleted_tweet.get('url', ''),
+                "content": deleted_tweet.get('content', ''),
+                "source": deleted_tweet.get('source', ''),
+                "source_type": deleted_tweet.get('source_type', 'news'),
+                "published_date": deleted_tweet.get('created_at', datetime.now().isoformat()),
+                "posted_date": datetime.now().isoformat(),
+                "hash": deleted_tweet.get('hash', ''),
+                "deleted": True,
+                "deleted_date": datetime.now().isoformat(),
+                "tweet_text": deleted_tweet.get('content', ''),
+                "deletion_reason": 'Manuel olarak silindi',
+                "is_posted": False
+            }
+            
+            # GitHub repo ise ek bilgileri ekle
+            if deleted_tweet.get('source_type') == 'github':
+                article_data.update({
+                    "type": "github_repo",
+                    "repo_data": deleted_tweet.get('repo_data', {}),
+                    "language": deleted_tweet.get('language', ''),
+                    "stars": deleted_tweet.get('stars', 0),
+                    "forks": deleted_tweet.get('forks', 0),
+                    "owner": deleted_tweet.get('owner', ''),
+                    "topics": deleted_tweet.get('topics', [])
+                })
             
             # Posted articles'a "silindi" olarak ekle
             posted_articles = load_json("posted_articles.json")
-            posted_articles.append(article)
+            posted_articles.append(article_data)
             save_json("posted_articles.json", posted_articles)
             
-            terminal_log(f"📝 Makale silindi olarak işaretlendi: {article.get('title', '')[:50]}...", "info")
+            terminal_log(f"📝 Tweet silindi olarak işaretlendi: {article_data.get('title', '')[:50]}...", "info")
         
         # Pending listesinden kaldır
-        pending_tweets = [p for i, p in enumerate(pending_tweets) if str(i) != str(tweet_id)]
-        save_json("pending_tweets.json", pending_tweets)
+        if tweet_index is not None:
+            pending_tweets.pop(tweet_index)
+            save_json("pending_tweets.json", pending_tweets)
         
         return jsonify({"success": True, "message": "Tweet silindi ve makale bir daha gösterilmeyecek"})
         
     except Exception as e:
+        terminal_log(f"❌ Tweet silme hatası: {e}", "error")
         return jsonify({"success": False, "error": str(e)})
 
 @app.route('/manual_post_tweet', methods=['POST'])
@@ -720,7 +824,7 @@ def manual_post_tweet_route():
         tweet_index = None
         
         for i, pending in enumerate(pending_tweets):
-            if str(i) == str(tweet_id):
+            if str(pending.get('id', i)) == str(tweet_id):
                 tweet_to_post = pending
                 tweet_index = i
                 break
@@ -729,8 +833,8 @@ def manual_post_tweet_route():
             return jsonify({"success": False, "error": "Tweet bulunamadı"})
         
         # Tweet metnini ve URL'yi hazırla
-        tweet_text = tweet_to_post['tweet_data']['tweet']
-        article_url = tweet_to_post['article'].get('url', '')
+        tweet_text = tweet_to_post.get('content', '')
+        article_url = tweet_to_post.get('url', '')
         
         # X.com paylaşım URL'si oluştur
         import urllib.parse
@@ -743,7 +847,7 @@ def manual_post_tweet_route():
             "x_share_url": x_share_url,
             "article_url": article_url,
             "tweet_index": tweet_index,
-            "article_title": tweet_to_post['article'].get('title', '')
+            "article_title": tweet_to_post.get('title', '')
         })
         
     except Exception as e:
@@ -775,12 +879,14 @@ def confirm_manual_post():
         # Pending tweet'i bul
         pending_tweets = load_json("pending_tweets.json")
         tweet_to_post = None
+        tweet_index = None
         
-        if tweet_id >= len(pending_tweets) or tweet_id < 0:
-            safe_log(f"Tweet ID aralık dışı: {tweet_id}, Toplam: {len(pending_tweets)}", "ERROR")
-            return jsonify({"success": False, "error": "Tweet bulunamadı"})
-        
-        tweet_to_post = pending_tweets[tweet_id]
+        # Tweet ID'ye göre tweet'i ara
+        for i, tweet in enumerate(pending_tweets):
+            if tweet.get('id') == tweet_id:
+                tweet_to_post = tweet
+                tweet_index = i
+                break
         
         if not tweet_to_post:
             safe_log(f"Tweet bulunamadı - ID: {tweet_id}", "ERROR")
@@ -789,33 +895,94 @@ def confirm_manual_post():
         # Manuel paylaşım olarak işaretle ve kaydet
         from datetime import datetime
         import urllib.parse
+        
+        # Tweet içeriğini al (GitHub vs normal tweet)
+        tweet_content = ""
+        if 'tweet_data' in tweet_to_post and 'tweet' in tweet_to_post['tweet_data']:
+            tweet_content = tweet_to_post['tweet_data']['tweet']
+        elif 'content' in tweet_to_post:
+            tweet_content = tweet_to_post['content']
+        else:
+            tweet_content = tweet_to_post.get('title', 'Tweet içeriği bulunamadı')
+        
         manual_tweet_result = {
             "success": True,
             "tweet_id": f"manual_{int(datetime.now().timestamp())}",
-            "url": f"https://x.com/search?q={urllib.parse.quote(tweet_to_post['tweet_data']['tweet'][:50])}",
+            "url": f"https://x.com/search?q={urllib.parse.quote(tweet_content[:50])}",
             "manual_post": True,
             "posted_at": datetime.now().isoformat()
         }
         
-        # Tweet metnini article data'ya ekle (manuel paylaşım için)
-        tweet_to_post['article']['tweet_text'] = tweet_to_post['tweet_data']['tweet']
-        
-        # Makaleyi paylaşıldı olarak işaretle
-        mark_article_as_posted(tweet_to_post['article'], manual_tweet_result)
+        # Tweet türüne göre işlem yap
+        if 'article' in tweet_to_post:
+            # Normal makale tweet'i
+            tweet_to_post['article']['tweet_text'] = tweet_to_post['tweet_data']['tweet']
+            mark_article_as_posted(tweet_to_post['article'], manual_tweet_result)
+        else:
+            # GitHub repo tweet'i veya diğer türler
+            posted_articles = load_json('posted_articles.json')
+            
+            # Tweet verilerini posted article formatına çevir
+            posted_article = {
+                "title": tweet_to_post.get('title', ''),
+                "url": tweet_to_post.get('url', ''),
+                "content": tweet_to_post.get('content', ''),
+                "source": tweet_to_post.get('source', ''),
+                "source_type": tweet_to_post.get('source_type', 'article'),
+                "posted_date": datetime.now().isoformat(),
+                "tweet_content": tweet_to_post.get('content', ''),
+                "manual_post": True,
+                "confirmed_at": datetime.now().isoformat(),
+                "type": tweet_to_post.get('source_type', 'article')
+            }
+            
+            # GitHub repo için ek veriler
+            if tweet_to_post.get('source_type') == 'github':
+                posted_article.update({
+                    "repo_data": tweet_to_post.get('repo_data', {}),
+                    "language": tweet_to_post.get('language', ''),
+                    "stars": tweet_to_post.get('stars', 0),
+                    "forks": tweet_to_post.get('forks', 0),
+                    "owner": tweet_to_post.get('owner', ''),
+                    "topics": tweet_to_post.get('topics', [])
+                })
+            
+            posted_articles.append(posted_article)
+            save_json('posted_articles.json', posted_articles)
         
         # Pending listesinden kaldır
-        pending_tweets.pop(tweet_id)  # Index'e göre direkt kaldır
-        save_json("pending_tweets.json", pending_tweets)
+        if tweet_index is not None:
+            pending_tweets.pop(tweet_index)  # Index'e göre direkt kaldır
+            save_json("pending_tweets.json", pending_tweets)
         
         safe_log(f"Tweet başarıyla onaylandı ve kaldırıldı - ID: {tweet_id}", "INFO")
         
-        # Telegram bildirimi
+        # Bildirimler (Telegram ve Gmail)
         settings = load_automation_settings()
+        
+        # Tweet başlığını al
+        tweet_title = ""
+        if 'article' in tweet_to_post and 'title' in tweet_to_post['article']:
+            tweet_title = tweet_to_post['article']['title']
+        elif 'title' in tweet_to_post:
+            tweet_title = tweet_to_post['title']
+        else:
+            tweet_title = "Tweet"
+        
+        # Telegram bildirimi
         if settings.get('telegram_notifications', False):
             send_telegram_notification(
-                f"✅ Tweet manuel olarak X'te paylaşıldı!\n\n{tweet_to_post['tweet_data']['tweet'][:100]}...",
+                f"✅ Tweet manuel olarak X'te paylaşıldı!\n\n{tweet_content[:100]}...",
                 manual_tweet_result.get('url', ''),
-                tweet_to_post['article']['title']
+                tweet_title
+            )
+        
+        # Gmail bildirimi
+        if settings.get('email_notifications', False):
+            send_gmail_notification(
+                f"✅ Tweet manuel olarak X'te paylaşıldı!\n\n{tweet_content[:100]}...",
+                manual_tweet_result.get('url', ''),
+                tweet_title
             )
         
         return jsonify({
@@ -1582,16 +1749,31 @@ def manual_post_confirmation(tweet_id):
         # Pending tweet'i bul
         pending_tweets = load_json("pending_tweets.json")
         
-        if tweet_id >= len(pending_tweets):
+        # Tweet ID'yi pending tweets listesinde ara
+        tweet_to_confirm = None
+        actual_index = None
+        
+        for i, tweet in enumerate(pending_tweets):
+            if tweet.get('id') == tweet_id:
+                tweet_to_confirm = tweet
+                actual_index = i
+                break
+        
+        if not tweet_to_confirm:
+            flash('Tweet bulunamadı!', 'error')
             return redirect(url_for('index'))
         
-        tweet_to_confirm = pending_tweets[tweet_id]
+        # Tweet türünü belirle
+        is_github_tweet = tweet_to_confirm.get('source_type') == 'github'
         
         return render_template('manual_confirmation.html', 
                              tweet=tweet_to_confirm, 
-                             tweet_id=tweet_id)
+                             tweet_id=tweet_id,
+                             actual_index=actual_index,
+                             is_github_tweet=is_github_tweet)
         
     except Exception as e:
+        flash(f'Manuel onay sayfası hatası: {str(e)}', 'error')
         return redirect(url_for('index'))
 
 # =============================================================================
@@ -2646,6 +2828,204 @@ def restore_deleted_tweet():
         else:
             return jsonify({"success": False, "error": "Silinmiş tweet bulunamadı"})
         
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+# GitHub Modülü Route'ları
+@app.route('/github_repos')
+@login_required
+def github_repos():
+    """GitHub repoları sayfası"""
+    try:
+        if not GITHUB_MODULE_AVAILABLE:
+            flash('GitHub modülü kullanılamıyor!', 'error')
+            return redirect(url_for('index'))
+        
+        # Mevcut GitHub repo verilerini yükle
+        posted_articles = load_json("posted_articles.json")
+        github_repos = [article for article in posted_articles if article.get('type') == 'github_repo']
+        
+        # Son 10 GitHub repo'yu göster
+        recent_repos = github_repos[-10:] if github_repos else []
+        recent_repos.reverse()  # En yeni önce
+        
+        # İstatistikler
+        stats = {
+            'total_repos': len(github_repos),
+            'recent_repos': len([repo for repo in github_repos 
+                               if datetime.fromisoformat(repo.get('posted_date', '2020-01-01')) > 
+                               datetime.now() - timedelta(days=7)]),
+            'languages': {}
+        }
+        
+        # Dil dağılımı
+        for repo in github_repos:
+            repo_data = repo.get('repo_data', {})
+            lang = repo_data.get('language', 'Unknown')
+            stats['languages'][lang] = stats['languages'].get(lang, 0) + 1
+        
+        return render_template('github_repos.html', 
+                             recent_repos=recent_repos,
+                             stats=stats)
+                             
+    except Exception as e:
+        terminal_log(f"❌ GitHub repos sayfası hatası: {e}", "error")
+        flash(f'GitHub repos sayfası hatası: {str(e)}', 'error')
+        return redirect(url_for('index'))
+
+@app.route('/fetch_github_repos', methods=['POST'])
+@login_required
+def fetch_github_repos():
+    """GitHub repolarını çek ve tweet'ler oluştur"""
+    try:
+        if not GITHUB_MODULE_AVAILABLE:
+            return jsonify({"success": False, "error": "GitHub modülü kullanılamıyor"})
+        
+        data = request.get_json()
+        language = data.get('language', 'python')
+        time_period = data.get('time_period', 'weekly')
+        limit = min(int(data.get('limit', 10)), 20)  # Maksimum 20
+        
+        terminal_log(f"🔍 GitHub repoları çekiliyor: {language}, {time_period}, limit: {limit}", "info")
+        
+        # GitHub API'den repoları çek
+        repos = fetch_trending_github_repos(language=language, time_period=time_period, limit=limit)
+        
+        if not repos:
+            return jsonify({"success": False, "error": "GitHub repo bulunamadı"})
+        
+        # Mevcut pending tweets'leri yükle
+        try:
+            pending_tweets = load_json('pending_tweets.json')
+        except:
+            pending_tweets = []
+        
+        # Mevcut GitHub repo URL'lerini kontrol et (duplikasyon önleme)
+        existing_urls = [tweet.get('url', '') for tweet in pending_tweets if tweet.get('source_type') == 'github']
+        
+        # Mevcut paylaşılan repoları da kontrol et
+        posted_articles = load_json("posted_articles.json")
+        posted_urls = [article.get('url', '') for article in posted_articles]
+        
+        # Tweet'leri oluştur
+        new_tweets = []
+        api_key = os.environ.get('GOOGLE_API_KEY')
+        
+        for repo in repos:
+            try:
+                # Duplikasyon kontrolü
+                if repo["url"] in existing_urls or repo["url"] in posted_urls:
+                    terminal_log(f"⚠️ GitHub repo zaten mevcut: {repo['name']}", "warning")
+                    continue
+                
+                # AI ile tweet oluştur
+                tweet_result = generate_github_tweet(repo, api_key)
+                
+                if tweet_result.get("success"):
+                    # Benzersiz ID oluştur
+                    tweet_id = len(pending_tweets) + len(new_tweets) + 1
+                    
+                    tweet_data = {
+                        "id": tweet_id,
+                        "title": f"GitHub: {repo['name']}",
+                        "content": tweet_result["tweet"],
+                        "url": repo["url"],
+                        "source": "GitHub",
+                        "source_type": "github",
+                        "created_at": datetime.now().isoformat(),
+                        "repo_data": repo,
+                        "is_posted": False,
+                        "language": repo.get("language", ""),
+                        "stars": repo.get("stars", 0),
+                        "forks": repo.get("forks", 0),
+                        "owner": repo.get("owner", {}).get("login", ""),
+                        "topics": repo.get("topics", [])[:5],
+                        "hash": hashlib.md5(repo["url"].encode()).hexdigest()
+                    }
+                    new_tweets.append(tweet_data)
+                    terminal_log(f"✅ GitHub tweet hazırlandı: {repo['name']}", "success")
+                else:
+                    # Fallback tweet oluştur
+                    tweet_text = create_fallback_github_tweet(repo)
+                    tweet_id = len(pending_tweets) + len(new_tweets) + 1
+                    
+                    tweet_data = {
+                        "id": tweet_id,
+                        "title": f"GitHub: {repo['name']}",
+                        "content": tweet_text,
+                        "url": repo["url"],
+                        "source": "GitHub",
+                        "source_type": "github",
+                        "created_at": datetime.now().isoformat(),
+                        "repo_data": repo,
+                        "is_posted": False,
+                        "language": repo.get("language", ""),
+                        "stars": repo.get("stars", 0),
+                        "forks": repo.get("forks", 0),
+                        "owner": repo.get("owner", {}).get("login", ""),
+                        "topics": repo.get("topics", [])[:5],
+                        "hash": hashlib.md5(repo["url"].encode()).hexdigest()
+                    }
+                    new_tweets.append(tweet_data)
+                    terminal_log(f"⚠️ GitHub fallback tweet oluşturuldu: {repo['name']}", "warning")
+                    
+            except Exception as e:
+                terminal_log(f"❌ GitHub tweet hatası ({repo['name']}): {e}", "error")
+                continue
+        
+        if new_tweets:
+            # Yeni tweet'leri pending listesine ekle
+            pending_tweets.extend(new_tweets)
+            save_json('pending_tweets.json', pending_tweets)
+            
+            terminal_log(f"✅ {len(new_tweets)} GitHub tweet'i pending listesine eklendi", "success")
+            
+            return jsonify({
+                "success": True,
+                "message": f"{len(new_tweets)} yeni GitHub repo tweet'i oluşturuldu",
+                "total_repos": len(repos),
+                "new_tweets": len(new_tweets)
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Yeni GitHub tweet'i oluşturulamadı (tümü zaten mevcut)"
+            })
+        
+    except Exception as e:
+        terminal_log(f"❌ GitHub repo çekme hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/test_github_api')
+@login_required
+def test_github_api():
+    """GitHub API bağlantısını test et"""
+    try:
+        if not GITHUB_MODULE_AVAILABLE:
+            return jsonify({"success": False, "error": "GitHub modülü kullanılamıyor"})
+        
+        # Test için basit bir arama yap
+        repos = fetch_trending_github_repos(language="python", time_period="daily", limit=3)
+        
+        if repos:
+            return jsonify({
+                "success": True,
+                "message": f"GitHub API çalışıyor - {len(repos)} repo bulundu",
+                "sample_repos": [
+                    {
+                        "name": repo['name'],
+                        "stars": repo['stars'],
+                        "language": repo['language'],
+                        "url": repo['url']
+                    } for repo in repos[:3]
+                ]
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "GitHub API'den veri alınamadı"
+            })
+            
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 

@@ -6,6 +6,7 @@ Bu, AI Tweet Bot'un Python Anywhere'de çalışacak şekilde optimize edilmiş F
 
 - **Otomatik Makale Çekme**: TechCrunch AI kategorisinden son haberleri çeker
 - **AI Tweet Oluşturma**: Google Gemini 2.0 Flash ile akıllı tweet'ler oluşturur
+- **GitHub Repo Keşfi**: Trend GitHub repolarını çeker ve tweet olarak paylaşır
 - **Otomatik Paylaşım**: Twitter'a otomatik tweet paylaşımı
 - **Manuel Onay Sistemi**: Tweet'leri paylaşmadan önce onaylama
 - **Telegram Bildirimleri**: Yeni tweet'ler için bildirim
@@ -78,7 +79,7 @@ FLASK_ENV=production
 # =============================================================================
 # GOOGLE GEMINI AI API
 # =============================================================================
-GOOGLE_API_KEY=your-google-gemini-api-key-here
+GOOGLE_API_KEY=your-google-gemini-api-key
 
 # =============================================================================
 # TWITTER API CREDENTIALS
@@ -88,6 +89,11 @@ TWITTER_API_KEY=your-twitter-api-key
 TWITTER_API_SECRET=your-twitter-api-secret
 TWITTER_ACCESS_TOKEN=your-twitter-access-token
 TWITTER_ACCESS_TOKEN_SECRET=your-twitter-access-token-secret
+
+# =============================================================================
+# GITHUB API (Opsiyonel - GitHub repoları için)
+# =============================================================================
+GITHUB_TOKEN=your-github-personal-access-token
 
 # =============================================================================
 # TELEGRAM BOT (Opsiyonel - Bildirimler için)
@@ -187,6 +193,35 @@ print(f'Task completed: {result}')
 3. Bot'a mesaj gönder
 4. **Chat ID Algıla** butonuna tıkla
 5. **Bağlantıyı Test Et** ile kontrol et
+
+### GitHub Repo Keşfi
+
+GitHub modülü, trend olan açık kaynak projelerini keşfetmenizi ve bunları tweet olarak paylaşmanızı sağlar:
+
+1. **GitHub Token (Opsiyonel)**:
+   - GitHub Personal Access Token oluşturun
+   - `.env` dosyasına `GITHUB_TOKEN` olarak ekleyin
+   - Token olmadan da çalışır, ancak rate limit daha düşük olur
+
+2. **GitHub Repoları Sayfası**:
+   - `/github_repos` sayfasına gidin
+   - **API Test** ile bağlantıyı kontrol edin
+   - **Repo Çek** ile yeni repoları çekin
+
+3. **Repo Çekme Ayarları**:
+   - **Programlama Dili**: Python, JavaScript, TypeScript, Go, Rust, Java vb.
+   - **Zaman Aralığı**: Günlük, haftalık veya aylık trend repolar
+   - **Repo Sayısı**: Çekilecek repo sayısı (1-20 arası)
+
+4. **Otomatik Tweet Oluşturma**:
+   - Çekilen repolar otomatik olarak pending tweets'e eklenir
+   - Her repo için AI ile tweet metni oluşturulur
+   - Repo bilgileri (yıldız, fork, dil) tweet'e dahil edilir
+
+5. **GitHub İstatistikleri**:
+   - Toplam paylaşılan repo sayısı
+   - Dil dağılımı
+   - Haftalık repo paylaşım istatistikleri
 
 ## 📊 İstatistikler
 

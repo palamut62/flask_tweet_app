@@ -202,6 +202,16 @@
                                 <span class="text-sm font-medium">{{ 'Mevcut' if api_check.telegram_available else 'Opsiyonel' }}</span>
                             </span>
                         </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-2">
+                                <i class="fab fa-github text-gray-800"></i>
+                                <span class="text-gray-600">GitHub API:</span>
+                            </div>
+                            <span class="flex items-center space-x-1 {{ 'text-green-600' if api_check.github_available else 'text-yellow-600' }}">
+                                <i class="fas fa-{{ 'check-circle' if api_check.github_available else 'exclamation-circle' }}"></i>
+                                <span class="text-sm font-medium">{{ 'Mevcut' if api_check.github_available else 'Opsiyonel' }}</span>
+                            </span>
+                        </div>
                     </div>
                 {% else %}
                     <p class="text-gray-500">API durumu kontrol edilemedi</p>
@@ -298,6 +308,10 @@
                         <i class="fas fa-trash"></i>
                         <span>Silinmiş Tweetler</span>
                     </a>
+                    <a href="{{ url_for('github_repos') }}" class="w-full px-6 py-3 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-200 font-medium flex items-center justify-center space-x-2">
+                        <i class="fab fa-github"></i>
+                        <span>GitHub Repoları</span>
+                    </a>
 
                 </div>
             </div>
@@ -317,25 +331,93 @@
                         </div>
                         <h3 class="text-lg font-semibold text-gray-900">Onay Bekleyen Tweet'ler</h3>
                     </div>
-                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                        {{ pending_tweets|length }} adet
-                    </span>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                            {{ pending_tweets|length }} toplam
+                        </span>
+                        {% if news_count > 0 %}
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                            {{ news_count }} haber
+                        </span>
+                        {% endif %}
+                        {% if github_count > 0 %}
+                        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                            {{ github_count }} GitHub
+                        </span>
+                        {% endif %}
+                    </div>
                 </div>
                 
                 <div class="space-y-4">
                     {% for tweet in pending_tweets %}
-                    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+                    <div class="bg-gradient-to-r {% if tweet.source_type == 'github' %}from-purple-50 to-indigo-50 border border-purple-200{% else %}from-yellow-50 to-orange-50 border border-yellow-200{% endif %} rounded-xl p-6 hover:shadow-lg transition-all duration-300">
                         <div class="flex justify-between items-start mb-4">
-                            <h4 class="text-lg font-medium text-gray-900 line-clamp-2">{{ tweet.article.title if tweet.article else tweet.content[:100] + '...' if tweet.content else 'Başlık bulunamadı' }}</h4>
-                            <span class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-medium ml-4 flex-shrink-0">
-                                Bekliyor
-                            </span>
+                            <h4 class="text-lg font-medium text-gray-900 line-clamp-2">{{ tweet.title if tweet.title else tweet.content[:100] + '...' if tweet.content else 'Başlık bulunamadı' }}</h4>
+                            <div class="flex items-center space-x-2 ml-4 flex-shrink-0">
+                                {% if tweet.source_type == 'github' %}
+                                <span class="px-3 py-1 bg-purple-500 text-white rounded-full text-sm font-medium flex items-center space-x-1">
+                                    <i class="fab fa-github text-xs"></i>
+                                    <span>GitHub</span>
+                                </span>
+                                {% else %}
+                                <span class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-medium">
+                                    Haber
+                                </span>
+                                {% endif %}
+                            </div>
                         </div>
                         
                         <div class="bg-white/80 backdrop-blur-sm rounded-lg p-4 mb-4 border border-gray-200">
-                            <p class="text-gray-800 leading-relaxed">{{ tweet.tweet_data.tweet if tweet.tweet_data else tweet.content if tweet.content else 'Tweet metni bulunamadı' }}</p>
+                            <p class="text-gray-800 leading-relaxed">{{ tweet.content if tweet.content else 'Tweet metni bulunamadı' }}</p>
                         </div>
                         
+                        {% if tweet.source_type == 'github' %}
+                        <!-- GitHub Repo Bilgileri -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 text-sm text-gray-600">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-code text-purple-500"></i>
+                                <span>Dil: <span class="font-medium">{{ tweet.language or 'N/A' }}</span></span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-star text-yellow-500"></i>
+                                <span>Yıldız: <span class="font-medium">{{ tweet.stars or 0 }}</span></span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-code-branch text-green-500"></i>
+                                <span>Fork: <span class="font-medium">{{ tweet.forks or 0 }}</span></span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-user text-blue-500"></i>
+                                <span>Sahip: <span class="font-medium">{{ tweet.owner or 'N/A' }}</span></span>
+                            </div>
+                        </div>
+                        
+                        <!-- GitHub Konuları -->
+                        {% if tweet.topics %}
+                        <div class="mb-4">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <i class="fas fa-tags text-purple-500"></i>
+                                <span class="text-sm font-medium text-gray-700">Konular:</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                {% for topic in tweet.topics[:5] %}
+                                <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">{{ topic }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- GitHub Kaynak Bilgisi -->
+                        <div class="mb-4">
+                            <div class="source-badge bg-purple-50 border border-purple-200 text-purple-800">
+                                <i class="fab fa-github source-icon"></i>
+                                <span>Kaynak:</span>
+                                <span class="source-name">GitHub Repository</span>
+                                <span class="source-id">{{ tweet.language or 'Mixed' }}</span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <!-- Haber Tweet Bilgileri -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 text-sm text-gray-600">
                             <div class="flex items-center space-x-2">
                                 <i class="fas fa-chart-line text-blue-500"></i>
@@ -347,12 +429,13 @@
                             </div>
                             <div class="flex items-center space-x-2">
                                 <i class="fas fa-calendar-alt text-purple-500"></i>
-                                <span>Yayın: <span class="font-medium">{{ tweet.article.fetch_date[:10] if tweet.article and tweet.article.fetch_date else tweet.created_at[:10] if tweet.created_at else 'Tarih yok' }}</span></span>
+                                <span>Yayın: <span class="font-medium">{{ tweet.created_at[:10] if tweet.created_at else 'Tarih yok' }}</span></span>
                             </div>
                         </div>
                         
                         <!-- Haber Kaynağı Bilgisi -->
-                        {{ render_source_badge(tweet.article.source if tweet.article else tweet.source, tweet.article.source_id if tweet.article else None, tweet.article.url if tweet.article else None) }}
+                        {{ render_source_badge(tweet.source, None, tweet.url) }}
+                        {% endif %}
                         
                         {% if tweet.error_reason %}
                         <div class="mb-4 p-3 {% if 'rate limit' in tweet.error_reason.lower() %}bg-yellow-50 border border-yellow-200{% else %}bg-red-50 border border-red-200{% endif %} rounded-lg">
@@ -373,25 +456,25 @@
                         {% endif %}
                         
                         <div class="flex flex-wrap gap-3">
-                            <button onclick="postTweet('{{ loop.index0 }}')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-medium flex items-center space-x-2">
+                            <button onclick="postTweet('{{ tweet.id }}')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-medium flex items-center space-x-2">
                                 <i class="fas fa-robot"></i>
                                 <span>API ile Paylaş</span>
                             </button>
-                            <button onclick="manualPostTweet('{{ loop.index0 }}')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium flex items-center space-x-2">
+                            <button onclick="manualPostTweet('{{ tweet.id }}')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium flex items-center space-x-2">
                                 <i class="fab fa-twitter"></i>
                                 <span>X'te Manuel Paylaş</span>
                             </button>
-                            <a href="{{ url_for('manual_post_confirmation', tweet_id=loop.index0) }}" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 font-medium flex items-center space-x-2">
+                            <a href="{{ url_for('manual_post_confirmation', tweet_id=tweet.id) }}" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 font-medium flex items-center space-x-2">
                                 <i class="fas fa-check-circle"></i>
                                 <span>Manuel Paylaşımı Onayla</span>
                             </a>
-                            <button onclick="deleteTweet('{{ loop.index0 }}')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 font-medium flex items-center space-x-2">
+                            <button onclick="deleteTweet('{{ tweet.id }}')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 font-medium flex items-center space-x-2">
                                 <i class="fas fa-trash"></i>
                                 <span>Sil</span>
                             </button>
-                            <a href="{{ tweet.article.url if tweet.article else '#' }}" target="_blank" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium flex items-center space-x-2 {{ 'opacity-50 cursor-not-allowed' if not tweet.article or not tweet.article.url else '' }}">
+                            <a href="{{ tweet.url if tweet.url else '#' }}" target="_blank" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium flex items-center space-x-2 {{ 'opacity-50 cursor-not-allowed' if not tweet.url else '' }}">
                                 <i class="fas fa-external-link-alt"></i>
-                                <span>Makaleyi Oku</span>
+                                <span>{% if tweet.source_type == 'github' %}Repo'yu Görüntüle{% else %}Makaleyi Oku{% endif %}</span>
                             </a>
                         </div>
                     </div>
@@ -414,7 +497,7 @@
                 {% if articles %}
                     <div class="space-y-4">
                         {% for article in articles|reverse %}
-                        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+                        <div class="bg-gradient-to-r {% if article.source_type == 'github' or article.type == 'github_repo' %}from-purple-50 to-indigo-50 border border-purple-200{% else %}from-blue-50 to-cyan-50 border border-blue-200{% endif %} rounded-xl p-6 hover:shadow-lg transition-all duration-300">
                             <div class="flex justify-between items-start mb-4">
                                 <h4 class="text-lg font-medium text-gray-900 line-clamp-2">{{ article.title }}</h4>
                                 <div class="flex items-center space-x-2 ml-4 flex-shrink-0">
@@ -429,6 +512,12 @@
                                     <span class="px-3 py-1 bg-green-500 text-white rounded-full text-sm font-medium">
                                         Paylaşıldı
                                     </span>
+                                    {% if article.source_type == 'github' or article.type == 'github_repo' %}
+                                    <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium flex items-center space-x-1">
+                                        <i class="fab fa-github text-xs"></i>
+                                        <span>GitHub</span>
+                                    </span>
+                                    {% endif %}
                                     {% if article.manual_post %}
                                     <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                                         Manuel
@@ -448,6 +537,37 @@
                             </div>
                             {% endif %}
                             
+                            {% if article.source_type == 'github' or article.type == 'github_repo' %}
+                            <!-- GitHub Repo Bilgileri -->
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 text-sm text-gray-600">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-calendar text-purple-500"></i>
+                                    <span>{{ article.posted_date[:10] if article.posted_date else 'Tarih yok' }}</span>
+                                </div>
+                                {% if article.language %}
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-code text-purple-500"></i>
+                                    <span>{{ article.language }}</span>
+                                </div>
+                                {% endif %}
+                                {% if article.stars %}
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-star text-yellow-500"></i>
+                                    <span>{{ article.stars }} yıldız</span>
+                                </div>
+                                {% endif %}
+                                {% if article.tweet_url %}
+                                <div class="flex items-center space-x-2">
+                                    <i class="fab fa-twitter text-twitter"></i>
+                                    <a href="{{ article.tweet_url }}" target="_blank" class="text-twitter hover:text-blue-800 font-medium flex items-center space-x-1">
+                                        <span>Tweet'i Görüntüle</span>
+                                        <i class="fas fa-external-link-alt text-xs"></i>
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <!-- Haber Makalesi Bilgileri -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm text-gray-600">
                                 <div class="flex items-center space-x-2">
                                     <i class="fas fa-calendar text-blue-500"></i>
@@ -463,15 +583,36 @@
                                 </div>
                                 {% endif %}
                             </div>
+                            {% endif %}
                             
-                            <!-- Haber Kaynağı Bilgisi -->
+                            <!-- Kaynak Bilgisi -->
+                            {% if article.source_type == 'github' or article.type == 'github_repo' %}
+                            <div class="mb-4">
+                                <div class="source-badge bg-purple-50 border border-purple-200 text-purple-800">
+                                    <i class="fab fa-github source-icon"></i>
+                                    <span>Kaynak:</span>
+                                    <span class="source-name">GitHub Repository</span>
+                                    {% if article.language %}
+                                    <span class="source-id">{{ article.language }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% else %}
                             {{ render_source_badge(article.source, article.source_id, article.url) }}
+                            {% endif %}
                             
                             <div class="flex flex-wrap gap-3">
+                                {% if article.source_type == 'github' or article.type == 'github_repo' %}
+                                <a href="{{ article.url }}" target="_blank" class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-200 font-medium flex items-center space-x-2">
+                                    <i class="fab fa-github"></i>
+                                    <span>Repo'yu Görüntüle</span>
+                                </a>
+                                {% else %}
                                 <a href="{{ article.url }}" target="_blank" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 font-medium flex items-center space-x-2">
                                     <i class="fas fa-external-link-alt"></i>
                                     <span>Makaleyi Oku</span>
                                 </a>
+                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}
