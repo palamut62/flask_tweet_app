@@ -19,9 +19,11 @@ try:
     print("✅ GitHub modülü utils import başarılı")
 except ImportError as e:
     print(f"⚠️ GitHub modülü utils import hatası: {e}")
-    # Fallback fonksiyonlar
+    # Fallback fonksiyonlar (terminal kaldırıldı)
     def terminal_log(message, level="info"):
-        print(f"[{level.upper()}] {message}")
+        import time
+        timestamp = time.strftime('%H:%M:%S')
+        print(f"[{timestamp}] [{level.upper()}] {message}")
     
     def load_json(filename, default=None):
         try:

@@ -3336,13 +3336,15 @@ def test_manual_selectors_for_url(url, selectors):
 def add_news_source_with_validation(name, url, description="", auto_detect=True, manual_selectors=None):
     """Doğrulama ile yeni haber kaynağı ekle"""
     try:
-        # Terminal log için import
+        # Konsol log için import (terminal kaldırıldı)
         try:
             from app import terminal_log
         except ImportError:
             # Eğer app.py'den import edilemezse normal print kullan
             def terminal_log(msg, level='info'):
-                print(f"[{level.upper()}] {msg}")
+                import time
+                timestamp = time.strftime('%H:%M:%S')
+                print(f"[{timestamp}] [{level.upper()}] {msg}")
         
         terminal_log(f"🔍 Kaynak ekleme başlatıldı - Name: {name}, URL: {url}, Auto: {auto_detect}", "debug")
         
@@ -3624,13 +3626,15 @@ def fetch_articles_from_custom_sources():
             print("⚠️ Aktif haber kaynağı bulunamadı")
             return []
         
-        # Terminal log için import
+        # Konsol log için import (terminal kaldırıldı)
         try:
             from app import terminal_log
         except ImportError:
             # Eğer app.py'den import edilemezse normal print kullan
             def terminal_log(msg, level='info'):
-                print(f"[{level.upper()}] {msg}")
+                import time
+                timestamp = time.strftime('%H:%M:%S')
+                print(f"[{timestamp}] [{level.upper()}] {msg}")
         
         terminal_log(f"🔍 {len(enabled_sources)} haber kaynağından makale çekiliyor...", "info")
         
@@ -5022,20 +5026,23 @@ def retry_pending_tweets_after_rate_limit():
 # ... existing code ...
 
 def terminal_log(message, level='info'):
-    """Global terminal log fonksiyonu - app.py'dan import edilebilir"""
-    try:
-        # app.py'dan TerminalLogHandler'ı import etmeye çalış
-        from app import log_handler
-        if log_handler:
-            log_handler.broadcast_log(message, level)
-        else:
-            print(f"[{level.upper()}] {message}")
-    except ImportError:
-        # app.py import edilemezse normal print kullan
-        print(f"[{level.upper()}] {message}")
-    except Exception as e:
-        # Herhangi bir hata durumunda normal print kullan
-        print(f"[{level.upper()}] {message}")
+    """Konsol log fonksiyonu (terminal işlevi kaldırıldı)"""
+    import time
+    
+    # Konsola yazdır
+    level_colors = {
+        'info': '\033[92m',      # Yeşil
+        'warning': '\033[93m',   # Sarı
+        'error': '\033[91m',     # Kırmızı
+        'debug': '\033[96m',     # Cyan
+        'success': '\033[92m'    # Yeşil
+    }
+    
+    color = level_colors.get(level, '\033[0m')
+    reset = '\033[0m'
+    timestamp = time.strftime('%H:%M:%S')
+    
+    print(f"{color}[{timestamp}] [{level.upper()}] {message}{reset}")
 
 def advanced_web_scraper(url, wait_time=3, use_js=False, return_html=False):
     """Gelişmiş web scraping - MCP'ye alternatif"""

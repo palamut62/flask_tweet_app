@@ -1921,60 +1921,15 @@ def manual_post_confirmation(tweet_id):
         return redirect(url_for('index'))
 
 # =============================================================================
-# CANLI TERMINAL SİSTEMİ
+# LOGGING SİSTEMİ (Terminal kaldırıldı - sadece konsol logları)
 # =============================================================================
 
-import queue
-import threading
-from flask import Response
-import json
 import time
 
-# Global log queue
-log_queue = queue.Queue(maxsize=1000)
-
-class TerminalLogHandler:
-    """Terminal için log handler"""
-    
-    def __init__(self):
-        self.clients = set()
-    
-    def add_client(self, client_queue):
-        """Yeni client ekle"""
-        self.clients.add(client_queue)
-    
-    def remove_client(self, client_queue):
-        """Client'ı kaldır"""
-        self.clients.discard(client_queue)
-    
-    def broadcast_log(self, message, level='info'):
-        """Tüm client'lara log gönder"""
-        timestamp = time.strftime('%H:%M:%S')
-        log_data = {
-            'message': message,
-            'level': level,
-            'timestamp': timestamp
-        }
-        
-        # Global queue'ya ekle
-        try:
-            log_queue.put_nowait(log_data)
-        except queue.Full:
-            # Queue dolu ise eski mesajları at
-            try:
-                log_queue.get_nowait()
-                log_queue.put_nowait(log_data)
-            except queue.Empty:
-                pass
-
-# Global terminal log handler
-terminal_logger = TerminalLogHandler()
-
 def terminal_log(message, level='info'):
-    """Terminal'e log gönder"""
-    terminal_logger.broadcast_log(message, level)
+    """Konsola log gönder (terminal işlevi kaldırıldı)"""
     
-    # Konsola da yazdır
+    # Konsola yazdır
     level_colors = {
         'info': '\033[92m',      # Yeşil
         'warning': '\033[93m',   # Sarı
@@ -1988,40 +1943,6 @@ def terminal_log(message, level='info'):
     timestamp = time.strftime('%H:%M:%S')
     
     print(f"{color}[{timestamp}] [{level.upper()}] {message}{reset}")
-
-@app.route('/api/logs/stream')
-@login_required
-def log_stream():
-    """Server-Sent Events ile canlı log akışı"""
-    
-    def event_stream():
-        client_queue = queue.Queue()
-        terminal_logger.add_client(client_queue)
-        
-        try:
-            # İlk bağlantı mesajı
-            yield f"data: {json.dumps({'message': 'Terminal bağlantısı kuruldu', 'level': 'success', 'timestamp': time.strftime('%H:%M:%S')})}\n\n"
-            
-            while True:
-                try:
-                    # Global queue'dan mesaj al
-                    log_data = log_queue.get(timeout=30)  # 30 saniye timeout
-                    yield f"data: {json.dumps(log_data)}\n\n"
-                    
-                except queue.Empty:
-                    # Heartbeat gönder
-                    yield f"data: {json.dumps({'message': 'heartbeat', 'level': 'debug', 'timestamp': time.strftime('%H:%M:%S')})}\n\n"
-                    
-        except GeneratorExit:
-            terminal_logger.remove_client(client_queue)
-    
-    return Response(event_stream(), mimetype='text/event-stream')
-
-@app.route('/terminal')
-@login_required
-def terminal_page():
-    """Terminal sayfası"""
-    return render_template('terminal.html')
 
 @app.route('/test_duplicate_detection')
 @login_required
@@ -2229,7 +2150,7 @@ def test_news_fetching_methods():
         results['method_info'] = method_info
         results['test_time'] = datetime.now().isoformat()
         
-        flash('Haber çekme yöntemleri test edildi! Terminal sayfasından detayları görebilirsiniz.', 'success')
+        flash('Haber çekme yöntemleri test edildi! Konsol loglarından detayları görebilirsiniz.', 'success')
         return jsonify(results)
         
     except Exception as e:
