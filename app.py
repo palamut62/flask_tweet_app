@@ -611,9 +611,10 @@ def check_and_post_articles():
         
         for article in articles[:max_articles]:
             try:
-                # Tweet oluştur
-                terminal_log(f"🤖 Tweet oluşturuluyor: {article['title'][:50]}...", "info")
-                tweet_data = generate_ai_tweet_with_mcp_analysis(article, api_key)
+                # Tweet oluştur - tema ile
+                theme = settings.get('tweet_theme', 'bilgilendirici')
+                terminal_log(f"🤖 Tweet oluşturuluyor (tema: {theme}): {article['title'][:50]}...", "info")
+                tweet_data = generate_ai_tweet_with_mcp_analysis(article, api_key, theme)
                 
                 if not tweet_data or not tweet_data.get('tweet'):
                     terminal_log(f"❌ Tweet oluşturulamadı: {article['title'][:50]}...", "error")
@@ -1222,6 +1223,7 @@ def save_settings():
             'title_similarity_threshold': float(request.form.get('title_similarity_threshold', 80)) / 100.0,
             'content_similarity_threshold': float(request.form.get('content_similarity_threshold', 60)) / 100.0,
             'news_fetching_method': request.form.get('news_fetching_method', 'auto'),
+            'tweet_theme': request.form.get('tweet_theme', 'bilgilendirici'),
             'last_updated': datetime.now().isoformat()
         }
         
@@ -1440,13 +1442,17 @@ def create_tweet():
                     from utils import gemini_ocr_image, generate_ai_tweet_with_content
                     ocr_text = gemini_ocr_image(image_path)
                     # AI ile konuya uygun tweet üret
+                    from utils import load_automation_settings
+                    settings = load_automation_settings()
+                    theme = settings.get('tweet_theme', 'bilgilendirici')
+                    
                     article_data = {
                         'title': ocr_text[:100],
                         'content': ocr_text,
                         'url': '',
                         'lang': 'en'
                     }
-                    tweet_data = generate_ai_tweet_with_content(article_data, api_key)
+                    tweet_data = generate_ai_tweet_with_content(article_data, api_key, theme)
                     tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
                 except Exception as e:
                     flash(f'Resimden tweet oluşturulamadı: {e}', 'error')
@@ -1470,14 +1476,18 @@ def create_tweet():
                     flash('URL\'den içerik çekilemedi!', 'error')
                     return redirect(url_for('create_tweet'))
                 
-                # AI ile tweet oluştur
+                # AI ile tweet oluştur - tema ile
+                from utils import load_automation_settings
+                settings = load_automation_settings()
+                theme = settings.get('tweet_theme', 'bilgilendirici')
+                
                 article_data = {
                     'title': url_content.get('title', ''),
                     'content': url_content.get('content', ''),
                     'url': url_content.get('url', ''),
                     'lang': 'en'
                 }
-                tweet_data = generate_ai_tweet_with_content(article_data, api_key)
+                tweet_data = generate_ai_tweet_with_content(article_data, api_key, theme)
                 tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
                 
             except Exception as e:
@@ -1490,14 +1500,17 @@ def create_tweet():
                 return redirect(url_for('create_tweet'))
             
             try:
-                from utils import generate_ai_tweet_with_content
+                from utils import generate_ai_tweet_with_content, load_automation_settings
+                settings = load_automation_settings()
+                theme = settings.get('tweet_theme', 'bilgilendirici')
+                
                 article_data = {
                     'title': tweet_text[:100],
                     'content': tweet_text,
                     'url': '',
                     'lang': 'en'
                 }
-                tweet_data = generate_ai_tweet_with_content(article_data, api_key)
+                tweet_data = generate_ai_tweet_with_content(article_data, api_key, theme)
                 tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
             except Exception as e:
                 flash(f'AI ile tweet metni oluşturulamadı: {e}', 'error')
@@ -1522,17 +1535,20 @@ def ocr_image():
     image_file.save(image_path)
 
     try:
-        from utils import gemini_ocr_image, generate_ai_tweet_with_content
+        from utils import gemini_ocr_image, generate_ai_tweet_with_content, load_automation_settings
         ocr_text = gemini_ocr_image(image_path)
-        # AI ile konuya uygun tweet üret
+        # AI ile konuya uygun tweet üret - tema ile
         api_key = os.environ.get('GOOGLE_API_KEY')
+        settings = load_automation_settings()
+        theme = settings.get('tweet_theme', 'bilgilendirici')
+        
         article_data = {
             'title': ocr_text[:100],
             'content': ocr_text,
             'url': '',
             'lang': 'en'
         }
-        tweet_data = generate_ai_tweet_with_content(article_data, api_key)
+        tweet_data = generate_ai_tweet_with_content(article_data, api_key, theme)
         tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
         return jsonify({'success': True, 'text': tweet_text})
     except Exception as e:

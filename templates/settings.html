@@ -95,7 +95,82 @@
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
                             <p class="text-sm text-gray-600">Bu skorun altındaki makaleler paylaşılmaz</p>
                         </div>
+                        
+                        <div class="space-y-2">
+                            <label for="tweet_theme" class="block text-sm font-medium text-gray-700">
+                                Tweet Teması
+                            </label>
+                            <select id="tweet_theme" name="tweet_theme" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                                <option value="bilgilendirici" {{ 'selected' if settings.tweet_theme == 'bilgilendirici' else '' }}>
+                                    📊 Bilgilendirici (Profesyonel ve eğitici)
+                                </option>
+                                <option value="eğlenceli" {{ 'selected' if settings.tweet_theme == 'eğlenceli' else '' }}>
+                                    🎉 Eğlenceli (Neşeli ve heyecanlı)
+                                </option>
+                                <option value="mizahi" {{ 'selected' if settings.tweet_theme == 'mizahi' else '' }}>
+                                    😄 Mizahi (Komik ve esprili)
+                                </option>
+                                <option value="resmi" {{ 'selected' if settings.tweet_theme == 'resmi' else '' }}>
+                                    🏢 Resmi (Ciddi ve otoriteye dayalı)
+                                </option>
+                                <option value="heyecanlı" {{ 'selected' if settings.tweet_theme == 'heyecanlı' else '' }}>
+                                    🔥 Heyecanlı (Dinamik ve ilham verici)
+                                </option>
+                                <option value="meraklı" {{ 'selected' if settings.tweet_theme == 'meraklı' else '' }}>
+                                    🤔 Meraklı (Sorgulayıcı ve düşündürücü)
+                                </option>
+                            </select>
+                            <p class="text-sm text-gray-600">Tweet'lerin hangi tarzda oluşturulacağını belirler</p>
+                        </div>
                     </div>
+                    
+                    <!-- Tweet Tema Önizleme -->
+                    <div class="mt-6 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl">
+                        <h4 class="text-lg font-semibold text-indigo-900 mb-4 flex items-center space-x-2">
+                            <i class="fas fa-eye text-indigo-600"></i>
+                            <span>Tweet Tema Önizlemeleri</span>
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="p-4 bg-white border border-indigo-200 rounded-lg">
+                                <h5 class="font-semibold text-indigo-900 mb-2">📊 Bilgilendirici</h5>
+                                <p class="text-sm text-gray-700 italic">
+                                    "💡 OpenAI's new model achieves 95% accuracy in medical diagnosis #AI #Tech"
+                                </p>
+                            </div>
+                            <div class="p-4 bg-white border border-indigo-200 rounded-lg">
+                                <h5 class="font-semibold text-indigo-900 mb-2">🎉 Eğlenceli</h5>
+                                <p class="text-sm text-gray-700 italic">
+                                    "🚀 Mind-blown! This AI can now read your thoughts (almost)! ✨ #TechFun #Amazing"
+                                </p>
+                            </div>
+                            <div class="p-4 bg-white border border-indigo-200 rounded-lg">
+                                <h5 class="font-semibold text-indigo-900 mb-2">😄 Mizahi</h5>
+                                <p class="text-sm text-gray-700 italic">
+                                    "🤖 Robots are getting smarter... Should we be worried or impressed? 😅 #TechHumor"
+                                </p>
+                            </div>
+                            <div class="p-4 bg-white border border-indigo-200 rounded-lg">
+                                <h5 class="font-semibold text-indigo-900 mb-2">🏢 Resmi</h5>
+                                <p class="text-sm text-gray-700 italic">
+                                    "📢 Major technological advancement announced in artificial intelligence sector #TechNews"
+                                </p>
+                            </div>
+                            <div class="p-4 bg-white border border-indigo-200 rounded-lg">
+                                <h5 class="font-semibold text-indigo-900 mb-2">🔥 Heyecanlı</h5>
+                                <p class="text-sm text-gray-700 italic">
+                                    "🔥 BREAKTHROUGH ALERT! This changes everything we know about AI! ⚡ #GameChanger"
+                                </p>
+                            </div>
+                            <div class="p-4 bg-white border border-indigo-200 rounded-lg">
+                                <h5 class="font-semibold text-indigo-900 mb-2">🤔 Meraklı</h5>
+                                <p class="text-sm text-gray-700 italic">
+                                    "🤔 What if AI could predict the future? This research suggests it might... 🔮 #WhatIf"
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                     
                     <!-- Duplikat Kontrol Ayarları -->
                     <div class="mt-6 p-6 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl">

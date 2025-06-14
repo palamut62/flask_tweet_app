@@ -120,6 +120,14 @@
                                 {% endif %}
                             </span>
                         </div>
+                        
+                        <!-- Manuel Kontrol Butonu -->
+                        <div class="pt-4 border-t border-gray-200">
+                            <a href="{{ url_for('check_articles') }}" class="btn-primary w-full flex items-center justify-center space-x-2">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Şimdi Kontrol Et</span>
+                            </a>
+                        </div>
                     </div>
                 {% else %}
                     <p class="text-gray-500">Otomasyon ayarları yüklenemedi</p>
@@ -294,10 +302,6 @@
                 </div>
                 
                 <div class="space-y-3">
-                    <a href="{{ url_for('check_articles') }}" class="btn-primary w-full flex items-center justify-center space-x-2">
-                        <i class="fas fa-sync-alt"></i>
-                        <span>Şimdi Kontrol Et</span>
-                    </a>
                     <a href="{{ url_for('settings') }}" class="btn-secondary w-full flex items-center justify-center space-x-2">
                         <i class="fas fa-cog"></i>
                         <span>Ayarları Düzenle</span>

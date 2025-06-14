@@ -1179,5 +1179,59 @@
     "post_method": "manuel",
     "tweet_text": "✅🗽🤖 NY just passed the RAISE Act! Frontier AI labs like OpenAI & Google must now prove their models are safe. Transparency is key to prevent AI disasters. #AISafety #RAISEAct #NewYork\n\n🔗 https://techcrunch.com/2025/06/13/new-york-passes-a-bill-to-prevent-ai-fueled-disasters/",
     "manual_posted_at": "2025-06-14T20:15:49.593462"
+  },
+  {
+    "title": "The Meta AI app is a privacy disaster",
+    "url": "https://techcrunch.com/2025/06/12/the-meta-ai-app-is-a-privacy-disaster/",
+    "content": "🎯📈 Meta AI's Share feature exposes private conversations. Unexpected sharing violates user privacy. Know your settings! #AI #Tech #Privacy #Technology\n\n🔗 https://techcrunch.com/2025/06/12/the-meta-ai-app-is-a-privacy-disaster/",
+    "source": "",
+    "source_type": "news",
+    "published_date": "2025-06-14T21:01:12.122944",
+    "posted_date": "2025-06-14T21:02:16.327649",
+    "hash": "",
+    "deleted": true,
+    "deleted_date": "2025-06-14T21:02:16.327649",
+    "tweet_text": "🎯📈 Meta AI's Share feature exposes private conversations. Unexpected sharing violates user privacy. Know your settings! #AI #Tech #Privacy #Technology\n\n🔗 https://techcrunch.com/2025/06/12/the-meta-ai-app-is-a-privacy-disaster/",
+    "deletion_reason": "Manuel olarak silindi",
+    "is_posted": false
+  },
+  {
+    "title": "Happy 8th Birthday to the Paper That Set All This Off",
+    "url": "https://i.redd.it/ka788zoani6f1.jpeg",
+    "content": "🔍📈 Meet the paper that revolutionized AI: 'Attention Is All You Need'. Introduced in 2017, this groundbreaking paper introduced the Transformer architecture, shattering recurrent neural net... #AI #Tech #GenerativeAI #ArtificialIntelligence\n\n🔗 https://i.redd.it/ka788zoani6f1.jpeg",
+    "source": "",
+    "source_type": "news",
+    "published_date": "2025-06-14T21:00:47.674914",
+    "posted_date": "2025-06-14T21:02:30.469486",
+    "hash": "",
+    "tweet_id": "1933948166174318987",
+    "tweet_url": "",
+    "is_posted": true
+  },
+  {
+    "title": "LLM combo (GPT4.1 + o3-mini-high + Gemini 2.0 Flash) delivers superhuman performance by completing 12 work-years of systematic reviews in just 2 days, offering scalable, mass reproducibility across the systematic review literature field",
+    "url": "https://www.medrxiv.org/content/10.1101/2025.06.13.25329541v1",
+    "content": "📊🔍 LLM combo (GPT4.1, o3, Gemini 2.0) automates systematic reviews, completing 12 work-years in record time! Google & Cochrane collaborate for superhuman research speed. #AI #Tech #LLM #SystematicReview\n\n🔗 https://www.medrxiv.org/content/10.1101/2025.06.13.25329541v1",
+    "source": "",
+    "source_type": "news",
+    "published_date": "2025-06-14T21:00:20.819909",
+    "posted_date": "2025-06-14T21:02:42.563538",
+    "hash": "",
+    "tweet_id": "1933948215885185345",
+    "tweet_url": "",
+    "is_posted": true
+  },
+  {
+    "title": "Waymo limits service ahead of today’s ‘No Kings’ protests",
+    "url": "https://techcrunch.com/2025/06/14/waymo-limits-service-ahead-of-todays-no-kings-protests/",
+    "content": "📊🔍 Waymo preemptively limited robotaxi service due to planned 'No Kings' protests. Service adjustments prioritize safety amidst potential disruptions. #AI #Tech #Waymo #NoKingsProtest\n\n🔗 https://techcrunch.com/2025/06/14/waymo-limits-service-ahead-of-todays-no-kings-protests/",
+    "source": "",
+    "source_type": "news",
+    "published_date": "2025-06-14T21:00:13.649371",
+    "posted_date": "2025-06-14T21:03:03.934525",
+    "hash": "",
+    "tweet_id": "1933948302715748834",
+    "tweet_url": "",
+    "is_posted": true
   }
 ]

@@ -995,8 +995,8 @@ def generate_comprehensive_analysis(article_data, api_key):
             "tweet_text": ""
         }
 
-def generate_ai_tweet_with_mcp_analysis(article_data, api_key):
-    """MCP verisi ile gelişmiş AI tweet oluşturma - Kapsamlı analiz ile"""
+def generate_ai_tweet_with_mcp_analysis(article_data, api_key, theme="bilgilendirici"):
+    """MCP verisi ile gelişmiş AI tweet oluşturma - Kapsamlı analiz ile - Tema desteği"""
     title = article_data.get("title", "")
     content = article_data.get("content", "")
     url = article_data.get("url", "")
@@ -1006,22 +1006,76 @@ def generate_ai_tweet_with_mcp_analysis(article_data, api_key):
     TWITTER_LIMIT = 280
     URL_LENGTH = 25  # "\n\n🔗 " + URL kısaltması için
     
-    print(f"🤖 AI ile tweet oluşturuluyor (kaynak: {source})...")
+    print(f"🤖 AI ile tweet oluşturuluyor (kaynak: {source}, tema: {theme})...")
+    
+    # Tweet temaları ve özellikleri
+    tweet_themes = {
+        "bilgilendirici": {
+            "style": "informative and professional",
+            "tone": "clear, factual, and educational",
+            "emojis": ["📊", "💡", "🔍", "📈", "⚡", "🎯"],
+            "hashtags": ["#AI", "#Tech", "#Innovation", "#Technology"],
+            "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+        },
+        "eğlenceli": {
+            "style": "fun and engaging",
+            "tone": "playful, exciting, and enthusiastic",
+            "emojis": ["🚀", "🎉", "🔥", "✨", "🎊", "🌟", "💫", "🎈"],
+            "hashtags": ["#TechFun", "#Innovation", "#Cool", "#Amazing"],
+            "example": "🚀 Mind-blown! This AI can now read your thoughts (almost)! 🧠✨"
+        },
+        "mizahi": {
+            "style": "humorous and witty",
+            "tone": "funny, clever, and entertaining",
+            "emojis": ["😂", "🤖", "😄", "🙃", "😎", "🤯", "🎭", "😅"],
+            "hashtags": ["#TechHumor", "#AILife", "#TechJokes", "#FunnyTech"],
+            "example": "Robots are getting smarter... Should we be worried or impressed? 🤖😅"
+        },
+        "resmi": {
+            "style": "formal and authoritative",
+            "tone": "professional, serious, and official",
+            "emojis": ["📢", "🏢", "📋", "⚖️", "🔒", "📊"],
+            "hashtags": ["#TechNews", "#Industry", "#Business", "#Enterprise"],
+            "example": "Major technological advancement announced in artificial intelligence sector"
+        },
+        "heyecanlı": {
+            "style": "exciting and energetic",
+            "tone": "enthusiastic, dynamic, and inspiring",
+            "emojis": ["🔥", "⚡", "🚀", "💥", "🌟", "✨", "🎯", "💪"],
+            "hashtags": ["#Breakthrough", "#GameChanger", "#Revolutionary", "#NextLevel"],
+            "example": "🔥 BREAKTHROUGH ALERT! This changes everything we know about AI! ⚡"
+        },
+        "meraklı": {
+            "style": "curious and questioning",
+            "tone": "inquisitive, thoughtful, and exploratory",
+            "emojis": ["🤔", "❓", "🔍", "🧐", "💭", "🔬", "🎓"],
+            "hashtags": ["#TechCuriosity", "#WhatIf", "#Explore", "#Discover"],
+            "example": "🤔 What if AI could predict the future? This new research suggests it might... 🔮"
+        }
+    }
+    
+    # Seçilen tema bilgilerini al
+    theme_info = tweet_themes.get(theme, tweet_themes["bilgilendirici"])
     
     try:
         # Kapsamlı analiz yap
         analysis = generate_comprehensive_analysis(article_data, api_key)
         
-        # Tweet metni oluştur
+        # Tweet metni oluştur - tema özelliklerine göre
         companies_text = ', '.join(analysis['companies'][:2]) if analysis['companies'] else ""
         
-        tweet_prompt = f"""Create a compelling English tweet about this AI/tech breakthrough:
+        tweet_prompt = f"""Create a compelling English tweet about this AI/tech breakthrough with specific style:
 
 Title: {title[:120]}
 Key Innovation: {analysis['innovation'][:120]}
 Companies: {companies_text}
 
-Requirements:
+THEME REQUIREMENTS:
+- Style: {theme_info['style']}
+- Tone: {theme_info['tone']}
+- Example style: "{theme_info['example']}"
+
+General Requirements:
 - Write in perfect English only
 - Maximum 200 characters
 - Make it clear, engaging and newsworthy
@@ -1033,36 +1087,29 @@ Requirements:
 - Do NOT include hashtags, emojis, URLs, or impact levels (added separately)
 - Do NOT mention impact, effect level, or rating in the tweet
 
-Examples of good style:
-- "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-- "Tesla's robot now performs complex assembly tasks autonomously"
-- "Google's AI reduces data center energy consumption by 40%"
-
 Tweet text:"""
         
         tweet_text = gemini_call(tweet_prompt, api_key, max_tokens=80)
         
         if tweet_text == "API hatası" or not tweet_text.strip():
-            # İyileştirilmiş fallback tweet metni
+            # İyileştirilmiş fallback tweet metni - tema göre
             if analysis['companies'] and analysis['innovation']:
                 company = analysis['companies'][0]
                 innovation = analysis['innovation'][:100]
-                # Daha anlamlı fallback tweet oluştur
-                if "launch" in innovation.lower():
-                    clean_innovation = innovation.lower().replace('launches', '').replace('launch', '').strip()
-                    tweet_text = f"{company} launches {clean_innovation}" if clean_innovation else f"{company} launches new solution"
-                elif "announce" in innovation.lower():
-                    clean_innovation = innovation.lower().replace('announces', '').replace('announce', '').strip()
-                    tweet_text = f"{company} announces {clean_innovation}" if clean_innovation else f"{company} announces breakthrough"
-                elif "develop" in innovation.lower():
-                    clean_innovation = innovation.lower().replace('develops', '').replace('develop', '').strip()
-                    tweet_text = f"{company} develops {clean_innovation}" if clean_innovation else f"{company} develops new technology"
-                else:
-                    # Innovation metnini direkt kullan (şirket adını tekrar etme)
-                    if company.lower() in innovation.lower():
-                        tweet_text = innovation
-                    else:
-                        tweet_text = f"{company}: {innovation}"
+                
+                # Tema göre fallback tweet oluştur
+                if theme == "eğlenceli":
+                    tweet_text = f"Wow! {company} just dropped something amazing: {innovation}!"
+                elif theme == "mizahi":
+                    tweet_text = f"{company} is at it again... {innovation} (and we're here for it!)"
+                elif theme == "resmi":
+                    tweet_text = f"{company} announces {innovation}"
+                elif theme == "heyecanlı":
+                    tweet_text = f"BREAKING: {company} unleashes {innovation}!"
+                elif theme == "meraklı":
+                    tweet_text = f"Interesting... {company} reveals {innovation}. What's next?"
+                else:  # bilgilendirici
+                    tweet_text = f"{company} introduces {innovation}"
             elif analysis['innovation'] and len(analysis['innovation']) > 20:
                 # Innovation metni yeterince uzunsa direkt kullan
                 tweet_text = analysis['innovation']
@@ -1091,9 +1138,26 @@ Tweet text:"""
         # Fazla boşlukları temizle
         tweet_text = re.sub(r'\s+', ' ', tweet_text).strip()
         
-        # Hashtag ve emoji metinlerini oluştur
-        hashtag_text = " ".join(analysis['hashtags']).strip()
-        emoji_text = "".join(analysis['emojis']).strip()
+        # Tema göre hashtag ve emoji seç
+        import random
+        
+        # Tema emojilerini kullan
+        theme_emojis = theme_info['emojis']
+        selected_emojis = random.sample(theme_emojis, min(2, len(theme_emojis)))
+        emoji_text = "".join(selected_emojis)
+        
+        # Tema hashtag'lerini kullan ve mevcut analiz hashtag'leri ile birleştir
+        theme_hashtags = theme_info['hashtags']
+        analysis_hashtags = analysis.get('hashtags', [])
+        
+        # Tema hashtag'lerini öncelikle al, sonra analiz hashtag'lerini ekle
+        combined_hashtags = theme_hashtags[:2]  # İlk 2 tema hashtag'i
+        for hashtag in analysis_hashtags:
+            if hashtag not in combined_hashtags and len(combined_hashtags) < 4:
+                combined_hashtags.append(hashtag)
+        
+        hashtag_text = " ".join(combined_hashtags[:4])  # Maksimum 4 hashtag
+        
         url_part = f"\n\n🔗 {url}"
         
         # Sabit kısımların uzunluğu
@@ -1132,7 +1196,7 @@ Tweet text:"""
                 tweet_text = tweet_text[:new_tweet_length] + "..."
             else:
                 # Çok kısa kalırsa hashtag'leri azalt
-                hashtag_text = " ".join(analysis['hashtags'][:2])  # 2 hashtag
+                hashtag_text = " ".join(combined_hashtags[:2])  # 2 hashtag
                 fixed_parts_length = len(emoji_text) + len(hashtag_text) + len(url_part) + 1  # 1 boşluk
                 available_chars = TWITTER_LIMIT - fixed_parts_length
                 tweet_text = tweet_text[:available_chars-3] + "..."
@@ -1149,9 +1213,10 @@ Tweet text:"""
                 final_tweet = f"{main_content}{url_part}"
         
         print(f"✅ AI analizi ile tweet oluşturuldu: {len(final_tweet)} karakter")
+        print(f"🎨 Tweet teması: {theme}")
         print(f"📝 Tweet metni: {len(tweet_text)} karakter")
-        print(f"🏷️ AI Hashtag'ler: {hashtag_text} ({len(hashtag_text)} karakter)")
-        print(f"😊 AI Emojiler: {emoji_text} ({len(emoji_text)} karakter)")
+        print(f"🏷️ Tema Hashtag'ler: {hashtag_text} ({len(hashtag_text)} karakter)")
+        print(f"😊 Tema Emojiler: {emoji_text} ({len(emoji_text)} karakter)")
         print(f"🔗 URL kısmı: {len(url_part)} karakter")
         print(f"🎯 Hedef Kitle: {analysis['audience']}")
         print(f"📊 Impact Score: 8 (varsayılan)")
@@ -1161,34 +1226,38 @@ Tweet text:"""
             "tweet": final_tweet,
             "impact_score": 8,  # Varsayılan yüksek skor
             "analysis": analysis,
+            "theme": theme,
+            "theme_info": theme_info,
             "source": "mcp_analysis"
         }
         
     except Exception as e:
         print(f"❌ AI tweet oluşturma hatası: {e}")
         print("🔄 Fallback yönteme geçiliyor...")
-        fallback_tweet = generate_ai_tweet_with_content_fallback(article_data, api_key)
+        fallback_tweet = generate_ai_tweet_with_content_fallback(article_data, api_key, theme)
         return {
             "tweet": fallback_tweet,
             "impact_score": 6,  # Orta skor
             "analysis": {"audience": "General", "companies": [], "hashtags": [], "emojis": []},
+            "theme": theme,
             "source": "fallback"
         }
 
-def generate_ai_tweet_with_content(article_data, api_key):
-    """Ana tweet oluşturma fonksiyonu - MCP analizi öncelikli"""
+def generate_ai_tweet_with_content(article_data, api_key, theme="bilgilendirici"):
+    """Ana tweet oluşturma fonksiyonu - MCP analizi öncelikli - Tema desteği"""
     try:
         # Önce MCP analizi ile dene
-        tweet_data = generate_ai_tweet_with_mcp_analysis(article_data, api_key)
+        tweet_data = generate_ai_tweet_with_mcp_analysis(article_data, api_key, theme)
         
         # Eğer başarısızsa fallback kullan
         if not tweet_data or not tweet_data.get('tweet') or len(tweet_data.get('tweet', '')) < 50:
             print("🔄 MCP analizi yetersiz, fallback yöntemi deneniyor...")
-            fallback_tweet = generate_ai_tweet_with_content_fallback(article_data, api_key)
+            fallback_tweet = generate_ai_tweet_with_content_fallback(article_data, api_key, theme)
             return {
                 "tweet": fallback_tweet,
                 "impact_score": 6,
                 "analysis": {"audience": "General", "companies": [], "hashtags": [], "emojis": []},
+                "theme": theme,
                 "source": "fallback"
             }
         
@@ -1196,16 +1265,17 @@ def generate_ai_tweet_with_content(article_data, api_key):
         
     except Exception as e:
         print(f"Ana tweet oluşturma hatası: {e}")
-        fallback_tweet = generate_ai_tweet_with_content_fallback(article_data, api_key)
+        fallback_tweet = generate_ai_tweet_with_content_fallback(article_data, api_key, theme)
         return {
             "tweet": fallback_tweet,
             "impact_score": 6,
             "analysis": {"audience": "General", "companies": [], "hashtags": [], "emojis": []},
+            "theme": theme,
             "source": "fallback"
         }
 
-def generate_ai_tweet_with_content_fallback(article_data, api_key):
-    """Fallback tweet oluşturma - Eski yöntem"""
+def generate_ai_tweet_with_content_fallback(article_data, api_key, theme="bilgilendirici"):
+    """Fallback tweet oluşturma - Eski yöntem - Tema desteği"""
     title = article_data.get("title", "")
     content = article_data.get("content", "")
     url = article_data.get("url", "")
