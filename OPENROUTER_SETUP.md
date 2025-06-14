@@ -11,13 +11,16 @@ OpenRouter, AI Tweet Bot'ta **yedek sistem** olarak çalışır:
 1. **Ana Sistem:** Google Gemini API (birincil AI sistemi)
 2. **Yedek Sistem:** OpenRouter API (Gemini başarısız olursa devreye girer)
 
-### 🆓 Ücretsiz Modeller
+### 🆓 Ücretsiz Modeller (2025 Güncel)
 
-OpenRouter'da kullanabileceğiniz ücretsiz modeller:
-- **Meta Llama 3.2 3B Instruct** (Hızlı ve etkili)
-- **Microsoft Phi-3 Mini** (Küçük ama güçlü)
-- **Google Gemma 2 9B** (Google'ın açık kaynak modeli)
-- **Hugging Face Zephyr 7B** (Topluluk favorisi)
+OpenRouter'da kullanabileceğiniz güncel ücretsiz modeller:
+- **Qwen3 8B** (En güvenilir ve hızlı - 2025 yeni model)
+- **Qwen3 30B A3B** (Güçlü performans - MoE mimarisi)
+- **Qwen3 4B** (Ultra hızlı - düşük kaynak kullanımı)
+- **DeepSeek Chat V3** (Konuşma odaklı - güvenilir)
+- **DeepSeek R1 Zero** (Reasoning odaklı - mantıksal çıkarım)
+- **DeepSeek V3 Base** (Teknik içerik için optimize)
+- **DeepHermes 3 Llama 3 8B** (Fallback - genel amaçlı)
 
 ### ⚡ Otomatik Yedek Sistemi
 
@@ -65,27 +68,42 @@ OPENROUTER_API_KEY=your_api_key_here
 
 ### 4. Ücretsiz Modeller
 
-Sistem şu ücretsiz modelleri kullanır (öncelik sırasına göre):
+Sistem şu güncel ücretsiz modelleri kullanır (öncelik sırasına göre):
 
-1. **meta-llama/llama-3.2-3b-instruct:free**
-   - Meta'nın Llama 3.2 modeli
-   - 3B parametre
-   - İyi performans/hız dengesi
+1. **qwen/qwen3-8b:free**
+   - Alibaba'nın Qwen3 8B modeli (2025)
+   - 8.2B parametre, 40K context
+   - En güvenilir ve hızlı performans
 
-2. **microsoft/phi-3-mini-128k-instruct:free**
-   - Microsoft'un Phi-3 modeli
-   - Kompakt ve hızlı
-   - 128K context window
+2. **qwen/qwen3-30b-a3b:free**
+   - Qwen3 30B A3B MoE modeli
+   - 30.5B toplam, 3.3B aktif parametre
+   - Güçlü reasoning ve çok dilli destek
 
-3. **google/gemma-2-9b-it:free**
-   - Google'ın Gemma 2 modeli
-   - 9B parametre
-   - İyi kalite
+3. **qwen/qwen3-4b:free**
+   - Qwen3 4B kompakt model
+   - 4B parametre, 128K context
+   - Ultra hızlı ve düşük kaynak kullanımı
 
-4. **huggingface/zephyr-7b-beta:free**
-   - Hugging Face'in Zephyr modeli
-   - 7B parametre
-   - Güvenilir performans
+4. **deepseek/deepseek-chat-v3-0324:free**
+   - DeepSeek Chat V3 modeli
+   - Konuşma odaklı optimizasyon
+   - Güvenilir dialogue management
+
+5. **deepseek/deepseek-r1-zero:free**
+   - DeepSeek R1 Zero reasoning modeli
+   - Mantıksal çıkarım ve problem çözme
+   - Bilimsel ve teknik görevler için
+
+6. **deepseek/deepseek-v3-base:free**
+   - DeepSeek V3 Base modeli
+   - Teknik içerik ve programlama
+   - Geniş domain bilgisi
+
+7. **nousresearch/deephermes-3-llama-3-8b-preview:free**
+   - Nous Research DeepHermes 3
+   - Llama 3 8B tabanlı
+   - Genel amaçlı fallback
 
 ## Nasıl Çalışır?
 

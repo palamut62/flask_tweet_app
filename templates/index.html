@@ -123,10 +123,10 @@
                         
                         <!-- Manuel Kontrol Butonu -->
                         <div class="pt-4 border-t border-gray-200">
-                            <a href="{{ url_for('check_articles') }}" class="btn-primary w-full flex items-center justify-center space-x-2">
-                                <i class="fas fa-sync-alt"></i>
-                                <span>Şimdi Kontrol Et</span>
-                            </a>
+                            <button id="check-articles-btn" onclick="startArticleCheck()" class="btn-primary flex items-center space-x-2 text-left">
+                                <i class="fas fa-sync-alt" id="check-icon"></i>
+                                <span id="check-text">Şimdi Kontrol Et</span>
+                            </button>
                         </div>
                     </div>
                 {% else %}
@@ -658,5 +658,235 @@
 </div>
 {% endif %}
 
+<script>
+// Terminal benzeri çalışma akışı için mesajlar
+const terminalMessages = [
+    { text: "🔍 Sistem başlatılıyor...", delay: 500 },
+    { text: "📡 API bağlantıları kontrol ediliyor...", delay: 800 },
+    { text: "🤖 AI modelleri hazırlanıyor...", delay: 1000 },
+    { text: "📰 Haber kaynaklarına bağlanılıyor...", delay: 1200 },
+    { text: "🔎 Yeni makaleler aranıyor...", delay: 1500 },
+    { text: "📊 İçerik analizi yapılıyor...", delay: 1800 },
+    { text: "🎯 Kalite skorları hesaplanıyor...", delay: 2000 },
+    { text: "✨ Tweet'ler oluşturuluyor...", delay: 2200 },
+    { text: "🔄 Duplikat kontrolleri yapılıyor...", delay: 2400 },
+    { text: "💾 Veriler kaydediliyor...", delay: 2600 },
+    { text: "✅ İşlem tamamlandı!", delay: 2800 }
+];
+
+let currentMessageIndex = 0;
+let isProcessing = false;
+
+function startArticleCheck() {
+    if (isProcessing) return;
+    
+    isProcessing = true;
+    currentMessageIndex = 0;
+    
+    const button = document.getElementById('check-articles-btn');
+    const icon = document.getElementById('check-icon');
+    const text = document.getElementById('check-text');
+    
+    // Butonu devre dışı bırak
+    button.disabled = true;
+    button.classList.add('opacity-75', 'cursor-not-allowed');
+    
+    // İkonu döndürmeye başla
+    icon.classList.add('animate-spin');
+    
+    // Terminal mesajlarını göster
+    showNextMessage();
+}
+
+function showNextMessage() {
+    if (currentMessageIndex >= terminalMessages.length) {
+        // Tüm mesajlar gösterildi, gerçek işlemi başlat
+        performActualCheck();
+        return;
+    }
+    
+    const message = terminalMessages[currentMessageIndex];
+    const text = document.getElementById('check-text');
+    
+    // Mesajı göster
+    text.textContent = message.text;
+    
+    currentMessageIndex++;
+    
+    // Sonraki mesaj için zamanlayıcı
+    setTimeout(showNextMessage, message.delay);
+}
+
+function performActualCheck() {
+    const text = document.getElementById('check-text');
+    text.textContent = "🚀 Sunucuya istek gönderiliyor...";
+    
+    // Gerçek API çağrısını yap
+    fetch('{{ url_for("check_articles") }}', {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (response.redirected) {
+            // Başarılı - sayfayı yenile
+            text.textContent = "✅ Başarılı! Sayfa yenileniyor...";
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            throw new Error('İstek başarısız');
+        }
+    })
+    .catch(error => {
+        console.error('Hata:', error);
+        text.textContent = "❌ Hata oluştu! Tekrar deneyin.";
+        resetButton();
+    });
+}
+
+function resetButton() {
+    setTimeout(() => {
+        const button = document.getElementById('check-articles-btn');
+        const icon = document.getElementById('check-icon');
+        const text = document.getElementById('check-text');
+        
+        button.disabled = false;
+        button.classList.remove('opacity-75', 'cursor-not-allowed');
+        icon.classList.remove('animate-spin');
+        text.textContent = "Şimdi Kontrol Et";
+        
+        isProcessing = false;
+    }, 3000);
+}
+
+// Sayfa yüklendiğinde rate limit durumunu kontrol et
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/rate_limit_status')
+        .then(response => response.json())
+        .then(data => {
+            const statusElement = document.getElementById('rate-limit-status');
+            if (data.success && data.rate_limits) {
+                const remaining = data.rate_limits.remaining || 0;
+                const resetTime = data.rate_limits.reset_time || 'Bilinmiyor';
+                statusElement.textContent = `${remaining} kalan`;
+                statusElement.className = remaining > 0 ? 'font-bold text-green-600' : 'font-bold text-red-600';
+            } else {
+                statusElement.textContent = 'Kontrol edilemedi';
+                statusElement.className = 'font-bold text-gray-500';
+            }
+        })
+        .catch(error => {
+            console.error('Rate limit kontrolü başarısız:', error);
+            document.getElementById('rate-limit-status').textContent = 'Hata';
+        });
+});
+
+// Diğer fonksiyonlar (mevcut)
+function postTweet(tweetId) {
+    if (confirm('Bu tweet\'i API ile paylaşmak istediğinizden emin misiniz?')) {
+        fetch('/post_tweet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({tweet_id: tweetId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Tweet başarıyla paylaşıldı!');
+                location.reload();
+            } else {
+                if (data.rate_limited) {
+                    alert('Rate limit hatası: ' + data.error + '\n\nTweet pending listesinde kalacak ve otomatik olarak tekrar denenecek.');
+                } else {
+                    alert('Hata: ' + data.error);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+}
+
+function deleteTweet(tweetId) {
+    if (confirm('Bu tweet\'i silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) {
+        fetch('/delete_tweet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({tweet_id: tweetId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Tweet silindi!');
+                location.reload();
+            } else {
+                alert('Hata: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+}
+
+function manualPostTweet(tweetId) {
+    fetch('/manual_post_tweet', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({tweet_id: tweetId})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // X.com'da paylaşım sayfasını aç
+            window.open(data.x_share_url, '_blank');
+            
+            // Kullanıcıya onay sorusu sor
+            setTimeout(() => {
+                if (confirm('Tweet\'i X\'te paylaştınız mı? Evet\'e tıklarsanız bu tweet pending listesinden kaldırılacak.')) {
+                    // Onay endpoint\'ine istek gönder
+                    fetch('/confirm_manual_post', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({tweet_id: tweetId})
+                    })
+                    .then(response => response.json())
+                    .then(confirmData => {
+                        if (confirmData.success) {
+                            alert('Tweet manuel paylaşım olarak kaydedildi!');
+                            location.reload();
+                        } else {
+                            alert('Onay hatası: ' + confirmData.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Onay hatası:', error);
+                        alert('Onay sırasında bir hata oluştu!');
+                    });
+                }
+            }, 2000); // 2 saniye bekle
+        } else {
+            alert('Hata: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Bir hata oluştu!');
+    });
+}
+</script>
 
 {% endblock %} 

@@ -509,7 +509,7 @@ Seçenekler: Developer, Investor, General
 Cevap:"""
     return gemini_call(prompt, api_key, max_tokens=10).strip()
 
-def openrouter_call(prompt, api_key, max_tokens=100, model="meta-llama/llama-3.2-3b-instruct:free"):
+def openrouter_call(prompt, api_key, max_tokens=100, model="qwen/qwen3-8b:free"):
     """OpenRouter API çağrısı - Ücretsiz model ile yedek sistem"""
     if not api_key:
         safe_log("OpenRouter API anahtarı bulunamadı", "WARNING")
@@ -635,12 +635,15 @@ def try_openrouter_fallback(prompt, max_tokens=100):
         
         safe_log("🔄 Gemini başarısız, OpenRouter yedek sistemi deneniyor...", "INFO")
         
-        # Ücretsiz modeller listesi (öncelik sırasına göre)
+        # Güncel ücretsiz modeller listesi (2025 güncel - öncelik sırasına göre)
         free_models = [
-            "meta-llama/llama-3.2-3b-instruct:free",
-            "microsoft/phi-3-mini-128k-instruct:free", 
-            "google/gemma-2-9b-it:free",
-            "huggingface/zephyr-7b-beta:free"
+            "qwen/qwen3-8b:free",                           # Yeni Qwen3 8B - En güvenilir
+            "qwen/qwen3-30b-a3b:free",                      # Yeni Qwen3 30B A3B - Güçlü
+            "qwen/qwen3-4b:free",                           # Yeni Qwen3 4B - Hızlı
+            "deepseek/deepseek-chat-v3-0324:free",         # DeepSeek Chat - Güvenilir
+            "deepseek/deepseek-r1-zero:free",              # DeepSeek R1 - Reasoning
+            "deepseek/deepseek-v3-base:free",              # DeepSeek V3 Base
+            "nousresearch/deephermes-3-llama-3-8b-preview:free"  # DeepHermes 3 - Fallback
         ]
         
         # Her modeli sırayla dene

@@ -15,7 +15,7 @@
         "excerpt": ".loop-card__content"
       },
       "added_date": "2025-01-08T10:00:00",
-      "last_checked": "2025-06-14T20:59:30.088136",
+      "last_checked": "2025-06-14T21:08:52.693816",
       "article_count": 2,
       "success_rate": 100
     }
@@ -25,7 +25,7 @@
     "check_all_sources": true,
     "source_timeout": 30,
     "articles_per_source": 5,
-    "last_updated": "2025-06-14T20:59:29.058897"
+    "last_updated": "2025-06-14T21:08:51.671817"
   },
   "rss_sources": []
 }

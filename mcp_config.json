@@ -19,7 +19,7 @@
     "enabled": true,
     "max_tokens": 300,
     "temperature": 0.7,
-    "model": "deepseek/deepseek-chat-v3-0324:free",
+    "model": "qwen/qwen3-8b:free",
     "fallback_enabled": true
   },
   "last_updated": "2024-01-01T00:00:00Z"

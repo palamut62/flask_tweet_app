@@ -3473,10 +3473,13 @@ def test_openrouter_api():
         
         # Ücretsiz modelleri test et
         free_models = [
-            "meta-llama/llama-3.2-3b-instruct:free",
-            "microsoft/phi-3-mini-128k-instruct:free", 
-            "google/gemma-2-9b-it:free",
-            "huggingface/zephyr-7b-beta:free"
+            "qwen/qwen3-8b:free",                           # Yeni Qwen3 8B - En güvenilir
+            "qwen/qwen3-30b-a3b:free",                      # Yeni Qwen3 30B A3B - Güçlü
+            "qwen/qwen3-4b:free",                           # Yeni Qwen3 4B - Hızlı
+            "deepseek/deepseek-chat-v3-0324:free",         # DeepSeek Chat - Güvenilir
+            "deepseek/deepseek-r1-zero:free",              # DeepSeek R1 - Reasoning
+            "deepseek/deepseek-v3-base:free",              # DeepSeek V3 Base
+            "nousresearch/deephermes-3-llama-3-8b-preview:free"  # DeepHermes 3 - Fallback
         ]
         
         test_results = []
