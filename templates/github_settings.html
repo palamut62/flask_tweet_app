@@ -92,7 +92,7 @@
                         <p class="mb-0 mt-2 opacity-75">GitHub repolarını çekmek için varsayılan ayarları yapılandırın</p>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ url_for('save_github_settings_route') }}">
+                        <form method="POST" action="{{ url_for('save_github_settings_route') }}" id="githubSettingsForm">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -233,6 +233,10 @@
                             <button type="button" class="btn btn-outline-primary" onclick="testGitHubAPI()">
                                 <i class="fas fa-vial me-2"></i>API Bağlantısını Test Et
                             </button>
+                            
+                            <button type="button" class="btn btn-outline-warning" onclick="testTopicsSearch()">
+                                <i class="fas fa-search me-2"></i>Konu Aramasını Test Et
+                            </button>
                         </div>
 
                         <div id="test-result" class="mt-3"></div>
@@ -287,9 +291,67 @@
                     `;
                 });
         }
+        
+        function testTopicsSearch() {
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Konulara göre arama test ediliyor...';
+            
+            // Test konuları
+            const testData = {
+                language: 'python',
+                time_period: 'weekly',
+                limit: 3,
+                use_topics: true,
+                custom_topics: 'ai, machine-learning'
+            };
+            
+            fetch('/fetch_github_repos_with_settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(testData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success alert-sm">
+                            <i class="fas fa-check-circle me-2"></i>
+                            ${data.message}<br>
+                            <small>Konular: ${data.search_topics ? data.search_topics.join(', ') : 'Yok'}</small>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-warning alert-sm">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            ${data.error}<br>
+                            <small>Toplam repo: ${data.total_repos || 0}, Duplikasyon: ${data.duplicate_count || 0}</small>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger alert-sm">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Test hatası: ${error.message}
+                    </div>
+                `;
+            });
+        }
 
-        // Form submit sonrası scroll to top
-        document.querySelector('form').addEventListener('submit', function() {
+        // Form submit işlemi
+        document.getElementById('githubSettingsForm').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Loading state
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Kaydediliyor...';
+            submitBtn.disabled = true;
+            
+            // Form submit sonrası scroll to top
             setTimeout(() => {
                 window.scrollTo(0, 0);
             }, 100);

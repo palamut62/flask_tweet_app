@@ -1,11 +1,16 @@
 {
   "default_language": "python",
-  "default_time_period": "daily",
-  "default_limit": 10,
+  "default_time_period": "weekly",
+  "default_limit": 6,
   "search_topics": [
-    "ai"
+    "ai",
+    "machine-learning",
+    "openai"
   ],
-  "custom_search_queries": [],
+  "custom_search_queries": [
+    "chatbot",
+    "neural network"
+  ],
   "languages": [
     "python",
     "javascript",
@@ -23,5 +28,5 @@
     "weekly",
     "monthly"
   ],
-  "last_updated": "2025-06-11T15:13:17.006727"
+  "last_updated": "2025-06-14T18:30:32.296186"
 }

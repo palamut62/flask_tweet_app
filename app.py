@@ -80,6 +80,21 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if 'logged_in' not in session:
             return redirect(url_for('login'))
+        
+        # "Beni Hatırla" süresini kontrol et
+        if session.get('remember_me') and session.get('remember_until'):
+            try:
+                remember_until = datetime.fromisoformat(session['remember_until'])
+                if datetime.now() > remember_until:
+                    # Süre dolmuş, çıkış yap
+                    session.clear()
+                    flash('Oturum süreniz doldu. Lütfen tekrar giriş yapın.', 'info')
+                    return redirect(url_for('login'))
+            except:
+                # Hatalı tarih formatı, güvenlik için çıkış yap
+                session.clear()
+                return redirect(url_for('login'))
+        
         return f(*args, **kwargs)
     return decorated_function
 
@@ -229,10 +244,22 @@ def login():
                 session['auth_method'] = 'email_otp'
                 session['user_email'] = email
                 
-                # Terminal log
-                terminal_log(f"✅ Başarılı giriş: {email}", "success")
+                # "Beni Hatırla" kontrolü
+                remember_me = request.form.get('remember_me')
+                if remember_me:
+                    # 30 gün boyunca hatırla
+                    session.permanent = True
+                    app.permanent_session_lifetime = timedelta(days=30)
+                    session['remember_me'] = True
+                    session['remember_until'] = (datetime.now() + timedelta(days=30)).isoformat()
+                    terminal_log(f"✅ Başarılı giriş (30 gün hatırlanacak): {email}", "success")
+                    flash('E-posta doğrulama ile başarıyla giriş yaptınız! 30 gün boyunca hatırlanacaksınız.', 'success')
+                else:
+                    # Normal session (tarayıcı kapanınca sona erer)
+                    session.permanent = False
+                    terminal_log(f"✅ Başarılı giriş: {email}", "success")
+                    flash('E-posta doğrulama ile başarıyla giriş yaptınız!', 'success')
                 
-                flash('E-posta doğrulama ile başarıyla giriş yaptınız!', 'success')
                 return redirect(url_for('index'))
             else:
                 # Hatalı kod
@@ -259,8 +286,18 @@ def login():
 @app.route('/logout')
 def logout():
     """Çıkış yap"""
+    user_email = session.get('user_email', 'Bilinmeyen kullanıcı')
+    was_remembered = session.get('remember_me', False)
+    
     session.clear()
-    flash('Başarıyla çıkış yaptınız!', 'info')
+    
+    if was_remembered:
+        terminal_log(f"🚪 Çıkış yapıldı (hatırlanan oturum): {user_email}", "info")
+        flash('Başarıyla çıkış yaptınız! Hatırlanan oturum temizlendi.', 'info')
+    else:
+        terminal_log(f"🚪 Çıkış yapıldı: {user_email}", "info")
+        flash('Başarıyla çıkış yaptınız!', 'info')
+    
     return redirect(url_for('login'))
 
 # E-posta OTP sistemi için global değişken
@@ -3111,10 +3148,13 @@ def test_github_api():
         if not GITHUB_MODULE_AVAILABLE:
             return jsonify({"success": False, "error": "GitHub modülü kullanılamıyor"})
         
+        terminal_log("🧪 GitHub API testi başlatılıyor...", "info")
+        
         # Test için basit bir arama yap
         repos = fetch_trending_github_repos(language="python", time_period="daily", limit=3)
         
         if repos:
+            terminal_log(f"✅ GitHub API testi başarılı - {len(repos)} repo bulundu", "success")
             return jsonify({
                 "success": True,
                 "message": f"GitHub API çalışıyor - {len(repos)} repo bulundu",
@@ -3128,12 +3168,14 @@ def test_github_api():
                 ]
             })
         else:
+            terminal_log("❌ GitHub API testinde repo bulunamadı", "error")
             return jsonify({
                 "success": False,
                 "error": "GitHub API'den veri alınamadı"
             })
             
     except Exception as e:
+        terminal_log(f"❌ GitHub API test hatası: {e}", "error")
         return jsonify({"success": False, "error": str(e)})
 
 @app.route('/github_settings')
@@ -3159,7 +3201,8 @@ def save_github_settings_route():
     """GitHub ayarlarını kaydet"""
     try:
         if not GITHUB_MODULE_AVAILABLE:
-            return jsonify({"success": False, "error": "GitHub modülü kullanılamıyor"})
+            flash('GitHub modülü kullanılamıyor!', 'error')
+            return redirect(url_for('github_settings'))
         
         # Form verilerini al
         settings = {
@@ -3176,17 +3219,28 @@ def save_github_settings_route():
         topics_input = request.form.get('search_topics', '')
         if topics_input.strip():
             settings["search_topics"] = [topic.strip() for topic in topics_input.split(',') if topic.strip()]
+        else:
+            # Varsayılan konuları ekle
+            settings["search_topics"] = ["ai", "machine-learning", "deep-learning"]
         
         # Özel arama sorgularını al (virgülle ayrılmış)
         queries_input = request.form.get('custom_search_queries', '')
         if queries_input.strip():
             settings["custom_search_queries"] = [query.strip() for query in queries_input.split(',') if query.strip()]
         
+        terminal_log(f"💾 GitHub ayarları kaydediliyor: {settings}", "info")
+        
         # Ayarları kaydet
-        if save_github_settings(settings):
-            flash('GitHub ayarları başarıyla kaydedildi!', 'success')
-        else:
-            flash('GitHub ayarları kaydedilemedi!', 'error')
+        try:
+            if save_github_settings(settings):
+                flash('GitHub ayarları başarıyla kaydedildi!', 'success')
+                terminal_log("✅ GitHub ayarları başarıyla kaydedildi", "success")
+            else:
+                flash('GitHub ayarları kaydedilemedi!', 'error')
+                terminal_log("❌ GitHub ayarları kaydedilemedi", "error")
+        except Exception as save_error:
+            terminal_log(f"❌ GitHub ayarları kaydetme exception: {save_error}", "error")
+            flash(f'GitHub ayarları kaydetme hatası: {str(save_error)}', 'error')
         
         return redirect(url_for('github_settings'))
         
@@ -3239,7 +3293,7 @@ def fetch_github_repos_with_settings():
                 limit=limit
             )
         else:
-            # Normal trend arama
+            # Normal trend arama (GitHub trending sayfasından)
             repos = fetch_trending_github_repos(
                 language=language,
                 time_period=time_period,
@@ -3256,11 +3310,26 @@ def fetch_github_repos_with_settings():
             pending_tweets = []
         
         # Mevcut GitHub repo URL'lerini kontrol et (duplikasyon önleme)
-        existing_urls = [tweet.get('url', '') for tweet in pending_tweets if tweet.get('source_type') == 'github']
+        existing_urls = set()
+        for tweet in pending_tweets:
+            if tweet.get('source_type') == 'github' and tweet.get('url'):
+                existing_urls.add(tweet.get('url'))
         
         # Mevcut paylaşılan repoları da kontrol et
-        posted_articles = load_json("posted_articles.json")
-        posted_urls = [article.get('url', '') for article in posted_articles]
+        try:
+            posted_articles = load_json("posted_articles.json")
+        except:
+            posted_articles = []
+        
+        posted_urls = set()
+        for article in posted_articles:
+            if article.get('url'):
+                posted_urls.add(article.get('url'))
+        
+        # Tüm mevcut URL'leri birleştir
+        all_existing_urls = existing_urls.union(posted_urls)
+        
+        terminal_log(f"📊 Duplikasyon kontrolü - Mevcut: {len(existing_urls)} pending, {len(posted_urls)} posted", "info")
         
         # Tweet'leri oluştur
         new_tweets = []
@@ -3269,7 +3338,7 @@ def fetch_github_repos_with_settings():
         for repo in repos:
             try:
                 # Duplikasyon kontrolü
-                if repo["url"] in existing_urls or repo["url"] in posted_urls:
+                if repo["url"] in all_existing_urls:
                     terminal_log(f"⚠️ GitHub repo zaten mevcut: {repo['name']}", "warning")
                     continue
                 
@@ -3346,9 +3415,18 @@ def fetch_github_repos_with_settings():
                 "search_topics": topics_to_search if use_topics else None
             })
         else:
+            # Hiç yeni tweet oluşturulamadıysa detaylı bilgi ver
+            duplicate_count = len([repo for repo in repos if repo["url"] in all_existing_urls])
+            
             return jsonify({
                 "success": False,
-                "error": "Yeni GitHub tweet'i oluşturulamadı (tümü zaten mevcut)"
+                "error": f"Yeni GitHub tweet'i oluşturulamadı. {len(repos)} repo bulundu, {duplicate_count} tanesi zaten mevcut.",
+                "total_repos": len(repos),
+                "duplicate_count": duplicate_count,
+                "search_method": "topics" if use_topics else "trending",
+                "search_topics": topics_to_search if use_topics else None,
+                "language": language,
+                "time_period": time_period
             })
         
     except Exception as e:
@@ -3371,6 +3449,34 @@ def get_github_settings_api():
         
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
+
+@app.route('/session_info')
+@login_required
+def session_info():
+    """Session bilgilerini göster (debug için)"""
+    session_data = {
+        'logged_in': session.get('logged_in'),
+        'login_time': session.get('login_time'),
+        'user_email': session.get('user_email'),
+        'remember_me': session.get('remember_me'),
+        'remember_until': session.get('remember_until'),
+        'auth_method': session.get('auth_method'),
+        'session_permanent': session.permanent,
+        'current_time': datetime.now().isoformat()
+    }
+    
+    # Kalan süreyi hesapla
+    if session.get('remember_until'):
+        try:
+            remember_until = datetime.fromisoformat(session['remember_until'])
+            remaining = remember_until - datetime.now()
+            session_data['remaining_days'] = remaining.days
+            session_data['remaining_hours'] = remaining.seconds // 3600
+        except:
+            session_data['remaining_days'] = 'Hata'
+            session_data['remaining_hours'] = 'Hata'
+    
+    return jsonify(session_data)
 
 if __name__ == '__main__':
     # Arka plan zamanlayıcısını başlat

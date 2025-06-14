@@ -202,6 +202,7 @@
                         <i class="fas fa-code mr-1"></i>Programlama Dili
                     </label>
                     <select id="language" class="input-mobile w-full">
+                        <option value="any">Tüm Diller</option>
                         <option value="python">Python</option>
                         <option value="javascript">JavaScript</option>
                         <option value="typescript">TypeScript</option>
@@ -339,6 +340,8 @@ document.getElementById('fetchForm').addEventListener('submit', function(e) {
         custom_topics: customTopics
     };
     
+    console.log('GitHub repo çekme isteği gönderiliyor:', requestData);
+    
     fetch('/fetch_github_repos_with_settings', {
         method: 'POST',
         headers: {
@@ -346,8 +349,12 @@ document.getElementById('fetchForm').addEventListener('submit', function(e) {
         },
         body: JSON.stringify(requestData)
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('GitHub API yanıtı alındı:', response.status);
+        return response.json();
+    })
     .then(data => {
+        console.log('GitHub API verisi:', data);
         if (data.success) {
             let message = data.message;
             if (data.search_method === 'topics' && data.search_topics) {
@@ -357,11 +364,13 @@ document.getElementById('fetchForm').addEventListener('submit', function(e) {
             closeFetchModal();
             setTimeout(() => window.location.reload(), 1500);
         } else {
+            console.error('GitHub API hatası:', data.error);
             showNotification('Hata: ' + data.error, 'error');
         }
     })
     .catch(error => {
-        showNotification('Bağlantı hatası: ' + error, 'error');
+        console.error('GitHub bağlantı hatası:', error);
+        showNotification('Bağlantı hatası: ' + error.message, 'error');
     })
     .finally(() => {
         submitBtn.innerHTML = originalText;
@@ -375,5 +384,37 @@ document.getElementById('fetchModal').addEventListener('click', function(e) {
         closeFetchModal();
     }
 });
+
+// Notification fonksiyonu
+function showNotification(message, type = 'info') {
+    // Mevcut notification'ları temizle
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(n => n.remove());
+    
+    // Yeni notification oluştur
+    const notification = document.createElement('div');
+    notification.className = `notification fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
+        type === 'success' ? 'bg-green-500 text-white' :
+        type === 'error' ? 'bg-red-500 text-white' :
+        type === 'warning' ? 'bg-yellow-500 text-black' :
+        'bg-blue-500 text-white'
+    }`;
+    
+    notification.innerHTML = `
+        <div class="flex items-center justify-between">
+            <span>${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-lg font-bold">×</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // 5 saniye sonra otomatik kapat
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
 </script>
 {% endblock %} 

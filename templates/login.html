@@ -194,6 +194,30 @@
                 padding: 1rem;
             }
         }
+        
+        /* Remember me checkbox styling */
+        .remember-me-container {
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .remember-me-container:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+        
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        
+        .form-check-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
     </style>
 </head>
 <body>
@@ -273,6 +297,28 @@
                                            inputmode="numeric"
                                            required
                                            autofocus>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="remember-me-container">
+                                        <div class="form-check d-flex align-items-center">
+                                            <input class="form-check-input me-3" 
+                                                   type="checkbox" 
+                                                   id="remember_me" 
+                                                   name="remember_me" 
+                                                   value="1"
+                                                   style="transform: scale(1.3);">
+                                            <label class="form-check-label flex-1" for="remember_me" style="cursor: pointer;">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-clock me-2 text-primary"></i>
+                                                    <div>
+                                                        <strong class="text-primary">Beni Hatırla</strong>
+                                                        <small class="text-muted d-block">30 gün boyunca tekrar şifre sorma</small>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                                 
                                 <button type="submit" class="btn btn-success btn-login btn-lg w-100">
@@ -439,6 +485,21 @@
              }, 5000);
          }
          
+         // Remember me checkbox animasyonu
+         function toggleRememberMe() {
+             const checkbox = document.getElementById('remember_me');
+             const container = document.querySelector('.remember-me-container');
+             
+             if (checkbox.checked) {
+                 container.style.background = 'rgba(102, 126, 234, 0.15)';
+                 container.style.borderColor = 'rgba(102, 126, 234, 0.5)';
+                 showNotification('30 gün boyunca hatırlanacaksınız!', 'success');
+             } else {
+                 container.style.background = 'rgba(102, 126, 234, 0.05)';
+                 container.style.borderColor = 'rgba(102, 126, 234, 0.2)';
+             }
+         }
+         
          // Sayfa yüklendiğinde
          document.addEventListener('DOMContentLoaded', function() {
              // OTP input'u için özel davranış
@@ -483,6 +544,12 @@
                      submitBtn.classList.add('btn-secondary');
                      submitBtn.innerHTML = '<i class="fas fa-key me-2"></i>6 Haneli Şifre Girin';
                  }
+             }
+             
+             // Remember me checkbox event listener
+             const rememberCheckbox = document.getElementById('remember_me');
+             if (rememberCheckbox) {
+                 rememberCheckbox.addEventListener('change', toggleRememberMe);
              }
              
              // Form submit kontrolü

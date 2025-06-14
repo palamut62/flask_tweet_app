@@ -13,11 +13,81 @@ load_dotenv()
 
 # GitHub modülünü test et
 try:
-    from github_module import fetch_trending_github_repos, create_fallback_github_tweet
+    from github_module import (
+        fetch_trending_github_repos, create_fallback_github_tweet, generate_github_tweet,
+        load_github_settings, save_github_settings, search_github_repos_by_topics
+    )
     print("✅ GitHub modülü başarıyla import edildi")
 except ImportError as e:
     print(f"❌ GitHub modülü import hatası: {e}")
     sys.exit(1)
+
+def test_github_settings():
+    """GitHub ayarları kaydetme ve yükleme test et"""
+    print("\n🔧 GitHub ayarları testi başlıyor...")
+    
+    # Test ayarları
+    test_settings = {
+        "default_language": "python",
+        "default_time_period": "weekly",
+        "default_limit": 5,
+        "search_topics": ["ai", "machine-learning", "openai"],
+        "custom_search_queries": ["chatbot", "neural network"],
+        "languages": ["python", "javascript", "typescript"],
+        "time_periods": ["daily", "weekly", "monthly"]
+    }
+    
+    # Ayarları kaydet
+    print("💾 Test ayarları kaydediliyor...")
+    if save_github_settings(test_settings):
+        print("✅ Ayarlar başarıyla kaydedildi")
+    else:
+        print("❌ Ayarlar kaydedilemedi")
+        return False
+    
+    # Ayarları yükle
+    print("📂 Ayarlar yükleniyor...")
+    loaded_settings = load_github_settings()
+    
+    if loaded_settings:
+        print("✅ Ayarlar başarıyla yüklendi")
+        print(f"   Dil: {loaded_settings.get('default_language')}")
+        print(f"   Dönem: {loaded_settings.get('default_time_period')}")
+        print(f"   Limit: {loaded_settings.get('default_limit')}")
+        print(f"   Konular: {loaded_settings.get('search_topics')}")
+        return True
+    else:
+        print("❌ Ayarlar yüklenemedi")
+        return False
+
+def test_topics_search():
+    """Konulara göre GitHub arama test et"""
+    print("\n🔍 Konulara göre GitHub arama testi başlıyor...")
+    
+    # Test konuları
+    test_topics = ["ai", "machine-learning"]
+    
+    print(f"📋 Test konuları: {test_topics}")
+    
+    repos = search_github_repos_by_topics(
+        topics=test_topics,
+        language="python",
+        time_period="weekly",
+        limit=3
+    )
+    
+    if repos:
+        print(f"✅ {len(repos)} repo bulundu (konular: {test_topics}):")
+        for i, repo in enumerate(repos, 1):
+            print(f"  {i}. {repo['name']} - ⭐ {repo['stars']} stars")
+            print(f"     Konular: {repo.get('topics', [])}")
+            print(f"     Arama konuları: {repo.get('search_topics', [])}")
+            print(f"     {repo['url']}")
+            print()
+        return True
+    else:
+        print(f"❌ Konulara göre repo bulunamadı: {test_topics}")
+        return False
 
 def test_github_api():
     """GitHub API'yi test et"""
@@ -70,11 +140,25 @@ def main():
     # Çevre değişkenlerini test et
     test_environment()
     
+    # GitHub ayarları test et
+    settings_ok = test_github_settings()
+    
+    # Konulara göre arama test et
+    topics_ok = test_topics_search()
+    
     # GitHub API'yi test et
     test_github_api()
     
-    print("\n✅ Test tamamlandı!")
-    print("\nGitHub modülü kullanıma hazır. Web uygulamasında /github_repos sayfasını ziyaret edebilirsiniz.")
+    print("\n" + "=" * 50)
+    print("📊 Test Sonuçları:")
+    print(f"   Ayarlar: {'✅ Başarılı' if settings_ok else '❌ Başarısız'}")
+    print(f"   Konu Araması: {'✅ Başarılı' if topics_ok else '❌ Başarısız'}")
+    
+    if settings_ok and topics_ok:
+        print("\n✅ Tüm testler başarılı!")
+        print("GitHub modülü kullanıma hazır. Web uygulamasında /github_repos sayfasını ziyaret edebilirsiniz.")
+    else:
+        print("\n⚠️ Bazı testler başarısız oldu. Lütfen hataları kontrol edin.")
 
 if __name__ == "__main__":
     main() 
