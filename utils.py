@@ -1736,6 +1736,36 @@ def get_data_statistics():
         # Bugünkü toplam aktivite
         stats["today_total_activity"] = stats["today_articles"] + stats["today_pending"]
         
+        # Dosya boyutlarını hesapla
+        import os
+        
+        def format_file_size(size_bytes):
+            """Dosya boyutunu okunabilir formata çevir"""
+            if size_bytes == 0:
+                return "0 B"
+            size_names = ["B", "KB", "MB", "GB"]
+            i = 0
+            while size_bytes >= 1024 and i < len(size_names) - 1:
+                size_bytes /= 1024.0
+                i += 1
+            return f"{size_bytes:.1f} {size_names[i]}"
+        
+        def get_file_size(filename):
+            """Dosya boyutunu güvenli şekilde al"""
+            try:
+                if os.path.exists(filename):
+                    size = os.path.getsize(filename)
+                    return format_file_size(size)
+                else:
+                    return "Dosya yok"
+            except Exception as e:
+                return f"Hata: {str(e)}"
+        
+        # Dosya boyutlarını hesapla
+        stats["articles_file_size"] = get_file_size("posted_articles.json")
+        stats["pending_file_size"] = get_file_size("pending_tweets.json")
+        stats["settings_file_size"] = get_file_size("automation_settings.json")
+        
         print(f"[DEBUG] İstatistikler: Bugün {stats['today_articles']} paylaşım, {stats['today_pending']} bekleyen (Paylaşım tarihine göre)")
         
         return stats
@@ -1752,7 +1782,10 @@ def get_data_statistics():
             "summaries": 0,
             "hashtags": 0,
             "accounts": 0,
-            "today_total_activity": 0
+            "today_total_activity": 0,
+            "articles_file_size": "N/A",
+            "pending_file_size": "N/A",
+            "settings_file_size": "N/A"
         }
 
 def load_automation_settings():
