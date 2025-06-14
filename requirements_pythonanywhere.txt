@@ -1,0 +1,81 @@
+# AI Tweet Bot - PythonAnywhere Requirements
+# Optimized for PythonAnywhere hosting
+
+# Core Flask Framework
+Flask==2.3.3
+Werkzeug==2.3.7
+
+# Environment and Configuration
+python-dotenv==1.0.0
+
+# HTTP Requests and Web Scraping
+requests==2.31.0
+beautifulsoup4==4.12.2
+lxml==4.9.3
+
+# Twitter API
+tweepy==4.14.0
+
+# Google AI (Gemini)
+google-generativeai==0.3.2
+
+# OpenAI and AI APIs
+openai==1.3.5
+
+# Web Scraping (Advanced)
+selenium==4.15.2
+webdriver-manager==4.0.1
+
+# RSS Feed Parsing
+feedparser==6.0.10
+
+# Telegram Bot (Optional)
+python-telegram-bot==20.7
+
+# Email and SMTP
+secure-smtplib==0.1.1
+
+# Scheduling and Background Tasks
+schedule==1.2.0
+APScheduler==3.10.4
+
+# Data Processing
+pandas==2.1.3
+numpy==1.24.4
+
+# Image Processing (for OCR)
+Pillow==10.1.0
+
+# JSON and Data Handling
+jsonschema==4.19.2
+
+# Date and Time Handling
+python-dateutil==2.8.2
+pytz==2023.3
+
+# URL and Text Processing
+urllib3==2.0.7
+charset-normalizer==3.3.2
+
+# Security and Hashing
+cryptography==41.0.7
+hashlib-compat==1.0.1
+
+# File Handling
+pathlib2==2.3.7
+
+# Logging and Monitoring
+colorlog==6.8.0
+
+# Development and Testing (Optional)
+pytest==7.4.3
+pytest-flask==1.3.0
+
+# PythonAnywhere Specific
+# Note: Some packages may already be installed system-wide on PythonAnywhere
+
+# Alternative lightweight packages for PythonAnywhere
+# If main packages fail, try these:
+# requests-html==0.10.0  # Alternative to selenium
+# newspaper3k==0.2.8     # Alternative news scraping
+# python-magic==0.4.27   # File type detection 
