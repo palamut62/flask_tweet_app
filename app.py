@@ -1428,8 +1428,11 @@ def create_tweet():
         tweet_text = request.form.get('tweet_text')
         image_file = request.files.get('tweet_image')
         tweet_url = request.form.get('tweet_url')
+        selected_theme = request.form.get('tweet_theme', 'bilgilendirici')  # Form'dan tema al
         image_path = None
         api_key = os.environ.get('GOOGLE_API_KEY')
+        
+        terminal_log(f"🎨 Tweet oluşturma başlatıldı - Mod: {tweet_mode}, Tema: {selected_theme}", "info")
 
         if tweet_mode == 'image':
             # Sadece resimden tweet
@@ -1440,26 +1443,33 @@ def create_tweet():
                 image_file.save(image_path)
                 try:
                     from utils import gemini_ocr_image, generate_ai_tweet_with_content
+                    terminal_log(f"📷 Resimden OCR çıkarılıyor: {filename}", "info")
                     ocr_text = gemini_ocr_image(image_path)
-                    # AI ile konuya uygun tweet üret
-                    from utils import load_automation_settings
-                    settings = load_automation_settings()
-                    theme = settings.get('tweet_theme', 'bilgilendirici')
                     
+                    if not ocr_text or len(ocr_text.strip()) < 10:
+                        flash('Resimden yeterli metin çıkarılamadı!', 'error')
+                        return redirect(url_for('create_tweet'))
+                    
+                    # AI ile konuya uygun tweet üret - seçilen tema ile
                     article_data = {
                         'title': ocr_text[:100],
                         'content': ocr_text,
                         'url': '',
                         'lang': 'en'
                     }
-                    tweet_data = generate_ai_tweet_with_content(article_data, api_key, theme)
+                    tweet_data = generate_ai_tweet_with_content(article_data, api_key, selected_theme)
                     tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
+                    
+                    terminal_log(f"✅ Resimden tweet oluşturuldu ({selected_theme} teması): {len(tweet_text)} karakter", "success")
+                    
                 except Exception as e:
+                    terminal_log(f"❌ Resimden tweet oluşturma hatası: {e}", "error")
                     flash(f'Resimden tweet oluşturulamadı: {e}', 'error')
                     return redirect(url_for('create_tweet'))
             else:
                 flash('Resim yüklenmedi!', 'error')
                 return redirect(url_for('create_tweet'))
+                
         elif tweet_mode == 'link':
             # Link'ten tweet
             if not tweet_url or not tweet_url.strip():
@@ -1469,28 +1479,29 @@ def create_tweet():
             try:
                 from utils import fetch_url_content_with_mcp, generate_ai_tweet_with_content
                 
+                terminal_log(f"🔗 URL'den içerik çekiliyor: {tweet_url.strip()}", "info")
+                
                 # URL'den içerik çek
                 url_content = fetch_url_content_with_mcp(tweet_url.strip())
                 
                 if not url_content or not url_content.get('content'):
-                    flash('URL\'den içerik çekilemedi!', 'error')
+                    flash('URL\'den içerik çekilemedi! Lütfen geçerli bir URL girin.', 'error')
                     return redirect(url_for('create_tweet'))
                 
-                # AI ile tweet oluştur - tema ile
-                from utils import load_automation_settings
-                settings = load_automation_settings()
-                theme = settings.get('tweet_theme', 'bilgilendirici')
-                
+                # AI ile tweet oluştur - seçilen tema ile
                 article_data = {
                     'title': url_content.get('title', ''),
                     'content': url_content.get('content', ''),
                     'url': url_content.get('url', ''),
                     'lang': 'en'
                 }
-                tweet_data = generate_ai_tweet_with_content(article_data, api_key, theme)
+                tweet_data = generate_ai_tweet_with_content(article_data, api_key, selected_theme)
                 tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
                 
+                terminal_log(f"✅ URL'den tweet oluşturuldu ({selected_theme} teması): {len(tweet_text)} karakter", "success")
+                
             except Exception as e:
+                terminal_log(f"❌ URL'den tweet oluşturma hatası: {e}", "error")
                 flash(f'Link\'ten tweet oluşturulamadı: {e}', 'error')
                 return redirect(url_for('create_tweet'))
         else:
@@ -1500,9 +1511,9 @@ def create_tweet():
                 return redirect(url_for('create_tweet'))
             
             try:
-                from utils import generate_ai_tweet_with_content, load_automation_settings
-                settings = load_automation_settings()
-                theme = settings.get('tweet_theme', 'bilgilendirici')
+                from utils import generate_ai_tweet_with_content
+                
+                terminal_log(f"📝 Metinden tweet oluşturuluyor ({selected_theme} teması): {len(tweet_text)} karakter", "info")
                 
                 article_data = {
                     'title': tweet_text[:100],
@@ -1510,48 +1521,104 @@ def create_tweet():
                     'url': '',
                     'lang': 'en'
                 }
-                tweet_data = generate_ai_tweet_with_content(article_data, api_key, theme)
+                tweet_data = generate_ai_tweet_with_content(article_data, api_key, selected_theme)
                 tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
+                
+                terminal_log(f"✅ Metinden tweet oluşturuldu ({selected_theme} teması): {len(tweet_text)} karakter", "success")
+                
             except Exception as e:
+                terminal_log(f"❌ Metinden tweet oluşturma hatası: {e}", "error")
                 flash(f'AI ile tweet metni oluşturulamadı: {e}', 'error')
                 return redirect(url_for('create_tweet'))
 
-        # Tweet oluşturuldu - sadece önizleme göster, paylaşma
-        flash('✅ Tweet başarıyla oluşturuldu! Aşağıdaki metni kopyalayıp Twitter\'da manuel olarak paylaşabilirsiniz.', 'success')
-        return render_template('create_tweet.html', generated_tweet=tweet_text)
+        # Tweet oluşturuldu - önizleme göster
+        if tweet_text and len(tweet_text.strip()) > 0:
+            # Tweet kalitesi analizi
+            char_count = len(tweet_text)
+            hashtag_count = len([word for word in tweet_text.split() if word.startswith('#')])
+            emoji_count = len([char for char in tweet_text if ord(char) > 127])
+            
+            quality_score = "Optimal" if char_count <= 240 else "İyi" if char_count <= 270 else "Limit Yakın"
+            
+            terminal_log(f"📊 Tweet kalitesi - Karakter: {char_count}/280, Hashtag: {hashtag_count}, Emoji: {emoji_count}, Kalite: {quality_score}", "info")
+            
+            flash(f'✅ Tweet başarıyla oluşturuldu! ({selected_theme} teması, {char_count} karakter)', 'success')
+            
+            return render_template('create_tweet.html', 
+                                 generated_tweet=tweet_text,
+                                 selected_theme=selected_theme,
+                                 char_count=char_count,
+                                 hashtag_count=hashtag_count,
+                                 emoji_count=emoji_count,
+                                 quality_score=quality_score)
+        else:
+            flash('Tweet oluşturulamadı! Lütfen tekrar deneyin.', 'error')
+            return redirect(url_for('create_tweet'))
 
-    return render_template('create_tweet.html')
+    # GET request - ayarlardan varsayılan temayı yükle
+    try:
+        from utils import load_automation_settings
+        settings = load_automation_settings()
+        default_theme = settings.get('tweet_theme', 'bilgilendirici')
+        
+        return render_template('create_tweet.html', default_theme=default_theme)
+    except Exception as e:
+        terminal_log(f"⚠️ Ayarlar yüklenemedi, varsayılan tema kullanılıyor: {e}", "warning")
+        return render_template('create_tweet.html', default_theme='bilgilendirici')
 
 @app.route('/ocr_image', methods=['POST'])
 @login_required
 def ocr_image():
-    image_file = request.files.get('image')
-    if not image_file or not image_file.filename:
-        return jsonify({'success': False, 'error': 'Resim bulunamadı.'}), 400
-
-    filename = secure_filename(image_file.filename)
-    image_path = os.path.join('static', 'uploads', filename)
-    os.makedirs(os.path.dirname(image_path), exist_ok=True)
-    image_file.save(image_path)
-
+    """AJAX OCR endpoint - Resimden tweet oluştur"""
     try:
-        from utils import gemini_ocr_image, generate_ai_tweet_with_content, load_automation_settings
-        ocr_text = gemini_ocr_image(image_path)
-        # AI ile konuya uygun tweet üret - tema ile
-        api_key = os.environ.get('GOOGLE_API_KEY')
-        settings = load_automation_settings()
-        theme = settings.get('tweet_theme', 'bilgilendirici')
+        image_file = request.files.get('image')
+        selected_theme = request.form.get('theme', 'bilgilendirici')  # AJAX'tan tema al
         
-        article_data = {
-            'title': ocr_text[:100],
-            'content': ocr_text,
-            'url': '',
-            'lang': 'en'
-        }
-        tweet_data = generate_ai_tweet_with_content(article_data, api_key, theme)
-        tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
-        return jsonify({'success': True, 'text': tweet_text})
+        if not image_file or not image_file.filename:
+            return jsonify({'success': False, 'error': 'Resim bulunamadı.'}), 400
+
+        filename = secure_filename(image_file.filename)
+        image_path = os.path.join('static', 'uploads', filename)
+        os.makedirs(os.path.dirname(image_path), exist_ok=True)
+        image_file.save(image_path)
+        
+        terminal_log(f"📷 AJAX OCR başlatıldı - Dosya: {filename}, Tema: {selected_theme}", "info")
+
+        try:
+            from utils import gemini_ocr_image, generate_ai_tweet_with_content
+            ocr_text = gemini_ocr_image(image_path)
+            
+            if not ocr_text or len(ocr_text.strip()) < 10:
+                return jsonify({'success': False, 'error': 'Resimden yeterli metin çıkarılamadı.'}), 400
+            
+            # AI ile konuya uygun tweet üret - seçilen tema ile
+            api_key = os.environ.get('GOOGLE_API_KEY')
+            
+            article_data = {
+                'title': ocr_text[:100],
+                'content': ocr_text,
+                'url': '',
+                'lang': 'en'
+            }
+            tweet_data = generate_ai_tweet_with_content(article_data, api_key, selected_theme)
+            tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
+            
+            terminal_log(f"✅ AJAX OCR tweet oluşturuldu ({selected_theme}): {len(tweet_text)} karakter", "success")
+            
+            return jsonify({
+                'success': True, 
+                'text': tweet_text,
+                'theme': selected_theme,
+                'char_count': len(tweet_text),
+                'ocr_text': ocr_text[:200] + "..." if len(ocr_text) > 200 else ocr_text
+            })
+            
+        except Exception as e:
+            terminal_log(f"❌ AJAX OCR hatası: {e}", "error")
+            return jsonify({'success': False, 'error': f'OCR işlemi başarısız: {str(e)}'}), 500
+            
     except Exception as e:
+        terminal_log(f"❌ AJAX OCR genel hatası: {e}", "error")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 def background_scheduler():
