@@ -391,6 +391,7 @@ def index():
         # API durumunu kontrol et (ana sayfa için basit kontrol)
         api_check = {
             "google_api_available": bool(os.environ.get('GOOGLE_API_KEY')),
+            "openrouter_api_available": bool(os.environ.get('OPENROUTER_API_KEY')),
             "twitter_api_available": bool(os.environ.get('TWITTER_BEARER_TOKEN') and os.environ.get('TWITTER_API_KEY')),
             "telegram_available": bool(os.environ.get('TELEGRAM_BOT_TOKEN')),
             "github_available": GITHUB_MODULE_AVAILABLE and bool(os.environ.get('GITHUB_TOKEN'))
@@ -1149,6 +1150,7 @@ def settings():
         # API durumunu kontrol et
         api_status = {
             "google_api": os.environ.get('GOOGLE_API_KEY') is not None,
+            "openrouter_api": os.environ.get('OPENROUTER_API_KEY') is not None,
             "twitter_bearer": os.environ.get('TWITTER_BEARER_TOKEN') is not None,
             "twitter_api_key": os.environ.get('TWITTER_API_KEY') is not None,
             "twitter_api_secret": os.environ.get('TWITTER_API_SECRET') is not None,
@@ -1169,12 +1171,25 @@ def settings():
             api_key = os.environ.get('GOOGLE_API_KEY')
             if api_key:
                 test_result = gemini_call("Test message", api_key)
-                api_status["google_api_working"] = bool(test_result)
+                api_status["google_api_working"] = bool(test_result and test_result != "API hatası")
             else:
                 api_status["google_api_working"] = False
         except Exception as e:
             api_status["google_api_working"] = False
             api_status["google_api_error"] = str(e)
+        
+        # OpenRouter API test
+        try:
+            from utils import openrouter_call
+            openrouter_key = os.environ.get('OPENROUTER_API_KEY')
+            if openrouter_key:
+                test_result = openrouter_call("Test message", openrouter_key, max_tokens=10)
+                api_status["openrouter_api_working"] = bool(test_result)
+            else:
+                api_status["openrouter_api_working"] = False
+        except Exception as e:
+            api_status["openrouter_api_working"] = False
+            api_status["openrouter_api_error"] = str(e)
         
         return render_template('settings.html', 
                              settings=automation_settings,
@@ -1317,11 +1332,23 @@ def api_status():
             api_key = os.environ.get('GOOGLE_API_KEY')
             if api_key:
                 test_result = gemini_call("Test message", api_key)
-                status["google_api_test"] = "ÇALIŞIYOR" if test_result else "HATA"
+                status["google_api_test"] = "ÇALIŞIYOR" if (test_result and test_result != "API hatası") else "HATA"
             else:
                 status["google_api_test"] = "API ANAHTARI EKSİK"
         except Exception as e:
             status["google_api_test"] = f"HATA: {str(e)}"
+        
+        # OpenRouter API test
+        try:
+            from utils import openrouter_call
+            openrouter_key = os.environ.get('OPENROUTER_API_KEY')
+            if openrouter_key:
+                test_result = openrouter_call("Test message", openrouter_key, max_tokens=10)
+                status["openrouter_api_test"] = "ÇALIŞIYOR" if test_result else "HATA"
+            else:
+                status["openrouter_api_test"] = "API ANAHTARI EKSİK"
+        except Exception as e:
+            status["openrouter_api_test"] = f"HATA: {str(e)}"
         
 
         
@@ -1858,6 +1885,7 @@ def get_safe_env_status():
     """Environment variable'ların durumunu güvenli şekilde döndür"""
     return {
         "google_api": "MEVCUT" if os.environ.get('GOOGLE_API_KEY') else "EKSİK",
+        "openrouter_api": "MEVCUT" if os.environ.get('OPENROUTER_API_KEY') else "EKSİK",
         "twitter_bearer": "MEVCUT" if os.environ.get('TWITTER_BEARER_TOKEN') else "EKSİK",
         "twitter_api_key": "MEVCUT" if os.environ.get('TWITTER_API_KEY') else "EKSİK",
         "twitter_api_secret": "MEVCUT" if os.environ.get('TWITTER_API_SECRET') else "EKSİK",
@@ -3398,6 +3426,283 @@ def session_info():
             session_data['remaining_hours'] = 'Hata'
     
     return jsonify(session_data)
+
+@app.route('/test_openrouter_api')
+@login_required
+def test_openrouter_api():
+    """OpenRouter API'yi test et"""
+    try:
+        from utils import openrouter_call, try_openrouter_fallback
+        
+        openrouter_key = os.environ.get('OPENROUTER_API_KEY')
+        if not openrouter_key:
+            return jsonify({
+                "success": False,
+                "error": "OpenRouter API anahtarı bulunamadı",
+                "message": "OPENROUTER_API_KEY environment variable'ı ayarlanmamış"
+            })
+        
+        # API anahtarı format kontrolü
+        terminal_log(f"🔍 OpenRouter API Key Debug:", "info")
+        terminal_log(f"  - Key exists: {openrouter_key is not None}", "info")
+        terminal_log(f"  - Key length: {len(openrouter_key)}", "info")
+        terminal_log(f"  - Key prefix: {openrouter_key[:10]}...", "info")
+        terminal_log(f"  - Expected format: sk-or-v1-...", "info")
+        terminal_log(f"  - Format check: {openrouter_key.startswith('sk-or-')}", "info")
+        
+        terminal_log("🧪 OpenRouter API test ediliyor...", "info")
+        
+        # Test prompt'u
+        test_prompt = "Write a short tweet about artificial intelligence in English (max 50 words):"
+        
+        # Ücretsiz modelleri test et
+        free_models = [
+            "meta-llama/llama-3.2-3b-instruct:free",
+            "microsoft/phi-3-mini-128k-instruct:free", 
+            "google/gemma-2-9b-it:free",
+            "huggingface/zephyr-7b-beta:free"
+        ]
+        
+        test_results = []
+        
+        for model in free_models:
+            try:
+                terminal_log(f"🔍 Model test ediliyor: {model}", "info")
+                result = openrouter_call(test_prompt, openrouter_key, max_tokens=100, model=model)
+                
+                if result and len(result.strip()) > 5:
+                    test_results.append({
+                        "model": model,
+                        "success": True,
+                        "response": result[:200] + "..." if len(result) > 200 else result,
+                        "response_length": len(result)
+                    })
+                    terminal_log(f"✅ Model başarılı: {model} - {len(result)} karakter", "success")
+                else:
+                    test_results.append({
+                        "model": model,
+                        "success": False,
+                        "error": "Boş veya çok kısa yanıt"
+                    })
+                    terminal_log(f"❌ Model başarısız: {model} - Boş yanıt", "error")
+                    
+            except Exception as e:
+                test_results.append({
+                    "model": model,
+                    "success": False,
+                    "error": str(e)
+                })
+                terminal_log(f"❌ Model hatası: {model} - {e}", "error")
+        
+        # Fallback sistemi test et
+        try:
+            terminal_log("🔄 Fallback sistemi test ediliyor...", "info")
+            fallback_result = try_openrouter_fallback(test_prompt, max_tokens=100)
+            
+            fallback_test = {
+                "success": fallback_result != "API hatası" and fallback_result is not None,
+                "response": fallback_result[:200] + "..." if fallback_result and len(fallback_result) > 200 else fallback_result
+            }
+            
+            if fallback_test["success"]:
+                terminal_log("✅ Fallback sistemi başarılı", "success")
+            else:
+                terminal_log("❌ Fallback sistemi başarısız", "error")
+                
+        except Exception as e:
+            fallback_test = {
+                "success": False,
+                "error": str(e)
+            }
+            terminal_log(f"❌ Fallback test hatası: {e}", "error")
+        
+        # Sonuçları özetle
+        successful_models = [r for r in test_results if r.get("success", False)]
+        
+        return jsonify({
+            "success": len(successful_models) > 0,
+            "message": f"OpenRouter test tamamlandı: {len(successful_models)}/{len(free_models)} model başarılı",
+            "api_key_available": True,
+            "total_models_tested": len(free_models),
+            "successful_models": len(successful_models),
+            "model_results": test_results,
+            "fallback_test": fallback_test,
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ OpenRouter test hatası: {e}", "error")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+@app.route('/test_tweet_generation')
+@login_required
+def test_tweet_generation():
+    """Tweet oluşturma sistemini test et - Farklı senaryolar"""
+    try:
+        from utils import generate_ai_tweet_with_mcp_analysis, generate_comprehensive_analysis
+        
+        # Test senaryoları
+        test_scenarios = [
+            {
+                "name": "Normal AI Makale",
+                "data": {
+                    "title": "OpenAI Releases GPT-5 with Revolutionary Reasoning Capabilities",
+                    "content": "OpenAI today announced the release of GPT-5, featuring enhanced reasoning capabilities and improved performance across multiple domains. The new model demonstrates significant improvements in mathematical problem-solving and code generation.",
+                    "url": "https://example.com/openai-gpt5"
+                }
+            },
+            {
+                "name": "Kısa Başlık",
+                "data": {
+                    "title": "AI News",
+                    "content": "",
+                    "url": "https://example.com/ai-news"
+                }
+            },
+            {
+                "name": "İçerik Yok",
+                "data": {
+                    "title": "Technology Innovation Breakthrough",
+                    "content": "",
+                    "url": "https://example.com/tech"
+                }
+            },
+            {
+                "name": "Şirket Adı Var",
+                "data": {
+                    "title": "Google Announces New Quantum Computing Breakthrough",
+                    "content": "Google's quantum computing team has achieved a major milestone in quantum error correction, bringing practical quantum computers closer to reality.",
+                    "url": "https://example.com/google-quantum"
+                }
+            },
+            {
+                "name": "Sayısal Veriler",
+                "data": {
+                    "title": "Tesla Reports 40% Increase in Autonomous Driving Accuracy",
+                    "content": "Tesla's latest Full Self-Driving update shows 40% improvement in accuracy and 25% reduction in intervention rates during highway driving.",
+                    "url": "https://example.com/tesla-fsd"
+                }
+            }
+        ]
+        
+        api_key = os.environ.get('GOOGLE_API_KEY')
+        test_results = []
+        
+        for scenario in test_scenarios:
+            try:
+                terminal_log(f"🧪 Test ediliyor: {scenario['name']}", "info")
+                
+                # Comprehensive analysis test
+                analysis = generate_comprehensive_analysis(scenario['data'], api_key)
+                
+                # Tweet generation test
+                tweet_result = generate_ai_tweet_with_mcp_analysis(scenario['data'], api_key)
+                
+                result = {
+                    "scenario": scenario['name'],
+                    "success": True,
+                    "analysis": {
+                        "innovation": analysis.get('innovation', ''),
+                        "companies": analysis.get('companies', []),
+                        "hashtags": analysis.get('hashtags', []),
+                        "emojis": analysis.get('emojis', [])
+                    },
+                    "tweet": tweet_result.get('tweet', ''),
+                    "tweet_length": len(tweet_result.get('tweet', '')),
+                    "source": tweet_result.get('source', ''),
+                    "impact_score": tweet_result.get('impact_score', 0)
+                }
+                
+                terminal_log(f"✅ {scenario['name']}: {len(tweet_result.get('tweet', ''))} karakter", "success")
+                
+            except Exception as e:
+                result = {
+                    "scenario": scenario['name'],
+                    "success": False,
+                    "error": str(e)
+                }
+                terminal_log(f"❌ {scenario['name']}: {e}", "error")
+            
+            test_results.append(result)
+        
+        return jsonify({
+            "success": True,
+            "message": "Tweet oluşturma testleri tamamlandı",
+            "test_results": test_results,
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Tweet test hatası: {e}", "error")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+@app.route('/debug_openrouter_key')
+@login_required
+def debug_openrouter_key():
+    """OpenRouter API anahtarını debug et"""
+    try:
+        openrouter_key = os.environ.get('OPENROUTER_API_KEY')
+        
+        debug_info = {
+            "key_exists": openrouter_key is not None,
+            "key_length": len(openrouter_key) if openrouter_key else 0,
+            "key_prefix": openrouter_key[:8] + "..." if openrouter_key and len(openrouter_key) > 8 else "N/A",
+            "key_format_check": openrouter_key.startswith('sk-or-') if openrouter_key else False,
+            "env_vars_count": len([k for k in os.environ.keys() if 'OPENROUTER' in k.upper()]),
+            "all_openrouter_vars": [k for k in os.environ.keys() if 'OPENROUTER' in k.upper()]
+        }
+        
+        terminal_log(f"🔍 OpenRouter Debug: {debug_info}", "info")
+        
+        # Basit HTTP test
+        if openrouter_key:
+            try:
+                import requests
+                headers = {
+                    "Authorization": f"Bearer {openrouter_key}",
+                    "Content-Type": "application/json"
+                }
+                
+                # Basit bir test isteği (models endpoint)
+                test_response = requests.get(
+                    "https://openrouter.ai/api/v1/models",
+                    headers=headers,
+                    timeout=10
+                )
+                
+                debug_info["http_test"] = {
+                    "status_code": test_response.status_code,
+                    "success": test_response.status_code == 200,
+                    "error": test_response.text if test_response.status_code != 200 else None
+                }
+                
+                terminal_log(f"🌐 HTTP Test: {test_response.status_code}", "info")
+                
+            except Exception as http_error:
+                debug_info["http_test"] = {
+                    "success": False,
+                    "error": str(http_error)
+                }
+                terminal_log(f"❌ HTTP Test hatası: {http_error}", "error")
+        
+        return jsonify({
+            "success": True,
+            "debug_info": debug_info,
+            "message": "Debug bilgileri konsol loglarında"
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ OpenRouter debug hatası: {e}", "error")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
 
 if __name__ == '__main__':
     # Arka plan zamanlayıcısını başlat

@@ -509,8 +509,78 @@ Seçenekler: Developer, Investor, General
 Cevap:"""
     return gemini_call(prompt, api_key, max_tokens=10).strip()
 
+def openrouter_call(prompt, api_key, max_tokens=100, model="meta-llama/llama-3.2-3b-instruct:free"):
+    """OpenRouter API çağrısı - Ücretsiz model ile yedek sistem"""
+    if not api_key:
+        safe_log("OpenRouter API anahtarı bulunamadı", "WARNING")
+        return None
+    
+    try:
+        import requests
+        
+        safe_log(f"OpenRouter API çağrısı yapılıyor... Model: {model}", "DEBUG")
+        safe_log(f"API Key format check: {api_key[:8]}... (length: {len(api_key)})", "DEBUG")
+        
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://ai-tweet-bot.pythonanywhere.com",
+            "X-Title": "AI Tweet Bot"
+        }
+        
+        data = {
+            "model": model,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "max_tokens": max_tokens,
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "frequency_penalty": 0.1,
+            "presence_penalty": 0.1
+        }
+        
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=30
+        )
+        
+        safe_log(f"OpenRouter API Response Status: {response.status_code}", "DEBUG")
+        
+        if response.status_code == 200:
+            result = response.json()
+            if result.get("choices") and len(result["choices"]) > 0:
+                content = result["choices"][0]["message"]["content"].strip()
+                safe_log(f"OpenRouter API yanıtı alındı: {len(content)} karakter", "DEBUG")
+                return content
+            else:
+                safe_log("OpenRouter API yanıtında choices bulunamadı", "WARNING")
+                safe_log(f"Response content: {result}", "DEBUG")
+                return None
+        elif response.status_code == 401:
+            safe_log(f"OpenRouter API 401 Unauthorized - API anahtarı geçersiz", "ERROR")
+            safe_log(f"Response: {response.text}", "ERROR")
+            safe_log(f"Headers sent: Authorization=Bearer {api_key[:10]}...", "DEBUG")
+            return None
+        elif response.status_code == 429:
+            safe_log(f"OpenRouter API 429 Rate Limited", "ERROR")
+            safe_log(f"Response: {response.text}", "ERROR")
+            return None
+        else:
+            safe_log(f"OpenRouter API hatası: {response.status_code} - {response.text}", "ERROR")
+            return None
+            
+    except Exception as e:
+        safe_log(f"OpenRouter API çağrı hatası: {str(e)}", "ERROR")
+        return None
+
 def gemini_call(prompt, api_key, max_tokens=100):
-    """Google Gemini API çağrısı"""
+    """Google Gemini API çağrısı - OpenRouter yedek sistemi ile"""
     if not api_key:
         safe_log("Gemini API anahtarı bulunamadı", "WARNING")
         return "API anahtarı eksik"
@@ -546,10 +616,56 @@ def gemini_call(prompt, api_key, max_tokens=100):
             return content
         else:
             safe_log("Gemini API yanıtında metin bulunamadı", "DEBUG")
-            return "API hatası"
+            # OpenRouter yedek sistemi dene
+            return try_openrouter_fallback(prompt, max_tokens)
             
     except Exception as e:
         safe_log(f"Gemini API çağrı hatası: {str(e)}", "ERROR")
+        # OpenRouter yedek sistemi dene
+        return try_openrouter_fallback(prompt, max_tokens)
+
+def try_openrouter_fallback(prompt, max_tokens=100):
+    """OpenRouter yedek sistemini dene"""
+    try:
+        # OpenRouter API anahtarını kontrol et
+        openrouter_key = os.environ.get('OPENROUTER_API_KEY')
+        if not openrouter_key:
+            safe_log("⚠️ OpenRouter API anahtarı bulunamadı, yedek sistem kullanılamıyor", "WARNING")
+            return "API hatası"
+        
+        safe_log("🔄 Gemini başarısız, OpenRouter yedek sistemi deneniyor...", "INFO")
+        
+        # Ücretsiz modeller listesi (öncelik sırasına göre)
+        free_models = [
+            "meta-llama/llama-3.2-3b-instruct:free",
+            "microsoft/phi-3-mini-128k-instruct:free", 
+            "google/gemma-2-9b-it:free",
+            "huggingface/zephyr-7b-beta:free"
+        ]
+        
+        # Her modeli sırayla dene
+        for model in free_models:
+            try:
+                safe_log(f"🧪 OpenRouter modeli deneniyor: {model}", "DEBUG")
+                result = openrouter_call(prompt, openrouter_key, max_tokens, model)
+                
+                if result and len(result.strip()) > 5:
+                    safe_log(f"✅ OpenRouter başarılı! Model: {model}", "SUCCESS")
+                    return result
+                else:
+                    safe_log(f"⚠️ OpenRouter model yanıt vermedi: {model}", "WARNING")
+                    continue
+                    
+            except Exception as model_error:
+                safe_log(f"❌ OpenRouter model hatası ({model}): {model_error}", "ERROR")
+                continue
+        
+        # Hiçbir model çalışmazsa
+        safe_log("❌ Tüm OpenRouter modelleri başarısız", "ERROR")
+        return "API hatası"
+        
+    except Exception as e:
+        safe_log(f"❌ OpenRouter yedek sistem hatası: {e}", "ERROR")
         return "API hatası"
 
 def generate_smart_hashtags(title, content):
@@ -696,7 +812,95 @@ def generate_comprehensive_analysis(article_data, api_key):
         # 1. Main innovation/insight analysis (ENGLISH)
         innovation_prompt = f"""Briefly explain the main innovation or breakthrough in this AI/tech news (max 50 words, in English):\n\nTitle: {title}\nContent: {content[:800]}\n\nMain innovation:"""
         innovation = gemini_call(innovation_prompt, api_key, max_tokens=80)
-        analysis_result["innovation"] = innovation.strip() if innovation != "API hatası" else "Technology innovation"
+        
+        # İyileştirilmiş fallback sistemi
+        if innovation == "API hatası" or not innovation or len(innovation.strip()) < 10:
+            # Başlık ve içerikten akıllı fallback oluştur
+            print("⚠️ AI analizi başarısız, akıllı fallback oluşturuluyor...")
+            
+            # Başlıktan şirket adlarını çıkar
+            import re
+            company_patterns = [
+                r'\b(OpenAI|Google|Microsoft|Apple|Meta|Tesla|Amazon|Netflix|Uber|Airbnb|SpaceX|Nvidia|Intel|AMD|IBM|Oracle|Salesforce|Adobe|Zoom|Slack|Discord|TikTok|ByteDance|Baidu|Alibaba|Tencent|Samsung|Sony|LG|Huawei|Xiaomi|OnePlus|Realme|Vivo|Oppo)\b',
+                r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:announces|launches|releases|unveils|introduces|develops|creates|builds|acquires|partners|invests)\b'
+            ]
+            
+            companies_found = []
+            for pattern in company_patterns:
+                matches = re.findall(pattern, title + " " + content[:200], re.IGNORECASE)
+                for match in matches:
+                    if isinstance(match, tuple):
+                        companies_found.extend([m for m in match if m])
+                    else:
+                        companies_found.append(match)
+            
+            # Eylemi belirle
+            action_keywords = {
+                'launch': ['launch', 'launches', 'launching', 'released', 'releases'],
+                'announce': ['announce', 'announces', 'announced', 'unveils', 'reveals'],
+                'develop': ['develop', 'develops', 'developed', 'creates', 'builds'],
+                'acquire': ['acquire', 'acquires', 'acquired', 'buys', 'purchases'],
+                'partner': ['partner', 'partners', 'partnership', 'collaborate'],
+                'invest': ['invest', 'invests', 'investment', 'funding', 'raises'],
+                'improve': ['improve', 'improves', 'enhanced', 'upgrade', 'better'],
+                'achieve': ['achieve', 'achieves', 'breakthrough', 'milestone', 'success']
+            }
+            
+            detected_action = None
+            for action, keywords in action_keywords.items():
+                if any(keyword in title_lower or keyword in content_lower[:200] for keyword in keywords):
+                    detected_action = action
+                    break
+            
+            # Teknoloji alanını belirle
+            tech_areas = {
+                'AI': ['ai', 'artificial intelligence', 'machine learning', 'neural', 'gpt', 'llm'],
+                'robotics': ['robot', 'robotics', 'automation', 'autonomous'],
+                'cloud': ['cloud', 'aws', 'azure', 'gcp', 'serverless'],
+                'mobile': ['mobile', 'app', 'ios', 'android', 'smartphone'],
+                'web': ['web', 'website', 'browser', 'internet', 'online'],
+                'data': ['data', 'analytics', 'database', 'big data', 'analysis'],
+                'security': ['security', 'cybersecurity', 'privacy', 'encryption'],
+                'blockchain': ['blockchain', 'crypto', 'bitcoin', 'ethereum', 'nft']
+            }
+            
+            detected_tech = None
+            for tech, keywords in tech_areas.items():
+                if any(keyword in title_lower or keyword in content_lower[:200] for keyword in keywords):
+                    detected_tech = tech
+                    break
+            
+            # Akıllı innovation metni oluştur
+            if companies_found and detected_action and detected_tech:
+                company = companies_found[0]
+                if detected_action == 'launch':
+                    analysis_result["innovation"] = f"{company} launches new {detected_tech} solution"
+                elif detected_action == 'announce':
+                    analysis_result["innovation"] = f"{company} announces {detected_tech} breakthrough"
+                elif detected_action == 'develop':
+                    analysis_result["innovation"] = f"{company} develops advanced {detected_tech} technology"
+                elif detected_action == 'acquire':
+                    analysis_result["innovation"] = f"{company} acquires {detected_tech} company"
+                elif detected_action == 'invest':
+                    analysis_result["innovation"] = f"{company} invests in {detected_tech} innovation"
+                else:
+                    analysis_result["innovation"] = f"{company} advances {detected_tech} capabilities"
+            elif companies_found and detected_tech:
+                analysis_result["innovation"] = f"{companies_found[0]} makes {detected_tech} breakthrough"
+            elif detected_action and detected_tech:
+                analysis_result["innovation"] = f"New {detected_tech} {detected_action} announced"
+            elif detected_tech:
+                analysis_result["innovation"] = f"Major {detected_tech} development unveiled"
+            elif companies_found:
+                analysis_result["innovation"] = f"{companies_found[0]} announces new technology"
+            else:
+                # Son çare: başlığı kısalt ve temizle
+                clean_title = re.sub(r'[^\w\s-]', '', title).strip()
+                if len(clean_title) > 60:
+                    clean_title = clean_title[:60] + "..."
+                analysis_result["innovation"] = clean_title if clean_title else "Technology breakthrough announced"
+        else:
+            analysis_result["innovation"] = innovation.strip()
         
         # 2. Company analysis (ENGLISH)
         company_prompt = f"""List the main companies mentioned in this news (max 3, comma separated, in English):\n\nTitle: {title}\nContent: {content[:600]}\n\nCompanies:"""
@@ -773,8 +977,16 @@ def generate_comprehensive_analysis(article_data, api_key):
         return analysis_result
     except Exception as e:
         print(f"❌ Kapsamlı analiz hatası: {e}")
+        # Exception durumunda da akıllı fallback
+        import re
+        clean_title = re.sub(r'[^\w\s-]', '', title).strip()
+        if len(clean_title) > 80:
+            clean_title = clean_title[:80] + "..."
+        
+        fallback_innovation = clean_title if clean_title else "Technology development announced"
+        
         return {
-            "innovation": "AI/tech innovation",
+            "innovation": fallback_innovation,
             "companies": [],
             "impact_level": 5,
             "audience": "General",
@@ -831,23 +1043,38 @@ Tweet text:"""
         tweet_text = gemini_call(tweet_prompt, api_key, max_tokens=80)
         
         if tweet_text == "API hatası" or not tweet_text.strip():
-            # Fallback tweet metni - daha anlamlı
+            # İyileştirilmiş fallback tweet metni
             if analysis['companies'] and analysis['innovation']:
                 company = analysis['companies'][0]
                 innovation = analysis['innovation'][:100]
                 # Daha anlamlı fallback tweet oluştur
                 if "launch" in innovation.lower():
-                    tweet_text = f"{company} launches {innovation.lower().replace('launch', '').strip()}"
+                    clean_innovation = innovation.lower().replace('launches', '').replace('launch', '').strip()
+                    tweet_text = f"{company} launches {clean_innovation}" if clean_innovation else f"{company} launches new solution"
                 elif "announce" in innovation.lower():
-                    tweet_text = f"{company} announces {innovation.lower().replace('announce', '').strip()}"
+                    clean_innovation = innovation.lower().replace('announces', '').replace('announce', '').strip()
+                    tweet_text = f"{company} announces {clean_innovation}" if clean_innovation else f"{company} announces breakthrough"
                 elif "develop" in innovation.lower():
-                    tweet_text = f"{company} develops {innovation.lower().replace('develop', '').strip()}"
+                    clean_innovation = innovation.lower().replace('develops', '').replace('develop', '').strip()
+                    tweet_text = f"{company} develops {clean_innovation}" if clean_innovation else f"{company} develops new technology"
                 else:
-                    tweet_text = f"{company} unveils {innovation}"
-            elif analysis['innovation']:
-                tweet_text = f"Breaking: {analysis['innovation'][:150]}"
+                    # Innovation metnini direkt kullan (şirket adını tekrar etme)
+                    if company.lower() in innovation.lower():
+                        tweet_text = innovation
+                    else:
+                        tweet_text = f"{company}: {innovation}"
+            elif analysis['innovation'] and len(analysis['innovation']) > 20:
+                # Innovation metni yeterince uzunsa direkt kullan
+                tweet_text = analysis['innovation']
+            elif title and len(title) > 10:
+                # Başlığı temizle ve kullan
+                import re
+                clean_title = re.sub(r'[^\w\s-]', '', title).strip()
+                if len(clean_title) > 120:
+                    clean_title = clean_title[:120] + "..."
+                tweet_text = clean_title
             else:
-                tweet_text = f"AI breakthrough: {title[:120]}"
+                tweet_text = "Technology breakthrough announced"
         
         # Tweet metnini temizle
         tweet_text = tweet_text.replace("Tweet:", "").replace("Tweet metni:", "").strip()
@@ -1239,18 +1466,26 @@ def create_fallback_tweet(title, content, url=""):
             return simple_tweet
             
         except:
-            # En son çare - basit tweet
-            simple_text = f"🤖 {title[:200]}... #AI #Innovation #Technology"
-            if url:
-                simple_tweet = f"{simple_text}\n\n🔗 {url}"
-            else:
-                simple_tweet = simple_text
+            # En son çare - başlığı temizle ve kullan
+            import re
+            clean_title = re.sub(r'[^\w\s-]', '', title).strip()
             
-            # Karakter limiti kontrolü
-            if len(simple_tweet) > TWITTER_LIMIT:
-                available = TWITTER_LIMIT - len("\n\n🔗 ") - len(url) - len(" #AI #Innovation #Technology") - 3
-                simple_text = f"🤖 {title[:available]}... #AI #Innovation #Technology"
-                simple_tweet = f"{simple_text}\n\n🔗 {url}" if url else simple_text
+            # Başlığı kısalt ve anlamlı hale getir
+            if len(clean_title) > 150:
+                clean_title = clean_title[:150] + "..."
+            
+            # Basit hashtag'ler ekle
+            hashtags = "#Technology #Innovation #News"
+            
+            # URL için yer hesapla
+            url_part = f"\n\n🔗 {url}" if url else ""
+            available_chars = TWITTER_LIMIT - len(hashtags) - len(url_part) - 5  # 5 karakter güvenlik
+            
+            # Başlığı gerekirse daha da kısalt
+            if len(clean_title) > available_chars:
+                clean_title = clean_title[:available_chars-3] + "..."
+            
+            simple_tweet = f"🤖 {clean_title} {hashtags}{url_part}"
             
             return simple_tweet
 

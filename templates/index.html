@@ -204,6 +204,16 @@
                         </div>
                         <div class="flex justify-between items-center">
                             <div class="flex items-center space-x-2">
+                                <i class="fas fa-route text-purple-500"></i>
+                                <span class="text-gray-600">OpenRouter:</span>
+                            </div>
+                            <span class="flex items-center space-x-1 {{ 'text-green-600' if api_check.openrouter_api_available else 'text-gray-500' }}">
+                                <i class="fas fa-{{ 'check-circle' if api_check.openrouter_api_available else 'shield-alt' }}"></i>
+                                <span class="text-sm font-medium">{{ 'Yedek Hazır' if api_check.openrouter_api_available else 'Yedek Sistem' }}</span>
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-2">
                                 <i class="fab fa-github text-gray-800"></i>
                                 <span class="text-gray-600">GitHub API:</span>
                             </div>

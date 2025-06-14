@@ -531,6 +531,42 @@
                         {% endif %}
                     </div>
                     
+                    <!-- OpenRouter API -->
+                    <div class="border rounded-xl p-6 text-center {{ 'border-green-200 bg-green-50' if api_status.openrouter_api and api_status.openrouter_api_working else 'border-yellow-200 bg-yellow-50' if api_status.openrouter_api else 'border-gray-200 bg-gray-50' }}">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center {{ 'bg-green-100' if api_status.openrouter_api and api_status.openrouter_api_working else 'bg-yellow-100' if api_status.openrouter_api else 'bg-gray-100' }}">
+                            <i class="fas fa-route text-2xl {{ 'text-green-600' if api_status.openrouter_api and api_status.openrouter_api_working else 'text-yellow-600' if api_status.openrouter_api else 'text-gray-400' }}"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">OpenRouter API</h3>
+                        <div class="mb-2">
+                            {% if api_status.openrouter_api and api_status.openrouter_api_working %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-2"></i>Çalışıyor
+                                </span>
+                                <p class="text-green-700 text-sm mt-2">Yedek sistem hazır ve çalışıyor</p>
+                            {% elif api_status.openrouter_api %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>Sorunlu
+                                </span>
+                                <p class="text-yellow-700 text-sm mt-2">API anahtarı mevcut ama çalışmıyor</p>
+                            {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                    <i class="fas fa-info-circle mr-2"></i>Yedek Sistem
+                                </span>
+                                <p class="text-gray-700 text-sm mt-2">Gemini başarısız olursa devreye girer</p>
+                            {% endif %}
+                        </div>
+                        <div class="mt-4 space-y-2">
+                            <button onclick="testOpenRouterAPI()" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 font-medium flex items-center space-x-2 mx-auto">
+                                <i class="fas fa-vial"></i>
+                                <span>OpenRouter Test</span>
+                            </button>
+                            <button onclick="debugOpenRouterKey()" class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-all duration-200 font-medium flex items-center space-x-2 mx-auto">
+                                <i class="fas fa-bug"></i>
+                                <span>Debug API Key</span>
+                            </button>
+                        </div>
+                    </div>
+                    
                     <!-- Twitter API -->
                     <div class="border rounded-xl p-6 text-center {{ 'border-green-200 bg-green-50' if api_status.twitter_bearer and api_status.twitter_api_key and api_status.twitter_api_secret and api_status.twitter_access_token and api_status.twitter_access_secret else 'border-yellow-200 bg-yellow-50' if api_status.twitter_bearer or api_status.twitter_api_key else 'border-red-200 bg-red-50' }}">
                         <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center {{ 'bg-green-100' if api_status.twitter_bearer and api_status.twitter_api_key and api_status.twitter_api_secret and api_status.twitter_access_token and api_status.twitter_access_secret else 'bg-yellow-100' if api_status.twitter_bearer or api_status.twitter_api_key else 'bg-red-100' }}">
@@ -622,6 +658,15 @@
                             </ul>
                         </div>
                         <div>
+                            <h4 class="font-semibold text-gray-900 mb-2">OpenRouter API (Yedek):</h4>
+                            <ul class="space-y-1">
+                                <li>• <a href="https://openrouter.ai" target="_blank" class="text-blue-600 hover:underline">OpenRouter.ai</a>'ye gidin</li>
+                                <li>• Hesap oluşturun ve API anahtarı alın</li>
+                                <li>• <code class="bg-gray-200 px-1 rounded text-sm">OPENROUTER_API_KEY</code> olarak kaydedin</li>
+                                <li>• <span class="text-green-600">✅ Ücretsiz modeller mevcut!</span></li>
+                            </ul>
+                        </div>
+                        <div>
                             <h4 class="font-semibold text-gray-900 mb-2">Twitter API:</h4>
                             <ul class="space-y-1">
                                 <li>• Twitter Developer Portal'a gidin</li>
@@ -644,6 +689,79 @@
 </div>
 
 <script>
+function testOpenRouterAPI() {
+    const button = event.target;
+    const originalText = button.innerHTML;
+    
+    // Butonu devre dışı bırak ve loading göster
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Test Ediliyor...</span>';
+    
+    fetch('/test_openrouter_api')
+        .then(response => response.json())
+        .then(data => {
+            console.log('OpenRouter test sonuçları:', data);
+            
+            // Sonuç mesajı göster
+            const alertDiv = document.createElement('div');
+            const isSuccess = data.success;
+            alertDiv.className = `fixed top-4 right-4 ${isSuccess ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'} border px-4 py-3 rounded z-50 max-w-md`;
+            alertDiv.innerHTML = `
+                <div class="flex items-start space-x-2">
+                    <i class="fas fa-${isSuccess ? 'check-circle' : 'exclamation-triangle'} mt-1"></i>
+                    <div class="flex-1">
+                        <div class="font-medium">${data.message}</div>
+                        ${data.successful_models ? `<div class="text-sm mt-1">${data.successful_models}/${data.total_models_tested} model başarılı</div>` : ''}
+                        ${data.error ? `<div class="text-sm mt-1">${data.error}</div>` : ''}
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 hover:opacity-75">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // 8 saniye sonra mesajı kaldır
+            setTimeout(() => {
+                if (alertDiv.parentElement) {
+                    alertDiv.remove();
+                }
+            }, 8000);
+            
+            // Butonu eski haline getir
+            button.disabled = false;
+            button.innerHTML = originalText;
+        })
+        .catch(error => {
+            console.error('OpenRouter test hatası:', error);
+            
+            // Hata mesajı göster
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50';
+            alertDiv.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Test sırasında hata oluştu: ${error.message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-red-700 hover:text-red-900">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // 5 saniye sonra mesajı kaldır
+            setTimeout(() => {
+                if (alertDiv.parentElement) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+            
+            // Butonu eski haline getir
+            button.disabled = false;
+            button.innerHTML = originalText;
+        });
+}
+
 function testNewsFetchingMethods() {
     const button = event.target;
     const originalText = button.innerHTML;
@@ -705,6 +823,96 @@ function testNewsFetchingMethods() {
                     alertDiv.remove();
                 }
             }, 5000);
+            
+            // Butonu eski haline getir
+            button.disabled = false;
+            button.innerHTML = originalText;
+        });
+}
+
+function debugOpenRouterKey() {
+    const button = event.target;
+    const originalText = button.innerHTML;
+    
+    // Butonu devre dışı bırak ve loading göster
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Debug Ediliyor...</span>';
+    
+    fetch('/debug_openrouter_key')
+        .then(response => response.json())
+        .then(data => {
+            console.log('OpenRouter debug sonuçları:', data);
+            
+            // Sonuç mesajı göster
+            const alertDiv = document.createElement('div');
+            const isSuccess = data.success;
+            alertDiv.className = `fixed top-4 right-4 ${isSuccess ? 'bg-blue-100 border-blue-400 text-blue-700' : 'bg-red-100 border-red-400 text-red-700'} border px-4 py-3 rounded z-50 max-w-md`;
+            
+            let debugDetails = '';
+            if (data.debug_info) {
+                const info = data.debug_info;
+                debugDetails = `
+                    <div class="text-sm mt-2 space-y-1">
+                        <div>API Key: ${info.key_exists ? '✅ Mevcut' : '❌ Eksik'}</div>
+                        <div>Uzunluk: ${info.key_length} karakter</div>
+                        <div>Format: ${info.key_format_check ? '✅ Doğru' : '❌ Hatalı'}</div>
+                        ${info.http_test ? `<div>HTTP Test: ${info.http_test.success ? '✅ Başarılı' : '❌ Başarısız'}</div>` : ''}
+                        ${info.http_test && !info.http_test.success ? `<div class="text-xs text-red-600">${info.http_test.error}</div>` : ''}
+                    </div>
+                `;
+            }
+            
+            alertDiv.innerHTML = `
+                <div class="flex items-start space-x-2">
+                    <i class="fas fa-${isSuccess ? 'info-circle' : 'exclamation-triangle'} mt-1"></i>
+                    <div class="flex-1">
+                        <div class="font-medium">OpenRouter API Key Debug</div>
+                        ${debugDetails}
+                        ${data.error ? `<div class="text-sm mt-1">${data.error}</div>` : ''}
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 hover:opacity-75">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // 10 saniye sonra mesajı kaldır
+            setTimeout(() => {
+                if (alertDiv.parentElement) {
+                    alertDiv.remove();
+                }
+            }, 10000);
+            
+            // Butonu eski haline getir
+            button.disabled = false;
+            button.innerHTML = originalText;
+        })
+        .catch(error => {
+            console.error('Debug hatası:', error);
+            
+            // Hata mesajı göster
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'fixed top-4 right-4 bg-red-100 border-red-400 text-red-700 border px-4 py-3 rounded z-50 max-w-md';
+            alertDiv.innerHTML = `
+                <div class="flex items-start space-x-2">
+                    <i class="fas fa-exclamation-triangle mt-1"></i>
+                    <div class="flex-1">
+                        <div class="font-medium">Debug hatası</div>
+                        <div class="text-sm mt-1">${error.message}</div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 hover:opacity-75">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentElement) {
+                    alertDiv.remove();
+                }
+            }, 8000);
             
             // Butonu eski haline getir
             button.disabled = false;

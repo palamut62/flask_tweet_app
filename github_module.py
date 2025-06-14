@@ -44,6 +44,9 @@ except ImportError as e:
     def gemini_call(prompt, api_key, max_tokens=200):
         return None
     
+    def openrouter_call(prompt, api_key, max_tokens=200, model="meta-llama/llama-3.2-3b-instruct:free"):
+        return None
+    
     def mcp_firecrawl_scrape(params):
         return {"success": False, "error": "MCP not available"}
     
