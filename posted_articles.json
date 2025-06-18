@@ -3232,5 +3232,21 @@
     "tweet_id": "1935294652090876135",
     "tweet_url": "",
     "is_posted": true
+  },
+  {
+    "title": "Manuel Tweet - bilgilendirici",
+    "url": "",
+    "content": "🔍💡 Hugging Face launches PRO for $9/month! Get increased daily quota & access. Empower your AI projects with expanded resources. #AI #Tech #HuggingFace #AIApps\n\n🔗 https://huggingface.co/pro",
+    "source": "Manuel Tweet (Create)",
+    "source_type": "manual_create",
+    "published_date": "2025-06-18T14:50:28.846658",
+    "posted_date": "2025-06-18T15:18:01.563691",
+    "hash": "9ee86b0363efe3e98263c5c7772af5d7",
+    "tweet_content": "🔍💡 Hugging Face launches PRO for $9/month! Get increased daily quota & access. Empower your AI projects with expanded resources. #AI #Tech #HuggingFace #AIApps\n\n🔗 https://huggingface.co/pro",
+    "manual_post": true,
+    "confirmed_at": "2025-06-18T15:18:01.563691",
+    "manual_tweet_id": "manual_1750247428_885",
+    "theme": "bilgilendirici",
+    "type": "manual_tweet_create"
   }
 ]

@@ -1430,14 +1430,20 @@ def create_tweet():
         tweet_text = request.form.get('tweet_text')
         image_file = request.files.get('tweet_image')
         tweet_url = request.form.get('tweet_url')
-        selected_theme = request.form.get('tweet_theme', 'bilgilendirici')  # Form'dan tema al
+        selected_theme = request.form.get('tweet_theme', 'bilgilendirici')
+        save_as_draft = request.form.get('save_as_draft') == 'on'  # Taslak olarak kaydet checkbox'ı
+        
         image_path = None
         api_key = os.environ.get('GOOGLE_API_KEY')
         
-        terminal_log(f"🎨 Tweet oluşturma başlatıldı - Mod: {tweet_mode}, Tema: {selected_theme}", "info")
+        terminal_log(f"🎨 Tweet oluşturma başlatıldı - Mod: {tweet_mode}, Tema: {selected_theme}, Taslak: {save_as_draft}", "info")
 
+        # Tweet içeriğini oluştur (mevcut kod aynı kalacak)
+        final_tweet_text = None
+        source_data = {}
+        
         if tweet_mode == 'image':
-            # Sadece resimden tweet
+            # Resimden tweet oluşturma
             if image_file and image_file.filename:
                 filename = secure_filename(image_file.filename)
                 image_path = os.path.join('static', 'uploads', filename)
@@ -1452,7 +1458,7 @@ def create_tweet():
                         flash('Resimden yeterli metin çıkarılamadı!', 'error')
                         return redirect(url_for('create_tweet'))
                     
-                    # AI ile konuya uygun tweet üret - seçilen tema ile
+                    # AI ile konuya uygun tweet üret
                     article_data = {
                         'title': ocr_text[:100],
                         'content': ocr_text,
@@ -1460,9 +1466,16 @@ def create_tweet():
                         'lang': 'en'
                     }
                     tweet_data = generate_ai_tweet_with_content(article_data, api_key, selected_theme)
-                    tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
+                    final_tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
                     
-                    terminal_log(f"✅ Resimden tweet oluşturuldu ({selected_theme} teması): {len(tweet_text)} karakter", "success")
+                    source_data = {
+                        'type': 'image',
+                        'image_path': image_path,
+                        'ocr_text': ocr_text,
+                        'original_filename': filename
+                    }
+                    
+                    terminal_log(f"✅ Resimden tweet oluşturuldu ({selected_theme} teması): {len(final_tweet_text)} karakter", "success")
                     
                 except Exception as e:
                     terminal_log(f"❌ Resimden tweet oluşturma hatası: {e}", "error")
@@ -1473,7 +1486,7 @@ def create_tweet():
                 return redirect(url_for('create_tweet'))
                 
         elif tweet_mode == 'link':
-            # Link'ten tweet
+            # Link'ten tweet oluşturma
             if not tweet_url or not tweet_url.strip():
                 flash('URL boş olamaz!', 'error')
                 return redirect(url_for('create_tweet'))
@@ -1490,7 +1503,7 @@ def create_tweet():
                     flash('URL\'den içerik çekilemedi! Lütfen geçerli bir URL girin.', 'error')
                     return redirect(url_for('create_tweet'))
                 
-                # AI ile tweet oluştur - seçilen tema ile
+                # AI ile tweet oluştur
                 article_data = {
                     'title': url_content.get('title', ''),
                     'content': url_content.get('content', ''),
@@ -1498,16 +1511,23 @@ def create_tweet():
                     'lang': 'en'
                 }
                 tweet_data = generate_ai_tweet_with_content(article_data, api_key, selected_theme)
-                tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
+                final_tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
                 
-                terminal_log(f"✅ URL'den tweet oluşturuldu ({selected_theme} teması): {len(tweet_text)} karakter", "success")
+                source_data = {
+                    'type': 'url',
+                    'source_url': tweet_url.strip(),
+                    'fetched_title': url_content.get('title', ''),
+                    'fetched_content': url_content.get('content', '')[:500]  # İlk 500 karakter
+                }
+                
+                terminal_log(f"✅ URL'den tweet oluşturuldu ({selected_theme} teması): {len(final_tweet_text)} karakter", "success")
                 
             except Exception as e:
                 terminal_log(f"❌ URL'den tweet oluşturma hatası: {e}", "error")
                 flash(f'Link\'ten tweet oluşturulamadı: {e}', 'error')
                 return redirect(url_for('create_tweet'))
         else:
-            # Sadece metinden tweet
+            # Metinden tweet oluşturma
             if not tweet_text or not tweet_text.strip():
                 flash('Tweet metni boş olamaz!', 'error')
                 return redirect(url_for('create_tweet'))
@@ -1524,49 +1544,492 @@ def create_tweet():
                     'lang': 'en'
                 }
                 tweet_data = generate_ai_tweet_with_content(article_data, api_key, selected_theme)
-                tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
+                final_tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
                 
-                terminal_log(f"✅ Metinden tweet oluşturuldu ({selected_theme} teması): {len(tweet_text)} karakter", "success")
+                source_data = {
+                    'type': 'text',
+                    'original_text': tweet_text
+                }
+                
+                terminal_log(f"✅ Metinden tweet oluşturuldu ({selected_theme} teması): {len(final_tweet_text)} karakter", "success")
                 
             except Exception as e:
                 terminal_log(f"❌ Metinden tweet oluşturma hatası: {e}", "error")
                 flash(f'AI ile tweet metni oluşturulamadı: {e}', 'error')
                 return redirect(url_for('create_tweet'))
 
-        # Tweet oluşturuldu - önizleme göster
-        if tweet_text and len(tweet_text.strip()) > 0:
-            # Tweet kalitesi analizi
-            char_count = len(tweet_text)
-            hashtag_count = len([word for word in tweet_text.split() if word.startswith('#')])
-            emoji_count = len([char for char in tweet_text if ord(char) > 127])
-            
-            quality_score = "Optimal" if char_count <= 240 else "İyi" if char_count <= 270 else "Limit Yakın"
-            
-            terminal_log(f"📊 Tweet kalitesi - Karakter: {char_count}/280, Hashtag: {hashtag_count}, Emoji: {emoji_count}, Kalite: {quality_score}", "info")
-            
-            flash(f'✅ Tweet başarıyla oluşturuldu! ({selected_theme} teması, {char_count} karakter)', 'success')
-            
-            return render_template('create_tweet.html', 
-                                 generated_tweet=tweet_text,
-                                 selected_theme=selected_theme,
-                                 char_count=char_count,
-                                 hashtag_count=hashtag_count,
-                                 emoji_count=emoji_count,
-                                 quality_score=quality_score)
+        # Tweet başarıyla oluşturuldu - Şimdi kaydet
+        if final_tweet_text and len(final_tweet_text.strip()) > 0:
+            try:
+                # Tweet'i manuel_tweets.json dosyasına kaydet
+                tweet_record = save_manual_tweet(
+                    tweet_text=final_tweet_text,
+                    theme=selected_theme,
+                    source_data=source_data,
+                    is_draft=save_as_draft
+                )
+                
+                # Tweet istatistikleri
+                char_count = len(final_tweet_text)
+                hashtag_count = len([word for word in final_tweet_text.split() if word.startswith('#')])
+                emoji_count = len([char for char in final_tweet_text if ord(char) > 127])
+                
+                terminal_log(f"📊 Tweet istatistikleri - Karakter: {char_count}/280, Hashtag: {hashtag_count}, Emoji: {emoji_count}", "info")
+                terminal_log(f"💾 Tweet kaydedildi - ID: {tweet_record['id']}, Durum: {'Taslak' if save_as_draft else 'Hazır'}", "success")
+                
+                if save_as_draft:
+                    flash(f'✅ Tweet taslak olarak kaydedildi! (ID: {tweet_record["id"]})', 'success')
+                else:
+                    flash(f'✅ Tweet başarıyla oluşturuldu ve kaydedildi! (ID: {tweet_record["id"]})', 'success')
+                
+                return render_template('create_tweet.html', 
+                                     generated_tweet=final_tweet_text,
+                                     selected_theme=selected_theme,
+                                     tweet_id=tweet_record['id'],
+                                     is_draft=save_as_draft)
+                                     
+            except Exception as e:
+                terminal_log(f"❌ Tweet kaydetme hatası: {e}", "error")
+                flash(f'Tweet oluşturuldu ancak kaydedilemedi: {e}', 'warning')
+                
+                # Yine de sonucu göster
+                return render_template('create_tweet.html', 
+                                     generated_tweet=final_tweet_text,
+                                     selected_theme=selected_theme,
+                                     tweet_id=None,
+                                     is_draft=False)
         else:
             flash('Tweet oluşturulamadı! Lütfen tekrar deneyin.', 'error')
             return redirect(url_for('create_tweet'))
 
-    # GET request - ayarlardan varsayılan temayı yükle
+    # GET request - sayfa yükleme ve mevcut taslakları göster
     try:
         from utils import load_automation_settings
         settings = load_automation_settings()
         default_theme = settings.get('tweet_theme', 'bilgilendirici')
         
-        return render_template('create_tweet.html', default_theme=default_theme)
+        # Mevcut manuel tweet'leri yükle
+        manual_tweets = load_manual_tweets()
+        draft_tweets = [tweet for tweet in manual_tweets if tweet.get('status') == 'draft']
+        ready_tweets = [tweet for tweet in manual_tweets if tweet.get('status') == 'ready']
+        
+        return render_template('create_tweet.html', 
+                             default_theme=default_theme,
+                             draft_tweets=draft_tweets[:5],  # Son 5 taslak
+                             ready_tweets=ready_tweets[:5])  # Son 5 hazır tweet
     except Exception as e:
         terminal_log(f"⚠️ Ayarlar yüklenemedi, varsayılan tema kullanılıyor: {e}", "warning")
-        return render_template('create_tweet.html', default_theme='bilgilendirici')
+        return render_template('create_tweet.html', 
+                             default_theme='bilgilendirici',
+                             draft_tweets=[],
+                             ready_tweets=[])
+
+# Tweet kayıt sistemi için yardımcı fonksiyonlar
+def save_manual_tweet(tweet_text, theme, source_data, is_draft=False):
+    """Manuel oluşturulan tweet'i kaydet"""
+    try:
+        manual_tweets = load_manual_tweets()
+        
+        # Yeni tweet kaydı oluştur
+        tweet_id = generate_manual_tweet_id()
+        tweet_hash = hashlib.md5(tweet_text.encode()).hexdigest()
+        
+        tweet_record = {
+            "id": tweet_id,
+            "content": tweet_text,
+            "theme": theme,
+            "source_data": source_data,
+            "status": "draft" if is_draft else "ready",
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat(),
+            "hash": tweet_hash,
+            "char_count": len(tweet_text),
+            "hashtag_count": len([word for word in tweet_text.split() if word.startswith('#')]),
+            "emoji_count": len([char for char in tweet_text if ord(char) > 127]),
+            "is_posted": False,
+            "posted_at": None,
+            "posted_url": None,
+            "created_by": "manual",
+            "version": 1
+        }
+        
+        manual_tweets.append(tweet_record)
+        save_manual_tweets(manual_tweets)
+        
+        terminal_log(f"💾 Manuel tweet kaydedildi - ID: {tweet_id}, Durum: {tweet_record['status']}", "success")
+        
+        return tweet_record
+        
+    except Exception as e:
+        terminal_log(f"❌ Manuel tweet kaydetme hatası: {e}", "error")
+        raise e
+
+def load_manual_tweets():
+    """Manuel tweet'leri yükle"""
+    try:
+        return load_json("manual_tweets.json")
+    except:
+        return []
+
+def save_manual_tweets(tweets):
+    """Manuel tweet'leri kaydet"""
+    try:
+        save_json("manual_tweets.json", tweets)
+        return True
+    except Exception as e:
+        terminal_log(f"❌ Manuel tweet'ler kaydedilemedi: {e}", "error")
+        return False
+
+def generate_manual_tweet_id():
+    """Manuel tweet için benzersiz ID oluştur"""
+    timestamp = int(datetime.now().timestamp())
+    random_suffix = random.randint(100, 999)
+    return f"manual_{timestamp}_{random_suffix}"
+
+# Tweet yönetim route'ları
+@app.route('/api/manual_tweets')
+@login_required
+def get_manual_tweets():
+    """Manuel tweet'leri API ile al"""
+    try:
+        manual_tweets = load_manual_tweets()
+        
+        # Tarihe göre sırala (en yeni önce)
+        manual_tweets.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        
+        # İstatistikler
+        stats = {
+            'total': len(manual_tweets),
+            'drafts': len([t for t in manual_tweets if t.get('status') == 'draft']),
+            'ready': len([t for t in manual_tweets if t.get('status') == 'ready']),
+            'posted': len([t for t in manual_tweets if t.get('is_posted', False)])
+        }
+        
+        return jsonify({
+            "success": True,
+            "tweets": manual_tweets,
+            "stats": stats
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/manual_tweets/<tweet_id>')
+@login_required
+def get_manual_tweet(tweet_id):
+    """Belirli bir manuel tweet'i al"""
+    try:
+        manual_tweets = load_manual_tweets()
+        
+        tweet = None
+        for t in manual_tweets:
+            if t.get('id') == tweet_id:
+                tweet = t
+                break
+        
+        if tweet:
+            return jsonify({"success": True, "tweet": tweet})
+        else:
+            return jsonify({"success": False, "error": "Tweet bulunamadı"})
+            
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/manual_tweets/<tweet_id>/delete', methods=['POST'])
+@login_required
+def delete_manual_tweet(tweet_id):
+    """Manuel tweet'i sil (henüz paylaşılmamış olanlar)"""
+    try:
+        manual_tweets = load_manual_tweets()
+        
+        tweet_to_delete = None
+        tweet_index = None
+        
+        for i, tweet in enumerate(manual_tweets):
+            if tweet.get('id') == tweet_id:
+                if tweet.get('is_posted', False):
+                    return jsonify({
+                        "success": False, 
+                        "error": "Paylaşılmış tweet'ler silinemez"
+                    })
+                
+                tweet_to_delete = tweet
+                tweet_index = i
+                break
+        
+        if tweet_to_delete:
+            # Tweet'i listeden kaldır
+            manual_tweets.pop(tweet_index)
+            save_manual_tweets(manual_tweets)
+            
+            terminal_log(f"🗑️ Manuel tweet silindi - ID: {tweet_id}", "info")
+            
+            return jsonify({
+                "success": True, 
+                "message": "Tweet başarıyla silindi"
+            })
+        else:
+            return jsonify({
+                "success": False, 
+                "error": "Tweet bulunamadı"
+            })
+            
+    except Exception as e:
+        terminal_log(f"❌ Manuel tweet silme hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/manual_tweets/<tweet_id>/post', methods=['POST'])
+@login_required
+def post_manual_tweet(tweet_id):
+    """Manuel tweet'i paylaş"""
+    try:
+        manual_tweets = load_manual_tweets()
+        
+        tweet_to_post = None
+        tweet_index = None
+        
+        for i, tweet in enumerate(manual_tweets):
+            if tweet.get('id') == tweet_id:
+                if tweet.get('is_posted', False):
+                    return jsonify({
+                        "success": False, 
+                        "error": "Bu tweet zaten paylaşılmış"
+                    })
+                
+                tweet_to_post = tweet
+                tweet_index = i
+                break
+        
+        if not tweet_to_post:
+            return jsonify({
+                "success": False, 
+                "error": "Tweet bulunamadı"
+            })
+        
+        # Tweet'i paylaş
+        tweet_text = tweet_to_post.get('content', '')
+        title = f"Manuel Tweet - {tweet_to_post.get('theme', 'Tema Yok')}"
+        
+        tweet_result = post_tweet(tweet_text, title)
+        
+        if tweet_result.get('success'):
+            # Tweet kaydını güncelle
+            manual_tweets[tweet_index].update({
+                "is_posted": True,
+                "posted_at": datetime.now().isoformat(),
+                "posted_url": tweet_result.get('tweet_url', ''),
+                "tweet_id": tweet_result.get('tweet_id', ''),
+                "status": "posted",
+                "updated_at": datetime.now().isoformat()
+            })
+            
+            save_manual_tweets(manual_tweets)
+            
+            # Ana posted_articles.json'a da ekle (uyumluluk için)
+            article_data = {
+                "title": title,
+                "url": "",
+                "content": tweet_text,
+                "source": "Manuel Tweet",
+                "source_type": "manual",
+                "published_date": tweet_to_post.get('created_at'),
+                "posted_date": datetime.now().isoformat(),
+                "hash": tweet_to_post.get('hash', ''),
+                "tweet_id": tweet_result.get('tweet_id', ''),
+                "tweet_url": tweet_result.get('tweet_url', ''),
+                "is_posted": True,
+                "manual_tweet_id": tweet_id,
+                "theme": tweet_to_post.get('theme', ''),
+                "type": "manual_tweet"
+            }
+            
+            posted_articles = load_json("posted_articles.json")
+            posted_articles.append(article_data)
+            save_json("posted_articles.json", posted_articles)
+            
+            # Telegram bildirimi
+            settings = load_automation_settings()
+            if settings.get('telegram_notifications', False):
+                send_telegram_notification(
+                    f"✅ Manuel tweet paylaşıldı!\n\n{tweet_text[:100]}...",
+                    tweet_result.get('tweet_url', ''),
+                    title
+                )
+            
+            terminal_log(f"✅ Manuel tweet paylaşıldı - ID: {tweet_id}", "success")
+            
+            return jsonify({
+                "success": True, 
+                "message": "Tweet başarıyla paylaşıldı",
+                "tweet_url": tweet_result.get('tweet_url', ''),
+                "tweet_id": tweet_result.get('tweet_id', '')
+            })
+        else:
+            # Paylaşım hatası
+            error_msg = tweet_result.get('error', 'Bilinmeyen hata')
+            is_rate_limited = 'rate limit' in error_msg.lower() or 'too many requests' in error_msg.lower()
+            
+            return jsonify({
+                "success": False, 
+                "error": error_msg,
+                "rate_limited": is_rate_limited
+            })
+            
+    except Exception as e:
+        terminal_log(f"❌ Manuel tweet paylaşım hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/confirm_manual_post_create', methods=['POST'])
+@login_required
+def confirm_manual_post_create():
+    """Create tweet sayfasından manuel paylaşım sonrası onaylama endpoint'i"""
+    try:
+        data = request.get_json()
+        tweet_id = data.get('tweet_id')
+        
+        terminal_log(f"Create tweet manuel onay isteği - Tweet ID: {tweet_id}", "info")
+        
+        if not tweet_id:
+            return jsonify({"success": False, "error": "Tweet ID gerekli"})
+        
+        # Manuel tweet'i bul
+        manual_tweets = load_manual_tweets()
+        tweet_to_confirm = None
+        tweet_index = None
+        
+        for i, tweet in enumerate(manual_tweets):
+            if tweet.get('id') == tweet_id:
+                if tweet.get('is_posted', False):
+                    return jsonify({"success": False, "error": "Bu tweet zaten paylaşılmış"})
+                tweet_to_confirm = tweet
+                tweet_index = i
+                break
+        
+        if not tweet_to_confirm:
+            return jsonify({"success": False, "error": "Tweet bulunamadı"})
+        
+        # Manuel paylaşım olarak işaretle
+        from datetime import datetime
+        import urllib.parse
+        
+        tweet_content = tweet_to_confirm.get('content', '')
+        
+        # Tweet kaydını güncelle
+        manual_tweets[tweet_index].update({
+            "is_posted": True,
+            "posted_at": datetime.now().isoformat(),
+            "posted_url": f"https://x.com/search?q={urllib.parse.quote(tweet_content[:50])}",
+            "status": "posted",
+            "updated_at": datetime.now().isoformat(),
+            "manual_post": True,
+            "confirmed_at": datetime.now().isoformat()
+        })
+        
+        save_manual_tweets(manual_tweets)
+        
+        # Ana posted_articles.json'a da ekle (uyumluluk için)
+        title = f"Manuel Tweet - {tweet_to_confirm.get('theme', 'Tema Yok')}"
+        article_data = {
+            "title": title,
+            "url": "",
+            "content": tweet_content,
+            "source": "Manuel Tweet (Create)",
+            "source_type": "manual_create",
+            "published_date": tweet_to_confirm.get('created_at'),
+            "posted_date": datetime.now().isoformat(),
+            "hash": tweet_to_confirm.get('hash', ''),
+            "tweet_content": tweet_content,
+            "manual_post": True,
+            "confirmed_at": datetime.now().isoformat(),
+            "manual_tweet_id": tweet_id,
+            "theme": tweet_to_confirm.get('theme', ''),
+            "type": "manual_tweet_create"
+        }
+        
+        posted_articles = load_json("posted_articles.json")
+        posted_articles.append(article_data)
+        save_json("posted_articles.json", posted_articles)
+        
+        # Bildirimler
+        settings = load_automation_settings()
+        
+        # Telegram bildirimi
+        if settings.get('telegram_notifications', False):
+            send_telegram_notification(
+                f"✅ Create sayfasından manuel tweet paylaşıldı!\n\n{tweet_content[:100]}...",
+                f"https://x.com/search?q={urllib.parse.quote(tweet_content[:50])}",
+                title
+            )
+        
+        # Gmail bildirimi
+        if settings.get('email_notifications', False):
+            send_gmail_notification(
+                f"✅ Create sayfasından manuel tweet paylaşıldı!\n\n{tweet_content[:100]}...",
+                f"https://x.com/search?q={urllib.parse.quote(tweet_content[:50])}",
+                title
+            )
+        
+        terminal_log(f"✅ Create tweet manuel paylaşım onaylandı - ID: {tweet_id}", "success")
+        
+        return jsonify({
+            "success": True, 
+            "message": "Tweet manuel paylaşım olarak kaydedildi",
+            "tweet_url": f"https://x.com/search?q={urllib.parse.quote(tweet_content[:50])}"
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Create tweet manuel onay hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/manual_tweets/<tweet_id>/update_status', methods=['POST'])
+@login_required
+def update_manual_tweet_status(tweet_id):
+    """Manuel tweet durumunu güncelle (draft <-> ready)"""
+    try:
+        data = request.get_json()
+        new_status = data.get('status')
+        
+        if new_status not in ['draft', 'ready']:
+            return jsonify({
+                "success": False, 
+                "error": "Geçersiz durum. 'draft' veya 'ready' olmalı"
+            })
+        
+        manual_tweets = load_manual_tweets()
+        
+        tweet_index = None
+        for i, tweet in enumerate(manual_tweets):
+            if tweet.get('id') == tweet_id:
+                if tweet.get('is_posted', False):
+                    return jsonify({
+                        "success": False, 
+                        "error": "Paylaşılmış tweet'lerin durumu değiştirilemez"
+                    })
+                
+                tweet_index = i
+                break
+        
+        if tweet_index is not None:
+            manual_tweets[tweet_index]['status'] = new_status
+            manual_tweets[tweet_index]['updated_at'] = datetime.now().isoformat()
+            
+            save_manual_tweets(manual_tweets)
+            
+            terminal_log(f"📝 Manuel tweet durumu güncellendi - ID: {tweet_id}, Yeni durum: {new_status}", "info")
+            
+            return jsonify({
+                "success": True, 
+                "message": f"Tweet durumu '{new_status}' olarak güncellendi"
+            })
+        else:
+            return jsonify({
+                "success": False, 
+                "error": "Tweet bulunamadı"
+            })
+            
+    except Exception as e:
+        terminal_log(f"❌ Manuel tweet durum güncelleme hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
 
 @app.route('/ocr_image', methods=['POST'])
 @login_required
@@ -2032,6 +2495,35 @@ def manual_post_confirmation(tweet_id):
     except Exception as e:
         flash(f'Manuel onay sayfası hatası: {str(e)}', 'error')
         return redirect(url_for('index'))
+
+@app.route('/manual_post_confirmation_create/<tweet_id>')
+@login_required
+def manual_post_confirmation_create(tweet_id):
+    """Create tweet sayfasından manuel paylaşım onaylama sayfası"""
+    try:
+        # Manuel tweet'i bul
+        manual_tweets = load_manual_tweets()
+        
+        tweet_to_confirm = None
+        for tweet in manual_tweets:
+            if tweet.get('id') == tweet_id:
+                if tweet.get('is_posted', False):
+                    flash('Bu tweet zaten paylaşılmış!', 'warning')
+                    return redirect(url_for('create_tweet'))
+                tweet_to_confirm = tweet
+                break
+        
+        if not tweet_to_confirm:
+            flash('Tweet bulunamadı!', 'error')
+            return redirect(url_for('create_tweet'))
+        
+        return render_template('manual_confirmation_create.html', 
+                             tweet=tweet_to_confirm, 
+                             tweet_id=tweet_id)
+        
+    except Exception as e:
+        flash(f'Manuel onay sayfası hatası: {str(e)}', 'error')
+        return redirect(url_for('create_tweet'))
 
 # =============================================================================
 # LOGGING SİSTEMİ (Terminal kaldırıldı - sadece konsol logları)

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Manuel Paylaşım Onayı - Create Tweet{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+    <div class="max-w-4xl mx-auto px-4">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">📝 Manuel Paylaşım Onayı</h1>
+            <p class="text-gray-600">Tweet'i X'te paylaştınız mı? Onaylayın ki sistemde paylaşıldı olarak işaretlensin.</p>
+        </div>
+
+        <!-- Tweet Önizleme -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">📋 Paylaşılan Tweet</h2>
+            
+            <!-- Tweet İçeriği -->
+            <div class="bg-gray-50 rounded-lg p-4 mb-4 border-l-4 border-blue-500">
+                <p class="text-gray-800 whitespace-pre-wrap">{{ tweet.content }}</p>
+            </div>
+
+            <!-- Tweet Detayları -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Tweet ID:</span>
+                        <span class="text-gray-600">{{ tweet.id }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Tema:</span>
+                        <span class="text-gray-600">{{ tweet.theme|title }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Durum:</span>
+                        <span class="px-2 py-1 rounded text-xs font-medium
+                                   {% if tweet.is_draft %}bg-yellow-100 text-yellow-700{% else %}bg-green-100 text-green-700{% endif %}">
+                            {% if tweet.is_draft %}📝 Taslak{% else %}✅ Hazır{% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Oluşturulma:</span>
+                        <span class="text-gray-600">{{ tweet.created_at[:16] }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Karakter:</span>
+                        <span class="text-gray-600">{{ tweet.char_count }}/280</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Hashtag:</span>
+                        <span class="text-gray-600">{{ tweet.hashtag_count }} adet</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kaynak Bilgileri -->
+            {% if tweet.source_data %}
+            <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <h4 class="font-semibold text-blue-800 mb-2">📊 Kaynak Bilgileri</h4>
+                <div class="space-y-1 text-sm text-blue-700">
+                    <div><span class="font-medium">Kaynak Türü:</span> 
+                        {% if tweet.source_data.type == 'text' %}📝 Metin
+                        {% elif tweet.source_data.type == 'image' %}🖼️ Resim
+                        {% elif tweet.source_data.type == 'url' %}🔗 URL
+                        {% else %}❓ Bilinmiyor{% endif %}
+                    </div>
+                    {% if tweet.source_data.type == 'image' and tweet.source_data.original_filename %}
+                    <div><span class="font-medium">Dosya:</span> {{ tweet.source_data.original_filename }}</div>
+                    {% endif %}
+                    {% if tweet.source_data.type == 'url' and tweet.source_data.source_url %}
+                    <div><span class="font-medium">URL:</span> <a href="{{ tweet.source_data.source_url }}" target="_blank" class="text-blue-600 hover:text-blue-800">{{ tweet.source_data.source_url[:50] }}...</a></div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Onaylama Bölümü -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">✅ Onaylama</h2>
+            
+            <div class="flex flex-col sm:flex-row gap-4">
+                <!-- Evet Butonu -->
+                <button onclick="confirmManualPostCreate('{{ tweet_id }}', true)" 
+                        class="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                    <span class="mr-2">✅</span>
+                    Evet, Tweet'i Paylaştım
+                </button>
+
+                <!-- Hayır Butonu -->
+                <button onclick="confirmManualPostCreate('{{ tweet_id }}', false)" 
+                        class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                    <span class="mr-2">❌</span>
+                    Hayır, Paylaşmadım
+                </button>
+
+                <!-- İptal Butonu -->
+                <a href="{{ url_for('create_tweet') }}" 
+                   class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center text-center">
+                    <span class="mr-2">🔙</span>
+                    Create Tweet'e Dön
+                </a>
+            </div>
+
+            <!-- Bilgilendirme -->
+            <div class="mt-4 p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
+                <p class="text-yellow-800 text-sm">
+                    <span class="font-semibold">💡 Bilgi:</span>
+                    "Evet" dediğinizde tweet paylaşıldı olarak işaretlenecek ve tekrar paylaşılmayacak.
+                    "Hayır" dediğinizde tweet mevcut durumunda kalacak ve daha sonra tekrar paylaşabilirsiniz.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmManualPostCreate(tweetId, confirmed) {
+    console.log('confirmManualPostCreate çağrıldı:', { tweetId, confirmed });
+    
+    if (confirmed) {
+        // Evet - Tweet paylaşıldı
+        const requestData = {
+            tweet_id: tweetId,
+            confirmed: true
+        };
+        
+        console.log('Request data:', requestData);
+        
+        // Button'u güncelle
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Onaylanıyor...';
+        button.disabled = true;
+        
+        fetch('/confirm_manual_post_create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ Tweet başarıyla onaylandı ve paylaşıldı olarak işaretlendi!');
+                window.location.href = '/create_tweet';
+            } else {
+                alert('❌ Hata: ' + data.error);
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        })
+        .catch(error => {
+            alert('❌ Bağlantı hatası: ' + error);
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
+    } else {
+        // Hayır - Tweet paylaşılmadı
+        alert('Tweet mevcut durumunda kalacak. Daha sonra tekrar paylaşabilirsiniz.');
+        window.location.href = '/create_tweet';
+    }
+}
+</script>
+{% endblock %} 

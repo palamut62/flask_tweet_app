@@ -3,6 +3,8 @@
 {% block title %}Tweet Oluştur{% endblock %}
 
 {% block content %}
+
+
 <div class="flex justify-center items-center min-h-[60vh]">
   <div class="w-full max-w-4xl bg-white/90 rounded-2xl shadow-2xl p-8 border border-blue-100">
     <h2 class="text-2xl font-bold mb-2 text-center text-blue-700 flex items-center justify-center gap-2">
@@ -132,6 +134,19 @@
               </div>
             </div>
 
+            <!-- Taslak Kaydetme Seçeneği -->
+            <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <label class="flex items-center gap-2">
+                <input type="checkbox" name="save_as_draft" id="save_as_draft" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                <span class="text-sm font-medium text-gray-700">
+                  <i class="fas fa-save text-yellow-500"></i> Taslak olarak kaydet (henüz paylaşma)
+                </span>
+              </label>
+              <p class="text-xs text-gray-500 mt-1 ml-6">
+                Tweet oluşturulacak ancak otomatik paylaşılmayacak. Daha sonra manuel olarak paylaşabilirsiniz.
+              </p>
+            </div>
+
             <div class="flex justify-center pt-4">
               <button 
                 type="submit" 
@@ -167,64 +182,9 @@
           </div>
         </div>
 
-        <!-- Gerçek Zamanlı Tweet Önizlemesi -->
-        <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <i class="fas fa-twitter text-blue-500"></i> Tweet Önizlemesi
-          </h3>
-          <div id="live-preview" class="bg-white p-4 rounded-lg border border-gray-300 min-h-[100px]">
-            <div class="flex items-start space-x-3">
-              <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                AI
-              </div>
-              <div class="flex-1">
-                <div class="flex items-center space-x-2 mb-1">
-                  <span class="font-bold text-gray-900">AI Tweet Bot</span>
-                  <span class="text-blue-500"><i class="fas fa-check-circle"></i></span>
-                  <span class="text-gray-500 text-sm">@ai_tweet_bot</span>
-                </div>
-                <p id="preview-text" class="text-gray-700 whitespace-pre-wrap">
-                  Tweet metni buraya gelecek...
-                </p>
-                <div class="flex justify-between items-center mt-3 text-gray-500 text-sm">
-                  <div class="flex space-x-4">
-                    <span><i class="far fa-comment"></i> 0</span>
-                    <span><i class="fas fa-retweet"></i> 0</span>
-                    <span><i class="far fa-heart"></i> 0</span>
-                    <span><i class="fas fa-share"></i></span>
-                  </div>
-                  <span id="preview-char-count" class="text-xs">0/280</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Tweet Kalitesi Göstergesi -->
-        <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <i class="fas fa-chart-line text-green-500"></i> Tweet Kalitesi
-          </h3>
-          <div class="space-y-3">
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600">Karakter Kullanımı</span>
-              <div class="flex items-center space-x-2">
-                <div class="w-20 h-2 bg-gray-200 rounded-full">
-                  <div id="char-progress" class="h-2 bg-blue-500 rounded-full transition-all duration-300" style="width: 0%"></div>
-                </div>
-                <span id="char-percentage" class="text-xs text-gray-500">0%</span>
-              </div>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600">Hashtag Sayısı</span>
-              <span id="hashtag-count" class="text-sm font-medium">0</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600">Emoji Sayısı</span>
-              <span id="emoji-count" class="text-sm font-medium">0</span>
-            </div>
-          </div>
-        </div>
+
+
       </div>
     </div>
 
@@ -246,6 +206,30 @@
         </div>
       </div>
       
+      <!-- Tweet Durum Bilgisi -->
+      {% if tweet_id %}
+      <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-database text-blue-500"></i>
+            <span class="text-sm font-medium text-gray-700">Tweet ID: {{ tweet_id }}</span>
+            {% if is_draft %}
+              <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-medium">
+                <i class="fas fa-save"></i> Taslak
+              </span>
+            {% else %}
+              <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
+                <i class="fas fa-check"></i> Hazır
+              </span>
+            {% endif %}
+          </div>
+          <button onclick="viewTweetDetails('{{ tweet_id }}')" class="text-blue-600 hover:text-blue-800 text-sm">
+            <i class="fas fa-info-circle"></i> Detaylar
+          </button>
+        </div>
+      </div>
+      {% endif %}
+
       <!-- Aksiyon Butonları -->
       <div class="flex flex-wrap gap-3">
         <button 
@@ -254,13 +238,33 @@
         >
           <i class="fas fa-copy"></i> Kopyala
         </button>
+        
+        {% if tweet_id and not is_draft %}
+        <button 
+          onclick="postManualTweet('{{ tweet_id }}')" 
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center gap-2"
+        >
+          <i class="fab fa-twitter"></i> API ile Paylaş
+        </button>
+        {% endif %}
+        
         <a 
           href="https://twitter.com/intent/tweet?text={{ generated_tweet|urlencode }}" 
           target="_blank"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center gap-2"
+          class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-all duration-200 flex items-center gap-2"
         >
-          <i class="fab fa-twitter"></i> Twitter'da Paylaş
+          <i class="fab fa-twitter"></i> X'te Paylaş
         </a>
+        
+        {% if tweet_id %}
+        <button 
+          onclick="deleteManualTweet('{{ tweet_id }}')" 
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 flex items-center gap-2"
+        >
+          <i class="fas fa-trash"></i> Sil
+        </button>
+        {% endif %}
+        
         <button 
           onclick="editTweet()" 
           class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 flex items-center gap-2"
@@ -369,8 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
       updateCharacterCount(this);
     });
     
-    // İlk yüklemede boş önizleme göster
-    updateLivePreview('');
+
   }
   
   // URL input dinleyicisi
@@ -428,8 +431,7 @@ function updateCharacterCount(element) {
       }
     }
     
-    // Önizlemeyi güncelle
-    updateLivePreview(element.value);
+
     
     console.log('Karakter sayısı güncellendi:', count); // Debug log
     
@@ -438,52 +440,9 @@ function updateCharacterCount(element) {
   }
 }
 
-// Canlı önizlemeyi güncelle
-function updateLivePreview(text) {
+// Hashtag ve emoji sayısını güncelle
+function updateTweetStats(text) {
   try {
-    const previewElement = document.getElementById('preview-text');
-    const charCountElement = document.getElementById('preview-char-count');
-    const charProgressElement = document.getElementById('char-progress');
-    const charPercentageElement = document.getElementById('char-percentage');
-    
-    // Element kontrolü
-    if (!previewElement || !charCountElement || !charProgressElement || !charPercentageElement) {
-      console.warn('Tweet önizleme elementleri bulunamadı');
-      return;
-    }
-    
-    // Metin önizlemesi
-    if (text && text.trim()) {
-      previewElement.textContent = text;
-    } else {
-      previewElement.textContent = 'Tweet metni buraya gelecek...';
-      previewElement.style.color = '#9CA3AF'; // Placeholder rengi
-    }
-    
-    const charCount = text ? text.length : 0;
-    const percentage = Math.min((charCount / 280) * 100, 100);
-    
-    // Karakter sayısını güncelle
-    charCountElement.textContent = `${charCount}/280`;
-    charProgressElement.style.width = `${percentage}%`;
-    charPercentageElement.textContent = `${Math.round(percentage)}%`;
-    
-    // Progress bar rengi ve karakter sayısı rengi
-    if (percentage > 95) {
-      charProgressElement.className = 'h-2 bg-red-600 rounded-full transition-all duration-300';
-      charCountElement.style.color = '#DC2626'; // Kırmızı
-    } else if (percentage > 85) {
-      charProgressElement.className = 'h-2 bg-orange-500 rounded-full transition-all duration-300';
-      charCountElement.style.color = '#EA580C'; // Turuncu
-    } else if (percentage > 75) {
-      charProgressElement.className = 'h-2 bg-yellow-500 rounded-full transition-all duration-300';
-      charCountElement.style.color = '#CA8A04'; // Sarı
-    } else {
-      charProgressElement.className = 'h-2 bg-blue-500 rounded-full transition-all duration-300';
-      charCountElement.style.color = '#6B7280'; // Gri
-    }
-    
-    // Hashtag ve emoji sayısını güncelle
     const hashtagCount = text ? (text.match(/#\w+/g) || []).length : 0;
     const emojiCount = text ? (text.match(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu) || []).length : 0;
     
@@ -493,13 +452,8 @@ function updateLivePreview(text) {
     if (hashtagElement) hashtagElement.textContent = hashtagCount;
     if (emojiElement) emojiElement.textContent = emojiCount;
     
-    // Metin varsa placeholder rengini kaldır
-    if (text && text.trim()) {
-      previewElement.style.color = '#374151'; // Normal metin rengi
-    }
-    
   } catch (error) {
-    console.error('Tweet önizleme güncelleme hatası:', error);
+    console.error('Tweet istatistik güncelleme hatası:', error);
   }
 }
 
@@ -645,7 +599,14 @@ function hideLoadingModal() {
 
 // Tweet kopyalama
 function copyTweet() {
-  const tweetText = `{{ generated_tweet|safe }}`;
+  const tweetElement = document.querySelector('.bg-green-50 .bg-white p');
+  if (!tweetElement) {
+    alert('Kopyalanacak tweet bulunamadı!');
+    return;
+  }
+  
+  const tweetText = tweetElement.textContent.trim();
+  
   navigator.clipboard.writeText(tweetText).then(function() {
     // Başarı mesajı
     const button = event.target.closest('button');
@@ -666,7 +627,14 @@ function copyTweet() {
 
 // Tweet düzenleme
 function editTweet() {
-  const tweetText = `{{ generated_tweet|safe }}`;
+  const tweetElement = document.querySelector('.bg-green-50 .bg-white p');
+  if (!tweetElement) {
+    alert('Düzenlenecek tweet bulunamadı!');
+    return;
+  }
+  
+  const tweetText = tweetElement.textContent.trim();
+  
   document.getElementById('tweet_text').value = tweetText;
   document.getElementById('tab-text').click();
   updateCharacterCount(document.getElementById('tweet_text'));
@@ -687,5 +655,637 @@ function generateVariation() {
 window.addEventListener('load', function() {
   hideLoadingModal();
 });
+
+// ==============================
+// MANUEL TWEET YÖNETİM FONKSİYONLARI
+// ==============================
+
+// Manuel tweet'i paylaş
+function postManualTweet(tweetId) {
+  if (!tweetId) {
+    alert('Tweet ID bulunamadı!');
+    return;
+  }
+  
+  if (!confirm('Bu tweet\'i API ile paylaşmak istediğinizden emin misiniz?')) {
+    return;
+  }
+  
+  // Loading göster
+  const button = event.target.closest('button');
+  const originalContent = button.innerHTML;
+  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Paylaşılıyor...';
+  button.disabled = true;
+  
+  fetch(`/api/manual_tweets/${tweetId}/post`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('✅ Tweet başarıyla paylaşıldı!');
+      
+      // Sayfayı yenile veya elementi güncelle
+      if (data.tweet_url) {
+        window.open(data.tweet_url, '_blank');
+      }
+      
+      // Sayfayı yenile
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+      
+    } else {
+      alert('❌ Hata: ' + data.error);
+      
+      // Rate limit durumunda özel mesaj
+      if (data.rate_limited) {
+        alert('⏰ Twitter API rate limit\'e takıldı. Lütfen daha sonra tekrar deneyin.');
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Tweet paylaşım hatası:', error);
+    alert('❌ Bir hata oluştu: ' + error.message);
+  })
+  .finally(() => {
+    // Button'u eski haline getir
+    button.innerHTML = originalContent;
+    button.disabled = false;
+  });
+}
+
+// Manuel tweet'i sil
+function deleteManualTweet(tweetId) {
+  if (!tweetId) {
+    alert('Tweet ID bulunamadı!');
+    return;
+  }
+  
+  if (!confirm('Bu tweet\'i silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) {
+    return;
+  }
+  
+  // Loading göster
+  const button = event.target.closest('button');
+  const originalContent = button.innerHTML;
+  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  button.disabled = true;
+  
+  fetch(`/api/manual_tweets/${tweetId}/delete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('✅ Tweet başarıyla silindi!');
+      
+      // Elementi DOM'dan kaldır
+      const tweetElement = button.closest('.bg-white');
+      if (tweetElement) {
+        tweetElement.style.transition = 'all 0.3s ease';
+        tweetElement.style.opacity = '0';
+        tweetElement.style.transform = 'scale(0.9)';
+        
+        setTimeout(() => {
+          tweetElement.remove();
+        }, 300);
+      }
+      
+    } else {
+      alert('❌ Hata: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Tweet silme hatası:', error);
+    alert('❌ Bir hata oluştu: ' + error.message);
+  })
+  .finally(() => {
+    // Button'u eski haline getir
+    button.innerHTML = originalContent;
+    button.disabled = false;
+  });
+}
+
+// Tweet detaylarını görüntüle
+function viewTweetDetails(tweetId) {
+  if (!tweetId) {
+    alert('Tweet ID bulunamadı!');
+    return;
+  }
+  
+  fetch(`/api/manual_tweets/${tweetId}`)
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const tweet = data.tweet;
+      
+      // Modal oluştur ve göster
+      showTweetDetailsModal(tweet);
+      
+    } else {
+      alert('❌ Tweet detayları alınamadı: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Tweet detay hatası:', error);
+    alert('❌ Bir hata oluştu: ' + error.message);
+  });
+}
+
+// Tweet detay modal'ını göster
+function showTweetDetailsModal(tweet) {
+  // Modal HTML'i oluştur
+  const modalHTML = `
+    <div id="tweet-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900">Tweet Detayları</h3>
+          <button onclick="closeTweetDetailsModal()" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+        
+        <!-- Tweet İçeriği -->
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <h4 class="font-semibold text-gray-800 mb-2">Tweet İçeriği</h4>
+          <p class="text-gray-700 whitespace-pre-wrap">${tweet.content}</p>
+          <div class="flex justify-between items-center mt-2 text-sm text-gray-500">
+            <span>Karakter: ${tweet.char_count}/280</span>
+            <span>Hashtag: ${tweet.hashtag_count} | Emoji: ${tweet.emoji_count}</span>
+          </div>
+        </div>
+        
+        <!-- Tweet Bilgileri -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="space-y-2">
+            <div class="flex justify-between">
+              <span class="font-medium text-gray-700">ID:</span>
+              <span class="text-gray-600">${tweet.id}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="font-medium text-gray-700">Durum:</span>
+              <span class="px-2 py-1 rounded text-xs font-medium ${
+                tweet.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
+                tweet.status === 'ready' ? 'bg-green-100 text-green-700' :
+                tweet.status === 'posted' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+              }">
+                ${tweet.status === 'draft' ? 'Taslak' : 
+                  tweet.status === 'ready' ? 'Hazır' :
+                  tweet.status === 'posted' ? 'Paylaşıldı' : tweet.status}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="font-medium text-gray-700">Tema:</span>
+              <span class="text-gray-600">${tweet.theme || 'Belirtilmemiş'}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="font-medium text-gray-700">Oluşturulma:</span>
+              <span class="text-gray-600">${new Date(tweet.created_at).toLocaleString('tr-TR')}</span>
+            </div>
+          </div>
+          
+          <div class="space-y-2">
+            <div class="flex justify-between">
+              <span class="font-medium text-gray-700">Kaynak Türü:</span>
+              <span class="text-gray-600">${
+                tweet.source_data?.type === 'text' ? 'Metin' :
+                tweet.source_data?.type === 'url' ? 'URL' :
+                tweet.source_data?.type === 'image' ? 'Resim' : 'Bilinmiyor'
+              }</span>
+            </div>
+            ${tweet.is_posted ? `
+              <div class="flex justify-between">
+                <span class="font-medium text-gray-700">Paylaşım Tarihi:</span>
+                <span class="text-gray-600">${new Date(tweet.posted_at).toLocaleString('tr-TR')}</span>
+              </div>
+              ${tweet.posted_url ? `
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-700">Tweet URL:</span>
+                  <a href="${tweet.posted_url}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
+                    <i class="fas fa-external-link-alt"></i> Görüntüle
+                  </a>
+                </div>
+              ` : ''}
+            ` : ''}
+          </div>
+        </div>
+        
+        <!-- Kaynak Bilgileri -->
+        ${tweet.source_data ? `
+          <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 class="font-semibold text-blue-800 mb-2">Kaynak Bilgileri</h4>
+            ${tweet.source_data.type === 'url' ? `
+              <div class="space-y-1 text-sm">
+                <div><span class="font-medium">URL:</span> <a href="${tweet.source_data.source_url}" target="_blank" class="text-blue-600 hover:text-blue-800">${tweet.source_data.source_url}</a></div>
+                ${tweet.source_data.fetched_title ? `<div><span class="font-medium">Başlık:</span> ${tweet.source_data.fetched_title}</div>` : ''}
+              </div>
+            ` : tweet.source_data.type === 'image' ? `
+              <div class="space-y-1 text-sm">
+                <div><span class="font-medium">Dosya:</span> ${tweet.source_data.original_filename}</div>
+                ${tweet.source_data.ocr_text ? `<div><span class="font-medium">OCR Metni:</span> ${tweet.source_data.ocr_text.substring(0, 100)}...</div>` : ''}
+              </div>
+            ` : tweet.source_data.type === 'text' ? `
+              <div class="space-y-1 text-sm">
+                <div><span class="font-medium">Orijinal Metin:</span> ${tweet.source_data.original_text.substring(0, 100)}...</div>
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+        
+        <!-- Aksiyon Butonları -->
+        <div class="flex flex-wrap gap-3 justify-end">
+          ${!tweet.is_posted ? `
+            ${tweet.status === 'ready' ? `
+              <button onclick="postManualTweet('${tweet.id}')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center gap-2">
+                <i class="fab fa-twitter"></i> Paylaş
+              </button>
+            ` : ''}
+            <button onclick="deleteManualTweet('${tweet.id}')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 flex items-center gap-2">
+              <i class="fas fa-trash"></i> Sil
+            </button>
+          ` : ''}
+          <button onclick="closeTweetDetailsModal()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200">
+            Kapat
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Modal'ı DOM'a ekle
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+// Tweet detay modal'ını kapat
+function closeTweetDetailsModal() {
+  const modal = document.getElementById('tweet-detail-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// Tüm manuel tweet'leri yükle
+function loadAllManualTweets() {
+  fetch('/api/manual_tweets')
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showAllTweetsModal(data.tweets, data.stats);
+    } else {
+      alert('❌ Tweetler yüklenemedi: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Tweet yükleme hatası:', error);
+    alert('❌ Bir hata oluştu: ' + error.message);
+  });
+}
+
+// Tüm tweet'ler modal'ını göster
+function showAllTweetsModal(tweets, stats) {
+  const modalHTML = `
+    <div id="all-tweets-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900">Tüm Manuel Tweet'ler</h3>
+          <button onclick="closeAllTweetsModal()" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+        
+        <!-- İstatistikler -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div class="bg-blue-50 p-3 rounded-lg text-center">
+            <div class="text-2xl font-bold text-blue-600">${stats.total}</div>
+            <div class="text-sm text-blue-800">Toplam</div>
+          </div>
+          <div class="bg-yellow-50 p-3 rounded-lg text-center">
+            <div class="text-2xl font-bold text-yellow-600">${stats.drafts}</div>
+            <div class="text-sm text-yellow-800">Taslak</div>
+          </div>
+          <div class="bg-green-50 p-3 rounded-lg text-center">
+            <div class="text-2xl font-bold text-green-600">${stats.ready}</div>
+            <div class="text-sm text-green-800">Hazır</div>
+          </div>
+          <div class="bg-purple-50 p-3 rounded-lg text-center">
+            <div class="text-2xl font-bold text-purple-600">${stats.posted}</div>
+            <div class="text-sm text-purple-800">Paylaşıldı</div>
+          </div>
+        </div>
+        
+        <!-- Tweet Listesi -->
+        <div class="space-y-3 max-h-96 overflow-y-auto">
+          ${tweets.map(tweet => `
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <p class="text-gray-700 mb-2">${tweet.content.length > 150 ? tweet.content.substring(0, 150) + '...' : tweet.content}</p>
+                  <div class="flex items-center gap-4 text-xs text-gray-500">
+                    <span><i class="fas fa-calendar"></i> ${new Date(tweet.created_at).toLocaleDateString('tr-TR')}</span>
+                    <span><i class="fas fa-palette"></i> ${tweet.theme || 'Tema Yok'}</span>
+                    <span class="px-2 py-1 rounded ${
+                      tweet.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
+                      tweet.status === 'ready' ? 'bg-green-100 text-green-700' :
+                      tweet.status === 'posted' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+                    }">
+                      ${tweet.status === 'draft' ? 'Taslak' : 
+                        tweet.status === 'ready' ? 'Hazır' :
+                        tweet.status === 'posted' ? 'Paylaşıldı' : tweet.status}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex gap-2 ml-4">
+                  ${!tweet.is_posted && tweet.status === 'ready' ? `
+                    <button onclick="postManualTweet('${tweet.id}')" class="text-blue-600 hover:text-blue-800" title="Paylaş">
+                      <i class="fab fa-twitter"></i>
+                    </button>
+                  ` : ''}
+                  <button onclick="viewTweetDetails('${tweet.id}')" class="text-gray-600 hover:text-gray-800" title="Detaylar">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  ${!tweet.is_posted ? `
+                    <button onclick="deleteManualTweet('${tweet.id}')" class="text-red-600 hover:text-red-800" title="Sil">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        
+        <div class="mt-6 text-center">
+          <button onclick="closeAllTweetsModal()" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200">
+            Kapat
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+// Tüm tweet'ler modal'ını kapat
+function closeAllTweetsModal() {
+  const modal = document.getElementById('all-tweets-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// Manuel paylaşım onayı modal'ını göster
+let currentTweetIdToPost = null;
+
+function confirmManualPost(tweetId) {
+  currentTweetIdToPost = tweetId;
+  
+  // Tweet detaylarını al
+  fetch(`/api/manual_tweets/${tweetId}`)
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showManualPostConfirmModal(data.tweet);
+    } else {
+      alert('❌ Tweet bilgileri alınamadı: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Tweet bilgileri alma hatası:', error);
+    alert('❌ Bir hata oluştu: ' + error.message);
+  });
+}
+
+function showManualPostConfirmModal(tweet) {
+  const modalHTML = `
+    <div id="manual-post-confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold text-gray-900">Tweet Paylaşım Onayı</h3>
+          <button onclick="closeManualPostConfirmModal()" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <h4 class="font-semibold text-gray-800 mb-2">Paylaşılacak Tweet:</h4>
+          <p class="text-gray-700 whitespace-pre-wrap">${tweet.content}</p>
+          <div class="flex justify-between items-center mt-2 text-sm text-gray-500">
+            <span>Karakter: ${tweet.char_count}/280</span>
+            <span>Tema: ${tweet.theme || 'Belirtilmemiş'}</span>
+          </div>
+        </div>
+        
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <div class="flex items-start gap-3">
+            <i class="fas fa-exclamation-triangle text-yellow-600 mt-1"></i>
+            <div>
+              <h4 class="font-medium text-yellow-800">Dikkat!</h4>
+              <p class="text-yellow-700 text-sm mt-1">
+                Bu tweet Twitter'a paylaşılacak. Paylaşım işlemi geri alınamaz.
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex gap-3 justify-end">
+          <button onclick="closeManualPostConfirmModal()" 
+                  class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+            İptal
+          </button>
+          <button onclick="executeManualPost()" 
+                  class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium">
+            <i class="fab fa-twitter"></i> Paylaş
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function closeManualPostConfirmModal() {
+  const modal = document.getElementById('manual-post-confirm-modal');
+  if (modal) {
+    modal.remove();
+  }
+  currentTweetIdToPost = null;
+}
+
+function executeManualPost() {
+  if (!currentTweetIdToPost) {
+    alert('❌ Tweet ID bulunamadı!');
+    return;
+  }
+  
+  const button = document.querySelector('#manual-post-confirm-modal button[onclick="executeManualPost()"]');
+  if (button) {
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Paylaşılıyor...';
+    button.disabled = true;
+  }
+  
+  fetch(`/api/manual_tweets/${currentTweetIdToPost}/post`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('✅ Tweet başarıyla paylaşıldı!');
+      closeManualPostConfirmModal();
+      // Sayfayı yenile
+      window.location.reload();
+    } else {
+      alert('❌ Tweet paylaşılamadı: ' + data.error);
+      if (button) {
+        button.innerHTML = '<i class="fab fa-twitter"></i> Paylaş';
+        button.disabled = false;
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Tweet paylaşım hatası:', error);
+    alert('❌ Bir hata oluştu: ' + error.message);
+    if (button) {
+      button.innerHTML = '<i class="fab fa-twitter"></i> Paylaş';
+      button.disabled = false;
+    }
+  });
+}
+
+// Manuel tweet paylaşımı (X.com'da açma)
+function manualPostTweetFromCreate(tweetId) {
+  // Tweet detaylarını al
+  fetch(`/api/manual_tweets/${tweetId}`)
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const tweet = data.tweet;
+      const tweetText = tweet.content;
+      
+      // X.com paylaşım URL'si oluştur
+      const encodedText = encodeURIComponent(tweetText);
+      const xShareUrl = `https://x.com/intent/tweet?text=${encodedText}`;
+      
+      // X.com'da yeni sekmede aç
+      window.open(xShareUrl, '_blank');
+      
+      // Kullanıcıya bilgilendirme
+      alert('📝 X.com\'da paylaşım sayfası açıldı.\n\nTweet\'i paylaştıktan sonra "Manuel Paylaşımı Onayla" butonuna tıklayın.');
+      
+    } else {
+      alert('❌ Tweet bilgileri alınamadı: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Tweet bilgileri alma hatası:', error);
+    alert('❌ Bir hata oluştu: ' + error.message);
+  });
+}
+
+// ESC tuşu ile modal'ları kapat
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    closeTweetDetailsModal();
+    closeAllTweetsModal();
+    closeManualPostConfirmModal();
+  }
+});
 </script>
+
+<!-- Mevcut Tweet'ler Bölümü (Ana Sayfa Tarzı) -->
+{% if draft_tweets or ready_tweets %}
+<div class="container mx-auto px-4 py-8">
+  <div class="bg-white rounded-lg shadow-lg p-6">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+      <i class="fas fa-edit text-blue-500"></i>
+      Mevcut Tweet'ler
+    </h2>
+    
+    <!-- Tweet Kartları -->
+    <div class="space-y-4">
+      {% for tweet in (draft_tweets + ready_tweets) %}
+      <div class="bg-gray-50 rounded-lg p-4 border-l-4 
+                  {% if tweet.is_draft %}border-yellow-400{% else %}border-green-400{% endif %}">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2 py-1 rounded-full text-xs font-medium
+                          {% if tweet.is_draft %}bg-yellow-100 text-yellow-800{% else %}bg-green-100 text-green-800{% endif %}">
+                {% if tweet.is_draft %}📝 Taslak{% else %}✅ Hazır{% endif %}
+              </span>
+              <span class="text-sm text-gray-500">
+                <i class="fas fa-calendar"></i> {{ tweet.created_at[:16] }}
+              </span>
+              <span class="text-sm text-gray-500">
+                <i class="fas fa-palette"></i> {{ tweet.theme|title }}
+              </span>
+            </div>
+            
+            <p class="text-gray-700 mb-3 leading-relaxed">{{ tweet.content }}</p>
+            
+            <div class="flex items-center gap-4 text-sm text-gray-500">
+              <span><i class="fas fa-font"></i> {{ tweet.content|length }} karakter</span>
+              {% if tweet.hashtag_count %}
+              <span><i class="fas fa-hashtag"></i> {{ tweet.hashtag_count }} hashtag</span>
+              {% endif %}
+              {% if tweet.emoji_count %}
+              <span><i class="fas fa-smile"></i> {{ tweet.emoji_count }} emoji</span>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="flex flex-col gap-2 ml-4">
+            {% if not tweet.is_draft %}
+            <button onclick="confirmManualPost('{{ tweet.id }}')" 
+                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <i class="fas fa-robot"></i> API ile Paylaş
+            </button>
+            <button onclick="manualPostTweetFromCreate('{{ tweet.id }}')" 
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <i class="fab fa-twitter"></i> X'te Manuel Paylaş
+            </button>
+            <a href="/manual_post_confirmation_create/{{ tweet.id }}" 
+               class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors text-center">
+              <i class="fas fa-check-circle"></i> Manuel Paylaşımı Onayla
+            </a>
+            {% endif %}
+            
+            <button onclick="viewTweetDetails('{{ tweet.id }}')" 
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <i class="fas fa-eye"></i> Detay
+            </button>
+            
+            {% if tweet.is_draft or not tweet.is_posted %}
+            <button onclick="deleteManualTweet('{{ tweet.id }}')" 
+                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <i class="fas fa-trash"></i> Sil
+            </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <div class="mt-6 text-center">
+      <button onclick="loadAllManualTweets()" 
+              class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+        <i class="fas fa-list"></i> Tüm Tweet'leri Görüntüle
+      </button>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 {% endblock %} 
