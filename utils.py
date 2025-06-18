@@ -2046,6 +2046,79 @@ def get_data_statistics():
         # Paylaşılan tweetler (silinmemiş olanlar)
         stats["posted_tweets"] = len(active_articles)
         
+        # Silinmiş tweetler istatistikleri
+        stats["deleted_tweets"] = len(deleted_articles)
+        
+        # Bugünkü silinmiş tweetler
+        today_deleted = []
+        for article in deleted_articles:
+            if article.get("deleted_date"):
+                try:
+                    deleted_date_str = article["deleted_date"]
+                    if deleted_date_str.endswith('Z'):
+                        deleted_date_str = deleted_date_str[:-1] + '+00:00'
+                    
+                    deleted_date = datetime.fromisoformat(deleted_date_str)
+                    if deleted_date.date() == today:
+                        today_deleted.append(article)
+                        
+                except (ValueError, TypeError):
+                    continue
+        
+        stats["today_deleted"] = len(today_deleted)
+        
+        # GitHub repo istatistikleri
+        github_repos = [article for article in posted_articles if article.get('type') == 'github_repo' or article.get('source_type') == 'github']
+        active_github_repos = [repo for repo in github_repos if not repo.get('deleted', False)]
+        deleted_github_repos = [repo for repo in github_repos if repo.get('deleted', False)]
+        
+        stats["github_repos_total"] = len(github_repos)
+        stats["github_repos_active"] = len(active_github_repos)
+        stats["github_repos_deleted"] = len(deleted_github_repos)
+        
+        # GitHub dil dağılımı
+        github_languages = {}
+        for repo in active_github_repos:
+            if 'repo_data' in repo:
+                lang = repo['repo_data'].get('language', 'Unknown')
+            elif 'language' in repo:
+                lang = repo['language']
+            else:
+                lang = 'Unknown'
+            
+            if lang:
+                github_languages[lang] = github_languages.get(lang, 0) + 1
+        
+        stats["github_languages"] = github_languages
+        
+        # En popüler GitHub dili
+        if github_languages:
+            stats["github_top_language"] = max(github_languages.items(), key=lambda x: x[1])
+        else:
+            stats["github_top_language"] = ("Veri yok", 0)
+        
+        # Bugünkü GitHub repoları
+        today_github = []
+        for repo in active_github_repos:
+            if repo.get("posted_date"):
+                try:
+                    posted_date_str = repo["posted_date"]
+                    if posted_date_str.endswith('Z'):
+                        posted_date_str = posted_date_str[:-1] + '+00:00'
+                    
+                    posted_date = datetime.fromisoformat(posted_date_str)
+                    if posted_date.date() == today:
+                        today_github.append(repo)
+                        
+                except (ValueError, TypeError):
+                    continue
+        
+        stats["today_github"] = len(today_github)
+        
+        # Kaynak türü dağılımı
+        news_articles = [article for article in active_articles if article.get('source_type', 'news') == 'news' or article.get('type') != 'github_repo']
+        stats["news_articles"] = len(news_articles)
+        
         # Dünkü makaleler de hesapla
         yesterday = today - timedelta(days=1)
         yesterday_articles = []
@@ -2156,6 +2229,16 @@ def get_data_statistics():
             "pending_tweets": 0,
             "today_pending": 0,
             "posted_tweets_in_pending": 0,
+            "posted_tweets": 0,
+            "deleted_tweets": 0,
+            "today_deleted": 0,
+            "github_repos_total": 0,
+            "github_repos_active": 0,
+            "github_repos_deleted": 0,
+            "github_languages": {},
+            "github_top_language": ("Veri yok", 0),
+            "today_github": 0,
+            "news_articles": 0,
             "summaries": 0,
             "hashtags": 0,
             "accounts": 0,
