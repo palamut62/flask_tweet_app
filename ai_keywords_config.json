@@ -1,0 +1,301 @@
+{
+    "version": "1.0",
+    "last_updated": "2025-06-18T13:01:39.487349",
+    "settings": {
+        "enabled": true,
+        "search_depth": "deep",
+        "language_preference": "tr",
+        "max_articles_per_search": 10,
+        "search_time_range_hours": 24
+    },
+    "keyword_categories": {
+        "ai_models": {
+            "enabled": true,
+            "priority": "high",
+            "default_keywords": [
+                "openai",
+                "chatgpt",
+                "gpt-4",
+                "gpt-5",
+                "claude",
+                "anthropic",
+                "gemini",
+                "bard",
+                "llama",
+                "meta ai",
+                "qwen",
+                "alibaba ai",
+                "deepseek",
+                "moonshot",
+                "zhipu",
+                "baichuan",
+                "yi model",
+                "minimax",
+                "doubao",
+                "bytedance ai"
+            ],
+            "user_keywords": [
+                "grok"
+            ],
+            "excluded_keywords": [
+                "yi model",
+                "gpt-5",
+                "alibaba ai",
+                "baichuan",
+                "anthropic",
+                "bytedance ai",
+                "moonshot",
+                "minimax",
+                "meta ai",
+                "doubao",
+                "zhipu",
+                "bard",
+                "gpt-4",
+                "chatgpt"
+            ]
+        },
+        "ai_tools": {
+            "enabled": true,
+            "priority": "high",
+            "default_keywords": [
+                "cursor ai",
+                "cursor ide",
+                "windsurf ai",
+                "codeium windsurf",
+                "github copilot",
+                "tabnine",
+                "codewhisperer",
+                "replit ai",
+                "v0.dev",
+                "bolt.new",
+                "lovable.dev",
+                "perplexity",
+                "phind",
+                "you.com",
+                "poe ai",
+                "character ai",
+                "janitor ai",
+                "midjourney",
+                "stable diffusion",
+                "dall-e",
+                "runway ml",
+                "luma ai",
+                "suno ai",
+                "udio ai"
+            ],
+            "user_keywords": [
+                "trae"
+            ],
+            "excluded_keywords": [
+                "replit ai",
+                "stable diffusion",
+                "tabnine",
+                "codewhisperer",
+                "codeium windsurf",
+                "runway ml",
+                "v0.dev",
+                "udio ai",
+                "poe ai",
+                "suno ai",
+                "phind",
+                "github copilot",
+                "luma ai",
+                "character ai",
+                "you.com",
+                "janitor ai",
+                "midjourney",
+                "perplexity",
+                "dall-e",
+                "cursor ide"
+            ]
+        },
+        "ai_companies": {
+            "enabled": true,
+            "priority": "medium",
+            "default_keywords": [
+                "openai",
+                "anthropic",
+                "google ai",
+                "microsoft ai",
+                "meta ai",
+                "apple intelligence",
+                "nvidia ai",
+                "tesla ai",
+                "xai",
+                "elon musk ai",
+                "stability ai",
+                "hugging face",
+                "cohere",
+                "inflection ai",
+                "adept ai",
+                "scale ai",
+                "databricks",
+                "together ai",
+                "replicate",
+                "runpod"
+            ],
+            "user_keywords": [],
+            "excluded_keywords": [
+                "together ai",
+                "inflection ai",
+                "elon musk ai",
+                "replicate",
+                "adept ai",
+                "tesla ai",
+                "stability ai",
+                "anthropic",
+                "hugging face",
+                "microsoft ai",
+                "runpod",
+                "databricks",
+                "cohere",
+                "meta ai",
+                "openai",
+                "google ai",
+                "nvidia ai",
+                "scale ai",
+                "apple intelligence",
+                "xai"
+            ]
+        },
+        "ai_technologies": {
+            "enabled": true,
+            "priority": "medium",
+            "default_keywords": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural network",
+                "transformer",
+                "llm",
+                "large language model",
+                "multimodal ai",
+                "computer vision",
+                "natural language processing",
+                "nlp",
+                "generative ai",
+                "agi",
+                "artificial general intelligence",
+                "ai safety",
+                "ai alignment",
+                "reinforcement learning",
+                "supervised learning",
+                "unsupervised learning",
+                "fine-tuning",
+                "rag",
+                "retrieval augmented generation"
+            ],
+            "user_keywords": [],
+            "excluded_keywords": [
+                "artificial general intelligence",
+                "transformer",
+                "ai alignment",
+                "neural network",
+                "large language model",
+                "unsupervised learning",
+                "reinforcement learning",
+                "computer vision",
+                "retrieval augmented generation",
+                "natural language processing",
+                "multimodal ai",
+                "supervised learning",
+                "rag",
+                "ai safety",
+                "fine-tuning",
+                "nlp"
+            ]
+        },
+        "ai_applications": {
+            "enabled": true,
+            "priority": "low",
+            "default_keywords": [
+                "ai coding",
+                "ai programming",
+                "ai assistant",
+                "ai chatbot",
+                "ai image generation",
+                "ai video generation",
+                "ai music generation",
+                "ai writing",
+                "ai content creation",
+                "ai automation",
+                "ai robotics",
+                "autonomous driving",
+                "ai healthcare",
+                "ai finance",
+                "ai education",
+                "ai research",
+                "ai ethics",
+                "ai regulation",
+                "ai policy"
+            ],
+            "user_keywords": [],
+            "excluded_keywords": [
+                "ai policy",
+                "ai education",
+                "ai ethics",
+                "ai image generation",
+                "ai regulation",
+                "ai finance",
+                "ai writing",
+                "ai research",
+                "ai assistant",
+                "ai content creation",
+                "autonomous driving",
+                "ai chatbot",
+                "ai robotics",
+                "ai programming",
+                "ai automation",
+                "ai music generation",
+                "ai video generation",
+                "ai healthcare",
+                "ai coding"
+            ]
+        }
+    },
+    "search_sources": {
+        "web_search": {
+            "enabled": true,
+            "engines": [
+                "google",
+                "bing",
+                "duckduckgo"
+            ],
+            "sites_to_prioritize": [
+                "techcrunch.com",
+                "theverge.com",
+                "arstechnica.com",
+                "venturebeat.com",
+                "wired.com",
+                "engadget.com",
+                "thenextweb.com",
+                "mashable.com",
+                "reuters.com",
+                "bloomberg.com",
+                "forbes.com",
+                "hackernews.com",
+                "reddit.com"
+            ]
+        },
+        "social_media": {
+            "enabled": false,
+            "platforms": [
+                "twitter",
+                "linkedin",
+                "reddit"
+            ]
+        }
+    },
+    "filters": {
+        "language": [
+            "en",
+            "tr"
+        ],
+        "min_article_length": 200,
+        "exclude_domains": [
+            "spam.com",
+            "clickbait.com"
+        ],
+        "required_quality_score": 6.0
+    }
+}

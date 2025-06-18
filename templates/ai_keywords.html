@@ -1,0 +1,807 @@
+{% extends "base.html" %}
+
+{% block title %}AI Anahtar Kelime Yönetimi{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+  <!-- Başlık ve Kısa Bilgi + İstatistikler -->
+  <section class="card-modern p-6 space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+      <div>
+        <h2 class="text-2xl font-bold flex items-center space-x-2">
+          <i class="fas fa-brain text-blue-500"></i>
+          <span>AI Anahtar Kelime Yönetimi</span>
+        </h2>
+        <p class="text-gray-500 mt-1">Gelişmiş yapay zeka haber arama sistemi için anahtar kelimeleri yönetin.</p>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button class="btn-primary" onclick="testAIKeywords()">🧪 Test Et</button>
+        <button class="btn-secondary" onclick="refreshStats()">🔄 Yenile</button>
+      </div>
+    </div>
+
+    <!-- İstatistikler -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="card-modern p-4 text-center">
+        <div class="text-2xl font-bold text-blue-600">{{ stats.total_categories }}</div>
+        <div class="text-sm text-gray-500 mt-1">Toplam Kategori</div>
+      </div>
+      <div class="card-modern p-4 text-center">
+        <div class="text-2xl font-bold text-green-600">{{ stats.enabled_categories }}</div>
+        <div class="text-sm text-gray-500 mt-1">Aktif Kategori</div>
+      </div>
+      <div class="card-modern p-4 text-center">
+        <div class="text-2xl font-bold text-indigo-600">{{ stats.total_default_keywords + stats.total_user_keywords }}</div>
+        <div class="text-sm text-gray-500 mt-1">Toplam Keyword</div>
+      </div>
+      <div class="card-modern p-4 text-center">
+        <div class="text-2xl font-bold text-purple-600">{{ stats.total_user_keywords }}</div>
+        <div class="text-sm text-gray-500 mt-1">Kullanıcı Keyword</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Genel Ayarlar -->
+  <section class="card-modern p-6">
+    <h3 class="text-lg font-semibold mb-6 flex items-center space-x-2"><i class="fas fa-gear"></i><span>Genel Ayarlar</span></h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Toggle Enabled -->
+      <div class="flex items-center space-x-4">
+        <label for="aiKeywordsEnabled" class="flex-1 text-gray-700 font-medium">AI Keyword Araması</label>
+        <input id="aiKeywordsEnabled" type="checkbox" class="h-6 w-6 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500" {{ 'checked' if config.settings.enabled else '' }} onchange="updateGeneralSetting('enabled', this.checked)">
+      </div>
+      <!-- Search Time Range -->
+      <div class="flex flex-col space-y-1">
+        <label for="searchTimeRange" class="text-gray-700 font-medium">Arama Zaman Aralığı (Saat)</label>
+        <input id="searchTimeRange" type="number" min="1" max="168" value="{{ config.settings.search_time_range_hours }}" class="input-mobile" onchange="updateGeneralSetting('search_time_range_hours', parseInt(this.value))">
+      </div>
+      <!-- Max Articles -->
+      <div class="flex flex-col space-y-1">
+        <label for="maxArticles" class="text-gray-700 font-medium">Maksimum Makale Sayısı</label>
+        <input id="maxArticles" type="number" min="1" max="50" value="{{ config.settings.max_articles_per_search }}" class="input-mobile" onchange="updateGeneralSetting('max_articles_per_search', parseInt(this.value))">
+      </div>
+      <!-- Search Depth -->
+      <div class="flex flex-col space-y-1">
+        <label for="searchDepth" class="text-gray-700 font-medium">Arama Derinliği</label>
+        <select id="searchDepth" class="input-mobile" onchange="updateGeneralSetting('search_depth', this.value)">
+          <option value="basic" {{ 'selected' if config.settings.search_depth == 'basic' else '' }}>Temel Arama</option>
+          <option value="deep" {{ 'selected' if config.settings.search_depth == 'deep' else '' }}>Derin Arama</option>
+          <option value="comprehensive" {{ 'selected' if config.settings.search_depth == 'comprehensive' else '' }}>Kapsamlı Arama</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Kategoriler -->
+  <section>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for category_name, category_data in config.keyword_categories.items() %}
+      <div id="category-{{ category_name }}" class="card-modern flex flex-col">
+        <!-- Header -->
+        <div class="px-6 py-4 rounded-t-xl text-white flex justify-between items-center {{ 'bg-gradient-to-r from-gray-500 to-gray-600' if not category_data.enabled else 'bg-gradient-to-r from-blue-500 to-purple-600' }}">
+          <div class="font-semibold">
+            {% if category_name == 'ai_models' %}🤖 AI Modelleri
+            {% elif category_name == 'ai_tools' %}🛠️ AI Araçları
+            {% elif category_name == 'ai_companies' %}🏢 AI Şirketleri
+            {% elif category_name == 'ai_technologies' %}⚡ AI Teknolojileri
+            {% elif category_name == 'ai_applications' %}📱 AI Uygulamaları
+            {% else %}{{ category_name.title() }}
+            {% endif %}
+          </div>
+          <span class="priority-badge inline-block bg-white/20 px-3 py-1 rounded-full text-xs font-semibold tracking-wide">{{ category_data.priority.upper() }}</span>
+        </div>
+
+        <!-- Body -->
+        <div class="flex-1 px-6 py-4 space-y-4 text-sm">
+          <p class="text-gray-500">Varsayılan: {{ category_data.default_keywords|length }} • Kullanıcı: {{ category_data.user_keywords|length }}</p>
+
+          <!-- Default Keywords -->
+          <div>
+            <div class="font-medium mb-1">Varsayılan Anahtar Kelimeler</div>
+            <div class="flex flex-wrap gap-2">
+              {% for keyword in category_data.default_keywords %}
+              <span class="cursor-pointer inline-flex items-center rounded-full px-3 py-1 transition-colors duration-200 {{ 'bg-gray-300 text-gray-500' if keyword in category_data.excluded_keywords else 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}" onclick="toggleKeywordInCard('{{ category_name }}', '{{ keyword }}')" title="{{ 'Pasif - Tıkla aktifleştir' if keyword in category_data.excluded_keywords else 'Aktif - Tıkla pasifleştir' }}">
+                {{ keyword }}
+              </span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- User Keywords -->
+          {% if category_data.user_keywords %}
+          <div>
+            <div class="font-medium mb-1 flex items-center justify-between">
+              <span>Kullanıcı Anahtar Kelimeleri</span>
+              <button class="text-xs text-red-600 hover:text-red-800 flex items-center space-x-1" onclick="showDeleteUserKeywords('{{ category_name }}')">
+                <i class="fas fa-trash"></i>
+                <span>Tümünü Sil</span>
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              {% for keyword in category_data.user_keywords %}
+              <span class="cursor-pointer inline-flex items-center rounded-full px-3 py-1 transition-colors duration-200 group {{ 'bg-red-200 text-red-600' if keyword in category_data.excluded_keywords else 'bg-green-100 text-green-700 hover:bg-green-200' }}" onclick="toggleKeywordInCard('{{ category_name }}', '{{ keyword }}')" title="{{ 'Pasif - Tıkla aktifleştir' if keyword in category_data.excluded_keywords else 'Aktif - Tıkla pasifleştir' }}">
+                {{ keyword }}
+                <button class="ml-1 opacity-0 group-hover:opacity-100 text-xs hover:text-red-600 transition-opacity" onclick="event.stopPropagation(); removeUserKeyword('{{ category_name }}', '{{ keyword }}')" title="Bu kelimeyi sil">
+                  <i class="fas fa-times"></i>
+                </button>
+              </span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+
+
+          <!-- Add Keyword Form -->
+          <form class="space-y-2" onsubmit="addUserKeyword('{{ category_name }}');return false;">
+            <input id="newKeyword-{{ category_name }}" type="text" placeholder="Yeni anahtar kelime, virgülle ayırabilirsiniz" class="input-mobile w-full" />
+            <button type="submit" class="btn-success w-full">Ekle</button>
+          </form>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="px-6 py-4 border-t border-gray-100 flex justify-between items-center rounded-b-xl bg-gray-50">
+          <button class="btn-secondary text-sm" onclick="toggleCategory('{{ category_name }}')">{{ 'Aktif' if category_data.enabled else 'Pasif' }}</button>
+          <button class="btn-warning text-sm" onclick="changePriority('{{ category_name }}')">Öncelik Değiştir</button>
+          <button class="btn-danger text-sm" onclick="resetCategory('{{ category_name }}')">Sıfırla</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Aktif Anahtar Kelimeler Önizleme -->
+  <section class="card-modern p-6" id="activeKeywordsContainer">
+    <h3 class="font-semibold mb-4 flex items-center space-x-2"><i class="fas fa-eye"></i><span>Aktif Anahtar Kelimeler</span></h3>
+    <div class="flex flex-wrap gap-2 mb-2">
+      {% for keyword in active_keywords %}
+      <span class="cursor-pointer inline-flex items-center bg-blue-100 text-blue-700 rounded-full px-3 py-1 hover:bg-blue-200" onclick="toggleKeyword('{{ keyword }}')" title="Tıkla → hariç tut / geri al">{{ keyword }}</span>
+      {% endfor %}
+    </div>
+    <small class="text-gray-500">Toplam {{ active_keywords|length }} anahtar kelime aktif</small>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.alert-modern {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  z-index: 100;
+  transition: opacity 0.3s ease;
+}
+.alert-success {
+  background: #dcfce7;
+  color: #166534;
+}
+.alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+</style>
+<script>
+function showLoading() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+function showAlert(message, type = 'success') {
+    const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
+    const alertIcon = type === 'error' ? '❌' : '✅';
+    const alertHtml = `
+        <div class="alert-modern ${alertClass}" id="tempAlert">
+            <span>${alertIcon}</span>
+            ${message}
+        </div>
+    `;
+    const existingAlert = document.getElementById('tempAlert');
+    if (existingAlert) existingAlert.remove();
+    document.body.insertAdjacentHTML('afterbegin', alertHtml);
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    setTimeout(() => {
+        const alert = document.getElementById('tempAlert');
+        if (alert) {
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 300);
+        }
+    }, 4000);
+}
+
+function updateGeneralSetting(key, value) {
+    showLoading();
+    
+    const settings = {};
+    settings[key] = value;
+    
+    fetch('/api/ai_keywords/save_settings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ settings: settings })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showAlert(data.message);
+        } else {
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showAlert('Ayar güncelleme hatası: ' + error, 'error');
+    });
+}
+
+function toggleCategory(categoryName) {
+    showLoading();
+    
+    fetch('/api/ai_keywords/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            category: categoryName,
+            action: 'toggle_enabled'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showAlert(data.message);
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showAlert('Kategori güncelleme hatası: ' + error, 'error');
+    });
+}
+
+function changePriority(categoryName) {
+    const priorities = ['high', 'medium', 'low'];
+    const currentPriority = document.querySelector(`#category-${categoryName} .priority-badge`).textContent.toLowerCase();
+    const currentIndex = priorities.indexOf(currentPriority);
+    const newPriority = priorities[(currentIndex + 1) % priorities.length];
+    
+    showLoading();
+    
+    fetch('/api/ai_keywords/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            category: categoryName,
+            action: 'set_priority',
+            keyword: newPriority
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showAlert(data.message);
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showAlert('Öncelik güncelleme hatası: ' + error, 'error');
+    });
+}
+
+function resetCategory(categoryName) {
+    if (!confirm(`${categoryName} kategorisini varsayılan ayarlara sıfırlamak istediğinizden emin misiniz?`)) {
+        return;
+    }
+    
+    showLoading();
+    
+    fetch('/api/ai_keywords/reset_category', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            category: categoryName
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showAlert(data.message);
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showAlert('Sıfırlama hatası: ' + error, 'error');
+    });
+}
+
+function addUserKeyword(categoryName) {
+    const input = document.getElementById(`newKeyword-${categoryName}`);
+    const keywords = input.value.trim();
+    
+    if (!keywords) {
+        showAlert('Lütfen anahtar kelime girin', 'error');
+        return;
+    }
+    
+    // Virgülle ayrılmış keywordleri işle
+    const keywordList = keywords.split(',').map(k => k.trim()).filter(k => k);
+    
+    if (keywordList.length === 0) {
+        showAlert('Geçerli anahtar kelime bulunamadı', 'error');
+        return;
+    }
+    
+    showLoading();
+    
+    // Her keyword için ayrı istek gönder
+    const promises = keywordList.map(keyword => 
+        fetch('/api/ai_keywords/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                category: categoryName,
+                action: 'add_user_keyword',
+                keyword: keyword
+            })
+        }).then(response => response.json())
+    );
+    
+    Promise.all(promises)
+    .then(results => {
+        hideLoading();
+        const successful = results.filter(r => r.success).length;
+        const failed = results.filter(r => !r.success).length;
+        
+        if (successful > 0) {
+            showAlert(`${successful} anahtar kelime başarıyla eklendi${failed > 0 ? `, ${failed} başarısız` : ''}`);
+            input.value = '';
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showAlert('Anahtar kelime ekleme başarısız', 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showAlert('Anahtar kelime ekleme hatası: ' + error, 'error');
+    });
+}
+
+function removeUserKeyword(categoryName, keyword) {
+    if (!confirm(`"${keyword}" anahtar kelimesini kaldırmak istediğinizden emin misiniz?`)) {
+        return;
+    }
+    
+    showLoading();
+    
+    fetch('/api/ai_keywords/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            category: categoryName,
+            action: 'remove_user_keyword',
+            keyword: keyword
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showAlert(data.message);
+            
+            // Keyword etiketini sayfadan kaldır
+            removeKeywordFromUI(categoryName, keyword);
+            
+            // Aktif keyword listesini güncelle
+            if (data.active_keywords) {
+                updateActiveKeywordsList(data.active_keywords);
+            }
+            
+            // İstatistikleri güncelle
+            if (data.stats) {
+                updateStatsDisplay(data.stats);
+            }
+        } else {
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showAlert('Anahtar kelime kaldırma hatası: ' + error, 'error');
+    });
+}
+
+function removeKeywordFromUI(categoryName, keyword) {
+    const categoryCard = document.getElementById(`category-${categoryName}`);
+    if (!categoryCard) return;
+    
+    // Keyword etiketini bul ve kaldır
+    const keywordSpans = categoryCard.querySelectorAll('span[onclick*="toggleKeywordInCard"]');
+    keywordSpans.forEach(span => {
+        const spanText = span.textContent.trim().replace('×', '').trim();
+        if (spanText === keyword) {
+            span.remove();
+        }
+    });
+}
+
+function addToExcluded(categoryName, keyword) {
+    if (!confirm(`"${keyword}" anahtar kelimesini hariç tutmak istediğinizden emin misiniz?`)) {
+        return;
+    }
+    
+    showLoading();
+    
+    fetch('/api/ai_keywords/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            category: categoryName,
+            action: 'add_excluded_keyword',
+            keyword: keyword
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showAlert(data.message);
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showAlert('Hariç tutma hatası: ' + error, 'error');
+    });
+}
+
+function removeFromExcluded(categoryName, keyword) {
+    showLoading();
+    
+    fetch('/api/ai_keywords/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            category: categoryName,
+            action: 'remove_excluded_keyword',
+            keyword: keyword
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showAlert(data.message);
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showAlert('Hariç tutmayı kaldırma hatası: ' + error, 'error');
+    });
+}
+
+function testAIKeywords() {
+    showLoading();
+    document.getElementById('testResults').style.display = 'none';
+    
+    fetch('/api/ai_keywords/test_search')
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        
+        const testContent = document.getElementById('testContent');
+        
+        if (data.success) {
+            let html = `
+                <div class="alert alert-success">
+                    ✅ Test başarılı! ${data.articles_found} makale bulundu.
+                </div>
+            `;
+            
+            if (data.articles && data.articles.length > 0) {
+                html += '<h6>📰 Bulunan Makaleler (İlk 5):</h6><ul>';
+                data.articles.forEach(article => {
+                    html += `
+                        <li>
+                            <strong>${article.title}</strong><br>
+                            <small class="text-muted">${article.url}</small><br>
+                            <small class="text-info">Keywords: ${article.matching_keywords ? article.matching_keywords.join(', ') : 'N/A'}</small>
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+            }
+            
+            testContent.innerHTML = html;
+            showAlert('AI Keywords test başarıyla tamamlandı!');
+        } else {
+            testContent.innerHTML = `
+                <div class="alert alert-danger">
+                    ❌ Test başarısız: ${data.error}
+                </div>
+            `;
+            showAlert('Test başarısız: ' + data.error, 'error');
+        }
+        
+        document.getElementById('testResults').style.display = 'block';
+    })
+    .catch(error => {
+        hideLoading();
+        showAlert('Test hatası: ' + error, 'error');
+    });
+}
+
+function refreshStats() {
+    showLoading();
+    
+    fetch('/api/ai_keywords/stats')
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showAlert('İstatistikler güncellendi');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showAlert('İstatistik güncelleme hatası: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showAlert('İstatistik yenileme hatası: ' + error, 'error');
+    });
+}
+
+function toggleKeyword(keyword){
+    showLoading();
+    fetch('/api/ai_keywords/toggle_keyword',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({keyword:keyword})
+    }).then(r=>r.json()).then(d=>{
+        hideLoading();
+        if(d.success){
+            // Mesaj gösterme - sadece renk değişimi yeterli
+            // Aktif keyword listesini güncelle
+            updateActiveKeywordsList(d.active_keywords || []);
+            // İstatistikleri güncelle
+            if (d.stats) {
+                updateStatsDisplay(d.stats);
+            }
+        }else{
+            showAlert(d.error,'error');
+        }
+    }).catch(e=>{hideLoading();showAlert('Anahtar kelime değiştirme hatası: '+e,'error');});
+}
+
+function toggleKeywordInCard(categoryName, keyword) {
+    console.log('toggleKeywordInCard called:', categoryName, keyword);
+    showLoading();
+    
+    fetch('/api/ai_keywords/toggle_keyword', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            category: categoryName,
+            keyword: keyword
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('API Response:', data);
+        hideLoading();
+        if (data.success) {
+            // Mesaj gösterme - sadece renk değişimi yeterli
+            
+            // Tıklanan etiketi görsel olarak güncelle (sayfa yenilemeden)
+            updateKeywordVisualState(categoryName, keyword, data.is_active);
+            
+            // Aktif keyword listesini güncelle
+            updateActiveKeywordsList(data.active_keywords || []);
+            
+            // İstatistikleri güncelle
+            if (data.stats) {
+                updateStatsDisplay(data.stats);
+            }
+        } else {
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('API Error:', error);
+        hideLoading();
+        showAlert('Anahtar kelime kontrol hatası: ' + error, 'error');
+    });
+}
+
+function updateKeywordVisualState(categoryName, keyword, isActive) {
+    // Kategori kartındaki keyword etiketini bul ve rengini güncelle
+    const categoryCard = document.getElementById(`category-${categoryName}`);
+    if (!categoryCard) return;
+    
+    // Tüm keyword etiketlerini bul
+    const keywordSpans = categoryCard.querySelectorAll('span[onclick*="toggleKeywordInCard"]');
+    
+    keywordSpans.forEach(span => {
+        // Span içindeki text'i al (X butonunu çıkar)
+        const spanText = span.textContent.trim().replace('×', '').trim();
+        
+        if (spanText === keyword) {
+            // Renk sınıflarını temizle
+            span.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200', 'bg-gray-300', 'text-gray-500');
+            span.classList.remove('bg-green-100', 'text-green-700', 'hover:bg-green-200', 'bg-red-200', 'text-red-600');
+            
+            // Kullanıcı kelimesi mi varsayılan kelime mi?
+            const isUserKeyword = span.closest('div').previousElementSibling?.textContent.includes('Kullanıcı');
+            
+            if (isActive) {
+                // Aktif görünüm
+                if (isUserKeyword) {
+                    // Kullanıcı kelimesi
+                    span.classList.add('bg-green-100', 'text-green-700', 'hover:bg-green-200');
+                } else {
+                    // Varsayılan kelime
+                    span.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                }
+                span.title = 'Aktif - Tıkla pasifleştir';
+            } else {
+                // Pasif görünüm
+                if (isUserKeyword) {
+                    // Kullanıcı kelimesi
+                    span.classList.add('bg-red-200', 'text-red-600');
+                } else {
+                    // Varsayılan kelime
+                    span.classList.add('bg-gray-300', 'text-gray-500');
+                }
+                span.title = 'Pasif - Tıkla aktifleştir';
+            }
+        }
+    });
+}
+
+function updateActiveKeywordsList(activeKeywords) {
+    const container = document.querySelector('#activeKeywordsContainer .flex.flex-wrap');
+    if (container) {
+        container.innerHTML = '';
+        
+        // Tüm aktif kelimeleri göster (sınır yok)
+        activeKeywords.forEach(keyword => {
+            const span = document.createElement('span');
+            span.className = 'cursor-pointer inline-flex items-center bg-blue-100 text-blue-700 rounded-full px-3 py-1 hover:bg-blue-200';
+            span.onclick = () => toggleKeyword(keyword);
+            span.title = 'Tıkla → hariç tut / geri al';
+            span.textContent = keyword;
+            container.appendChild(span);
+        });
+        
+        // Toplam sayıyı güncelle
+        const totalElement = container.nextElementSibling;
+        if (totalElement && totalElement.tagName === 'SMALL') {
+            totalElement.textContent = `Toplam ${activeKeywords.length} anahtar kelime aktif`;
+        }
+    }
+}
+
+function updateStatsDisplay(stats) {
+    // İstatistik kartlarını güncelle
+    const statCards = document.querySelectorAll('.card-modern .text-2xl');
+    if (statCards.length >= 4) {
+        statCards[0].textContent = stats.total_categories || 0;
+        statCards[1].textContent = stats.enabled_categories || 0;
+        statCards[2].textContent = (stats.total_default_keywords || 0) + (stats.total_user_keywords || 0);
+        statCards[3].textContent = stats.total_user_keywords || 0;
+    }
+}
+
+function showDeleteUserKeywords(categoryName) {
+    // Bu kategorideki kullanıcı kelimelerini al (sayfa yenilenecek)
+    showLoading();
+    fetch('/api/ai_keywords/config')
+    .then(r => r.json())
+    .then(data => {
+        hideLoading();
+        if (!data.success) {
+            showAlert('Yapılandırma alınamadı', 'error');
+            return;
+        }
+        const userKeywords = data.config.keyword_categories[categoryName].user_keywords || [];
+        
+        if (userKeywords.length === 0) {
+            showAlert('Bu kategoride kullanıcı kelimesi yok', 'error');
+            return;
+        }
+        
+        const keywordList = userKeywords.map(kw => `• ${kw}`).join('\n');
+        if (confirm(`${categoryName} kategorisindeki kullanıcı kelimelerini silmek istediğinizden emin misiniz?\n\n${keywordList}`)) {
+            showLoading();
+            
+            const promises = userKeywords.map(keyword => 
+                fetch('/api/ai_keywords/update', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        category: categoryName,
+                        action: 'remove_user_keyword',
+                        keyword: keyword
+                    })
+                }).then(r => r.json())
+            );
+            
+            Promise.all(promises).then(results => {
+                hideLoading();
+                const successful = results.filter(r => r.success).length;
+                showAlert(`${successful} kullanıcı kelimesi silindi`);
+                setTimeout(() => location.reload(), 1000);
+            }).catch(e => {
+                hideLoading();
+                showAlert('Silme hatası: ' + e, 'error');
+            });
+        }
+    })
+    .catch(e => {
+        hideLoading();
+        showAlert('Yapılandırma alma hatası: ' + e, 'error');
+    });
+}
+
+function testClick() {
+    alert('Test tıklama çalışıyor!');
+}
+
+// Enter tuşu ile keyword ekleme
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[id^="newKeyword-"]').forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const categoryName = this.id.replace('newKeyword-', '');
+                addUserKeyword(categoryName);
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

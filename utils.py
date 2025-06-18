@@ -70,10 +70,33 @@ def mcp_firecrawl_scrape(params):
                 
                 print(f"[MCP] Gelişmiş scraper başarılı: {len(content)} karakter ({result.get('method', 'unknown')})")
                 
+                # HTML içeriğinden linkleri çıkar
+                links = []
+                html_content = result.get("html", "")
+                if html_content:
+                    from bs4 import BeautifulSoup
+                    soup = BeautifulSoup(html_content, 'html.parser')
+                    
+                    # Tüm linkleri bul
+                    for link_elem in soup.find_all('a', href=True):
+                        href = link_elem.get('href', '')
+                        text = link_elem.get_text(strip=True)
+                        
+                        if href and text and len(text) > 5:
+                            # Relative URL'leri absolute yap
+                            if href.startswith('/'):
+                                from urllib.parse import urljoin
+                                href = urljoin(url, href)
+                            elif not href.startswith('http'):
+                                continue
+                            
+                            links.append({"text": text, "url": href})
+                
                 return {
                     "success": True,
                     "content": content,
                     "markdown": content,
+                    "links": links,
                     "source": f"advanced_scraper_{result.get('method', 'unknown')}",
                     "method": result.get('method', 'unknown')
                 }
@@ -184,35 +207,68 @@ def fetch_latest_ai_articles_with_firecrawl():
                 print(f"⚠️ Firecrawl MCP hatası, fallback yönteme geçiliyor...")
                 return fetch_latest_ai_articles_fallback()
             
-            # Markdown içeriğinden makale linklerini çıkar
+            # Hem markdown hem de links formatından URL çıkar
             markdown_content = scrape_result.get("markdown", "")
+            mcp_links = scrape_result.get("links", [])
             
-            # Basit regex ile TechCrunch makale URL'lerini bul
+            print(f"📄 MCP'den {len(mcp_links)} link alındı, markdown: {len(markdown_content)} karakter")
+            
             import re
             current_year = datetime.now().year
-            
-            # Tüm TechCrunch URL'lerini bul
-            all_urls = re.findall(r'https://techcrunch\.com/[^\s\)\]]+', markdown_content)
-            
-            # Güncel yıl ve önceki yılın makalelerini filtrele
             article_urls = []
-            for url in all_urls:
-                # URL'yi temizle
-                url = url.rstrip(')')
-                
-                # Yıl kontrolü
-                year_check = f'/{current_year}/' in url or f'/{current_year-1}/' in url
-                
-                # Makale URL'si kontrolü (tarih formatı içermeli)
-                date_pattern = r'/\d{4}/\d{2}/\d{2}/'
-                is_article = re.search(date_pattern, url)
-                
-                if (year_check and is_article and 
-                    url not in posted_urls and 
-                    url not in article_urls and
-                    len(article_urls) < 4):  # Sadece son 4 makale
-                    article_urls.append(url)
             
+            # 1. MCP'den gelen linklerden makale URL'lerini çıkar
+            if mcp_links and isinstance(mcp_links, list):
+                for link_item in mcp_links:
+                    if isinstance(link_item, dict):
+                        url = link_item.get("url", "") or link_item.get("href", "")
+                    elif isinstance(link_item, str):
+                        url = link_item
+                    else:
+                        continue
+                    
+                    if not url or 'techcrunch.com' not in url:
+                        continue
+                    
+                    # Yıl kontrolü
+                    year_check = f'/{current_year}/' in url or f'/{current_year-1}/' in url
+                    
+                    # Makale URL'si kontrolü (tarih formatı içermeli)
+                    date_pattern = r'/\d{4}/\d{2}/\d{2}/'
+                    is_article = re.search(date_pattern, url)
+                    
+                    if (year_check and is_article and 
+                        url not in posted_urls and 
+                        url not in article_urls and
+                        len(article_urls) < 10):  # Daha fazla URL topla
+                        article_urls.append(url)
+                        print(f"   📰 MCP Link: {url}")
+            
+            # 2. Markdown içeriğinden de URL çıkar (fallback)
+            if len(article_urls) < 4:
+                # Markdown'dan TechCrunch URL'lerini bul
+                markdown_urls = re.findall(r'https://techcrunch\.com/[^\s\)\]]+', markdown_content)
+                
+                for url in markdown_urls:
+                    # URL'yi temizle
+                    url = url.rstrip(')')
+                    
+                    # Yıl kontrolü
+                    year_check = f'/{current_year}/' in url or f'/{current_year-1}/' in url
+                    
+                    # Makale URL'si kontrolü (tarih formatı içermeli)
+                    date_pattern = r'/\d{4}/\d{2}/\d{2}/'
+                    is_article = re.search(date_pattern, url)
+                    
+                    if (year_check and is_article and 
+                        url not in posted_urls and 
+                        url not in article_urls and
+                        len(article_urls) < 10):
+                        article_urls.append(url)
+                        print(f"   📄 Markdown Link: {url}")
+            
+            # En yeni makaleleri al (sadece ilk 4)
+            article_urls = article_urls[:4]
             print(f"🔗 {len(article_urls)} makale URL'si bulundu")
             
         except Exception as firecrawl_error:
@@ -261,7 +317,12 @@ def fetch_latest_ai_articles_with_firecrawl():
         if articles_data:
             articles_data = filter_duplicate_articles(articles_data)
         
-        return articles_data
+        # Ana ayarlardan maksimum makale sayısını al
+        main_settings = load_automation_settings()
+        max_articles = main_settings.get('max_articles_per_run', 5)
+        
+        print(f"🔢 Kullanıcı ayarına göre {max_articles} makale döndürülüyor")
+        return articles_data[:max_articles]
         
     except Exception as e:
         print(f"Firecrawl MCP haber çekme hatası: {e}")
@@ -337,7 +398,12 @@ def fetch_latest_ai_articles_fallback():
         if articles_data:
             articles_data = filter_duplicate_articles(articles_data)
         
-        return articles_data
+        # Ana ayarlardan maksimum makale sayısını al
+        main_settings = load_automation_settings()
+        max_articles = main_settings.get('max_articles_per_run', 5)
+        
+        print(f"🔢 Kullanıcı ayarına göre {max_articles} makale döndürülüyor")
+        return articles_data[:max_articles]
         
     except Exception as e:
         print(f"Fallback haber çekme hatası: {e}")
@@ -1976,6 +2042,9 @@ def get_data_statistics():
                 except (ValueError, TypeError) as e:
                     print(f"[DEBUG] Tarih parse hatası: {e} - {article.get('posted_date')}")
                     continue
+        
+        # Paylaşılan tweetler (silinmemiş olanlar)
+        stats["posted_tweets"] = len(active_articles)
         
         # Dünkü makaleler de hesapla
         yesterday = today - timedelta(days=1)
@@ -4858,9 +4927,9 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
             print("🔄 Gelişmiş duplikat tespiti kapalı, sadece temel kontroller yapılıyor...")
             return basic_duplicate_filter(new_articles, existing_articles)
         
-        # Eşik değerlerini ayarlardan al
-        title_threshold = settings.get('title_similarity_threshold', 0.8)
-        content_threshold = settings.get('content_similarity_threshold', 0.6)
+        # Eşik değerlerini ayarlardan al - AI Keywords için çok gevşek
+        title_threshold = settings.get('title_similarity_threshold', 0.95)  # 0.9 → 0.95 (çok gevşek)
+        content_threshold = settings.get('content_similarity_threshold', 0.9)  # 0.8 → 0.9 (çok gevşek)
         
         print(f"🔍 Gelişmiş duplikat tespiti aktif (Başlık: {title_threshold:.0%}, İçerik: {content_threshold:.0%})")
         
@@ -4886,16 +4955,36 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
         for new_article in new_articles:
             is_duplicate = False
             
-            # Önce URL kontrolü (hızlı)
+            # URL kontrolü - AI Keywords için gevşetildi (sadece son 7 gün kontrol et)
             new_url = new_article.get('url', '')
+            url_is_duplicate = False
+            
+            # Son 7 gün içindeki makaleleri kontrol et
+            from datetime import datetime, timedelta
+            seven_days_ago = datetime.now() - timedelta(days=7)
+            
             for existing in all_existing:
                 if new_url == existing.get('url', ''):
-                    is_duplicate = True
-                    break
+                    # Tarih kontrolü yap
+                    existing_date_str = existing.get('posted_date') or existing.get('fetch_date')
+                    if existing_date_str:
+                        try:
+                            existing_date = datetime.fromisoformat(existing_date_str.replace('Z', '+00:00').replace('+00:00', ''))
+                            if existing_date >= seven_days_ago:
+                                url_is_duplicate = True
+                                break
+                        except:
+                            # Tarih parse edilemezse duplikat say
+                            url_is_duplicate = True
+                            break
+                    else:
+                        # Tarih yoksa duplikat say
+                        url_is_duplicate = True
+                        break
             
-            if is_duplicate:
+            if url_is_duplicate:
                 duplicate_count += 1
-                print(f"🔄 URL duplikatı atlandı: {new_article.get('title', '')[:50]}...")
+                print(f"🔄 URL duplikatı atlandı (son 7 gün): {new_article.get('title', '')[:50]}...")
                 continue
             
             # Hash kontrolü (hızlı)
@@ -5605,7 +5694,12 @@ def fetch_latest_ai_articles_pythonanywhere():
         
         print(f"📊 PythonAnywhere sistemi ile toplam {len(unique_articles)} benzersiz makale bulundu")
         
-        return unique_articles[:10]  # En fazla 10 makale döndür
+        # Ana ayarlardan maksimum makale sayısını al
+        main_settings = load_automation_settings()
+        max_articles = main_settings.get('max_articles_per_run', 5)
+        
+        print(f"🔢 Kullanıcı ayarına göre {max_articles} makale döndürülüyor")
+        return unique_articles[:max_articles]
         
     except Exception as e:
         print(f"❌ PythonAnywhere haber çekme hatası: {e}")
@@ -5916,7 +6010,10 @@ def fetch_articles_with_rss_only():
                                 "source_id": rss_source["id"],
                                 "article_date": entry_date.isoformat() if entry_date else datetime.now().isoformat(),
                                 "is_within_24h": True,
-                                "rss_published": date_str
+                                "rss_published": date_str,
+                                "fetch_method": "RSS Feed",
+                                "method_icon": "📡",
+                                "method_color": "green"
                             })
                             print(f"🆕 RSS ile yeni makale (24h içinde): {title[:50]}...")
                         else:
@@ -6123,7 +6220,10 @@ def fetch_articles_with_simple_scraping():
                             "source": f"Scraping - {target['name']}",
                             "fetch_date": datetime.now().isoformat(),
                             "is_new": True,
-                            "already_posted": False
+                            "already_posted": False,
+                            "fetch_method": "Web Scraping",
+                            "method_icon": "🕷️",
+                            "method_color": "orange"
                         })
                         
                     except Exception as article_error:
@@ -6373,45 +6473,97 @@ def get_news_fetching_method():
         return {
             'method': method,
             'mcp_enabled': mcp_enabled,
-            'available_methods': ['auto', 'mcp_only', 'pythonanywhere_only', 'custom_sources_only']
+            'available_methods': ['auto', 'ai_keywords_only', 'mcp_only', 'pythonanywhere_only', 'custom_sources_only']
         }
     except Exception as e:
         print(f"Haber çekme yöntemi alma hatası: {e}")
         return {
             'method': 'auto',
             'mcp_enabled': False,
-            'available_methods': ['auto', 'mcp_only', 'pythonanywhere_only', 'custom_sources_only']
+            'available_methods': ['auto', 'ai_keywords_only', 'mcp_only', 'pythonanywhere_only', 'custom_sources_only']
         }
 
 def fetch_latest_ai_articles_smart():
     """Akıllı haber çekme - Ayarlara göre yöntem seçer"""
     try:
+        # Otomasyon ayarlarını yükle
+        settings = load_automation_settings()
+        max_articles = settings.get('max_articles_per_run', 5)  # Varsayılan 5 makale
+        
         method_info = get_news_fetching_method()
         method = method_info['method']
         mcp_enabled = method_info['mcp_enabled']
         
         print(f"🎯 Haber çekme yöntemi: {method} (MCP: {'Aktif' if mcp_enabled else 'Pasif'})")
+        print(f"📊 Maksimum makale limiti: {max_articles}")
         
-        if method == 'mcp_only' and mcp_enabled:
+        if method == 'ai_keywords_only':
+            # Sadece AI Keywords kullan
+            articles = fetch_ai_news_with_advanced_keywords()
+            # Yöntem bilgisini ekle
+            for article in articles:
+                article['fetch_method'] = 'AI Keywords'
+                article['method_icon'] = '🧠'
+                article['method_color'] = 'purple'
+            return articles[:max_articles]
+            
+        elif method == 'mcp_only' and mcp_enabled:
             # Sadece MCP kullan
-            return fetch_latest_ai_articles_with_firecrawl()
+            articles = fetch_latest_ai_articles_with_firecrawl()
+            # Yöntem bilgisini ekle
+            for article in articles:
+                article['fetch_method'] = 'MCP Firecrawl'
+                article['method_icon'] = '🤖'
+                article['method_color'] = 'blue'
+            return articles[:max_articles]
             
         elif method == 'pythonanywhere_only':
             # Sadece PythonAnywhere uyumlu sistem kullan
-            return fetch_latest_ai_articles_pythonanywhere()
+            articles = fetch_latest_ai_articles_pythonanywhere()
+            # Yöntem bilgisini ekle
+            for article in articles:
+                article['fetch_method'] = 'PythonAnywhere'
+                article['method_icon'] = '🐍'
+                article['method_color'] = 'green'
+            return articles[:max_articles]
             
         elif method == 'custom_sources_only':
             # Sadece özel kaynakları kullan
-            return fetch_articles_from_custom_sources()
+            articles = fetch_articles_from_custom_sources()
+            # Yöntem bilgisini ekle
+            for article in articles:
+                article['fetch_method'] = 'Özel Kaynaklar'
+                article['method_icon'] = '📰'
+                article['method_color'] = 'orange'
+            return articles[:max_articles]
             
         else:  # method == 'auto'
             # Otomatik seçim - Öncelik sırasına göre dene
             all_articles = []
             
-            # 1. Önce özel kaynakları dene
+            # 0. AI Keywords sistemi (yeni özellik) - En yüksek öncelik
+            try:
+                ai_keyword_articles = fetch_ai_news_with_advanced_keywords()
+                if ai_keyword_articles:
+                    # Yöntem bilgisini ekle
+                    for article in ai_keyword_articles:
+                        article['fetch_method'] = 'AI Keywords'
+                        article['method_icon'] = '🧠'
+                        article['method_color'] = 'purple'
+                    all_articles.extend(ai_keyword_articles)
+                    print(f"✅ AI Keywords'den {len(ai_keyword_articles)} makale")
+            except Exception as e:
+                print(f"⚠️ AI Keywords hatası: {e}")
+            
+            # 1. Özel kaynakları dene
             try:
                 custom_articles = fetch_articles_from_custom_sources()
                 if custom_articles:
+                    # Yöntem bilgisini ekle
+                    for article in custom_articles:
+                        article['fetch_method'] = 'Özel Kaynaklar'
+                        article['method_icon'] = '📰'
+                        article['method_color'] = 'orange'
                     all_articles.extend(custom_articles)
                     print(f"✅ Özel kaynaklardan {len(custom_articles)} makale")
             except Exception as e:
@@ -6421,6 +6573,11 @@ def fetch_latest_ai_articles_smart():
             try:
                 pa_articles = fetch_latest_ai_articles_pythonanywhere()
                 if pa_articles:
+                    # Yöntem bilgisini ekle
+                    for article in pa_articles:
+                        article['fetch_method'] = 'PythonAnywhere'
+                        article['method_icon'] = '🐍'
+                        article['method_color'] = 'green'
                     all_articles.extend(pa_articles)
                     print(f"✅ PythonAnywhere sisteminden {len(pa_articles)} makale")
             except Exception as e:
@@ -6431,6 +6588,11 @@ def fetch_latest_ai_articles_smart():
                 try:
                     mcp_articles = fetch_latest_ai_articles_with_firecrawl()
                     if mcp_articles:
+                        # Yöntem bilgisini ekle
+                        for article in mcp_articles:
+                            article['fetch_method'] = 'MCP Firecrawl'
+                            article['method_icon'] = '🤖'
+                            article['method_color'] = 'blue'
                         all_articles.extend(mcp_articles)
                         print(f"✅ MCP'den {len(mcp_articles)} makale")
                 except Exception as e:
@@ -6441,6 +6603,11 @@ def fetch_latest_ai_articles_smart():
                 try:
                     fallback_articles = fetch_latest_ai_articles_fallback()
                     if fallback_articles:
+                        # Yöntem bilgisini ekle
+                        for article in fallback_articles:
+                            article['fetch_method'] = 'Fallback'
+                            article['method_icon'] = '⚠️'
+                            article['method_color'] = 'gray'
                         all_articles.extend(fallback_articles)
                         print(f"✅ Fallback'den {len(fallback_articles)} makale")
                 except Exception as e:
@@ -6450,7 +6617,8 @@ def fetch_latest_ai_articles_smart():
             if all_articles:
                 unique_articles = filter_duplicate_articles(all_articles)
                 print(f"📊 Toplam {len(unique_articles)} benzersiz makale bulundu")
-                return unique_articles[:10]
+                print(f"🔢 Kullanıcı ayarına göre {max_articles} makale döndürülüyor")
+                return unique_articles[:max_articles]
             
             return []
         
@@ -7358,3 +7526,581 @@ def get_github_stats():
             "languages": {},
             "last_repo": None
         }
+
+# ============================================================================
+# AI KEYWORD-BASED NEWS FETCHING SYSTEM
+# ============================================================================
+
+AI_KEYWORDS_CONFIG_FILE = "ai_keywords_config.json"
+
+def load_ai_keywords_config():
+    """AI anahtar kelime yapılandırmasını yükle"""
+    try:
+        if os.path.exists(AI_KEYWORDS_CONFIG_FILE):
+            with open(AI_KEYWORDS_CONFIG_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        else:
+            # Default config oluştur
+            default_config = {
+                "version": "1.0",
+                "last_updated": datetime.now().isoformat(),
+                "settings": {
+                    "enabled": True,
+                    "search_depth": "deep",
+                    "language_preference": "tr",
+                    "max_articles_per_search": 10,
+                    "search_time_range_hours": 24
+                },
+                "keyword_categories": {
+                    "ai_models": {
+                        "enabled": True,
+                        "priority": "high",
+                        "default_keywords": [
+                            "openai", "chatgpt", "gpt-4", "gpt-5", "claude", "anthropic", 
+                            "gemini", "bard", "llama", "meta ai", "qwen", "alibaba ai", 
+                            "deepseek", "moonshot", "zhipu", "baichuan", "yi model", 
+                            "minimax", "doubao", "bytedance ai"
+                        ],
+                        "user_keywords": [],
+                        "excluded_keywords": []
+                    },
+                    "ai_tools": {
+                        "enabled": True,
+                        "priority": "high",
+                        "default_keywords": [
+                            "cursor ai", "cursor ide", "windsurf ai", "codeium windsurf",
+                            "github copilot", "tabnine", "codewhisperer", "replit ai",
+                            "v0.dev", "bolt.new", "lovable.dev", "perplexity", "phind",
+                            "you.com", "poe ai", "character ai", "janitor ai", "midjourney",
+                            "stable diffusion", "dall-e", "runway ml", "luma ai", "suno ai", "udio ai"
+                        ],
+                        "user_keywords": [],
+                        "excluded_keywords": []
+                    },
+                    "ai_companies": {
+                        "enabled": True,
+                        "priority": "medium",
+                        "default_keywords": [
+                            "openai", "anthropic", "google ai", "microsoft ai", "meta ai",
+                            "apple intelligence", "nvidia ai", "tesla ai", "xai", "elon musk ai",
+                            "stability ai", "hugging face", "cohere", "inflection ai", "adept ai",
+                            "scale ai", "databricks", "together ai", "replicate", "runpod"
+                        ],
+                        "user_keywords": [],
+                        "excluded_keywords": []
+                    }
+                }
+            }
+            save_ai_keywords_config(default_config)
+            return default_config
+    except Exception as e:
+        terminal_log(f"❌ AI keywords config yükleme hatası: {e}", "error")
+        return {}
+
+def save_ai_keywords_config(config):
+    """AI anahtar kelime yapılandırmasını kaydet"""
+    try:
+        config["last_updated"] = datetime.now().isoformat()
+        with open(AI_KEYWORDS_CONFIG_FILE, 'w', encoding='utf-8') as f:
+            json.dump(config, f, ensure_ascii=False, indent=4)
+        return True
+    except Exception as e:
+        terminal_log(f"❌ AI keywords config kaydetme hatası: {e}", "error")
+        return False
+
+def get_all_active_keywords():
+    """Aktif olan tüm anahtar kelimeleri topla"""
+    try:
+        config = load_ai_keywords_config()
+        all_keywords = []
+        
+        for category_name, category_data in config.get("keyword_categories", {}).items():
+            if category_data.get("enabled", True):
+                # Default keywords
+                default_keywords = category_data.get("default_keywords", [])
+                # User keywords
+                user_keywords = category_data.get("user_keywords", [])
+                # Excluded keywords
+                excluded_keywords = category_data.get("excluded_keywords", [])
+                
+                # Combine and filter (case-insensitive exclusion)
+                combined_keywords = list(set(default_keywords + user_keywords))
+                excluded_lower = [ex.lower() for ex in excluded_keywords]
+                filtered_keywords = [kw for kw in combined_keywords if kw.lower() not in excluded_lower]
+                
+                all_keywords.extend(filtered_keywords)
+        
+        # Remove duplicates and return
+        return list(set(all_keywords))
+    except Exception as e:
+        terminal_log(f"❌ Aktif keywords alma hatası: {e}", "error")
+        return []
+
+def fetch_ai_news_with_advanced_keywords():
+    """Gelişmiş anahtar kelime tabanlı AI haber çekme - MCP ile"""
+    try:
+        import time
+        start_time = time.time()
+        MAX_EXECUTION_TIME = 90  # 90 saniye maksimum çalışma süresi
+        
+        terminal_log("🔍 Gelişmiş AI keyword araması başlatılıyor...", "info")
+        
+        config = load_ai_keywords_config()
+        if not config.get("settings", {}).get("enabled", True):
+            terminal_log("⚠️ AI keyword araması devre dışı", "warning")
+            return []
+        
+        # Ana ayarlardan maksimum makale sayısını al
+        main_settings = load_automation_settings()
+        max_articles = main_settings.get('max_articles_per_run', 5)
+        
+        # Zaman aralığını al
+        time_range_hours = config.get("settings", {}).get("search_time_range_hours", 24)
+        cutoff_date = datetime.now() - timedelta(hours=time_range_hours)
+        
+        terminal_log(f"⏰ Son {time_range_hours} saat içindeki haberler aranıyor (limit: {max_articles}, timeout: {MAX_EXECUTION_TIME}s)", "info")
+        
+        # Aktif keywords al
+        all_keywords = get_all_active_keywords()
+        if not all_keywords:
+            terminal_log("⚠️ Aktif keyword bulunamadı", "warning")
+            return []
+        
+        terminal_log(f"🎯 {len(all_keywords)} anahtar kelime ile arama yapılıyor", "info")
+        
+        # Mevcut makaleleri kontrol et
+        posted_articles = load_json(HISTORY_FILE)
+        posted_urls = [article.get('url', '') for article in posted_articles]
+        posted_hashes = [article.get('hash', '') for article in posted_articles]
+        
+        all_found_articles = []
+        
+        # Prioritized search - High priority keywords first
+        config_categories = config.get("keyword_categories", {})
+        priority_order = ["high", "medium", "low"]
+        
+        for priority in priority_order:
+            # Timeout kontrolü
+            elapsed_time = time.time() - start_time
+            if elapsed_time > MAX_EXECUTION_TIME:
+                terminal_log(f"⏰ Timeout! {elapsed_time:.1f}s geçti, işlem sonlandırılıyor", "warning")
+                break
+                
+            priority_keywords = []
+            
+            for category_name, category_data in config_categories.items():
+                if (category_data.get("enabled", True) and 
+                    category_data.get("priority", "medium") == priority):
+                    
+                    default_kw = category_data.get("default_keywords", [])
+                    user_kw = category_data.get("user_keywords", [])
+                    excluded_kw = category_data.get("excluded_keywords", [])
+                    
+                    combined = list(set(default_kw + user_kw))
+                    filtered = [kw for kw in combined if kw.lower() not in [ex.lower() for ex in excluded_kw]]
+                    priority_keywords.extend(filtered)
+            
+            if not priority_keywords:
+                continue
+                
+            terminal_log(f"🔍 {priority.upper()} öncelikli {len(priority_keywords)} keyword ile arama (⏱️ {elapsed_time:.1f}s)", "info")
+            
+            # Her priority seviyesi için arama yap - Limit kontrolü ile
+            remaining_slots = max_articles - len(all_found_articles)
+            if remaining_slots <= 0:
+                terminal_log(f"🏁 Maksimum makale sayısına ulaşıldı ({max_articles}), {priority.upper()} seviyesi atlanıyor", "warning")
+                break
+                
+            # Priority seviyesi başına maksimum makale sayısı
+            priority_limit = min(remaining_slots, max(1, max_articles // len(priority_order)))
+            terminal_log(f"🎯 {priority.upper()} seviyesi için limit: {priority_limit} makale", "info")
+            
+            priority_articles = search_ai_news_with_mcp(priority_keywords, cutoff_date, priority_limit)
+            
+            if priority_articles:
+                all_found_articles.extend(priority_articles)
+                terminal_log(f"✅ {priority.upper()} seviyesinden {len(priority_articles)} makale bulundu (toplam: {len(all_found_articles)}/{max_articles})", "success")
+                
+                # Limit kontrolü
+                if len(all_found_articles) >= max_articles:
+                    terminal_log(f"🎯 Hedef sayıya ulaşıldı ({max_articles}), kalan priority seviyeleri atlanıyor", "success")
+                    break
+        
+        # Duplikasyonları temizle - AI Keywords için basit filtreleme
+        if all_found_articles:
+            # AI Keywords için sadece URL duplikatını kontrol et (son 24 saat)
+            unique_articles = []
+            seen_urls = set()
+            
+            for article in all_found_articles:
+                url = article.get('url', '')
+                if url not in seen_urls:
+                    unique_articles.append(article)
+                    seen_urls.add(url)
+                    
+            terminal_log(f"📊 Toplam {len(unique_articles)} benzersiz AI makale bulundu (basit filtreleme)", "info")
+            
+            # Posted articles ile karşılaştır
+            new_articles = []
+            for article in unique_articles[:max_articles]:
+                if (article.get('url') not in posted_urls and 
+                    article.get('hash') not in posted_hashes):
+                    new_articles.append(article)
+            
+            terminal_log(f"🆕 {len(new_articles)} yeni AI makale bulundu", "success")
+            
+            # Toplam süre bilgisi
+            total_time = time.time() - start_time
+            terminal_log(f"⏱️ AI Keywords araması tamamlandı: {total_time:.1f}s", "info")
+            return new_articles
+        
+        total_time = time.time() - start_time
+        terminal_log(f"⚠️ AI keyword aramasında makale bulunamadı ({total_time:.1f}s)", "warning")
+        return []
+        
+    except Exception as e:
+        total_time = time.time() - start_time
+        terminal_log(f"❌ Gelişmiş AI keyword araması hatası ({total_time:.1f}s): {e}", "error")
+        return []
+
+def search_ai_news_with_mcp(keywords, cutoff_date, max_results=5):
+    """MCP kullanarak belirli keywordler ile haber ara"""
+    try:
+        import time
+        start_time = time.time()
+        MAX_SEARCH_TIME = 45  # 45 saniye maksimum
+        
+        found_articles = []
+        
+        terminal_log(f"🎯 MCP keyword araması başlatılıyor - Hedef: {max_results} makale (timeout: {MAX_SEARCH_TIME}s)", "info")
+        
+        # Prioritized search sources - Sadece ilk 3 kaynak (performans için)
+        search_sources = [
+            "https://techcrunch.com/category/artificial-intelligence/",
+            "https://www.theverge.com/ai-artificial-intelligence",
+            "https://venturebeat.com/ai/"
+        ]
+        
+        terminal_log(f"📰 {len(search_sources)} kaynak taranacak", "info")
+        
+        # Her kaynak için arama yap
+        for source_index, source_url in enumerate(search_sources):
+            # Timeout kontrolü
+            elapsed_time = time.time() - start_time
+            if elapsed_time > MAX_SEARCH_TIME:
+                terminal_log(f"⏰ Search timeout! {elapsed_time:.1f}s geçti, kalan kaynaklar atlanıyor", "warning")
+                break
+                
+            # Global limit kontrolü
+            if len(found_articles) >= max_results:
+                terminal_log(f"🏁 Toplam limit doldu ({max_results}), kalan kaynaklar atlanıyor", "success")
+                break
+            try:
+                terminal_log(f"🔍 MCP ile aranıyor ({source_index+1}/{len(search_sources)}): {source_url} (⏱️ {elapsed_time:.1f}s)", "info")
+                
+                # MCP ile scrape - Timeout kontrolü ile
+                scrape_result = mcp_firecrawl_scrape({
+                    "url": source_url,
+                    "formats": ["markdown", "links"],
+                    "onlyMainContent": True,
+                    "waitFor": 2000,  # 2 saniye bekleme (3'ten düşürüldü)
+                    "removeBase64Images": True,
+                    "timeout": 15000  # 15 saniye maksimum
+                })
+                
+                if not scrape_result.get("success", False):
+                    terminal_log(f"⚠️ MCP scrape başarısız: {source_url}", "warning")
+                    continue
+                
+                markdown_content = scrape_result.get("markdown", "")
+                mcp_links = scrape_result.get("links", [])
+                
+                if not markdown_content and not mcp_links:
+                    terminal_log(f"⚠️ İçerik bulunamadı: {source_url}", "warning")
+                    continue
+                
+                # Link listesi oluştur - Gelişmiş yöntemle
+                links = []
+                
+                # 1. MCP'den gelen linkler (eğer varsa)
+                if mcp_links and isinstance(mcp_links, list):
+                    for link_item in mcp_links:
+                        if isinstance(link_item, dict):
+                            text = link_item.get("text", "") or link_item.get("title", "")
+                            url = link_item.get("url", "") or link_item.get("href", "")
+                            if text and url:
+                                links.append({"text": text, "url": url})
+                        elif isinstance(link_item, str):
+                            # Basit string ise URL olarak kabul et
+                            links.append({"text": link_item, "url": link_item})
+                
+                # 2. Markdown içeriğinden linkleri çıkar
+                import re
+                if markdown_content:
+                    # Markdown link pattern: [text](url)
+                    markdown_links = re.findall(r'\[([^\]]+)\]\(([^)]+)\)', markdown_content)
+                    for title, url in markdown_links:
+                        if url not in [link.get("url", "") for link in links]:
+                            links.append({"text": title, "url": url})
+                    
+                    # HTML link pattern de dene: <a href="url">text</a>
+                    html_links = re.findall(r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>([^<]+)</a>', markdown_content)
+                    for url, title in html_links:
+                        if url not in [link.get("url", "") for link in links]:
+                            links.append({"text": title, "url": url})
+                    
+                    # Basit URL pattern: http(s)://... 
+                    simple_urls = re.findall(r'https?://[^\s\)\]\>]+', markdown_content)
+                    for url in simple_urls:
+                        url = url.rstrip('.,;!?)')  # Noktalama işaretlerini temizle
+                        if url not in [link.get("url", "") for link in links]:
+                            # URL'den başlık çıkar
+                            title = url.split('/')[-1].replace('-', ' ').replace('_', ' ').title()
+                            if not title or len(title) < 5:
+                                title = url
+                            links.append({"text": title, "url": url})
+                
+                # 3. AI/Tech makalelerini filtrele - Gelişmiş filtreleme
+                ai_links = []
+                for link in links:
+                    url = link.get("url", "")
+                    text = link.get("text", "")
+                    
+                    # Gereksiz linkleri filtrele
+                    skip_patterns = [
+                        'subscribe', 'newsletter', 'login', 'register', 'contact',
+                        'about', 'privacy', 'terms', 'cookie', 'advertise',
+                        'podcast', 'events', 'jobs', 'careers', 'support',
+                        'logo', 'menu', 'navigation', 'search', 'category',
+                        'tag', 'author', 'feed', 'rss', 'sitemap'
+                    ]
+                    
+                    if any(pattern in url.lower() or pattern in text.lower() for pattern in skip_patterns):
+                        continue
+                    
+                    # Makale URL pattern'larını kontrol et
+                    article_patterns = [
+                        r'/\d{4}/\d{2}/\d{2}/',  # Tarih formatı
+                        r'/article/',
+                        r'/story/',
+                        r'/news/',
+                        r'/post/'
+                    ]
+                    
+                    is_article_url = any(re.search(pattern, url) for pattern in article_patterns)
+                    
+                    # AI/Tech ile ilgili mi kontrol et
+                    ai_keywords_in_text = any(keyword.lower() in text.lower() for keyword in [
+                        'ai', 'artificial intelligence', 'machine learning', 'deep learning',
+                        'neural', 'chatgpt', 'gpt', 'openai', 'anthropic', 'claude', 
+                        'gemini', 'llm', 'automation', 'robot', 'algorithm'
+                    ])
+                    
+                    ai_keywords_in_url = any(keyword in url.lower() for keyword in [
+                        'ai', 'artificial', 'machine-learning', 'deep-learning',
+                        'neural', 'chatgpt', 'openai', 'anthropic'
+                    ])
+                    
+                    # AI sitelerinden makale URL'leri öncelikle al
+                    if any(domain in url.lower() for domain in [
+                        'techcrunch.com', 'theverge.com', 'venturebeat.com',
+                        'arstechnica.com', 'wired.com'
+                    ]) and (is_article_url or ai_keywords_in_text or ai_keywords_in_url):
+                        ai_links.append(link)
+                    elif ai_keywords_in_text and len(text) > 15:  # Başlık yeterince uzun
+                        ai_links.append(link)
+                
+                # AI linkler varsa onları kullan, yoksa tüm linkleri kullan
+                final_links = ai_links if ai_links else links
+                
+                # Her link için keyword kontrolü yap - LIMIT KONTROLÜ İLE
+                links_to_check = min(10, len(final_links))  # En fazla 10 link kontrol et
+                terminal_log(f"🔍 {links_to_check} link kontrol ediliyor (toplam: {len(final_links)}, limit: {max_results})", "info")
+                
+                for i, link_data in enumerate(final_links[:links_to_check]):
+                    try:
+                        # Timeout kontrolü
+                        elapsed_time = time.time() - start_time
+                        if elapsed_time > MAX_SEARCH_TIME:
+                            terminal_log(f"⏰ Link timeout! {elapsed_time:.1f}s geçti, link döngüsü sonlandırılıyor", "warning")
+                            break
+                            
+                        # Erken çıkış kontrolü
+                        if len(found_articles) >= max_results:
+                            terminal_log(f"⚡ Limit doldu ({max_results}), sonlandırılıyor", "warning")
+                            break
+                            
+                        link_url = link_data.get("url", "")
+                        link_text = link_data.get("text", "")
+                        
+                        if not link_url or not link_text:
+                            continue
+                        
+                        terminal_log(f"🔍 Link {i+1}/{links_to_check} kontrol ediliyor: {link_text[:30]}...", "info")
+                        
+                        # URL ve başlıkta keyword kontrolü
+                        text_to_check = (link_text + " " + link_url).lower()
+                        
+                        # Keyword eşleşmesi var mı?
+                        matching_keywords = []
+                        for keyword in keywords:
+                            if keyword.lower() in text_to_check:
+                                matching_keywords.append(keyword)
+                        
+                        if not matching_keywords:
+                            terminal_log(f"❌ Keyword eşleşmesi yok: {link_text[:30]}...", "info")
+                            continue
+                        
+                        # URL tarih kontrolü
+                        if not check_article_url_date(link_url, cutoff_date):
+                            terminal_log(f"⏰ Makale 24 saatten eski: {link_text[:30]}...", "info")
+                            continue
+                        
+                        # Makale içeriğini çek
+                        terminal_log(f"📄 İçerik çekiliyor: {link_text[:30]}...", "info")
+                        article_content = fetch_article_content_with_mcp_only(link_url)
+                        
+                        if not article_content:
+                            # Fallback: başlığı içerik olarak kullan
+                            article_content = {
+                                "title": link_text,
+                                "content": link_text,
+                                "url": link_url
+                            }
+                        
+                        # Hash oluştur
+                        article_hash = hashlib.md5(link_text.encode()).hexdigest()
+                        
+                        # Makale objesi oluştur
+                        article = {
+                            "title": article_content.get("title", link_text),
+                            "content": article_content.get("content", link_text),
+                            "url": link_url,
+                            "hash": article_hash,
+                            "source": f"AI Keyword Search - {source_url}",
+                            "fetch_date": datetime.now().isoformat(),
+                            "matching_keywords": matching_keywords,
+                            "search_method": "advanced_ai_keywords",
+                            "fetch_method": "AI Keywords",
+                            "method_icon": "🧠",
+                            "method_color": "purple",
+                            "is_new": True,
+                            "already_posted": False
+                        }
+                        
+                        found_articles.append(article)
+                        terminal_log(f"✅ AI makale bulundu ({len(found_articles)}/{max_results}): {link_text[:50]}... (Keywords: {', '.join(matching_keywords[:3])})", "success")
+                        
+                        # Limit kontrolü
+                        if len(found_articles) >= max_results:
+                            terminal_log(f"🎯 Hedef sayıya ulaşıldı ({max_results}), durduruluyor", "success")
+                            break
+                            
+                    except Exception as link_error:
+                        terminal_log(f"⚠️ Link işleme hatası: {link_error}", "warning")
+                        continue
+                
+                # Kaynak seviyesinde limit kontrolü
+                if len(found_articles) >= max_results:
+                    terminal_log(f"🏁 Toplam limit doldu ({max_results}), diğer kaynaklar atlanıyor", "success")
+                    break
+                    
+            except Exception as source_error:
+                terminal_log(f"⚠️ Kaynak arama hatası ({source_url}): {source_error}", "warning")
+                continue
+        
+        # Son limit kontrolü ve sonuç döndürme
+        final_articles = found_articles[:max_results]
+        terminal_log(f"🎯 MCP araması tamamlandı: {len(final_articles)} makale döndürülüyor (hedef: {max_results})", "success")
+        return final_articles
+        
+    except Exception as e:
+        terminal_log(f"❌ MCP AI haber arama hatası: {e}", "error")
+        return []
+
+def update_ai_keyword_category(category_name, action, keyword=None):
+    """AI keyword kategorisini güncelle"""
+    try:
+        config = load_ai_keywords_config()
+        
+        if category_name not in config.get("keyword_categories", {}):
+            return False, f"Kategori bulunamadı: {category_name}"
+        
+        category = config["keyword_categories"][category_name]
+        
+        if action == "add_user_keyword" and keyword:
+            if keyword not in category.get("user_keywords", []):
+                category.setdefault("user_keywords", []).append(keyword)
+                
+        elif action == "remove_user_keyword" and keyword:
+            if keyword in category.get("user_keywords", []):
+                category["user_keywords"].remove(keyword)
+                
+        elif action == "add_excluded_keyword" and keyword:
+            if keyword not in category.get("excluded_keywords", []):
+                category.setdefault("excluded_keywords", []).append(keyword)
+                
+        elif action == "remove_excluded_keyword" and keyword:
+            if keyword in category.get("excluded_keywords", []):
+                category["excluded_keywords"].remove(keyword)
+                
+        elif action == "toggle_enabled":
+            category["enabled"] = not category.get("enabled", True)
+            
+        elif action == "set_priority" and keyword in ["high", "medium", "low"]:
+            category["priority"] = keyword
+            
+        else:
+            return False, "Geçersiz işlem"
+        
+        # Yapılandırmayı kaydet
+        if save_ai_keywords_config(config):
+            return True, "Başarıyla güncellendi"
+        else:
+            return False, "Kaydetme hatası"
+            
+    except Exception as e:
+        return False, f"Güncelleme hatası: {e}"
+
+def get_ai_keywords_stats():
+    """AI keywords istatistiklerini al"""
+    try:
+        config = load_ai_keywords_config()
+        
+        stats = {
+            "total_categories": 0,
+            "enabled_categories": 0,
+            "total_default_keywords": 0,
+            "total_user_keywords": 0,
+            "total_excluded_keywords": 0,
+            "categories_detail": {}
+        }
+        
+        for category_name, category_data in config.get("keyword_categories", {}).items():
+            stats["total_categories"] += 1
+            
+            if category_data.get("enabled", True):
+                stats["enabled_categories"] += 1
+            
+            default_count = len(category_data.get("default_keywords", []))
+            user_count = len(category_data.get("user_keywords", []))
+            excluded_count = len(category_data.get("excluded_keywords", []))
+            
+            stats["total_default_keywords"] += default_count
+            stats["total_user_keywords"] += user_count
+            stats["total_excluded_keywords"] += excluded_count
+            
+            stats["categories_detail"][category_name] = {
+                "enabled": category_data.get("enabled", True),
+                "priority": category_data.get("priority", "medium"),
+                "default_keywords_count": default_count,
+                "user_keywords_count": user_count,
+                "excluded_keywords_count": excluded_count,
+                "total_active_keywords": default_count + user_count - excluded_count
+            }
+        
+        return stats
+        
+    except Exception as e:
+        terminal_log(f"❌ AI keywords stats hatası: {e}", "error")
+        return {}

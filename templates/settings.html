@@ -75,9 +75,28 @@
                                 Maksimum Makale Sayısı
                             </label>
                             <input type="number" id="max_articles_per_run" name="max_articles_per_run" 
-                                   value="{{ settings.max_articles_per_run or 3 }}" min="1" max="10"
+                                   value="{{ settings.max_articles_per_run or 3 }}" min="1" max="15"
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                            <p class="text-sm text-gray-600">Her kontrolde işlenecek maksimum makale</p>
+                            <p class="text-sm text-gray-600">Her haber çekme işleminde bulunacak maksimum makale sayısı (AI Keywords, MCP, RSS, vb. tüm yöntemler için geçerli)</p>
+                            
+                            <!-- Bilgi Kutusu -->
+                            <div class="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                                    <div class="text-sm text-blue-700">
+                                        <p class="font-medium mb-1">Makale Limit Sistemi</p>
+                                        <p>Bu ayar tüm haber çekme yöntemlerini etkiler:</p>
+                                        <ul class="list-disc list-inside mt-2 space-y-1 text-xs">
+                                            <li><strong>AI Keywords:</strong> Anahtar kelime araması sonuçları</li>
+                                            <li><strong>MCP Firecrawl:</strong> Gelişmiş web scraping sonuçları</li>
+                                            <li><strong>RSS Feeds:</strong> RSS kaynaklarından gelen makaleler</li>
+                                            <li><strong>Özel Kaynaklar:</strong> Kullanıcı tanımlı haber siteleri</li>
+                                            <li><strong>PythonAnywhere:</strong> Basit scraping yöntemi</li>
+                                        </ul>
+                                        <p class="mt-2 text-blue-600">⚡ Önerilen değer: 3-7 arası (performans için)</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -245,7 +264,10 @@
                                 <select id="news_fetching_method" name="news_fetching_method" 
                                         class="w-full px-4 py-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200">
                                     <option value="auto" {{ 'selected' if settings.news_fetching_method == 'auto' else '' }}>
-                                        🎯 Otomatik (Tüm yöntemleri dene)
+                                        🎯 Otomatik (AI Keywords + Tüm yöntemleri dene)
+                                    </option>
+                                    <option value="ai_keywords_only" {{ 'selected' if settings.news_fetching_method == 'ai_keywords_only' else '' }}>
+                                        🧠 Sadece AI Keywords (Akıllı anahtar kelime sistemi)
                                     </option>
                                     <option value="pythonanywhere_only" {{ 'selected' if settings.news_fetching_method == 'pythonanywhere_only' else '' }}>
                                         🐍 PythonAnywhere Uyumlu (RSS + API + Scraping)
@@ -261,20 +283,38 @@
                             </div>
                             
                             <!-- Yöntem Açıklamaları -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
                                 <div class="p-4 bg-white border border-green-200 rounded-lg">
                                     <h5 class="font-semibold text-green-900 mb-2 flex items-center space-x-2">
                                         <i class="fas fa-magic text-green-600"></i>
-                                        <span>Otomatik</span>
+                                        <span>Otomatik (Önerilen)</span>
                                     </h5>
                                     <p class="text-sm text-green-700">
-                                        Tüm yöntemleri sırayla dener. En güvenilir seçenek.
+                                        <strong>🧠 AI Keywords sistemi</strong> ile en akıllı haber bulma.
                                     </p>
                                     <ul class="text-xs text-green-600 mt-2 space-y-1">
-                                        <li>• Özel kaynaklar</li>
-                                        <li>• PythonAnywhere sistemi</li>
-                                        <li>• MCP (varsa)</li>
-                                        <li>• Fallback</li>
+                                        <li>• <strong>1. AI Keywords:</strong> Gelişmiş anahtar kelime sistemi</li>
+                                        <li>• <strong>2. Özel Kaynaklar:</strong> Tanımladığınız siteler</li>
+                                        <li>• <strong>3. PythonAnywhere:</strong> RSS + API sistemi</li>
+                                        <li>• <strong>4. MCP:</strong> Firecrawl ile scraping</li>
+                                        <li>• <span class="font-semibold">En fazla ve en kaliteli makale bulur</span></li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="p-4 bg-white border border-purple-200 rounded-lg">
+                                    <h5 class="font-semibold text-purple-900 mb-2 flex items-center space-x-2">
+                                        <i class="fas fa-brain text-purple-600"></i>
+                                        <span>Sadece AI Keywords</span>
+                                    </h5>
+                                    <p class="text-sm text-purple-700">
+                                        <strong>Sadece AI Keywords sistemi</strong> ile hedefli haber bulma.
+                                    </p>
+                                    <ul class="text-xs text-purple-600 mt-2 space-y-1">
+                                        <li>• 🎯 Kategori bazlı anahtar kelimeler</li>
+                                        <li>• 🚀 Öncelik sistemi (HIGH/MEDIUM/LOW)</li>
+                                        <li>• 🔍 MCP ile gelişmiş arama</li>
+                                        <li>• 📰 6 ana AI haber kaynağı</li>
+                                        <li>• <span class="font-semibold">En hedefli ve kaliteli sonuçlar</span></li>
                                     </ul>
                                 </div>
                                 
@@ -331,7 +371,11 @@
                                     <i class="fas fa-info-circle text-gray-600"></i>
                                     <span>Mevcut Durum</span>
                                 </h5>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm mb-4">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                                        <span class="text-gray-700">🧠 AI Keywords: Aktif</span>
+                                    </div>
                                     <div class="flex items-center space-x-2">
                                         <div class="w-3 h-3 bg-green-500 rounded-full"></div>
                                         <span class="text-gray-700">Özel Kaynaklar: Aktif</span>
@@ -346,14 +390,18 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Test Butonu -->
-                                <div class="flex space-x-3">
+                                <!-- Test Butonları -->
+                                <div class="flex flex-wrap gap-3">
                                     <button onclick="testNewsFetchingMethods()" 
                                             class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-all duration-200 font-medium flex items-center space-x-2">
                                         <i class="fas fa-vial"></i>
                                         <span>Tüm Yöntemleri Test Et</span>
                                     </button>
-
+                                    <a href="{{ url_for('ai_keywords') }}" 
+                                       class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-200 font-medium flex items-center space-x-2">
+                                        <i class="fas fa-brain"></i>
+                                        <span>AI Keywords Yönetimi</span>
+                                    </a>
                                 </div>
                             </div>
                         </div>

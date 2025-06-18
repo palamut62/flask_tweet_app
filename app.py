@@ -30,7 +30,9 @@ from utils import (
     check_telegram_configuration, auto_detect_and_save_chat_id,
     setup_twitter_api, send_gmail_notification, test_gmail_connection,
     check_gmail_configuration, get_rate_limit_info, terminal_log,
-    create_automatic_backup
+    create_automatic_backup, load_ai_keywords_config, save_ai_keywords_config,
+    get_all_active_keywords, fetch_ai_news_with_advanced_keywords,
+    update_ai_keyword_category, get_ai_keywords_stats
 )
 
 # GitHub modülünü import et
@@ -3789,6 +3791,272 @@ def debug_openrouter_key():
             "success": False,
             "error": str(e)
         })
+
+# ============================================================================
+# AI KEYWORDS MANAGEMENT ROUTES
+# ============================================================================
+
+@app.route('/ai_keywords')
+@login_required
+def ai_keywords():
+    """AI Keywords yönetim sayfası"""
+    try:
+        config = load_ai_keywords_config()
+        stats = get_ai_keywords_stats()
+        active_keywords = get_all_active_keywords()
+        
+        return render_template('ai_keywords.html', 
+                             config=config, 
+                             stats=stats, 
+                             active_keywords=active_keywords)  # Tüm aktif keywordleri göster
+    except Exception as e:
+        terminal_log(f"❌ AI Keywords sayfa hatası: {e}", "error")
+        flash(f'AI Keywords yükleme hatası: {e}', 'error')
+        return redirect(url_for('settings'))
+
+@app.route('/api/ai_keywords/config')
+@login_required
+def get_ai_keywords_config():
+    """AI Keywords yapılandırmasını API ile al"""
+    try:
+        config = load_ai_keywords_config()
+        return jsonify({
+            "success": True,
+            "config": config
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+@app.route('/api/ai_keywords/stats')
+@login_required
+def get_ai_keywords_stats_api():
+    """AI Keywords istatistiklerini API ile al"""
+    try:
+        stats = get_ai_keywords_stats()
+        active_keywords = get_all_active_keywords()
+        
+        return jsonify({
+            "success": True,
+            "stats": stats,
+            "active_keywords_count": len(active_keywords),
+            "active_keywords_sample": active_keywords[:10]
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+@app.route('/api/ai_keywords/update', methods=['POST'])
+@login_required
+def update_ai_keywords():
+    """AI Keywords güncelle"""
+    try:
+        data = request.get_json()
+        category_name = data.get('category')
+        action = data.get('action')
+        keyword = data.get('keyword', '').strip()
+        
+        if not category_name or not action:
+            return jsonify({
+                "success": False,
+                "error": "Kategori ve işlem gerekli"
+            })
+        
+        success, message = update_ai_keyword_category(category_name, action, keyword)
+        
+        if success:
+            # Güncel istatistikleri al
+            stats = get_ai_keywords_stats()
+            active_keywords = get_all_active_keywords()
+            return jsonify({
+                "success": True,
+                "message": message,
+                "stats": stats,
+                "active_keywords": active_keywords
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": message
+            })
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+@app.route('/api/ai_keywords/test_search')
+@login_required
+def test_ai_keywords_search():
+    """AI Keywords aramasını test et"""
+    try:
+        terminal_log("🧪 AI Keywords arama testi başlatılıyor...", "info")
+        
+        # Test araması yap
+        articles = fetch_ai_news_with_advanced_keywords()
+        
+        result = {
+            "success": True,
+            "articles_found": len(articles),
+            "articles": articles[:5],  # İlk 5 makaleyi göster
+            "test_completed_at": datetime.now().isoformat()
+        }
+        
+        terminal_log(f"✅ AI Keywords test tamamlandı: {len(articles)} makale bulundu", "success")
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        terminal_log(f"❌ AI Keywords test hatası: {e}", "error")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+@app.route('/api/ai_keywords/save_settings', methods=['POST'])
+@login_required
+def save_ai_keywords_settings():
+    """AI Keywords genel ayarlarını kaydet"""
+    try:
+        data = request.get_json()
+        config = load_ai_keywords_config()
+        
+        # Ayarları güncelle
+        if 'settings' in data:
+            config['settings'].update(data['settings'])
+        
+        # Kaydet
+        if save_ai_keywords_config(config):
+            return jsonify({
+                "success": True,
+                "message": "Ayarlar başarıyla kaydedildi"
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Kaydetme hatası"
+            })
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+@app.route('/api/ai_keywords/reset_category', methods=['POST'])
+@login_required
+def reset_ai_keywords_category():
+    """AI Keywords kategorisini varsayılana sıfırla"""
+    try:
+        data = request.get_json()
+        category_name = data.get('category')
+        
+        if not category_name:
+            return jsonify({
+                "success": False,
+                "error": "Kategori adı gerekli"
+            })
+        
+        config = load_ai_keywords_config()
+        
+        if category_name not in config.get("keyword_categories", {}):
+            return jsonify({
+                "success": False,
+                "error": "Kategori bulunamadı"
+            })
+        
+        # Kullanıcı keywordlerini ve excluded keywordleri temizle
+        category = config["keyword_categories"][category_name]
+        category["user_keywords"] = []
+        category["excluded_keywords"] = []
+        category["enabled"] = True
+        
+        # Kaydet
+        if save_ai_keywords_config(config):
+            stats = get_ai_keywords_stats()
+            return jsonify({
+                "success": True,
+                "message": f"{category_name} kategorisi varsayılana sıfırlandı",
+                "stats": stats
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Kaydetme hatası"
+            })
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+@app.route('/api/ai_keywords/toggle_keyword', methods=['POST'])
+@login_required
+def toggle_ai_keyword():
+    """Bir keywordü tüm kategorilerde veya belirli kategoride hariç/aktif arasında değiştir"""
+    try:
+        data = request.get_json()
+        keyword = data.get('keyword', '').strip()
+        category_name = data.get('category', '').strip()
+        
+        if not keyword:
+            return jsonify({"success": False, "error": "Keyword gerekli"})
+
+        config = load_ai_keywords_config()
+        changed = False
+        message_part = ""
+        
+        # Belirli kategori belirtilmişse sadece o kategoride işlem yap
+        if category_name:
+            categories_to_check = {category_name: config.get("keyword_categories", {}).get(category_name)}
+            if not categories_to_check[category_name]:
+                return jsonify({"success": False, "error": "Kategori bulunamadı"})
+        else:
+            # Tüm kategorilerde ara
+            categories_to_check = config.get("keyword_categories", {})
+        
+        is_active = None
+        for cat_key, cat in categories_to_check.items():
+            if not cat:
+                continue
+                
+            # keyword kategoriye ait mi?
+            if keyword in cat.get("default_keywords", []) or keyword in cat.get("user_keywords", []):
+                excluded = cat.get("excluded_keywords", [])
+                if keyword in excluded:
+                    excluded.remove(keyword)
+                    message_part = "aktifleştirildi"
+                    is_active = True
+                else:
+                    excluded.append(keyword)
+                    message_part = "hariç tutuldu"
+                    is_active = False
+                cat["excluded_keywords"] = excluded
+                changed = True
+                
+        if not changed:
+            return jsonify({"success": False, "error": "Keyword kategori listelerinde bulunamadı"})
+
+        if save_ai_keywords_config(config):
+            stats = get_ai_keywords_stats()
+            active_keywords = get_all_active_keywords()
+            return jsonify({
+                "success": True, 
+                "message": f'"{keyword}" {message_part}', 
+                "is_active": is_active,
+                "stats": stats,
+                "active_keywords": active_keywords
+            })
+        else:
+            return jsonify({"success": False, "error": "Kaydetme hatası"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
 
 if __name__ == '__main__':
     # Arka plan zamanlayıcısını başlat

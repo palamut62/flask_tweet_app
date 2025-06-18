@@ -1,7 +1,7 @@
 {
   "auto_mode": true,
   "check_interval_hours": 3,
-  "max_articles_per_run": 4,
+  "max_articles_per_run": 5,
   "min_score_threshold": 5,
   "auto_post_enabled": false,
   "manual_approval_required": true,
@@ -11,5 +11,6 @@
   "title_similarity_threshold": 0.8,
   "content_similarity_threshold": 0.7,
   "news_fetching_method": "auto",
-  "last_updated": "2025-06-10T04:52:23.178066"
+  "tweet_theme": "bilgilendirici",
+  "last_updated": "2025-06-18T14:04:58.199710"
 }

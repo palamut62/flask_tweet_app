@@ -111,6 +111,10 @@
                             <span class="font-medium text-gray-900">{{ automation_status.min_score_threshold }}/10</span>
                         </div>
                         <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Makale Limiti:</span>
+                            <span class="font-medium text-gray-900">{{ automation_status.max_articles_per_run or 5 }} makale</span>
+                        </div>
+                        <div class="flex justify-between items-center">
                             <span class="text-gray-600">Son Kontrol:</span>
                             <span class="text-gray-500 text-sm">
                                 {% if last_check %}
@@ -448,7 +452,17 @@
                         </div>
                         
                         <!-- Haber Kaynağı Bilgisi -->
-                        {{ render_source_badge(tweet.source, None, tweet.url) }}
+                        <div class="mb-4 flex flex-wrap gap-2">
+                            {{ render_source_badge(tweet.source, None, tweet.url) }}
+                            
+                            <!-- Haber Çekme Yöntemi Badge -->
+                            {% if tweet.article and tweet.article.fetch_method %}
+                            <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-{{ tweet.article.method_color or 'gray' }}-100 text-{{ tweet.article.method_color or 'gray' }}-800 border border-{{ tweet.article.method_color or 'gray' }}-200">
+                                <span class="mr-1">{{ tweet.article.method_icon or '📰' }}</span>
+                                <span>{{ tweet.article.fetch_method }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
                         {% endif %}
                         
                         {% if tweet.error_reason %}
@@ -612,7 +626,17 @@
                                 </div>
                             </div>
                             {% else %}
-                            {{ render_source_badge(article.source, article.source_id, article.url) }}
+                            <div class="mb-4 flex flex-wrap gap-2">
+                                {{ render_source_badge(article.source, article.source_id, article.url) }}
+                                
+                                <!-- Haber Çekme Yöntemi Badge -->
+                                {% if article.fetch_method %}
+                                <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-{{ article.method_color or 'gray' }}-100 text-{{ article.method_color or 'gray' }}-800 border border-{{ article.method_color or 'gray' }}-200">
+                                    <span class="mr-1">{{ article.method_icon or '📰' }}</span>
+                                    <span>{{ article.fetch_method }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
                             {% endif %}
                             
                             <div class="flex flex-wrap gap-3">
