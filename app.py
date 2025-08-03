@@ -999,6 +999,144 @@ def manual_post_tweet_route():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
+@app.route('/bulk_tweet_action', methods=['POST'])
+@login_required
+def bulk_tweet_action():
+    """Toplu tweet işlemleri - onaylama veya reddetme"""
+    try:
+        data = request.get_json()
+        tweet_ids = data.get('tweet_ids', [])
+        action = data.get('action', '')  # 'approve' veya 'reject'
+        
+        if not tweet_ids or not action:
+            return jsonify({"success": False, "error": "Tweet ID'leri ve işlem türü gerekli"})
+        
+        if action not in ['approve', 'reject']:
+            return jsonify({"success": False, "error": "Geçersiz işlem türü"})
+        
+        # Pending tweets yükle
+        pending_tweets = load_json("pending_tweets.json", [])
+        pending_tweets = ensure_tweet_ids(pending_tweets)
+        
+        processed_count = 0
+        errors = []
+        
+        for tweet_id in tweet_ids:
+            try:
+                # Tweet'i bul
+                tweet_to_process = None
+                tweet_index = None
+                
+                for i, pending in enumerate(pending_tweets):
+                    try:
+                        pending_id = pending.get('id') if isinstance(pending, dict) else getattr(pending, 'id', None)
+                        if pending_id is None:
+                            pending_id = i + 1
+                            if isinstance(pending, dict):
+                                pending['id'] = pending_id
+                        
+                        if str(pending_id) == str(tweet_id):
+                            tweet_to_process = pending
+                            tweet_index = i
+                            break
+                    except (AttributeError, TypeError):
+                        if str(i + 1) == str(tweet_id):
+                            tweet_to_process = pending
+                            tweet_index = i
+                            break
+                
+                if not tweet_to_process:
+                    errors.append(f"Tweet ID {tweet_id} bulunamadı")
+                    continue
+                
+                if action == 'approve':
+                    # Tweet'i paylaş
+                    try:
+                        from utils import post_tweet, mark_article_as_posted
+                        
+                        # Twitter API ile paylaş
+                        success = post_tweet(tweet_to_process.get('content', ''))
+                        
+                        if success:
+                            # Paylaşılan tweet'lere ekle
+                            mark_article_as_posted({
+                                'id': tweet_to_process.get('id'),
+                                'title': tweet_to_process.get('title', ''),
+                                'content': tweet_to_process.get('content', ''),
+                                'url': tweet_to_process.get('url', ''),
+                                'source': tweet_to_process.get('source', ''),
+                                'category': tweet_to_process.get('category', 'ai_general'),
+                                'tags': tweet_to_process.get('tags', []),
+                                'score': tweet_to_process.get('score', 0),
+                                'posted_date': datetime.now().isoformat(),
+                                'tweet_text': tweet_to_process.get('content', ''),
+                                'manual_approval': True,
+                                'bulk_operation': True
+                            })
+                            
+                            # Pending'den kaldır
+                            pending_tweets.pop(tweet_index)
+                            processed_count += 1
+                            
+                            terminal_log(f"✅ Bulk approve: Tweet {tweet_id} başarıyla paylaşıldı", "success")
+                        else:
+                            errors.append(f"Tweet ID {tweet_id} paylaşılamadı (API hatası)")
+                            
+                    except Exception as e:
+                        errors.append(f"Tweet ID {tweet_id} paylaşım hatası: {str(e)}")
+                
+                elif action == 'reject':
+                    # Tweet'i sil
+                    try:
+                        # Silinmiş tweet'lere ekle
+                        deleted_articles = load_json("deleted_articles.json", [])
+                        deleted_tweet = dict(tweet_to_process)
+                        deleted_tweet['deleted_date'] = datetime.now().isoformat()
+                        deleted_tweet['deletion_reason'] = 'Bulk rejection'
+                        deleted_tweet['bulk_operation'] = True
+                        deleted_articles.append(deleted_tweet)
+                        save_json("deleted_articles.json", deleted_articles)
+                        
+                        # Pending'den kaldır
+                        pending_tweets.pop(tweet_index)
+                        processed_count += 1
+                        
+                        terminal_log(f"🗑️ Bulk reject: Tweet {tweet_id} silindi", "info")
+                        
+                    except Exception as e:
+                        errors.append(f"Tweet ID {tweet_id} silme hatası: {str(e)}")
+                        
+            except Exception as e:
+                errors.append(f"Tweet ID {tweet_id} işlem hatası: {str(e)}")
+        
+        # Güncellenmiş pending tweets'i kaydet
+        save_json("pending_tweets.json", pending_tweets)
+        
+        # Sonucu döndür
+        if processed_count > 0:
+            action_text = "onaylandı" if action == 'approve' else "reddedildi"
+            message = f"{processed_count} tweet başarıyla {action_text}"
+            if errors:
+                message += f". {len(errors)} hata oluştu."
+            
+            terminal_log(f"📊 Bulk operation tamamlandı - {action}: {processed_count} başarılı, {len(errors)} hata", "info")
+            
+            return jsonify({
+                "success": True, 
+                "processed_count": processed_count,
+                "errors": errors,
+                "message": message
+            })
+        else:
+            return jsonify({
+                "success": False, 
+                "error": f"Hiçbir tweet işlenemedi. Hatalar: {'; '.join(errors)}"
+            })
+            
+    except Exception as e:
+        terminal_log(f"❌ Bulk operation hatası: {e}", "error")
+        return jsonify({"success": False, "error": f"Toplu işlem hatası: {str(e)}"})
+
 @app.route('/confirm_manual_post', methods=['POST'])
 @login_required
 def confirm_manual_post():
@@ -1361,7 +1499,64 @@ def api_status():
     except Exception as e:
         return jsonify({"error": str(e)})
 
-
+@app.route('/api/dashboard_data')
+@login_required
+def api_dashboard_data():
+    """Dashboard verileri için API endpoint - auto-refresh için"""
+    try:
+        # Son güncelleme zamanını kontrol et için session kullan
+        last_check = session.get('last_dashboard_check', 0)
+        current_time = time.time()
+        
+        # İstatistikleri al
+        stats = get_data_statistics()
+        
+        # Pending tweets yükle
+        pending_tweets = load_json("pending_tweets.json", [])
+        current_pending_count = len(pending_tweets)
+        
+        # Önceki pending count ile karşılaştır
+        previous_pending_count = session.get('previous_pending_count', 0)
+        new_tweets_available = current_pending_count > previous_pending_count
+        new_tweets_count = current_pending_count - previous_pending_count if new_tweets_available else 0
+        
+        # Session'ı güncelle
+        session['last_dashboard_check'] = current_time
+        session['previous_pending_count'] = current_pending_count
+        
+        # Automation status
+        try:
+            automation_status = get_automation_status()
+        except:
+            automation_status = {'auto_mode': False, 'check_interval_hours': 3}
+        
+        return jsonify({
+            "success": True,
+            "stats": {
+                "pending_tweets": current_pending_count,
+                "today_articles": stats.get('today_articles', 0),
+                "total_articles": stats.get('total_articles', 0),
+                "today_pending": stats.get('today_pending', 0),
+                "average_score": stats.get('average_score', 0)
+            },
+            "automation": {
+                "auto_mode": automation_status.get('auto_mode', False),
+                "check_interval_hours": automation_status.get('check_interval_hours', 3),
+                "last_check": automation_status.get('last_check', 'Henüz kontrol yapılmadı')
+            },
+            "new_tweets_available": new_tweets_available,
+            "new_tweets_count": new_tweets_count,
+            "timestamp": current_time,
+            "last_update": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Dashboard API hatası: {e}", "error")
+        return jsonify({
+            "success": False, 
+            "error": str(e),
+            "timestamp": time.time()
+        })
 
 @app.route('/debug/env')
 @login_required
@@ -1432,6 +1627,7 @@ def create_tweet():
         tweet_url = request.form.get('tweet_url')
         selected_theme = request.form.get('tweet_theme', 'bilgilendirici')
         save_as_draft = request.form.get('save_as_draft') == 'on'  # Taslak olarak kaydet checkbox'ı
+        action = request.form.get('action', 'preview')  # 'preview' veya 'direct_post'
         
         image_path = None
         api_key = os.environ.get('GOOGLE_API_KEY')
@@ -1558,35 +1754,68 @@ def create_tweet():
                 flash(f'AI ile tweet metni oluşturulamadı: {e}', 'error')
                 return redirect(url_for('create_tweet'))
 
-        # Tweet başarıyla oluşturuldu - Şimdi kaydet
+        # Tweet başarıyla oluşturuldu - Şimdi kaydet veya doğrudan paylaş
         if final_tweet_text and len(final_tweet_text.strip()) > 0:
             try:
-                # Tweet'i manuel_tweets.json dosyasına kaydet
-                tweet_record = save_manual_tweet(
-                    tweet_text=final_tweet_text,
-                    theme=selected_theme,
-                    source_data=source_data,
-                    is_draft=save_as_draft
-                )
+                if action == 'direct_post':
+                    # Doğrudan pending tweets'e ekle
+                    from utils import save_json, load_json, get_next_tweet_id
+                    
+                    pending_tweets = load_json("pending_tweets.json", [])
+                    
+                    new_tweet = {
+                        "id": get_next_tweet_id(pending_tweets),
+                        "title": f"Manuel Tweet - {selected_theme.title()}",
+                        "content": final_tweet_text,
+                        "tweet_text": final_tweet_text,
+                        "url": source_data.get('url', ''),
+                        "source": "Manual Creation",
+                        "category": "ai_general",
+                        "tags": [selected_theme, "manual"],
+                        "score": 8.5,
+                        "posted_date": datetime.now().isoformat(),
+                        "created_date": datetime.now().isoformat(),
+                        "tweet_theme": selected_theme,
+                        "source_data": source_data,
+                        "manual_creation": True,
+                        "auto_approved": True
+                    }
+                    
+                    pending_tweets.append(new_tweet)
+                    save_json("pending_tweets.json", pending_tweets)
+                    
+                    terminal_log(f"🚀 Manuel tweet doğrudan pending'e eklendi - ID: {new_tweet['id']}", "success")
+                    flash(f'✅ Tweet oluşturuldu ve paylaşım kuyruğuna eklendi! (ID: {new_tweet["id"]})', 'success')
+                    
+                    return redirect(url_for('index', highlight_tweet=new_tweet['id']))
                 
-                # Tweet istatistikleri
-                char_count = len(final_tweet_text)
-                hashtag_count = len([word for word in final_tweet_text.split() if word.startswith('#')])
-                emoji_count = len([char for char in final_tweet_text if ord(char) > 127])
-                
-                terminal_log(f"📊 Tweet istatistikleri - Karakter: {char_count}/280, Hashtag: {hashtag_count}, Emoji: {emoji_count}", "info")
-                terminal_log(f"💾 Tweet kaydedildi - ID: {tweet_record['id']}, Durum: {'Taslak' if save_as_draft else 'Hazır'}", "success")
-                
-                if save_as_draft:
-                    flash(f'✅ Tweet taslak olarak kaydedildi! (ID: {tweet_record["id"]})', 'success')
                 else:
-                    flash(f'✅ Tweet başarıyla oluşturuldu ve kaydedildi! (ID: {tweet_record["id"]})', 'success')
-                
-                return render_template('create_tweet.html', 
-                                     generated_tweet=final_tweet_text,
-                                     selected_theme=selected_theme,
-                                     tweet_id=tweet_record['id'],
-                                     is_draft=save_as_draft)
+                    # Normal önizleme modu
+                    tweet_record = save_manual_tweet(
+                        tweet_text=final_tweet_text,
+                        theme=selected_theme,
+                        source_data=source_data,
+                        is_draft=save_as_draft
+                    )
+                    
+                    # Tweet istatistikleri
+                    char_count = len(final_tweet_text)
+                    hashtag_count = len([word for word in final_tweet_text.split() if word.startswith('#')])
+                    emoji_count = len([char for char in final_tweet_text if ord(char) > 127])
+                    
+                    terminal_log(f"📊 Tweet istatistikleri - Karakter: {char_count}/280, Hashtag: {hashtag_count}, Emoji: {emoji_count}", "info")
+                    terminal_log(f"💾 Tweet kaydedildi - ID: {tweet_record['id']}, Durum: {'Taslak' if save_as_draft else 'Hazır'}", "success")
+                    
+                    if save_as_draft:
+                        flash(f'✅ Tweet taslak olarak kaydedildi! (ID: {tweet_record["id"]})', 'success')
+                    else:
+                        flash(f'✅ Tweet başarıyla oluşturuldu ve kaydedildi! (ID: {tweet_record["id"]})', 'success')
+                    
+                    return render_template('create_tweet.html', 
+                                         generated_tweet=final_tweet_text,
+                                         selected_theme=selected_theme,
+                                         tweet_id=tweet_record['id'],
+                                         is_draft=save_as_draft)
                                      
             except Exception as e:
                 terminal_log(f"❌ Tweet kaydetme hatası: {e}", "error")

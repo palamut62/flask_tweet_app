@@ -3,7 +3,7 @@
 {% block title %}AI Tweet Bot - Ayarlar{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-8">
+<div class="max-w-6xl mx-auto space-y-8">
     <!-- Sayfa Başlığı -->
     <div class="text-center">
         <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
@@ -12,7 +12,7 @@
         <p class="text-gray-600">AI Tweet Bot'unuzun davranışını özelleştirin</p>
     </div>
 
-    <!-- Otomasyon Ayarları -->
+    <!-- Temel Ayarlar Kartı -->
     <div class="card-modern">
         <div class="p-8">
             <div class="flex items-center space-x-3 mb-8">
@@ -77,26 +77,7 @@
                             <input type="number" id="max_articles_per_run" name="max_articles_per_run" 
                                    value="{{ settings.max_articles_per_run or 3 }}" min="1" max="15"
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                            <p class="text-sm text-gray-600">Her haber çekme işleminde bulunacak maksimum makale sayısı (AI Keywords, MCP, RSS, vb. tüm yöntemler için geçerli)</p>
-                            
-                            <!-- Bilgi Kutusu -->
-                            <div class="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                <div class="flex items-start space-x-3">
-                                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-                                    <div class="text-sm text-blue-700">
-                                        <p class="font-medium mb-1">Makale Limit Sistemi</p>
-                                        <p>Bu ayar tüm haber çekme yöntemlerini etkiler:</p>
-                                        <ul class="list-disc list-inside mt-2 space-y-1 text-xs">
-                                            <li><strong>AI Keywords:</strong> Anahtar kelime araması sonuçları</li>
-                                            <li><strong>MCP Firecrawl:</strong> Gelişmiş web scraping sonuçları</li>
-                                            <li><strong>RSS Feeds:</strong> RSS kaynaklarından gelen makaleler</li>
-                                            <li><strong>Özel Kaynaklar:</strong> Kullanıcı tanımlı haber siteleri</li>
-                                            <li><strong>PythonAnywhere:</strong> Basit scraping yöntemi</li>
-                                        </ul>
-                                        <p class="mt-2 text-blue-600">⚡ Önerilen değer: 3-7 arası (performans için)</p>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="text-sm text-gray-600">Her haber çekme işleminde bulunacak maksimum makale sayısı</p>
                         </div>
                     </div>
                 </div>
@@ -143,275 +124,41 @@
                             <p class="text-sm text-gray-600">Tweet'lerin hangi tarzda oluşturulacağını belirler</p>
                         </div>
                     </div>
-                    
-                    <!-- Tweet Tema Önizleme -->
-                    <div class="mt-6 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl">
-                        <h4 class="text-lg font-semibold text-indigo-900 mb-4 flex items-center space-x-2">
-                            <i class="fas fa-eye text-indigo-600"></i>
-                            <span>Tweet Tema Önizlemeleri</span>
-                        </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <div class="p-4 bg-white border border-indigo-200 rounded-lg">
-                                <h5 class="font-semibold text-indigo-900 mb-2">📊 Bilgilendirici</h5>
-                                <p class="text-sm text-gray-700 italic">
-                                    "💡 OpenAI's new model achieves 95% accuracy in medical diagnosis #AI #Tech"
-                                </p>
-                            </div>
-                            <div class="p-4 bg-white border border-indigo-200 rounded-lg">
-                                <h5 class="font-semibold text-indigo-900 mb-2">🎉 Eğlenceli</h5>
-                                <p class="text-sm text-gray-700 italic">
-                                    "🚀 Mind-blown! This AI can now read your thoughts (almost)! ✨ #TechFun #Amazing"
-                                </p>
-                            </div>
-                            <div class="p-4 bg-white border border-indigo-200 rounded-lg">
-                                <h5 class="font-semibold text-indigo-900 mb-2">😄 Mizahi</h5>
-                                <p class="text-sm text-gray-700 italic">
-                                    "🤖 Robots are getting smarter... Should we be worried or impressed? 😅 #TechHumor"
-                                </p>
-                            </div>
-                            <div class="p-4 bg-white border border-indigo-200 rounded-lg">
-                                <h5 class="font-semibold text-indigo-900 mb-2">🏢 Resmi</h5>
-                                <p class="text-sm text-gray-700 italic">
-                                    "📢 Major technological advancement announced in artificial intelligence sector #TechNews"
-                                </p>
-                            </div>
-                            <div class="p-4 bg-white border border-indigo-200 rounded-lg">
-                                <h5 class="font-semibold text-indigo-900 mb-2">🔥 Heyecanlı</h5>
-                                <p class="text-sm text-gray-700 italic">
-                                    "🔥 BREAKTHROUGH ALERT! This changes everything we know about AI! ⚡ #GameChanger"
-                                </p>
-                            </div>
-                            <div class="p-4 bg-white border border-indigo-200 rounded-lg">
-                                <h5 class="font-semibold text-indigo-900 mb-2">🤔 Meraklı</h5>
-                                <p class="text-sm text-gray-700 italic">
-                                    "🤔 What if AI could predict the future? This research suggests it might... 🔮 #WhatIf"
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                    
-                    <!-- Duplikat Kontrol Ayarları -->
-                    <div class="mt-6 p-6 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl">
-                        <h4 class="text-lg font-semibold text-purple-900 mb-4 flex items-center space-x-2">
-                            <i class="fas fa-copy text-purple-600"></i>
-                            <span>Duplikat Kontrol Ayarları</span>
-                        </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-2">
-                                <label for="title_similarity_threshold" class="block text-sm font-medium text-purple-700">
-                                    Başlık Benzerlik Eşiği (%)
-                                </label>
-                                <input type="number" id="title_similarity_threshold" name="title_similarity_threshold" 
-                                       value="{{ (settings.title_similarity_threshold * 100) if settings.title_similarity_threshold else 80 }}" 
-                                       min="50" max="100" step="5"
-                                       class="w-full px-4 py-3 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
-                                <p class="text-sm text-purple-600">Bu oranın üzerinde benzer başlıklar duplikat sayılır</p>
-                            </div>
-                            
-                            <div class="space-y-2">
-                                <label for="content_similarity_threshold" class="block text-sm font-medium text-purple-700">
-                                    İçerik Benzerlik Eşiği (%)
-                                </label>
-                                <input type="number" id="content_similarity_threshold" name="content_similarity_threshold" 
-                                       value="{{ (settings.content_similarity_threshold * 100) if settings.content_similarity_threshold else 60 }}" 
-                                       min="30" max="90" step="5"
-                                       class="w-full px-4 py-3 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
-                                <p class="text-sm text-purple-600">Bu oranın üzerinde benzer içerikler duplikat sayılır</p>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-4 space-y-4">
-                            <label class="flex items-center space-x-3 cursor-pointer group">
-                                <div class="relative">
-                                    <input type="checkbox" id="enable_duplicate_detection" name="enable_duplicate_detection" 
-                                           {{ 'checked' if settings.enable_duplicate_detection != False else '' }}
-                                           class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                                </div>
-                                <div>
-                                    <span class="text-lg font-semibold text-purple-900">Gelişmiş Duplikat Tespiti</span>
-                                    <p class="text-sm text-purple-600">Farklı sitelerden gelen aynı haberleri tespit et ve filtrele</p>
-                                </div>
-                            </label>
-                            
-                            <div class="flex space-x-3">
-                                <a href="{{ url_for('test_duplicate_detection') }}" 
-                                   class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-200 font-medium flex items-center space-x-2">
-                                    <i class="fas fa-vial"></i>
-                                    <span>Duplikat Tespitini Test Et</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
                 </div>
 
                 <!-- Haber Çekme Yöntemi -->
                 <div class="border-t border-gray-200 pt-8">
                     <h3 class="text-xl font-semibold text-gray-900 mb-6">Haber Çekme Yöntemi</h3>
-                    <div class="p-6 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl">
-                        <h4 class="text-lg font-semibold text-green-900 mb-4 flex items-center space-x-2">
-                            <i class="fas fa-newspaper text-green-600"></i>
-                            <span>Haber Kaynağı Seçimi</span>
-                        </h4>
-                        <div class="space-y-4">
-                            <div class="space-y-2">
-                                <label for="news_fetching_method" class="block text-sm font-medium text-green-700">
-                                    Haber Çekme Yöntemi
-                                </label>
-                                <select id="news_fetching_method" name="news_fetching_method" 
-                                        class="w-full px-4 py-3 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200">
-                                    <option value="auto" {{ 'selected' if settings.news_fetching_method == 'auto' else '' }}>
-                                        🎯 Otomatik (AI Keywords + Tüm yöntemleri dene)
-                                    </option>
-                                    <option value="ai_keywords_only" {{ 'selected' if settings.news_fetching_method == 'ai_keywords_only' else '' }}>
-                                        🧠 Sadece AI Keywords (Akıllı anahtar kelime sistemi)
-                                    </option>
-                                    <option value="pythonanywhere_only" {{ 'selected' if settings.news_fetching_method == 'pythonanywhere_only' else '' }}>
-                                        🐍 PythonAnywhere Uyumlu (RSS + API + Scraping)
-                                    </option>
-                                    <option value="custom_sources_only" {{ 'selected' if settings.news_fetching_method == 'custom_sources_only' else '' }}>
-                                        📰 Sadece Özel Haber Kaynakları
-                                    </option>
-                                    <option value="mcp_only" {{ 'selected' if settings.news_fetching_method == 'mcp_only' else '' }}>
-                                        🔧 Sadece MCP (Firecrawl)
-                                    </option>
-                                </select>
-                                <p class="text-sm text-green-600">Hangi yöntemle haber çekileceğini seçin</p>
-                            </div>
-                            
-                            <!-- Yöntem Açıklamaları -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-                                <div class="p-4 bg-white border border-green-200 rounded-lg">
-                                    <h5 class="font-semibold text-green-900 mb-2 flex items-center space-x-2">
-                                        <i class="fas fa-magic text-green-600"></i>
-                                        <span>Otomatik (Önerilen)</span>
-                                    </h5>
-                                    <p class="text-sm text-green-700">
-                                        <strong>🧠 AI Keywords sistemi</strong> ile en akıllı haber bulma.
-                                    </p>
-                                    <ul class="text-xs text-green-600 mt-2 space-y-1">
-                                        <li>• <strong>1. AI Keywords:</strong> Gelişmiş anahtar kelime sistemi</li>
-                                        <li>• <strong>2. Özel Kaynaklar:</strong> Tanımladığınız siteler</li>
-                                        <li>• <strong>3. PythonAnywhere:</strong> RSS + API sistemi</li>
-                                        <li>• <strong>4. MCP:</strong> Firecrawl ile scraping</li>
-                                        <li>• <span class="font-semibold">En fazla ve en kaliteli makale bulur</span></li>
-                                    </ul>
-                                </div>
-                                
-                                <div class="p-4 bg-white border border-purple-200 rounded-lg">
-                                    <h5 class="font-semibold text-purple-900 mb-2 flex items-center space-x-2">
-                                        <i class="fas fa-brain text-purple-600"></i>
-                                        <span>Sadece AI Keywords</span>
-                                    </h5>
-                                    <p class="text-sm text-purple-700">
-                                        <strong>Sadece AI Keywords sistemi</strong> ile hedefli haber bulma.
-                                    </p>
-                                    <ul class="text-xs text-purple-600 mt-2 space-y-1">
-                                        <li>• 🎯 Kategori bazlı anahtar kelimeler</li>
-                                        <li>• 🚀 Öncelik sistemi (HIGH/MEDIUM/LOW)</li>
-                                        <li>• 🔍 MCP ile gelişmiş arama</li>
-                                        <li>• 📰 6 ana AI haber kaynağı</li>
-                                        <li>• <span class="font-semibold">En hedefli ve kaliteli sonuçlar</span></li>
-                                    </ul>
-                                </div>
-                                
-                                <div class="p-4 bg-white border border-blue-200 rounded-lg">
-                                    <h5 class="font-semibold text-blue-900 mb-2 flex items-center space-x-2">
-                                        <i class="fas fa-server text-blue-600"></i>
-                                        <span>PythonAnywhere Uyumlu</span>
-                                    </h5>
-                                    <p class="text-sm text-blue-700">
-                                        Özel haber kaynaklarınız + API'ler birlikte.
-                                    </p>
-                                    <ul class="text-xs text-blue-600 mt-2 space-y-1">
-                                        <li>• Özel Haber Kaynakları (news_sources.json)</li>
-                                        <li>• RSS Feed'ler</li>
-                                        <li>• Hacker News API</li>
-                                        <li>• Reddit API</li>
-                                    </ul>
-                                </div>
-                                
-                                <div class="p-4 bg-white border border-purple-200 rounded-lg">
-                                    <h5 class="font-semibold text-purple-900 mb-2 flex items-center space-x-2">
-                                        <i class="fas fa-newspaper text-purple-600"></i>
-                                        <span>Özel Kaynaklar</span>
-                                    </h5>
-                                    <p class="text-sm text-purple-700">
-                                        Sadece tanımladığınız özel haber kaynaklarını kullanır.
-                                    </p>
-                                    <ul class="text-xs text-purple-600 mt-2 space-y-1">
-                                        <li>• Hızlı ve güvenilir</li>
-                                        <li>• Özelleştirilebilir</li>
-                                        <li>• Düşük kaynak kullanımı</li>
-                                    </ul>
-                                </div>
-                                
-                                <div class="p-4 bg-white border border-orange-200 rounded-lg">
-                                    <h5 class="font-semibold text-orange-900 mb-2 flex items-center space-x-2">
-                                        <i class="fas fa-cog text-orange-600"></i>
-                                        <span>Sadece MCP</span>
-                                    </h5>
-                                    <p class="text-sm text-orange-700">
-                                        Sadece MCP Firecrawl sistemini kullanır.
-                                    </p>
-                                    <ul class="text-xs text-orange-600 mt-2 space-y-1">
-                                        <li>• Gelişmiş scraping</li>
-                                        <li>• Yüksek kalite</li>
-                                        <li>• MCP gerekli</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            
-                            <!-- Durum Göstergesi -->
-                            <div class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                                <h5 class="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-                                    <i class="fas fa-info-circle text-gray-600"></i>
-                                    <span>Mevcut Durum</span>
-                                </h5>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm mb-4">
-                                    <div class="flex items-center space-x-2">
-                                        <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
-                                        <span class="text-gray-700">🧠 AI Keywords: Aktif</span>
-                                    </div>
-                                    <div class="flex items-center space-x-2">
-                                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                                        <span class="text-gray-700">Özel Kaynaklar: Aktif</span>
-                                    </div>
-                                    <div class="flex items-center space-x-2">
-                                        <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                        <span class="text-gray-700">PythonAnywhere: Aktif</span>
-                                    </div>
-                                    <div class="flex items-center space-x-2">
-                                        <div class="w-3 h-3 bg-{{ 'green' if mcp_status and mcp_status.mcp_enabled else 'red' }}-500 rounded-full"></div>
-                                        <span class="text-gray-700">MCP: {{ 'Aktif' if mcp_status and mcp_status.mcp_enabled else 'Pasif' }}</span>
-                                    </div>
-                                </div>
-                                
-                                <!-- Test Butonları -->
-                                <div class="flex flex-wrap gap-3">
-                                    <button onclick="testNewsFetchingMethods()" 
-                                            class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-all duration-200 font-medium flex items-center space-x-2">
-                                        <i class="fas fa-vial"></i>
-                                        <span>Tüm Yöntemleri Test Et</span>
-                                    </button>
-                                    <a href="{{ url_for('ai_keywords') }}" 
-                                       class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-200 font-medium flex items-center space-x-2">
-                                        <i class="fas fa-brain"></i>
-                                        <span>AI Keywords Yönetimi</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="space-y-2">
+                        <label for="news_fetching_method" class="block text-sm font-medium text-gray-700">
+                            Haber Çekme Yöntemi
+                        </label>
+                        <select id="news_fetching_method" name="news_fetching_method" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                            <option value="auto" {{ 'selected' if settings.news_fetching_method == 'auto' else '' }}>
+                                🎯 Otomatik (AI Keywords + Tüm yöntemleri dene)
+                            </option>
+                            <option value="ai_keywords_only" {{ 'selected' if settings.news_fetching_method == 'ai_keywords_only' else '' }}>
+                                🧠 Sadece AI Keywords (Akıllı anahtar kelime sistemi)
+                            </option>
+                            <option value="pythonanywhere_only" {{ 'selected' if settings.news_fetching_method == 'pythonanywhere_only' else '' }}>
+                                🐍 PythonAnywhere Uyumlu (RSS + API + Scraping)
+                            </option>
+                            <option value="custom_sources_only" {{ 'selected' if settings.news_fetching_method == 'custom_sources_only' else '' }}>
+                                📰 Sadece Özel Haber Kaynakları
+                            </option>
+                            <option value="mcp_only" {{ 'selected' if settings.news_fetching_method == 'mcp_only' else '' }}>
+                                🔧 Sadece MCP (Firecrawl)
+                            </option>
+                        </select>
+                        <p class="text-sm text-gray-600">Hangi yöntemle haber çekileceğini seçin</p>
                     </div>
                 </div>
 
                 <!-- Onay Ayarları -->
                 <div class="border-t border-gray-200 pt-8">
                     <h3 class="text-xl font-semibold text-gray-900 mb-6">Onay ve Bildirim Ayarları</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="space-y-2">
                             <label class="flex items-center space-x-3 cursor-pointer group">
                                 <div class="relative">
@@ -421,8 +168,8 @@
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-600"></div>
                                 </div>
                                 <div>
-                                    <span class="text-lg font-semibold text-gray-900">Manuel Onay Gerekli</span>
-                                    <p class="text-sm text-gray-600">Tweet'ler paylaşılmadan önce onay beklesin</p>
+                                    <span class="text-lg font-semibold text-gray-900">Manuel Onay</span>
+                                    <p class="text-sm text-gray-600">Tweet'ler onay beklesin</p>
                                 </div>
                             </label>
                         </div>
@@ -436,8 +183,8 @@
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                                 </div>
                                 <div>
-                                    <span class="text-lg font-semibold text-gray-900">📧 E-posta Bildirimleri</span>
-                                    <p class="text-sm text-gray-600">Gmail ile güzel HTML e-posta bildirimleri</p>
+                                    <span class="text-lg font-semibold text-gray-900">📧 E-posta</span>
+                                    <p class="text-sm text-gray-600">Gmail bildirimleri</p>
                                 </div>
                             </label>
                         </div>
@@ -451,8 +198,8 @@
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                 </div>
                                 <div>
-                                    <span class="text-lg font-semibold text-gray-900">📱 Telegram Bildirimleri</span>
-                                    <p class="text-sm text-gray-600">Fallback bildirim sistemi (opsiyonel)</p>
+                                    <span class="text-lg font-semibold text-gray-900">📱 Telegram</span>
+                                    <p class="text-sm text-gray-600">Fallback bildirim</p>
                                 </div>
                             </label>
                         </div>
@@ -470,7 +217,66 @@
         </div>
     </div>
 
-    <!-- Gmail E-posta Bildirimleri -->
+    <!-- Duplikat Kontrol Ayarları Kartı -->
+    <div class="card-modern">
+        <div class="p-8">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-copy text-white text-lg"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900">Duplikat Kontrol Ayarları</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="space-y-2">
+                    <label for="title_similarity_threshold" class="block text-sm font-medium text-gray-700">
+                        Başlık Benzerlik Eşiği (%)
+                    </label>
+                    <input type="number" id="title_similarity_threshold" name="title_similarity_threshold" 
+                           value="{{ (settings.title_similarity_threshold * 100) if settings.title_similarity_threshold else 80 }}" 
+                           min="50" max="100" step="5"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
+                    <p class="text-sm text-gray-600">Bu oranın üzerinde benzer başlıklar duplikat sayılır</p>
+                </div>
+                
+                <div class="space-y-2">
+                    <label for="content_similarity_threshold" class="block text-sm font-medium text-gray-700">
+                        İçerik Benzerlik Eşiği (%)
+                    </label>
+                    <input type="number" id="content_similarity_threshold" name="content_similarity_threshold" 
+                           value="{{ (settings.content_similarity_threshold * 100) if settings.content_similarity_threshold else 60 }}" 
+                           min="30" max="90" step="5"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
+                    <p class="text-sm text-gray-600">Bu oranın üzerinde benzer içerikler duplikat sayılır</p>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <label class="flex items-center space-x-3 cursor-pointer group">
+                    <div class="relative">
+                        <input type="checkbox" id="enable_duplicate_detection" name="enable_duplicate_detection" 
+                               {{ 'checked' if settings.enable_duplicate_detection != False else '' }}
+                               class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                    </div>
+                    <div>
+                        <span class="text-lg font-semibold text-gray-900">Gelişmiş Duplikat Tespiti</span>
+                        <p class="text-sm text-gray-600">Farklı sitelerden gelen aynı haberleri tespit et ve filtrele</p>
+                    </div>
+                </label>
+                
+                <div class="flex space-x-3">
+                    <a href="{{ url_for('test_duplicate_detection') }}" 
+                       class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-200 font-medium flex items-center space-x-2">
+                        <i class="fas fa-vial"></i>
+                        <span>Duplikat Tespitini Test Et</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gmail E-posta Bildirimleri Kartı -->
     <div class="card-modern">
         <div class="p-8">
             <div class="flex items-center space-x-3 mb-8">
@@ -532,14 +338,6 @@
                             <span>"Gmail Bağlantısını Test Et" butonu ile test edin</span>
                         </li>
                     </ol>
-                    
-                    <div class="mt-4 p-3 bg-red-100 rounded-lg">
-                        <p class="text-sm text-red-800">
-                            <i class="fas fa-lightbulb mr-2"></i>
-                            <strong>Not:</strong> Gmail bildirimleri Telegram'dan daha güvenilir ve kolay kurulur. 
-                            Her tweet paylaşıldığında size güzel bir HTML e-posta gönderilecek.
-                        </p>
-                    </div>
                 </div>
             {% else %}
                 <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
@@ -552,14 +350,14 @@
         </div>
     </div>
 
-    <!-- Telegram Ayarları (Artık Opsiyonel) -->
+    <!-- Telegram Ayarları Kartı -->
     <div class="card-modern">
         <div class="p-8">
             <div class="flex items-center space-x-3 mb-8">
                 <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
                     <i class="fab fa-telegram text-white text-lg"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900">Telegram Ayarları <span class="text-sm text-gray-500">(Opsiyonel - Fallback)</span></h2>
+                <h2 class="text-2xl font-bold text-gray-900">Telegram Ayarları <span class="text-sm text-gray-500">(Opsiyonel)</span></h2>
             </div>
             
             {% if telegram_config %}
@@ -582,31 +380,6 @@
                         <span>Chat ID Algıla</span>
                     </a>
                 </div>
-                
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
-                    <h3 class="flex items-center space-x-2 text-lg font-semibold text-blue-900 mb-4">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Telegram Kurulumu</span>
-                    </h3>
-                    <ol class="space-y-2 text-blue-800">
-                        <li class="flex items-start space-x-2">
-                            <span class="flex-shrink-0 w-6 h-6 bg-blue-200 text-blue-800 rounded-full flex items-center justify-center text-sm font-medium">1</span>
-                            <span>Environment değişkenlerinde <code class="bg-blue-200 px-2 py-1 rounded text-sm">TELEGRAM_BOT_TOKEN</code> tanımlayın</span>
-                        </li>
-                        <li class="flex items-start space-x-2">
-                            <span class="flex-shrink-0 w-6 h-6 bg-blue-200 text-blue-800 rounded-full flex items-center justify-center text-sm font-medium">2</span>
-                            <span>Bot'unuza bir mesaj gönderin</span>
-                        </li>
-                        <li class="flex items-start space-x-2">
-                            <span class="flex-shrink-0 w-6 h-6 bg-blue-200 text-blue-800 rounded-full flex items-center justify-center text-sm font-medium">3</span>
-                            <span>"Chat ID Algıla" butonuna tıklayın</span>
-                        </li>
-                        <li class="flex items-start space-x-2">
-                            <span class="flex-shrink-0 w-6 h-6 bg-blue-200 text-blue-800 rounded-full flex items-center justify-center text-sm font-medium">4</span>
-                            <span>"Bağlantıyı Test Et" ile kontrol edin</span>
-                        </li>
-                    </ol>
-                </div>
             {% else %}
                 <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
                     <div class="flex items-center space-x-3">
@@ -618,7 +391,7 @@
         </div>
     </div>
 
-    <!-- API Ayarları -->
+    <!-- API Durumu Kartı -->
     <div class="card-modern">
         <div class="p-8">
             <div class="flex items-center space-x-3 mb-8">
@@ -629,28 +402,25 @@
             </div>
             
             {% if api_status %}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     <!-- Google Gemini API -->
                     <div class="border rounded-xl p-6 text-center {{ 'border-green-200 bg-green-50' if api_status.google_api and api_status.google_api_working else 'border-yellow-200 bg-yellow-50' if api_status.google_api else 'border-red-200 bg-red-50' }}">
                         <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center {{ 'bg-green-100' if api_status.google_api and api_status.google_api_working else 'bg-yellow-100' if api_status.google_api else 'bg-red-100' }}">
                             <i class="fab fa-google text-2xl {{ 'text-green-600' if api_status.google_api and api_status.google_api_working else 'text-yellow-600' if api_status.google_api else 'text-red-600' }}"></i>
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Google Gemini API</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Google Gemini</h3>
                         {% if api_status.google_api and api_status.google_api_working %}
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                 <i class="fas fa-check-circle mr-2"></i>Çalışıyor
                             </span>
-                            <p class="text-green-700 text-sm mt-2">API anahtarı mevcut ve çalışıyor</p>
                         {% elif api_status.google_api %}
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
                                 <i class="fas fa-exclamation-triangle mr-2"></i>Sorunlu
                             </span>
-                            <p class="text-yellow-700 text-sm mt-2">API anahtarı mevcut ama çalışmıyor</p>
                         {% else %}
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
                                 <i class="fas fa-times-circle mr-2"></i>Eksik
                             </span>
-                            <p class="text-red-700 text-sm mt-2">GOOGLE_API_KEY tanımlanmamış</p>
                         {% endif %}
                     </div>
                     
@@ -659,33 +429,23 @@
                         <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center {{ 'bg-green-100' if api_status.openrouter_api and api_status.openrouter_api_working else 'bg-yellow-100' if api_status.openrouter_api else 'bg-gray-100' }}">
                             <i class="fas fa-route text-2xl {{ 'text-green-600' if api_status.openrouter_api and api_status.openrouter_api_working else 'text-yellow-600' if api_status.openrouter_api else 'text-gray-400' }}"></i>
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">OpenRouter API</h3>
-                        <div class="mb-2">
-                            {% if api_status.openrouter_api and api_status.openrouter_api_working %}
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                    <i class="fas fa-check-circle mr-2"></i>Çalışıyor
-                                </span>
-                                <p class="text-green-700 text-sm mt-2">Yedek sistem hazır ve çalışıyor</p>
-                            {% elif api_status.openrouter_api %}
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                    <i class="fas fa-exclamation-triangle mr-2"></i>Sorunlu
-                                </span>
-                                <p class="text-yellow-700 text-sm mt-2">API anahtarı mevcut ama çalışmıyor</p>
-                            {% else %}
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                                    <i class="fas fa-info-circle mr-2"></i>Yedek Sistem
-                                </span>
-                                <p class="text-gray-700 text-sm mt-2">Gemini başarısız olursa devreye girer</p>
-                            {% endif %}
-                        </div>
-                        <div class="mt-4 space-y-2">
-                            <button onclick="testOpenRouterAPI()" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 font-medium flex items-center space-x-2 mx-auto">
-                                <i class="fas fa-vial"></i>
-                                <span>OpenRouter Test</span>
-                            </button>
-                            <button onclick="debugOpenRouterKey()" class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-all duration-200 font-medium flex items-center space-x-2 mx-auto">
-                                <i class="fas fa-bug"></i>
-                                <span>Debug API Key</span>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">OpenRouter</h3>
+                        {% if api_status.openrouter_api and api_status.openrouter_api_working %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-check-circle mr-2"></i>Çalışıyor
+                            </span>
+                        {% elif api_status.openrouter_api %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>Sorunlu
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                <i class="fas fa-info-circle mr-2"></i>Yedek
+                            </span>
+                        {% endif %}
+                        <div class="mt-3 space-y-2">
+                            <button onclick="testOpenRouterAPI()" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-sm font-medium">
+                                Test Et
                             </button>
                         </div>
                     </div>
@@ -700,103 +460,15 @@
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                 <i class="fas fa-check-circle mr-2"></i>Tamamı Mevcut
                             </span>
-                            <p class="text-green-700 text-sm mt-2">Tüm Twitter API anahtarları tanımlı</p>
                         {% elif api_status.twitter_bearer or api_status.twitter_api_key %}
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>Eksik Anahtarlar
+                                <i class="fas fa-exclamation-triangle mr-2"></i>Eksik
                             </span>
-                            <p class="text-yellow-700 text-sm mt-2">Bazı Twitter API anahtarları eksik</p>
                         {% else %}
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
                                 <i class="fas fa-times-circle mr-2"></i>Hiçbiri Yok
                             </span>
-                            <p class="text-red-700 text-sm mt-2">Twitter API anahtarları tanımlanmamış</p>
                         {% endif %}
-                    </div>
-                </div>
-                
-                <!-- Gmail API Durumu -->
-                <div class="border rounded-xl p-6 {{ 'border-green-200 bg-green-50' if api_status.gmail_email and api_status.gmail_password else 'border-yellow-200 bg-yellow-50' if api_status.gmail_email else 'border-red-200 bg-red-50' }}">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center {{ 'bg-green-100' if api_status.gmail_email and api_status.gmail_password else 'bg-yellow-100' if api_status.gmail_email else 'bg-red-100' }}">
-                                <i class="fas fa-envelope text-xl {{ 'text-green-600' if api_status.gmail_email and api_status.gmail_password else 'text-yellow-600' if api_status.gmail_email else 'text-red-600' }}"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Gmail SMTP</h3>
-                                <p class="text-sm text-gray-600">
-                                    {% if api_status.gmail_email and api_status.gmail_password %}
-                                        ✅ Gmail yapılandırması tamamlanmış
-                                    {% elif api_status.gmail_email %}
-                                        ⚠️ E-posta var, uygulama şifresi eksik
-                                    {% else %}
-                                        ❌ Gmail yapılandırması eksik
-                                    {% endif %}
-                                </p>
-                            </div>
-                        </div>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ 'bg-green-100 text-green-800' if api_status.gmail_email and api_status.gmail_password else 'bg-yellow-100 text-yellow-800' if api_status.gmail_email else 'bg-red-100 text-red-800' }}">
-                            {{ 'Hazır' if api_status.gmail_email and api_status.gmail_password else 'Eksik' if api_status.gmail_email else 'Gerekli' }}
-                        </span>
-                    </div>
-                </div>
-                
-                <!-- Telegram API Durumu -->
-                <div class="border rounded-xl p-6 {{ 'border-green-200 bg-green-50' if api_status.telegram_bot else 'border-gray-200 bg-gray-50' }}">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center {{ 'bg-green-100' if api_status.telegram_bot else 'bg-gray-100' }}">
-                                <i class="fab fa-telegram text-xl {{ 'text-green-600' if api_status.telegram_bot else 'text-gray-400' }}"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900">Telegram Bot</h3>
-                                <p class="text-sm text-gray-600">
-                                    {% if api_status.telegram_bot %}
-                                        ✅ Telegram yapılandırması tamamlanmış (Fallback)
-                                    {% else %}
-                                        ⚠️ Telegram bot token yapılandırılmamış
-                                    {% endif %}
-                                </p>
-                            </div>
-                        </div>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ 'bg-green-100 text-green-800' if api_status.telegram_bot else 'bg-gray-100 text-gray-800' }}">
-                            {{ 'Fallback' if api_status.telegram_bot else 'Opsiyonel' }}
-                        </span>
-                    </div>
-                </div>
-                
-                <!-- API Kurulum Rehberi -->
-                <div class="mt-8 bg-gray-50 border border-gray-200 rounded-xl p-6">
-                    <h3 class="flex items-center space-x-2 text-lg font-semibold text-gray-900 mb-4">
-                        <i class="fas fa-book"></i>
-                        <span>API Kurulum Rehberi</span>
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
-                        <div>
-                            <h4 class="font-semibold text-gray-900 mb-2">Google Gemini API:</h4>
-                            <ul class="space-y-1">
-                                <li>• Google AI Studio'ya gidin</li>
-                                <li>• API anahtarı oluşturun</li>
-                                <li>• <code class="bg-gray-200 px-1 rounded text-sm">GOOGLE_API_KEY</code> olarak kaydedin</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-900 mb-2">OpenRouter API (Yedek):</h4>
-                            <ul class="space-y-1">
-                                <li>• <a href="https://openrouter.ai" target="_blank" class="text-blue-600 hover:underline">OpenRouter.ai</a>'ye gidin</li>
-                                <li>• Hesap oluşturun ve API anahtarı alın</li>
-                                <li>• <code class="bg-gray-200 px-1 rounded text-sm">OPENROUTER_API_KEY</code> olarak kaydedin</li>
-                                <li>• <span class="text-green-600">✅ Ücretsiz modeller mevcut!</span></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-900 mb-2">Twitter API:</h4>
-                            <ul class="space-y-1">
-                                <li>• Twitter Developer Portal'a gidin</li>
-                                <li>• Uygulama oluşturun</li>
-                                <li>• API anahtarlarını environment'a ekleyin</li>
-                            </ul>
-                        </div>
                     </div>
                 </div>
             {% else %}
@@ -816,16 +488,12 @@ function testOpenRouterAPI() {
     const button = event.target;
     const originalText = button.innerHTML;
     
-    // Butonu devre dışı bırak ve loading göster
     button.disabled = true;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Test Ediliyor...</span>';
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Test...';
     
     fetch('/test_openrouter_api')
         .then(response => response.json())
         .then(data => {
-            console.log('OpenRouter test sonuçları:', data);
-            
-            // Sonuç mesajı göster
             const alertDiv = document.createElement('div');
             const isSuccess = data.success;
             alertDiv.className = `fixed top-4 right-4 ${isSuccess ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'} border px-4 py-3 rounded z-50 max-w-md`;
@@ -834,7 +502,6 @@ function testOpenRouterAPI() {
                     <i class="fas fa-${isSuccess ? 'check-circle' : 'exclamation-triangle'} mt-1"></i>
                     <div class="flex-1">
                         <div class="font-medium">${data.message}</div>
-                        ${data.successful_models ? `<div class="text-sm mt-1">${data.successful_models}/${data.total_models_tested} model başarılı</div>` : ''}
                         ${data.error ? `<div class="text-sm mt-1">${data.error}</div>` : ''}
                     </div>
                     <button onclick="this.parentElement.parentElement.remove()" class="ml-2 hover:opacity-75">
@@ -844,200 +511,17 @@ function testOpenRouterAPI() {
             `;
             document.body.appendChild(alertDiv);
             
-            // 8 saniye sonra mesajı kaldır
-            setTimeout(() => {
-                if (alertDiv.parentElement) {
-                    alertDiv.remove();
-                }
-            }, 8000);
-            
-            // Butonu eski haline getir
-            button.disabled = false;
-            button.innerHTML = originalText;
-        })
-        .catch(error => {
-            console.error('OpenRouter test hatası:', error);
-            
-            // Hata mesajı göster
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50';
-            alertDiv.innerHTML = `
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Test sırasında hata oluştu: ${error.message}</span>
-                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-red-700 hover:text-red-900">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(alertDiv);
-            
-            // 5 saniye sonra mesajı kaldır
             setTimeout(() => {
                 if (alertDiv.parentElement) {
                     alertDiv.remove();
                 }
             }, 5000);
             
-            // Butonu eski haline getir
-            button.disabled = false;
-            button.innerHTML = originalText;
-        });
-}
-
-function testNewsFetchingMethods() {
-    const button = event.target;
-    const originalText = button.innerHTML;
-    
-    // Butonu devre dışı bırak ve loading göster
-    button.disabled = true;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Test Ediliyor...</span>';
-    
-    fetch('/test_news_fetching_methods')
-        .then(response => response.json())
-        .then(data => {
-            console.log('Test sonuçları:', data);
-            
-            // Başarı mesajı göster
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded z-50';
-            alertDiv.innerHTML = `
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-check-circle"></i>
-                                            <span>Haber çekme yöntemleri test edildi! Konsol loglarından detayları görebilirsiniz.</span>
-                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-green-700 hover:text-green-900">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(alertDiv);
-            
-            // 5 saniye sonra mesajı kaldır
-            setTimeout(() => {
-                if (alertDiv.parentElement) {
-                    alertDiv.remove();
-                }
-            }, 5000);
-            
-            // Butonu eski haline getir
             button.disabled = false;
             button.innerHTML = originalText;
         })
         .catch(error => {
             console.error('Test hatası:', error);
-            
-            // Hata mesajı göster
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50';
-            alertDiv.innerHTML = `
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Test sırasında hata oluştu: ${error.message}</span>
-                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-red-700 hover:text-red-900">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(alertDiv);
-            
-            // 5 saniye sonra mesajı kaldır
-            setTimeout(() => {
-                if (alertDiv.parentElement) {
-                    alertDiv.remove();
-                }
-            }, 5000);
-            
-            // Butonu eski haline getir
-            button.disabled = false;
-            button.innerHTML = originalText;
-        });
-}
-
-function debugOpenRouterKey() {
-    const button = event.target;
-    const originalText = button.innerHTML;
-    
-    // Butonu devre dışı bırak ve loading göster
-    button.disabled = true;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Debug Ediliyor...</span>';
-    
-    fetch('/debug_openrouter_key')
-        .then(response => response.json())
-        .then(data => {
-            console.log('OpenRouter debug sonuçları:', data);
-            
-            // Sonuç mesajı göster
-            const alertDiv = document.createElement('div');
-            const isSuccess = data.success;
-            alertDiv.className = `fixed top-4 right-4 ${isSuccess ? 'bg-blue-100 border-blue-400 text-blue-700' : 'bg-red-100 border-red-400 text-red-700'} border px-4 py-3 rounded z-50 max-w-md`;
-            
-            let debugDetails = '';
-            if (data.debug_info) {
-                const info = data.debug_info;
-                debugDetails = `
-                    <div class="text-sm mt-2 space-y-1">
-                        <div>API Key: ${info.key_exists ? '✅ Mevcut' : '❌ Eksik'}</div>
-                        <div>Uzunluk: ${info.key_length} karakter</div>
-                        <div>Format: ${info.key_format_check ? '✅ Doğru' : '❌ Hatalı'}</div>
-                        ${info.http_test ? `<div>HTTP Test: ${info.http_test.success ? '✅ Başarılı' : '❌ Başarısız'}</div>` : ''}
-                        ${info.http_test && !info.http_test.success ? `<div class="text-xs text-red-600">${info.http_test.error}</div>` : ''}
-                    </div>
-                `;
-            }
-            
-            alertDiv.innerHTML = `
-                <div class="flex items-start space-x-2">
-                    <i class="fas fa-${isSuccess ? 'info-circle' : 'exclamation-triangle'} mt-1"></i>
-                    <div class="flex-1">
-                        <div class="font-medium">OpenRouter API Key Debug</div>
-                        ${debugDetails}
-                        ${data.error ? `<div class="text-sm mt-1">${data.error}</div>` : ''}
-                    </div>
-                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 hover:opacity-75">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(alertDiv);
-            
-            // 10 saniye sonra mesajı kaldır
-            setTimeout(() => {
-                if (alertDiv.parentElement) {
-                    alertDiv.remove();
-                }
-            }, 10000);
-            
-            // Butonu eski haline getir
-            button.disabled = false;
-            button.innerHTML = originalText;
-        })
-        .catch(error => {
-            console.error('Debug hatası:', error);
-            
-            // Hata mesajı göster
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'fixed top-4 right-4 bg-red-100 border-red-400 text-red-700 border px-4 py-3 rounded z-50 max-w-md';
-            alertDiv.innerHTML = `
-                <div class="flex items-start space-x-2">
-                    <i class="fas fa-exclamation-triangle mt-1"></i>
-                    <div class="flex-1">
-                        <div class="font-medium">Debug hatası</div>
-                        <div class="text-sm mt-1">${error.message}</div>
-                    </div>
-                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 hover:opacity-75">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(alertDiv);
-            
-            setTimeout(() => {
-                if (alertDiv.parentElement) {
-                    alertDiv.remove();
-                }
-            }, 8000);
-            
-            // Butonu eski haline getir
             button.disabled = false;
             button.innerHTML = originalText;
         });

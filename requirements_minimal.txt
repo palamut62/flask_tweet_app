@@ -1,0 +1,39 @@
+# AI Tweet Bot - Minimal Requirements for PythonAnywhere
+# Core packages only - guaranteed to work
+
+# Flask Framework
+Flask==2.2.5
+Werkzeug==2.2.3
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# HTTP Requests
+requests==2.31.0
+
+# Web Scraping
+beautifulsoup4==4.12.2
+
+# Twitter API
+tweepy==4.14.0
+
+# Google AI
+google-generativeai==0.3.2
+
+# OpenAI
+openai==1.3.5
+
+# RSS Feeds
+feedparser==6.0.10
+
+# Scheduling
+schedule==1.2.0
+
+# Date/Time
+python-dateutil==2.8.2
+
+# JSON Schema
+jsonschema==4.19.2
+
+# Image Processing
+Pillow==10.1.0 
