@@ -525,8 +525,11 @@ def fetch_article_content_advanced(url, headers):
     result = fetch_article_content_advanced_fallback(url)
     return result.get("content", "") if result else ""
 
-def load_json(path):
-    return json.load(open(path, 'r', encoding='utf-8')) if os.path.exists(path) else []
+def load_json(path, default=None):
+    if os.path.exists(path):
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return default if default is not None else []
 
 def save_json(path, data):
     with open(path, "w", encoding='utf-8') as f:
@@ -736,7 +739,6 @@ def try_openrouter_fallback(prompt, max_tokens=100):
     except Exception as e:
         safe_log(f"❌ OpenRouter yedek sistem hatası: {e}", "ERROR")
         return "API hatası"
-
 def generate_smart_hashtags(title, content):
     """Makale içeriğine göre akıllı hashtag oluşturma - 5 popüler hashtag"""
     combined_text = f"{title.lower()} {content.lower()}"
@@ -1449,7 +1451,6 @@ Tweet text (max {MAX_CONTENT_LENGTH} chars):"""
         print(f"Fallback tweet oluşturma hatası: {e}")
         print("[FALLBACK] API hatası, basit fallback tweet oluşturuluyor...")
         return create_fallback_tweet(title, content, url)
-
 def create_fallback_tweet(title, content, url=""):
     """API hatası durumunda fallback tweet oluştur - Akıllı hashtag ve emoji ile"""
     try:
@@ -2247,7 +2248,6 @@ def get_data_statistics():
             "pending_file_size": "N/A",
             "settings_file_size": "N/A"
         }
-
 def load_automation_settings():
     """Otomatikleştirme ayarlarını yükle"""
     try:
@@ -2987,7 +2987,6 @@ def post_text_tweet_v2(tweet_text):
     except Exception as e:
         safe_log(f"Tweet paylaşım genel hatası: {e}", "ERROR")
         return {"success": False, "error": str(e)}
-
 def fetch_url_content_with_mcp(url):
     """MCP ile URL içeriği çekme - Tweet oluşturma için"""
     try:
@@ -3584,7 +3583,6 @@ def detect_site_type(url, soup):
         
     except Exception as e:
         return {"cms": "unknown", "type": "unknown", "features": [], "error": str(e)}
-
 def test_manual_selectors_for_url(url, selectors):
     """Manuel selector'ları test et"""
     try:
@@ -4319,7 +4317,6 @@ def auto_detect_selectors(soup, url):
     print(f"🏁 En iyi selector bulundu: {best_selectors['container']} ({max_containers} konteyner, skor: {best_score})")
     
     return best_selectors, max_containers
-
 def calculate_selector_quality(containers, pattern, url):
     """Selector kalitesini hesapla"""
     try:
@@ -5018,10 +5015,10 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
         
         if existing_articles is None:
             # Mevcut paylaşılan makaleleri yükle
-            existing_articles = load_json(HISTORY_FILE)
+            existing_articles = load_json("history.json", [])
         
         # Bekleyen tweet'leri de kontrol et
-        pending_tweets = load_json("pending_tweets.json")
+        pending_tweets = load_json("pending_tweets.json", [])
         pending_articles = [tweet.get('article', {}) for tweet in pending_tweets if tweet.get('article')]
         
         # Tüm mevcut makaleleri birleştir (silinen makaleler de dahil)
@@ -5116,15 +5113,14 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
     except Exception as e:
         print(f"Duplikat filtreleme hatası: {e}")
         return new_articles  # Hata durumunda orijinal listeyi döndür
-
 def basic_duplicate_filter(new_articles, existing_articles=None):
     """Temel duplikat filtreleme - sadece URL ve hash kontrolü"""
     try:
         if existing_articles is None:
-            existing_articles = load_json(HISTORY_FILE)
+            existing_articles = load_json("history.json", [])
         
         # Bekleyen tweet'leri de kontrol et
-        pending_tweets = load_json("pending_tweets.json")
+        pending_tweets = load_json("pending_tweets.json", [])
         pending_articles = [tweet.get('article', {}) for tweet in pending_tweets if tweet.get('article')]
         
         # Tüm mevcut makaleleri birleştir (silinen makaleler de dahil)
@@ -5178,7 +5174,7 @@ def basic_duplicate_filter(new_articles, existing_articles=None):
 def clean_duplicate_pending_tweets():
     """Bekleyen tweet'lerdeki duplikatları temizle"""
     try:
-        pending_tweets = load_json("pending_tweets.json")
+        pending_tweets = load_json("pending_tweets.json", [])
         
         if not pending_tweets:
             return {
@@ -5409,7 +5405,7 @@ def retry_pending_tweets_after_rate_limit():
             return {"success": False, "message": "Rate limit hala aktif"}
         
         # Bekleyen tweet'leri yükle
-        pending_tweets = load_json("pending_tweets.json")
+        pending_tweets = load_json("pending_tweets.json", [])
         if not pending_tweets:
             return {"success": True, "message": "Bekleyen tweet yok"}
         
@@ -5453,7 +5449,7 @@ def retry_pending_tweets_after_rate_limit():
                     article['manual_post'] = False
                     
                     # Posted articles'a ekle
-                    posted_articles = load_json("posted_articles.json")
+                    posted_articles = load_json("posted_articles.json", [])
                     posted_articles.append(article)
                     save_json("posted_articles.json", posted_articles)
                     
@@ -5709,7 +5705,7 @@ def fetch_latest_ai_articles_pythonanywhere():
     """PythonAnywhere için optimize edilmiş haber çekme sistemi - Özel kaynaklar + API'ler"""
     try:
         # Önce mevcut yayınlanan makaleleri yükle
-        posted_articles = load_json(HISTORY_FILE)
+        posted_articles = load_json("history.json", [])
         posted_urls = [article.get('url', '') for article in posted_articles]
         posted_hashes = [article.get('hash', '') for article in posted_articles]
         
@@ -5837,7 +5833,6 @@ def fetch_articles_from_custom_sources_pythonanywhere():
     except Exception as e:
         print(f"❌ Özel kaynaklar genel hatası: {e}")
         return []
-
 def fetch_articles_from_single_source_pythonanywhere(source):
     """PythonAnywhere uyumlu tek kaynak makale çekme"""
     try:
@@ -5962,7 +5957,7 @@ def fetch_articles_with_rss_only():
         print(f"⏰ 24 saat öncesi: {twenty_four_hours_ago.strftime('%Y-%m-%d %H:%M:%S')}")
         
         # Önce mevcut yayınlanan makaleleri yükle
-        posted_articles = load_json(HISTORY_FILE)
+        posted_articles = load_json("history.json", [])
         posted_urls = [article.get('url', '') for article in posted_articles]
         posted_hashes = [article.get('hash', '') for article in posted_articles]
         
@@ -6550,7 +6545,7 @@ def get_news_fetching_method():
         method = settings.get('news_fetching_method', 'auto')
         
         # MCP config'den de kontrol et
-        mcp_config = load_json(MCP_CONFIG_FILE) if os.path.exists(MCP_CONFIG_FILE) else {}
+        mcp_config = load_json(MCP_CONFIG_FILE, {})
         mcp_enabled = mcp_config.get('mcp_enabled', False)
         
         return {
@@ -6565,7 +6560,6 @@ def get_news_fetching_method():
             'mcp_enabled': False,
             'available_methods': ['auto', 'ai_keywords_only', 'mcp_only', 'pythonanywhere_only', 'custom_sources_only']
         }
-
 def fetch_latest_ai_articles_smart():
     """Akıllı haber çekme - Ayarlara göre yöntem seçer"""
     try:
@@ -6723,7 +6717,7 @@ def fetch_articles_with_mcp_only():
         print(f"⏰ 24 saat öncesi: {twenty_four_hours_ago.strftime('%Y-%m-%d %H:%M:%S')}")
         
         # Önce mevcut yayınlanan makaleleri yükle
-        posted_articles = load_json(HISTORY_FILE)
+        posted_articles = load_json("history.json", [])
         posted_urls = [article.get('url', '') for article in posted_articles]
         posted_hashes = [article.get('hash', '') for article in posted_articles]
         
@@ -7319,7 +7313,6 @@ def fetch_github_repo_details_with_mcp(repo_url):
     except Exception as e:
         terminal_log(f"❌ MCP GitHub repo detay hatası: {e}", "error")
         return fetch_github_repo_details_fallback(repo_url)
-
 def fetch_github_repo_details_fallback(repo_url):
     """Fallback yöntemi ile GitHub repo detaylarını çek"""
     try:
@@ -8100,7 +8093,6 @@ def search_ai_news_with_mcp(keywords, cutoff_date, max_results=5):
     except Exception as e:
         terminal_log(f"❌ MCP AI haber arama hatası: {e}", "error")
         return []
-
 def update_ai_keyword_category(category_name, action, keyword=None):
     """AI keyword kategorisini güncelle"""
     try:

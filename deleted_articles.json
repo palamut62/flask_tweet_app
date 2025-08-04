@@ -1,0 +1,145 @@
+[
+  {
+    "article": {
+      "title": "Right on track for 2029",
+      "url": "https://i.redd.it/cdqd5r7wiygf1.png",
+      "content": "Skip to main contentView post",
+      "score": 20,
+      "hash": "2ada7851fc239fb26c18fd9c9146b123",
+      "source": "Reddit - r/artificial",
+      "fetch_date": "2025-08-04T14:36:18.498850",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "PythonAnywhere",
+      "method_icon": "🐍",
+      "method_color": "green"
+    },
+    "tweet_data": {
+      "tweet": "📊💡 Since I lack the article content, I'll create a *placeholder* tweet. **Replace the bracketed information with details from the article.** [Breakthrough description] achieves [quantifiable result]... #AI #Tech #Construction #Infrastructure\n\n🔗 https://i.redd.it/cdqd5r7wiygf1.png",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Please provide the actual content of the news article. Without the article's content, I cannot identify the main innovation or breakthrough.",
+        "companies": [
+          "There are no companies mentioned in the provided title or content."
+        ],
+        "impact_level": 1,
+        "audience": "General",
+        "hashtags": [
+          "#Construction",
+          "#Infrastructure",
+          "#Development"
+        ],
+        "emojis": [
+          "✅",
+          "🚄",
+          "🤖"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "emojis": [
+          "📊",
+          "💡",
+          "🔍",
+          "📈",
+          "⚡",
+          "🎯"
+        ],
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis"
+    },
+    "created_date": "2025-08-04T14:37:43.758191",
+    "created_at": "2025-08-04T14:37:43.758191",
+    "status": "pending",
+    "id": 4,
+    "content": "📊💡 Since I lack the article content, I'll create a *placeholder* tweet. **Replace the bracketed information with details from the article.** [Breakthrough description] achieves [quantifiable result]... #AI #Tech #Construction #Infrastructure\n\n🔗 https://i.redd.it/cdqd5r7wiygf1.png",
+    "title": "Right on track for 2029",
+    "url": "https://i.redd.it/cdqd5r7wiygf1.png",
+    "source_type": "news",
+    "deleted_date": "2025-08-04T14:49:47.088294",
+    "deletion_reason": "Bulk rejection",
+    "bulk_operation": true
+  },
+  {
+    "article": {
+      "title": "LIVE: Introducing ChatGPT Agent",
+      "url": "https://www.youtube.com/watch?v=1jn_RpbPbEc",
+      "content": "AboutPressCopyrightContact usCreatorsAdvertiseDevelopersTermsPrivacyPolicy & SafetyHow YouTube worksTest new features© 2025 Google LLC",
+      "score": 401,
+      "hash": "14d85585bb768b1933ba1dbe8d864804",
+      "source": "Reddit - r/singularity",
+      "fetch_date": "2025-08-04T14:36:23.301539",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "PythonAnywhere",
+      "method_icon": "🐍",
+      "method_color": "green"
+    },
+    "tweet_data": {
+      "tweet": "📊🎯 LIVE: ChatGPT Agent unveiled! Automates complex tasks, shifting AI from reactive to proactive. A leap towards personalized problem-solving. #AI #Tech #ChatGPT #AIagent\n\n🔗 https://www.youtube.com/watch?v=1jn_RpbPbEc",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Based on the title \"Introducing ChatGPT Agent,\" the main innovation is likely the introduction of an AI agent built on ChatGPT that can perform actions and tasks autonomously, potentially interacting with external tools and systems.",
+        "companies": [
+          "Google",
+          "OpenAI (ChatGPT)"
+        ],
+        "impact_level": 9,
+        "audience": "General",
+        "hashtags": [
+          "#ChatGPT",
+          "#AIagent",
+          "#ArtificialIntelligence"
+        ],
+        "emojis": [
+          "🔥",
+          "🚀",
+          "🔒"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "emojis": [
+          "📊",
+          "💡",
+          "🔍",
+          "📈",
+          "⚡",
+          "🎯"
+        ],
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis"
+    },
+    "created_date": "2025-08-04T14:36:38.569571",
+    "created_at": "2025-08-04T14:36:38.569571",
+    "status": "pending",
+    "id": 1,
+    "content": "📊🎯 LIVE: ChatGPT Agent unveiled! Automates complex tasks, shifting AI from reactive to proactive. A leap towards personalized problem-solving. #AI #Tech #ChatGPT #AIagent\n\n🔗 https://www.youtube.com/watch?v=1jn_RpbPbEc",
+    "title": "LIVE: Introducing ChatGPT Agent",
+    "url": "https://www.youtube.com/watch?v=1jn_RpbPbEc",
+    "source_type": "news",
+    "deleted_date": "2025-08-04T14:49:47.091295",
+    "deletion_reason": "Bulk rejection",
+    "bulk_operation": true
+  }
+]

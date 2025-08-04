@@ -982,6 +982,70 @@ def manual_post_tweet_route():
         tweet_text = tweet_to_post.get('content', '')
         article_url = tweet_to_post.get('url', '')
         
+        # Manuel paylaşım sonrası tweet'i posted_articles.json'a kaydet
+        try:
+            from utils import mark_article_as_posted
+            
+            # Manuel tweet sonucu oluştur
+            manual_tweet_result = {
+                "success": True,
+                "tweet_id": f"manual_{int(datetime.now().timestamp())}",
+                "url": f"https://x.com/search?q={urllib.parse.quote(tweet_text[:50])}",
+                "manual_post": True,
+                "posted_at": datetime.now().isoformat()
+            }
+            
+            # Tweet türüne göre işlem yap
+            if 'article' in tweet_to_post:
+                # Normal makale tweet'i
+                tweet_to_post['article']['tweet_text'] = tweet_text
+                mark_article_as_posted(tweet_to_post['article'], manual_tweet_result)
+            else:
+                # GitHub repo tweet'i veya diğer türler
+                posted_articles = load_json('posted_articles.json')
+                
+                # Tweet verilerini posted article formatına çevir
+                posted_article = {
+                    "title": tweet_to_post.get('title', ''),
+                    "url": tweet_to_post.get('url', ''),
+                    "content": tweet_to_post.get('content', ''),
+                    "source": tweet_to_post.get('source', ''),
+                    "source_type": tweet_to_post.get('source_type', 'article'),
+                    "posted_date": datetime.now().isoformat(),
+                    "tweet_content": tweet_to_post.get('content', ''),
+                    "manual_post": True,
+                    "confirmed_at": datetime.now().isoformat(),
+                    "type": tweet_to_post.get('source_type', 'article')
+                }
+                
+                # GitHub repo için ek veriler
+                if tweet_to_post.get('source_type') == 'github':
+                    posted_article.update({
+                        "repo_data": tweet_to_post.get('repo_data', {}),
+                        "language": tweet_to_post.get('language', ''),
+                        "stars": tweet_to_post.get('stars', 0),
+                        "forks": tweet_to_post.get('forks', 0),
+                        "owner": tweet_to_post.get('owner', ''),
+                        "topics": tweet_to_post.get('topics', [])
+                    })
+                
+                posted_articles.append(posted_article)
+                save_json('posted_articles.json', posted_articles)
+            
+            terminal_log(f"✅ Manuel paylaşım sonrası tweet kaydedildi: {tweet_to_post.get('title', '')[:50]}...", "success")
+            
+        except Exception as save_error:
+            terminal_log(f"❌ Manuel paylaşım kaydetme hatası: {save_error}", "error")
+        
+        # Pending listesinden kaldır - hata olsa bile kaldır
+        try:
+            if tweet_index is not None:
+                pending_tweets.pop(tweet_index)
+                save_json("pending_tweets.json", pending_tweets)
+                terminal_log(f"✅ Tweet pending listesinden kaldırıldı: {tweet_to_post.get('title', '')[:50]}...", "success")
+        except Exception as remove_error:
+            terminal_log(f"❌ Tweet kaldırma hatası: {remove_error}", "error")
+        
         # X.com paylaşım URL'si oluştur
         import urllib.parse
         encoded_text = urllib.parse.quote(tweet_text)
@@ -993,7 +1057,8 @@ def manual_post_tweet_route():
             "x_share_url": x_share_url,
             "article_url": article_url,
             "tweet_index": tweet_index,
-            "article_title": tweet_to_post.get('title', '')
+            "article_title": tweet_to_post.get('title', ''),
+            "message": "Tweet manuel olarak paylaşıldı ve kaydedildi"
         })
         
     except Exception as e:
@@ -1055,9 +1120,9 @@ def bulk_tweet_action():
                         from utils import post_tweet, mark_article_as_posted
                         
                         # Twitter API ile paylaş
-                        success = post_tweet(tweet_to_process.get('content', ''))
+                        tweet_result = post_tweet(tweet_to_process.get('content', ''))
                         
-                        if success:
+                        if tweet_result.get('success'):
                             # Paylaşılan tweet'lere ekle
                             mark_article_as_posted({
                                 'id': tweet_to_process.get('id'),
@@ -1072,7 +1137,7 @@ def bulk_tweet_action():
                                 'tweet_text': tweet_to_process.get('content', ''),
                                 'manual_approval': True,
                                 'bulk_operation': True
-                            })
+                            }, tweet_result)
                             
                             # Pending'den kaldır
                             pending_tweets.pop(tweet_index)

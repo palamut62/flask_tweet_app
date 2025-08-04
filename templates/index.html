@@ -393,12 +393,12 @@
                             {{ pending_tweets|length }} toplam
                         </span>
                         {% if news_count > 0 %}
-                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium" id="news-count">
                             {{ news_count }} haber
                         </span>
                         {% endif %}
                         {% if github_count > 0 %}
-                        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium" id="github-count">
                             {{ github_count }} GitHub
                         </span>
                         {% endif %}
@@ -430,7 +430,9 @@
                 
                 <div class="space-y-4">
                     {% for tweet in pending_tweets %}
-                    <div class="bg-gradient-to-r {% if tweet.source_type == 'github' %}from-purple-50 to-indigo-50 border border-purple-200{% else %}from-yellow-50 to-orange-50 border border-yellow-200{% endif %} rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+                    <div class="bg-gradient-to-r {% if tweet.source_type == 'github' %}from-purple-50 to-indigo-50 border border-purple-200{% else %}from-yellow-50 to-orange-50 border border-yellow-200{% endif %} rounded-xl p-6 hover:shadow-lg transition-all duration-300" 
+                         data-tweet-id="{{ tweet.id }}" 
+                         data-source-type="{{ tweet.source_type or 'news' }}">
                         <div class="flex items-start space-x-4 mb-4">
                             <!-- Toplu İşlem Checkbox -->
                             {% if pending_tweets|length > 1 %}
@@ -566,10 +568,7 @@
                                 <i class="fab fa-twitter"></i>
                                 <span>X'te Manuel Paylaş</span>
                             </button>
-                            <a href="{{ url_for('manual_post_confirmation', tweet_id=tweet.id) }}" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 font-medium flex items-center space-x-2">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Manuel Paylaşımı Onayla</span>
-                            </a>
+
                             <button onclick="deleteTweet('{{ tweet.id }}')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 font-medium flex items-center space-x-2">
                                 <i class="fas fa-trash"></i>
                                 <span>Sil</span>
@@ -937,6 +936,13 @@ function deleteTweet(tweetId) {
 }
 
 function manualPostTweet(tweetId) {
+    // UI feedback - tweet'i geçici olarak devre dışı bırak
+    const tweetElement = document.querySelector(`[data-tweet-id="${tweetId}"]`);
+    if (tweetElement) {
+        tweetElement.style.opacity = '0.5';
+        tweetElement.style.pointerEvents = 'none';
+    }
+    
     fetch('/manual_post_tweet', {
         method: 'POST',
         headers: {
@@ -950,40 +956,53 @@ function manualPostTweet(tweetId) {
             // X.com'da paylaşım sayfasını aç
             window.open(data.x_share_url, '_blank');
             
-            // Kullanıcıya onay sorusu sor
+            // Tweet'i UI'dan kaldır
+            if (tweetElement) {
+                tweetElement.style.transition = 'all 0.3s ease';
+                tweetElement.style.transform = 'translateX(-100%)';
+                tweetElement.style.opacity = '0';
+                
+                setTimeout(() => {
+                    tweetElement.remove();
+                    // Tweet sayısını güncelle
+                    updateTweetCounts();
+                }, 300);
+            }
+            
+            // Kullanıcıya bilgi ver
             setTimeout(() => {
-                if (confirm('Tweet\'i X\'te paylaştınız mı? Evet\'e tıklarsanız bu tweet pending listesinden kaldırılacak.')) {
-                    // Onay endpoint\'ine istek gönder
-                    fetch('/confirm_manual_post', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({tweet_id: tweetId})
-                    })
-                    .then(response => response.json())
-                    .then(confirmData => {
-                        if (confirmData.success) {
-                            alert('Tweet manuel paylaşım olarak kaydedildi!');
-                            location.reload();
-                        } else {
-                            alert('Onay hatası: ' + confirmData.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Onay hatası:', error);
-                        alert('Onay sırasında bir hata oluştu!');
-                    });
-                }
-            }, 2000); // 2 saniye bekle
+                alert('Tweet manuel olarak paylaşıldı ve kaydedildi!');
+            }, 500);
         } else {
+            // Hata durumunda UI'ı geri yükle
+            if (tweetElement) {
+                tweetElement.style.opacity = '1';
+                tweetElement.style.pointerEvents = 'auto';
+            }
             alert('Hata: ' + data.error);
         }
     })
     .catch(error => {
         console.error('Error:', error);
+        // Hata durumunda UI'ı geri yükle
+        if (tweetElement) {
+            tweetElement.style.opacity = '1';
+            tweetElement.style.pointerEvents = 'auto';
+        }
         alert('Bir hata oluştu!');
     });
+}
+
+// Tweet sayılarını güncelle
+function updateTweetCounts() {
+    const newsTweets = document.querySelectorAll('[data-source-type="news"]');
+    const githubTweets = document.querySelectorAll('[data-source-type="github"]');
+    
+    const newsCount = document.getElementById('news-count');
+    const githubCount = document.getElementById('github-count');
+    
+    if (newsCount) newsCount.textContent = newsTweets.length;
+    if (githubCount) githubCount.textContent = githubTweets.length;
 }
 
 // Bulk Operations Functions

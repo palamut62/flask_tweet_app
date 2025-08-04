@@ -1181,6 +1181,13 @@ function executeManualPost() {
 
 // Manuel tweet paylaşımı (X.com'da açma)
 function manualPostTweetFromCreate(tweetId) {
+  // UI feedback - tweet'i geçici olarak devre dışı bırak
+  const tweetElement = document.querySelector(`[data-tweet-id="${tweetId}"]`);
+  if (tweetElement) {
+    tweetElement.style.opacity = '0.5';
+    tweetElement.style.pointerEvents = 'none';
+  }
+  
   // Tweet detaylarını al
   fetch(`/api/manual_tweets/${tweetId}`)
   .then(response => response.json())
@@ -1189,22 +1196,71 @@ function manualPostTweetFromCreate(tweetId) {
       const tweet = data.tweet;
       const tweetText = tweet.content;
       
-      // X.com paylaşım URL'si oluştur
-      const encodedText = encodeURIComponent(tweetText);
-      const xShareUrl = `https://x.com/intent/tweet?text=${encodedText}`;
-      
-      // X.com'da yeni sekmede aç
-      window.open(xShareUrl, '_blank');
-      
-      // Kullanıcıya bilgilendirme
-      alert('📝 X.com\'da paylaşım sayfası açıldı.\n\nTweet\'i paylaştıktan sonra "Manuel Paylaşımı Onayla" butonuna tıklayın.');
+      // Manuel paylaşım endpoint'ini çağır
+      fetch('/manual_post_tweet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({tweet_id: tweetId})
+      })
+      .then(response => response.json())
+      .then(manualData => {
+        if (manualData.success) {
+          // X.com'da yeni sekmede aç
+          window.open(manualData.x_share_url, '_blank');
+          
+          // Tweet'i UI'dan kaldır
+          if (tweetElement) {
+            tweetElement.style.transition = 'all 0.3s ease';
+            tweetElement.style.transform = 'translateX(-100%)';
+            tweetElement.style.opacity = '0';
+            
+            setTimeout(() => {
+              tweetElement.remove();
+            }, 300);
+          }
+          
+          // Kullanıcıya bilgi ver
+          setTimeout(() => {
+            alert('✅ Tweet manuel olarak paylaşıldı ve kaydedildi!');
+          }, 500);
+          
+        } else {
+          // Hata durumunda UI'ı geri yükle
+          if (tweetElement) {
+            tweetElement.style.opacity = '1';
+            tweetElement.style.pointerEvents = 'auto';
+          }
+          alert('❌ Manuel paylaşım hatası: ' + manualData.error);
+        }
+      })
+      .catch(error => {
+        console.error('Manuel paylaşım hatası:', error);
+        // Hata durumunda UI'ı geri yükle
+        if (tweetElement) {
+          tweetElement.style.opacity = '1';
+          tweetElement.style.pointerEvents = 'auto';
+        }
+        alert('❌ Manuel paylaşım sırasında bir hata oluştu!');
+      });
       
     } else {
+      // Hata durumunda UI'ı geri yükle
+      if (tweetElement) {
+        tweetElement.style.opacity = '1';
+        tweetElement.style.pointerEvents = 'auto';
+      }
       alert('❌ Tweet bilgileri alınamadı: ' + data.error);
     }
   })
   .catch(error => {
     console.error('Tweet bilgileri alma hatası:', error);
+    // Hata durumunda UI'ı geri yükle
+    if (tweetElement) {
+      tweetElement.style.opacity = '1';
+      tweetElement.style.pointerEvents = 'auto';
+    }
     alert('❌ Bir hata oluştu: ' + error.message);
   });
 }
@@ -1232,7 +1288,8 @@ document.addEventListener('keydown', function(event) {
     <div class="space-y-4">
       {% for tweet in (draft_tweets + ready_tweets) %}
       <div class="bg-gray-50 rounded-lg p-4 border-l-4 
-                  {% if tweet.is_draft %}border-yellow-400{% else %}border-green-400{% endif %}">
+                  {% if tweet.is_draft %}border-yellow-400{% else %}border-green-400{% endif %}"
+           data-tweet-id="{{ tweet.id }}">
         <div class="flex justify-between items-start">
           <div class="flex-1">
             <div class="flex items-center gap-2 mb-2">
@@ -1271,10 +1328,7 @@ document.addEventListener('keydown', function(event) {
                     class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
               <i class="fab fa-twitter"></i> X'te Manuel Paylaş
             </button>
-            <a href="/manual_post_confirmation_create/{{ tweet.id }}" 
-               class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors text-center">
-              <i class="fas fa-check-circle"></i> Manuel Paylaşımı Onayla
-            </a>
+
             {% endif %}
             
             <button onclick="viewTweetDetails('{{ tweet.id }}')" 

@@ -15,8 +15,8 @@
         "excerpt": ".loop-card__content"
       },
       "added_date": "2025-01-08T10:00:00",
-      "last_checked": "2025-06-18T14:07:43.914126",
-      "article_count": 4,
+      "last_checked": "2025-08-04T14:44:07.997659",
+      "article_count": 5,
       "success_rate": 100
     }
   ],
@@ -25,7 +25,7 @@
     "check_all_sources": true,
     "source_timeout": 30,
     "articles_per_source": 5,
-    "last_updated": "2025-06-18T14:07:42.897798"
+    "last_updated": "2025-08-04T14:44:07.313127"
   },
   "rss_sources": [
     {
@@ -35,9 +35,9 @@
       "description": "TechCrunch genel RSS feed",
       "enabled": true,
       "added_date": "2025-06-18T14:00:00",
-      "last_checked": "2025-06-18T14:07:44.515791",
+      "last_checked": "2025-08-04T14:44:08.546794",
       "article_count": 0,
-      "success_rate": 90
+      "success_rate": 60
     },
     {
       "id": "theverge_rss",
@@ -46,9 +46,9 @@
       "description": "The Verge genel RSS feed",
       "enabled": true,
       "added_date": "2025-06-18T14:00:00",
-      "last_checked": "2025-06-18T14:07:45.175179",
+      "last_checked": "2025-08-04T14:44:09.338620",
       "article_count": 0,
-      "success_rate": 90
+      "success_rate": 60
     },
     {
       "id": "venturebeat_rss",
@@ -59,7 +59,7 @@
       "added_date": "2025-06-18T14:00:00",
       "last_checked": "2025-06-18T14:00:00",
       "article_count": 0,
-      "success_rate": 80
+      "success_rate": 20
     }
   ]
 }
