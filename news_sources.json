@@ -15,7 +15,7 @@
         "excerpt": ".loop-card__content"
       },
       "added_date": "2025-01-08T10:00:00",
-      "last_checked": "2025-08-04T14:44:07.997659",
+      "last_checked": "2025-08-04T15:25:14.143414",
       "article_count": 5,
       "success_rate": 100
     }
@@ -25,7 +25,7 @@
     "check_all_sources": true,
     "source_timeout": 30,
     "articles_per_source": 5,
-    "last_updated": "2025-08-04T14:44:07.313127"
+    "last_updated": "2025-08-04T15:25:09.442107"
   },
   "rss_sources": [
     {
@@ -35,9 +35,9 @@
       "description": "TechCrunch genel RSS feed",
       "enabled": true,
       "added_date": "2025-06-18T14:00:00",
-      "last_checked": "2025-08-04T14:44:08.546794",
-      "article_count": 0,
-      "success_rate": 60
+      "last_checked": "2025-08-04T15:25:45.533173",
+      "article_count": 5,
+      "success_rate": 100
     },
     {
       "id": "theverge_rss",
@@ -46,20 +46,20 @@
       "description": "The Verge genel RSS feed",
       "enabled": true,
       "added_date": "2025-06-18T14:00:00",
-      "last_checked": "2025-08-04T14:44:09.338620",
-      "article_count": 0,
-      "success_rate": 60
+      "last_checked": "2025-08-04T15:25:46.123938",
+      "article_count": 5,
+      "success_rate": 100
     },
     {
       "id": "venturebeat_rss",
       "name": "VentureBeat AI RSS",
-      "url": "https://venturebeat.com/ai/feed/",
+      "url": "https://venturebeat.com/category/ai/feed/",
       "description": "VentureBeat AI RSS feed",
       "enabled": true,
       "added_date": "2025-06-18T14:00:00",
-      "last_checked": "2025-06-18T14:00:00",
-      "article_count": 0,
-      "success_rate": 20
+      "last_checked": "2025-08-04T15:25:46.570438",
+      "article_count": 5,
+      "success_rate": 100
     }
   ]
 }

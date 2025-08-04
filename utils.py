@@ -5945,23 +5945,23 @@ def fetch_articles_from_single_source_pythonanywhere(source):
         return []
 
 def fetch_articles_with_rss_only():
-    """Sadece RSS yöntemi ile haber kaynaklarından makale çekme - Son 24 saat filtreli"""
+    """Sadece RSS yöntemi ile haber kaynaklarından makale çekme - Son 7 gün filtreli"""
     try:
-        print("🔍 RSS yöntemi ile haber çekme başlatılıyor (Son 24 saat)...")
+        print("🔍 RSS yöntemi ile haber çekme başlatılıyor (Son 7 gün)...")
         
         # Bugünün tarih ve saatini al
         now = datetime.now()
-        twenty_four_hours_ago = now - timedelta(hours=24)
+        seven_days_ago = now - timedelta(days=7)  # 24 saat yerine 7 gün
         
         print(f"📅 Bugün: {now.strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"⏰ 24 saat öncesi: {twenty_four_hours_ago.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"⏰ 7 gün öncesi: {seven_days_ago.strftime('%Y-%m-%d %H:%M:%S')}")
         
         # Önce mevcut yayınlanan makaleleri yükle
         posted_articles = load_json("history.json", [])
         posted_urls = [article.get('url', '') for article in posted_articles]
         posted_hashes = [article.get('hash', '') for article in posted_articles]
         
-        # Son 24 saat içinde paylaşılan makaleleri de kontrol et
+        # Son 7 gün içinde paylaşılan makaleleri de kontrol et
         recent_posted_urls = []
         recent_posted_hashes = []
         
@@ -5970,14 +5970,14 @@ def fetch_articles_with_rss_only():
             if posted_date_str:
                 try:
                     posted_date = datetime.fromisoformat(posted_date_str.replace('Z', '+00:00').replace('+00:00', ''))
-                    if posted_date >= twenty_four_hours_ago:
+                    if posted_date >= seven_days_ago:
                         recent_posted_urls.append(article.get('url', ''))
                         recent_posted_hashes.append(article.get('hash', ''))
                 except Exception as date_error:
                     print(f"⚠️ Tarih parse hatası: {date_error}")
                     continue
         
-        print(f"📊 Son 24 saatte paylaşılan makale sayısı: {len(recent_posted_urls)}")
+        print(f"📊 Son 7 günde paylaşılan makale sayısı: {len(recent_posted_urls)}")
         
         # RSS kaynaklarını yükle
         config = load_news_sources()
@@ -6041,11 +6041,11 @@ def fetch_articles_with_rss_only():
                             except:
                                 pass
                         
-                        # 24 saat kontrolü
+                        # 7 gün kontrolü (daha esnek)
                         if entry_date:
-                            if entry_date < twenty_four_hours_ago:
-                                print(f"⏰ RSS makale 24 saatten eski: {entry_date.strftime('%Y-%m-%d %H:%M')} - {title[:50]}...")
-                            continue
+                            if entry_date < seven_days_ago:
+                                print(f"⏰ RSS makale 7 günden eski: {entry_date.strftime('%Y-%m-%d %H:%M')} - {title[:50]}...")
+                                continue
                         
                         # İçerik al
                         content = ""
@@ -6087,16 +6087,16 @@ def fetch_articles_with_rss_only():
                                 "source": f"RSS - {rss_source['name']}",
                                 "source_id": rss_source["id"],
                                 "article_date": entry_date.isoformat() if entry_date else datetime.now().isoformat(),
-                                "is_within_24h": True,
+                                "is_within_7d": True,
                                 "rss_published": date_str,
                                 "fetch_method": "RSS Feed",
                                 "method_icon": "📡",
                                 "method_color": "green"
                             })
-                            print(f"🆕 RSS ile yeni makale (24h içinde): {title[:50]}...")
+                            print(f"🆕 RSS ile yeni makale (7g içinde): {title[:50]}...")
                         else:
                             if article_hash in recent_posted_hashes:
-                                print(f"⏰ Son 24 saatte paylaşılmış: {title[:50]}...")
+                                print(f"⏰ Son 7 günde paylaşılmış: {title[:50]}...")
                             else:
                                 print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
                         
@@ -6130,16 +6130,16 @@ def fetch_articles_with_rss_only():
         except Exception as save_error:
             print(f"⚠️ RSS kaynakları kaydetme hatası: {save_error}")
         
-        print(f"📊 RSS ile toplam {len(all_articles)} yeni makale bulundu (Son 24 saat filtreli)")
+        print(f"📊 RSS ile toplam {len(all_articles)} yeni makale bulundu (Son 7 gün filtreli)")
         
         # Duplikat filtreleme uygula
         if all_articles:
             all_articles = filter_duplicate_articles(all_articles)
             print(f"🔄 Duplikat filtreleme sonrası: {len(all_articles)} benzersiz makale")
         
-        # 24 saat içindeki makaleleri işaretle
+        # 7 gün içindeki makaleleri işaretle
         for article in all_articles:
-            article['filtered_by_24h'] = True
+            article['filtered_by_7d'] = True
             article['filter_applied_at'] = datetime.now().isoformat()
             article['method'] = 'rss'
         
@@ -6659,6 +6659,20 @@ def fetch_latest_ai_articles_smart():
                     print(f"✅ PythonAnywhere sisteminden {len(pa_articles)} makale")
             except Exception as e:
                 print(f"⚠️ PythonAnywhere sistemi hatası: {e}")
+            
+            # 3. RSS kaynaklarını dene
+            try:
+                rss_articles = fetch_articles_with_rss_only()
+                if rss_articles:
+                    # Yöntem bilgisini ekle
+                    for article in rss_articles:
+                        article['fetch_method'] = 'RSS Feeds'
+                        article['method_icon'] = '📡'
+                        article['method_color'] = 'blue'
+                    all_articles.extend(rss_articles)
+                    print(f"✅ RSS kaynaklarından {len(rss_articles)} makale")
+            except Exception as e:
+                print(f"⚠️ RSS kaynakları hatası: {e}")
             
             # 3. MCP varsa onu da dene
             if mcp_enabled:
