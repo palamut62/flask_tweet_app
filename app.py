@@ -334,9 +334,9 @@ log_queue = queue.Queue(maxsize=1000)
 def index():
     """Ana sayfa - Minimal versiyon"""
     try:
-        # Temel verileri yükle
-        all_articles = load_json("posted_articles.json")
-        pending_tweets = load_json("pending_tweets.json")
+        # Temel verileri yükle - performans için limit kullan
+        all_articles = load_json("posted_articles.json", limit=100)  # Son 100 makale
+        pending_tweets = load_json("pending_tweets.json", limit=50)  # Son 50 pending tweet
         
         # Aktif makaleleri filtrele
         articles = [article for article in all_articles if not article.get('deleted', False)]
@@ -389,8 +389,8 @@ def index():
             settings = {}
         
         return render_template('index.html', 
-                             articles=articles[-10:],
-                             pending_tweets=pending_tweets,
+                             articles=articles[-5:],  # Daha az makale göster
+                             pending_tweets=pending_tweets[:20],  # Maksimum 20 pending tweet
                              stats=stats,
                              automation_status=automation_status,
                              api_check=api_check,
@@ -1597,31 +1597,9 @@ def settings():
         from utils import get_news_fetching_method
         mcp_status = get_news_fetching_method()
         
-        # Gemini API test
-        try:
-            from utils import gemini_call
-            api_key = os.environ.get('GOOGLE_API_KEY')
-            if api_key:
-                test_result = gemini_call("Test message", api_key)
-                api_status["google_api_working"] = bool(test_result and test_result != "API hatası")
-            else:
-                api_status["google_api_working"] = False
-        except Exception as e:
-            api_status["google_api_working"] = False
-            api_status["google_api_error"] = str(e)
-        
-        # OpenRouter API test
-        try:
-            from utils import openrouter_call
-            openrouter_key = os.environ.get('OPENROUTER_API_KEY')
-            if openrouter_key:
-                test_result = openrouter_call("Test message", openrouter_key, max_tokens=10)
-                api_status["openrouter_api_working"] = bool(test_result)
-            else:
-                api_status["openrouter_api_working"] = False
-        except Exception as e:
-            api_status["openrouter_api_working"] = False
-            api_status["openrouter_api_error"] = str(e)
+        # API testlerini sadece anahtarların varlığına göre yap (hızlı kontrol)
+        api_status["google_api_working"] = bool(os.environ.get('GOOGLE_API_KEY'))
+        api_status["openrouter_api_working"] = bool(os.environ.get('OPENROUTER_API_KEY'))
         
         return render_template('settings.html', 
                              settings=automation_settings,
@@ -1665,6 +1643,48 @@ def save_settings():
         flash(f'Ayar kaydetme hatası: {str(e)}', 'error')
     
     return redirect(url_for('settings'))
+
+@app.route('/test_api_connections')
+@login_required 
+def test_api_connections():
+    """API bağlantılarını test et - ayrı endpoint"""
+    try:
+        results = {}
+        
+        # Gemini API test
+        try:
+            from utils import gemini_call
+            api_key = os.environ.get('GOOGLE_API_KEY')
+            if api_key:
+                test_result = gemini_call("Test", api_key)
+                results["google_api"] = {
+                    "working": bool(test_result and test_result != "API hatası"),
+                    "message": "✅ Çalışıyor" if test_result else "❌ Yanıt alınamadı"
+                }
+            else:
+                results["google_api"] = {"working": False, "message": "❌ API anahtarı yok"}
+        except Exception as e:
+            results["google_api"] = {"working": False, "message": f"❌ Hata: {str(e)[:50]}"}
+        
+        # OpenRouter API test  
+        try:
+            from utils import openrouter_call
+            openrouter_key = os.environ.get('OPENROUTER_API_KEY')
+            if openrouter_key:
+                test_result = openrouter_call("Test", openrouter_key, max_tokens=5)
+                results["openrouter_api"] = {
+                    "working": bool(test_result),
+                    "message": "✅ Çalışıyor" if test_result else "❌ Yanıt alınamadı"
+                }
+            else:
+                results["openrouter_api"] = {"working": False, "message": "❌ API anahtarı yok"}
+        except Exception as e:
+            results["openrouter_api"] = {"working": False, "message": f"❌ Hata: {str(e)[:50]}"}
+            
+        return jsonify({"success": True, "results": results})
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
 
 @app.route('/test_telegram')
 @login_required

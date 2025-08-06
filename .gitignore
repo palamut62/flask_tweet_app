@@ -78,6 +78,10 @@ logs/
 # summaries.json
 # hashtags.json
 # news_sources.json
+
+# Cache Files
+stats_cache.json
+*.tmp
 # accounts.json
 # scheduler_config.json
 

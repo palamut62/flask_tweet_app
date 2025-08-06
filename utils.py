@@ -525,15 +525,49 @@ def fetch_article_content_advanced(url, headers):
     result = fetch_article_content_advanced_fallback(url)
     return result.get("content", "") if result else ""
 
-def load_json(path, default=None):
+def load_json(path, default=None, limit=None):
+    """JSON dosyasını yükle - limit parametresi ile performans optimizasyonu"""
     if os.path.exists(path):
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                
+                # Eğer limit belirtildiyse ve data bir liste ise, son N öğeyi al
+                if limit and isinstance(data, list) and len(data) > limit:
+                    return data[-limit:]
+                
+                return data
+        except json.JSONDecodeError as e:
+            print(f"JSON parse hatası ({path}): {e}")
+            return default if default is not None else []
+        except Exception as e:
+            print(f"Dosya okuma hatası ({path}): {e}")
+            return default if default is not None else []
+    
     return default if default is not None else []
 
 def save_json(path, data):
-    with open(path, "w", encoding='utf-8') as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+    """JSON dosyasını kaydet - atomic write ile"""
+    import tempfile
+    import shutil
+    
+    try:
+        # Geçici dosyaya yaz
+        temp_path = f"{path}.tmp"
+        with open(temp_path, "w", encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        # Atomic move
+        shutil.move(temp_path, path)
+        
+    except Exception as e:
+        # Geçici dosyayı temizle
+        if os.path.exists(f"{path}.tmp"):
+            try:
+                os.remove(f"{path}.tmp")
+            except:
+                pass
+        raise e
 
 def summarize_article(article_content, api_key):
     """LLM ile gelişmiş makale özetleme"""
@@ -2028,9 +2062,27 @@ def clear_pending_tweets():
         }
 
 def get_data_statistics():
-    """Veri istatistiklerini döndür - bugünkü analizler dahil"""
+    """Veri istatistiklerini döndür - bugünkü analizler dahil - Cache'li versiyon"""
     try:
         from datetime import datetime, date, timedelta
+        import time
+        
+        # Cache mekanizması (30 saniye cache)
+        cache_file = "stats_cache.json"
+        cache_duration = 30  # saniye
+        
+        # Cache kontrol et
+        if os.path.exists(cache_file):
+            try:
+                cache_data = load_json(cache_file)
+                if cache_data and 'timestamp' in cache_data:
+                    cache_age = time.time() - cache_data['timestamp']
+                    if cache_age < cache_duration:
+                        # Cache geçerli, cache'den döndür
+                        return cache_data['stats']
+            except:
+                pass  # Cache hatası, yeni hesaplama yap
+        
         today = date.today()
         stats = {}
         
@@ -2244,6 +2296,16 @@ def get_data_statistics():
         stats["settings_file_size"] = get_file_size("automation_settings.json")
         
         print(f"[DEBUG] İstatistikler: Bugün {stats['today_articles']} paylaşım, {stats['today_pending']} bekleyen (Paylaşım tarihine göre)")
+        
+        # Cache'e kaydet
+        try:
+            cache_data = {
+                'stats': stats,
+                'timestamp': time.time()
+            }
+            save_json(cache_file, cache_data)
+        except:
+            pass  # Cache kaydetme hatası, önemli değil
         
         return stats
         
