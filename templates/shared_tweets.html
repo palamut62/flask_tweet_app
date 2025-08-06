@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}Paylaşılan Tweetler{% endblock %}
+
+<!-- Haber kaynağı gösterimi için makro -->
+{% macro render_source_badge(source, source_id, url, badge_type='primary') %}
+    {% if source %}
+        {% set source_class = 'source-badge-' + badge_type %}
+        {% if 'techcrunch' in source.lower() %}
+            {% set source_class = 'source-techcrunch' %}
+        {% elif 'venturebeat' in source.lower() %}
+            {% set source_class = 'source-venturebeat' %}
+        {% elif 'wired' in source.lower() %}
+            {% set source_class = 'source-wired' %}
+        {% elif 'reddit' in source.lower() %}
+            {% set source_class = 'source-reddit' %}
+        {% elif 'economist' in source.lower() %}
+            {% set source_class = 'source-economist' %}
+        {% elif 'atlantic' in source.lower() %}
+            {% set source_class = 'source-atlantic' %}
+        {% elif 'guardian' in source.lower() %}
+            {% set source_class = 'source-guardian' %}
+        {% elif 'apple' in source.lower() %}
+            {% set source_class = 'source-apple' %}
+        {% elif 'hacker news' in source.lower() %}
+            {% set source_class = 'source-hackernews' %}
+        {% endif %}
+        
+        <div class="mb-4">
+            <div class="source-badge {{ source_class }}">
+                <i class="fas fa-newspaper source-icon"></i>
+                <span>Kaynak:</span>
+                <span class="source-name">{{ source }}</span>
+                {% if source_id %}
+                <span class="source-id">{{ source_id }}</span>
+                {% endif %}
+            </div>
+        </div>
+    {% elif url %}
+        <!-- Fallback: URL'den kaynak adını çıkar -->
+        {% set fallback_source = '' %}
+        {% set fallback_class = 'source-badge-fallback' %}
+        
+        {% if 'techcrunch.com' in url %}
+            {% set fallback_source = 'TechCrunch' %}
+            {% set fallback_class = 'source-techcrunch' %}
+        {% elif 'venturebeat.com' in url %}
+            {% set fallback_source = 'VentureBeat' %}
+            {% set fallback_class = 'source-venturebeat' %}
+        {% elif 'wired.com' in url %}
+            {% set fallback_source = 'Wired' %}
+            {% set fallback_class = 'source-wired' %}
+        {% elif 'reddit.com' in url %}
+            {% set fallback_source = 'Reddit' %}
+            {% set fallback_class = 'source-reddit' %}
+        {% elif 'github.com' in url %}
+            {% set fallback_source = 'GitHub' %}
+            {% set fallback_class = 'source-badge-dark' %}
+        {% endif %}
+        
+        {% if fallback_source %}
+        <div class="mb-4">
+            <div class="source-badge {{ fallback_class }}">
+                <i class="fas fa-link source-icon"></i>
+                <span>{{ fallback_source }}</span>
+            </div>
+        </div>
+        {% endif %}
+    {% endif %}
+{% endmacro %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto p-6 space-y-6">
+    <!-- Başlık -->
+    <div class="text-center mb-8">
+        <div class="flex items-center justify-center space-x-3 mb-4">
+            <div class="w-12 h-12 tweet-gradient rounded-lg flex items-center justify-center">
+                <i class="fab fa-twitter text-white text-xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Paylaşılan Tweetler
+            </h1>
+        </div>
+        <p class="text-gray-600 text-lg">Başarıyla paylaşılmış olan tüm tweetleriniz</p>
+    </div>
+
+    <!-- Filtreler ve Arama -->
+    <div class="card-modern mb-6">
+        <div class="p-6">
+            <div class="flex flex-wrap gap-4 items-center">
+                <!-- Arama -->
+                <div class="flex-1 min-w-64">
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Tweet başlığı veya içeriği ara..." 
+                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Filtreler -->
+                <div class="flex gap-2">
+                    <select id="sourceFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Tüm Kaynaklar</option>
+                        <option value="github">GitHub</option>
+                        <option value="news">Haber</option>
+                        <option value="manual">Manuel</option>
+                    </select>
+                    
+                    <select id="dateFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Tüm Tarihler</option>
+                        <option value="today">Bugün</option>
+                        <option value="week">Bu Hafta</option>
+                        <option value="month">Bu Ay</option>
+                    </select>
+                </div>
+                
+                <!-- Toplam Sayı -->
+                <div class="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg font-medium">
+                    <i class="fas fa-chart-bar mr-2"></i>
+                    <span id="totalCount">{{ articles|length if articles else 0 }}</span> Tweet
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paylaşılan Tweetler -->
+    {% if articles %}
+    <div id="tweetsContainer" class="space-y-4">
+        {% for article in articles|reverse %}
+        {% if not article.deleted %}
+        <div class="tweet-item bg-gradient-to-r {% if article.source_type == 'github' or article.type == 'github_repo' %}from-purple-50 to-indigo-50 border border-purple-200{% else %}from-blue-50 to-cyan-50 border border-blue-200{% endif %} rounded-xl p-6 hover:shadow-lg transition-all duration-300"
+             data-source="{{ 'github' if (article.source_type == 'github' or article.type == 'github_repo') else 'news' }}"
+             data-manual="{{ 'true' if article.manual_post else 'false' }}"
+             data-date="{{ article.post_date[:10] if article.post_date else '' }}"
+             data-title="{{ article.title|lower }}"
+             data-content="{{ article.tweet_text|lower if article.tweet_text else article.content|lower }}">
+            
+            <div class="flex justify-between items-start mb-4">
+                <h4 class="text-lg font-medium text-gray-900 line-clamp-2 flex-1">{{ article.title }}</h4>
+                <div class="flex items-center space-x-2 ml-4 flex-shrink-0">
+                    <span class="px-3 py-1 bg-green-500 text-white rounded-full text-sm font-medium">
+                        Paylaşıldı
+                    </span>
+                    {% if article.source_type == 'github' or article.type == 'github_repo' %}
+                    <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium flex items-center space-x-1">
+                        <i class="fab fa-github text-xs"></i>
+                        <span>GitHub</span>
+                    </span>
+                    {% endif %}
+                    {% if article.manual_post %}
+                    <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                        Manuel
+                    </span>
+                    {% else %}
+                    <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                        API
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="bg-white/80 backdrop-blur-sm rounded-lg p-4 mb-4 border border-gray-200">
+                <p class="text-gray-800 leading-relaxed">{{ article.tweet_text if article.tweet_text else article.content }}</p>
+            </div>
+            
+            <!-- Tweet Bilgileri -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 text-sm text-gray-600">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-calendar-alt text-blue-500"></i>
+                    <span>Tarih: <span class="font-medium">{{ article.post_date[:10] if article.post_date else 'Belirtilmemiş' }}</span></span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-clock text-green-500"></i>
+                    <span>Saat: <span class="font-medium">{{ article.post_date[11:19] if article.post_date and article.post_date|length > 19 else 'N/A' }}</span></span>
+                </div>
+                {% if article.tweet_id %}
+                <div class="flex items-center space-x-2">
+                    <i class="fab fa-twitter text-blue-400"></i>
+                    <span>Tweet ID: <span class="font-medium">{{ article.tweet_id }}</span></span>
+                </div>
+                {% endif %}
+                {% if article.hash %}
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-fingerprint text-purple-500"></i>
+                    <span>Hash: <span class="font-medium">{{ article.hash[:8] }}...</span></span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Kaynak Bilgisi -->
+            <div class="mb-4">
+                {{ render_source_badge(article.source, None, article.url) }}
+            </div>
+            
+            <!-- Eylem Butonları -->
+            <div class="flex flex-wrap gap-3">
+                {% if article.tweet_url %}
+                <a href="{{ article.tweet_url }}" target="_blank" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium flex items-center space-x-2">
+                    <i class="fab fa-twitter"></i>
+                    <span>Tweet'i Görüntüle</span>
+                </a>
+                {% endif %}
+                <a href="{{ article.url if article.url else '#' }}" target="_blank" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium flex items-center space-x-2 {{ 'opacity-50 cursor-not-allowed' if not article.url else '' }}">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>{% if article.source_type == 'github' or article.type == 'github_repo' %}Repo'yu Görüntüle{% else %}Makaleyi Oku{% endif %}</span>
+                </a>
+                <button onclick="restoreDeletedTweet('{{ loop.index0 }}')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 font-medium flex items-center space-x-2">
+                    <i class="fas fa-archive"></i>
+                    <span>Arşivle</span>
+                </button>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    
+    <!-- Sayfalama -->
+    <div class="flex justify-center mt-8">
+        <nav class="flex space-x-2">
+            <button class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                Önceki
+            </button>
+            <button class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg">
+                1
+            </button>
+            <button class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                2
+            </button>
+            <button class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                Sonraki
+            </button>
+        </nav>
+    </div>
+    {% else %}
+    <!-- Boş Durum -->
+    <div class="text-center py-12">
+        <div class="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+            <i class="fab fa-twitter text-4xl text-gray-400"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Henüz Paylaşılan Tweet Yok</h3>
+        <p class="text-gray-500 mb-6">İlk tweetinizi paylaştığınızda burada görünecek.</p>
+        <a href="{{ url_for('index') }}" class="btn-primary inline-flex items-center space-x-2">
+            <i class="fas fa-plus"></i>
+            <span>Tweet Paylaş</span>
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- JavaScript -->
+<script>
+// Arama ve filtreleme
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const sourceFilter = document.getElementById('sourceFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    const tweetsContainer = document.getElementById('tweetsContainer');
+    const totalCount = document.getElementById('totalCount');
+    
+    function filterTweets() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const sourceType = sourceFilter.value;
+        const dateRange = dateFilter.value;
+        const tweetItems = tweetsContainer.querySelectorAll('.tweet-item');
+        
+        let visibleCount = 0;
+        const today = new Date();
+        
+        tweetItems.forEach(item => {
+            const title = item.dataset.title || '';
+            const content = item.dataset.content || '';
+            const source = item.dataset.source || '';
+            const isManual = item.dataset.manual === 'true';
+            const dateStr = item.dataset.date || '';
+            
+            // Arama filtresi
+            const matchesSearch = !searchTerm || 
+                title.includes(searchTerm) || 
+                content.includes(searchTerm);
+            
+            // Kaynak filtresi
+            let matchesSource = true;
+            if (sourceType === 'github') {
+                matchesSource = source === 'github';
+            } else if (sourceType === 'news') {
+                matchesSource = source === 'news';
+            } else if (sourceType === 'manual') {
+                matchesSource = isManual;
+            }
+            
+            // Tarih filtresi
+            let matchesDate = true;
+            if (dateRange && dateStr) {
+                const tweetDate = new Date(dateStr);
+                const diffTime = Math.abs(today - tweetDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (dateRange === 'today') {
+                    matchesDate = diffDays <= 1;
+                } else if (dateRange === 'week') {
+                    matchesDate = diffDays <= 7;
+                } else if (dateRange === 'month') {
+                    matchesDate = diffDays <= 30;
+                }
+            }
+            
+            if (matchesSearch && matchesSource && matchesDate) {
+                item.style.display = '';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        totalCount.textContent = visibleCount;
+    }
+    
+    // Event listeners
+    searchInput.addEventListener('input', filterTweets);
+    sourceFilter.addEventListener('change', filterTweets);
+    dateFilter.addEventListener('change', filterTweets);
+});
+
+// Tweet arşivleme fonksiyonu
+function restoreDeletedTweet(index) {
+    if (confirm('Bu tweeti arşivlemek istediğinizden emin misiniz?')) {
+        // Bu fonksiyonu backend'de implement etmek gerekecek
+        console.log('Tweet arşivlendi:', index);
+        // Sayfayı yenile veya öğeyi gizle
+        location.reload();
+    }
+}
+</script>
+{% endblock %}

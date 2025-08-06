@@ -14,6 +14,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from bs4 import BeautifulSoup
 import hashlib
+import uuid
 
 # .env dosyasını yükle
 load_dotenv()
@@ -23,7 +24,7 @@ DEBUG_MODE = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 from utils import (
     fetch_latest_ai_articles, generate_ai_tweet_with_mcp_analysis,
-    post_tweet, mark_article_as_posted, load_json, save_json,
+    generate_ai_tweet_with_content, post_tweet, mark_article_as_posted, load_json, save_json,
     get_posted_articles_summary, reset_all_data, clear_pending_tweets,
     get_data_statistics, load_automation_settings, save_automation_settings,
     get_automation_status, send_telegram_notification, test_telegram_connection,
@@ -32,24 +33,32 @@ from utils import (
     check_gmail_configuration, get_rate_limit_info, terminal_log,
     create_automatic_backup, load_ai_keywords_config, save_ai_keywords_config,
     get_all_active_keywords, fetch_ai_news_with_advanced_keywords,
-    update_ai_keyword_category, get_ai_keywords_stats
+    update_ai_keyword_category, get_ai_keywords_stats, analyze_tweet_quality
 )
 
-# GitHub modülünü import et
-try:
-    from github_module import (
-        fetch_trending_github_repos, create_fallback_github_tweet, generate_github_tweet,
-        load_github_settings, save_github_settings, search_github_repos_by_topics
-    )
-    GITHUB_MODULE_AVAILABLE = True
-except ImportError:
-    GITHUB_MODULE_AVAILABLE = False
-    terminal_log("⚠️ GitHub modülü yüklenemedi", "warning")
+# GitHub modülü kaldırıldı
+
+# Version Information
+APP_VERSION = "1.3.0"
+VERSION_CHANGELOG = {
+    "1.3.0": "GitHub kaldırıldı, Footer düzeltildi, Navbar yenilendi",
+    "1.2.0": "UI iyileştirmeleri ve performans optimizasyonları", 
+    "1.1.0": "Otomatik tweet sistemi ve AI entegrasyonu"
+}
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 
-# Global değişkenler
+# Template context processor for global variables
+@app.context_processor
+def inject_globals():
+    return {
+        'app_version': APP_VERSION,
+        'version_changelog': VERSION_CHANGELOG
+    }
+
+# Global değişkenler ve sabitler
+HISTORY_FILE = "posted_articles.json"
 last_check_time = None
 automation_running = False
 background_scheduler_running = False
@@ -323,108 +332,68 @@ log_queue = queue.Queue(maxsize=1000)
 @app.route('/')
 @login_required
 def index():
-    """Ana sayfa"""
+    """Ana sayfa - Minimal versiyon"""
     try:
-        # Sayfa verilerini hazırla (otomatik kontrol yok)
+        # Temel verileri yükle
         all_articles = load_json("posted_articles.json")
         pending_tweets = load_json("pending_tweets.json")
         
-        # Silinmiş tweetleri filtrele - sadece gerçekten paylaşılan tweetleri göster
+        # Aktif makaleleri filtrele
         articles = [article for article in all_articles if not article.get('deleted', False)]
         
         # Tweet ID'lerini güvenli şekilde kontrol et
         pending_tweets = ensure_tweet_ids(pending_tweets)
         
-        # Tweet'leri kaynak türüne göre ayır ve sırala
-        news_tweets = []
-        github_tweets = []
-        
+        # Tweet içeriklerini düzenle
         for tweet in pending_tweets:
-            
-            # Tweet içeriğini düzenle (template uyumluluğu için)
             if 'tweet_data' in tweet and 'tweet' in tweet['tweet_data']:
                 tweet['content'] = tweet['tweet_data']['tweet']
             elif 'content' not in tweet and 'article' in tweet:
                 tweet['content'] = tweet['article'].get('title', 'İçerik bulunamadı')
             
-            # Başlık ekle
-            if 'title' not in tweet and 'article' in tweet:
-                tweet['title'] = tweet['article'].get('title', 'Başlık bulunamadı')
-            
-            # URL ekle
-            if 'url' not in tweet and 'article' in tweet:
-                tweet['url'] = tweet['article'].get('url', '')
-            
-            # Kaynak türünü belirle
-            if tweet.get('source_type') == 'github':
-                github_tweets.append(tweet)
-            else:
-                # Varsayılan olarak news
-                tweet['source_type'] = 'news'
-                news_tweets.append(tweet)
+            # Başlık ve URL bilgilerini ekle
+            tweet['title'] = tweet['article'].get('title', 'Başlık bulunamadı') if 'article' in tweet else tweet.get('content', 'Başlık bulunamadı')
+            tweet['url'] = tweet['article'].get('url', '') if 'article' in tweet else ''
         
-        # Tarihe göre sırala (en yeni önce)
-        news_tweets.sort(key=lambda x: x.get('created_at', ''), reverse=True)
-        github_tweets.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        # Tarihe göre sırala
+        pending_tweets.sort(key=lambda x: x.get('created_at', ''), reverse=True)
         
-        # Tüm tweet'leri birleştir (GitHub tweet'leri önce)
-        all_pending_tweets = github_tweets + news_tweets
-        
-        # Güncellenmiş pending tweets'i kaydet
-        save_json("pending_tweets.json", pending_tweets)
-        
+        # İstatistikleri ve durumu al
         stats = get_data_statistics()
         automation_status = get_automation_status()
         
-        # Kaynak türü istatistikleri
-        news_count = len(news_tweets)
-        github_count = len(github_tweets)
+        # Terminal log
+        terminal_log(f"📊 Ana sayfa yüklendi: {len(pending_tweets)} bekleyen tweet, {len(articles)} son makale", "info")
         
-        # Debug için istatistikleri logla (güvenli)
-        from utils import safe_log
-        safe_log(f"Ana sayfa istatistikleri: {stats}", "DEBUG")
-        safe_log(f"Toplam makale: {len(all_articles)}, Gösterilen: {len(articles)}, Silinmiş: {len(all_articles) - len(articles)}", "DEBUG")
-        safe_log(f"Bekleyen tweet'ler: {len(all_pending_tweets)} ({news_count} haber, {github_count} GitHub)", "DEBUG")
-        
-        # Terminal log ekle
-        terminal_log(f"📊 Ana sayfa yüklendi: {len(all_pending_tweets)} bekleyen tweet, {len(articles)} son makale", "info")
-        terminal_log(f"📈 Bugünkü istatistikler: {stats.get('today_articles', 0)} paylaşım, {stats.get('today_pending', 0)} bekleyen", "info")
-        
-        # API durumunu kontrol et (ana sayfa için basit kontrol)
+        # API durumu kontrolü - minimal versiyon
         api_check = {
-            "google_api_available": bool(os.environ.get('GOOGLE_API_KEY')),
-            "openrouter_api_available": bool(os.environ.get('OPENROUTER_API_KEY')),
             "twitter_api_available": bool(os.environ.get('TWITTER_BEARER_TOKEN') and os.environ.get('TWITTER_API_KEY')),
-            "telegram_available": bool(os.environ.get('TELEGRAM_BOT_TOKEN')),
-            "github_available": GITHUB_MODULE_AVAILABLE and bool(os.environ.get('GITHUB_TOKEN'))
+            "telegram_available": bool(os.environ.get('TELEGRAM_BOT_TOKEN'))
         }
         
         # Ayarları yükle
         settings = load_automation_settings()
         
         return render_template('index.html', 
-                             articles=articles[-10:], 
-                             pending_tweets=all_pending_tweets,
+                             articles=articles[-10:],
+                             pending_tweets=pending_tweets,
                              stats=stats,
                              automation_status=automation_status,
                              api_check=api_check,
                              settings=settings,
-                             last_check=last_check_time,
-                             news_count=news_count,
-                             github_count=github_count)
+                             last_check=last_check_time)
+                             
     except Exception as e:
         from utils import safe_log
         safe_log(f"Ana sayfa hatası: {str(e)}", "ERROR")
         return render_template('index.html', 
-                             articles=[], 
+                             articles=[],
                              pending_tweets=[],
                              stats={},
                              automation_status={},
                              api_check={},
                              settings={},
-                             error=str(e),
-                             news_count=0,
-                             github_count=0)
+                             error=str(e))
 
 @app.route('/check_articles')
 @login_required
@@ -642,18 +611,30 @@ def check_and_post_articles():
                 # Tweet oluştur - tema ile
                 theme = settings.get('tweet_theme', 'bilgilendirici')
                 terminal_log(f"🤖 Tweet oluşturuluyor (tema: {theme}): {article['title'][:50]}...", "info")
-                tweet_data = generate_ai_tweet_with_mcp_analysis(article, api_key, theme)
+                tweet_data = generate_ai_tweet_with_content(article, api_key, theme)
                 
                 if not tweet_data or not tweet_data.get('tweet'):
                     terminal_log(f"❌ Tweet oluşturulamadı: {article['title'][:50]}...", "error")
                     continue
                 
+                # Tweet kalite kontrolü - OTOMATIK SİSTEMDE KALİTELİ TWEET ZORUNLULUĞU
+                if tweet_data.get('is_valid') == False:
+                    quality_issues = tweet_data.get('quality_analysis', {}).get('issues', [])
+                    terminal_log(f"❌ Tweet kalite kontrolünden geçemedi: {', '.join(quality_issues[:2])}", "error")
+                    terminal_log(f"🚫 Kalitesiz tweet otomatik sistemde paylaşılmayacak: {article['title'][:50]}...", "warning")
+                    continue
+                
                 # Skor kontrolü
                 impact_score = tweet_data.get('impact_score', 0)
-                terminal_log(f"📊 Tweet skoru: {impact_score} (minimum: {min_score})", "info")
+                quality_score = tweet_data.get('quality_score', 7)
+                terminal_log(f"📊 Tweet skoru: {impact_score} (minimum: {min_score}), Kalite: {quality_score}/10", "info")
                 
                 if impact_score < min_score:
                     terminal_log(f"⚠️ Düşük skor ({impact_score}), atlanıyor: {article['title'][:50]}...", "warning")
+                    continue
+                
+                if quality_score < 5:
+                    terminal_log(f"⚠️ Düşük kalite skoru ({quality_score}/10), atlanıyor: {article['title'][:50]}...", "warning")
                     continue
                 
                 # Otomatik paylaşım kontrolü
@@ -3912,477 +3893,7 @@ def restore_deleted_tweet():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-# GitHub Modülü Route'ları
-@app.route('/github_repos')
-@login_required
-def github_repos():
-    """GitHub repoları sayfası"""
-    try:
-        if not GITHUB_MODULE_AVAILABLE:
-            flash('GitHub modülü kullanılamıyor!', 'error')
-            return redirect(url_for('index'))
-        
-        # Mevcut GitHub repo verilerini yükle
-        posted_articles = load_json("posted_articles.json")
-        github_repos = [article for article in posted_articles if article.get('type') == 'github_repo']
-        
-        # Son 10 GitHub repo'yu göster
-        recent_repos = github_repos[-10:] if github_repos else []
-        recent_repos.reverse()  # En yeni önce
-        
-        # İstatistikler
-        stats = {
-            'total_repos': len(github_repos),
-            'recent_repos': len([repo for repo in github_repos 
-                               if datetime.fromisoformat(repo.get('posted_date', '2020-01-01')) > 
-                               datetime.now() - timedelta(days=7)]),
-            'languages': {}
-        }
-        
-        # Dil dağılımı
-        for repo in github_repos:
-            repo_data = repo.get('repo_data', {})
-            lang = repo_data.get('language', 'Unknown')
-            stats['languages'][lang] = stats['languages'].get(lang, 0) + 1
-        
-        return render_template('github_repos.html', 
-                             recent_repos=recent_repos,
-                             stats=stats)
-                             
-    except Exception as e:
-        terminal_log(f"❌ GitHub repos sayfası hatası: {e}", "error")
-        flash(f'GitHub repos sayfası hatası: {str(e)}', 'error')
-        return redirect(url_for('index'))
 
-@app.route('/fetch_github_repos', methods=['POST'])
-@login_required
-def fetch_github_repos():
-    """GitHub repolarını çek ve tweet'ler oluştur"""
-    try:
-        if not GITHUB_MODULE_AVAILABLE:
-            return jsonify({"success": False, "error": "GitHub modülü kullanılamıyor"})
-        
-        data = request.get_json()
-        language = data.get('language', 'python')
-        time_period = data.get('time_period', 'weekly')
-        limit = min(int(data.get('limit', 10)), 20)  # Maksimum 20
-        
-        terminal_log(f"🔍 GitHub repoları çekiliyor: {language}, {time_period}, limit: {limit}", "info")
-        
-        # GitHub API'den repoları çek
-        repos = fetch_trending_github_repos(language=language, time_period=time_period, limit=limit)
-        
-        if not repos:
-            return jsonify({"success": False, "error": "GitHub repo bulunamadı"})
-        
-        # Mevcut pending tweets'leri yükle
-        try:
-            pending_tweets = load_json('pending_tweets.json')
-        except:
-            pending_tweets = []
-        
-        # Mevcut GitHub repo URL'lerini kontrol et (duplikasyon önleme)
-        existing_urls = [tweet.get('url', '') for tweet in pending_tweets if tweet.get('source_type') == 'github']
-        
-        # Mevcut paylaşılan repoları da kontrol et
-        posted_articles = load_json("posted_articles.json")
-        posted_urls = [article.get('url', '') for article in posted_articles]
-        
-        # Tweet'leri oluştur
-        new_tweets = []
-        api_key = os.environ.get('GOOGLE_API_KEY')
-        
-        for repo in repos:
-            try:
-                # Duplikasyon kontrolü
-                if repo["url"] in existing_urls or repo["url"] in posted_urls:
-                    terminal_log(f"⚠️ GitHub repo zaten mevcut: {repo['name']}", "warning")
-                    continue
-                
-                # AI ile tweet oluştur
-                tweet_result = generate_github_tweet(repo, api_key)
-                
-                if tweet_result.get("success"):
-                    # Benzersiz ID oluştur
-                    tweet_id = len(pending_tweets) + len(new_tweets) + 1
-                    
-                    tweet_data = {
-                        "id": tweet_id,
-                        "title": f"GitHub: {repo['name']}",
-                        "content": tweet_result["tweet"],
-                        "url": repo["url"],
-                        "source": "GitHub",
-                        "source_type": "github",
-                        "created_at": datetime.now().isoformat(),
-                        "repo_data": repo,
-                        "is_posted": False,
-                        "language": repo.get("language", ""),
-                        "stars": repo.get("stars", 0),
-                        "forks": repo.get("forks", 0),
-                        "owner": repo.get("owner", {}).get("login", ""),
-                        "topics": repo.get("topics", [])[:5],
-                        "hash": hashlib.md5(repo["url"].encode()).hexdigest()
-                    }
-                    new_tweets.append(tweet_data)
-                    terminal_log(f"✅ GitHub tweet hazırlandı: {repo['name']}", "success")
-                else:
-                    # Fallback tweet oluştur
-                    tweet_text = create_fallback_github_tweet(repo)
-                    tweet_id = len(pending_tweets) + len(new_tweets) + 1
-                    
-                    tweet_data = {
-                        "id": tweet_id,
-                        "title": f"GitHub: {repo['name']}",
-                        "content": tweet_text,
-                        "url": repo["url"],
-                        "source": "GitHub",
-                        "source_type": "github",
-                        "created_at": datetime.now().isoformat(),
-                        "repo_data": repo,
-                        "is_posted": False,
-                        "language": repo.get("language", ""),
-                        "stars": repo.get("stars", 0),
-                        "forks": repo.get("forks", 0),
-                        "owner": repo.get("owner", {}).get("login", ""),
-                        "topics": repo.get("topics", [])[:5],
-                        "hash": hashlib.md5(repo["url"].encode()).hexdigest()
-                    }
-                    new_tweets.append(tweet_data)
-                    terminal_log(f"⚠️ GitHub fallback tweet oluşturuldu: {repo['name']}", "warning")
-                    
-            except Exception as e:
-                terminal_log(f"❌ GitHub tweet hatası ({repo['name']}): {e}", "error")
-                continue
-        
-        if new_tweets:
-            # Yeni tweet'leri pending listesine ekle
-            pending_tweets.extend(new_tweets)
-            save_json('pending_tweets.json', pending_tweets)
-            
-            terminal_log(f"✅ {len(new_tweets)} GitHub tweet'i pending listesine eklendi", "success")
-            
-            return jsonify({
-                "success": True,
-                "message": f"{len(new_tweets)} yeni GitHub repo tweet'i oluşturuldu",
-                "total_repos": len(repos),
-                "new_tweets": len(new_tweets)
-            })
-        else:
-            return jsonify({
-                "success": False,
-                "error": "Yeni GitHub tweet'i oluşturulamadı (tümü zaten mevcut)"
-            })
-        
-    except Exception as e:
-        terminal_log(f"❌ GitHub repo çekme hatası: {e}", "error")
-        return jsonify({"success": False, "error": str(e)})
-
-@app.route('/test_github_api')
-@login_required
-def test_github_api():
-    """GitHub API bağlantısını test et"""
-    try:
-        if not GITHUB_MODULE_AVAILABLE:
-            return jsonify({"success": False, "error": "GitHub modülü kullanılamıyor"})
-        
-        terminal_log("🧪 GitHub API testi başlatılıyor...", "info")
-        
-        # Test için basit bir arama yap
-        repos = fetch_trending_github_repos(language="python", time_period="daily", limit=3)
-        
-        if repos:
-            terminal_log(f"✅ GitHub API testi başarılı - {len(repos)} repo bulundu", "success")
-            return jsonify({
-                "success": True,
-                "message": f"GitHub API çalışıyor - {len(repos)} repo bulundu",
-                "sample_repos": [
-                    {
-                        "name": repo['name'],
-                        "stars": repo['stars'],
-                        "language": repo['language'],
-                        "url": repo['url']
-                    } for repo in repos[:3]
-                ]
-            })
-        else:
-            terminal_log("❌ GitHub API testinde repo bulunamadı", "error")
-            return jsonify({
-                "success": False,
-                "error": "GitHub API'den veri alınamadı"
-            })
-            
-    except Exception as e:
-        terminal_log(f"❌ GitHub API test hatası: {e}", "error")
-        return jsonify({"success": False, "error": str(e)})
-
-@app.route('/github_settings')
-@login_required
-def github_settings():
-    """GitHub ayarları sayfası"""
-    try:
-        if not GITHUB_MODULE_AVAILABLE:
-            flash('GitHub modülü kullanılamıyor!', 'error')
-            return redirect(url_for('index'))
-        
-        settings = load_github_settings()
-        return render_template('github_settings.html', settings=settings)
-        
-    except Exception as e:
-        terminal_log(f"❌ GitHub ayarları sayfası hatası: {e}", "error")
-        flash(f'GitHub ayarları sayfası hatası: {str(e)}', 'error')
-        return redirect(url_for('index'))
-
-@app.route('/save_github_settings', methods=['POST'])
-@login_required
-def save_github_settings_route():
-    """GitHub ayarlarını kaydet"""
-    try:
-        if not GITHUB_MODULE_AVAILABLE:
-            flash('GitHub modülü kullanılamıyor!', 'error')
-            return redirect(url_for('github_settings'))
-        
-        # Form verilerini al
-        settings = {
-            "default_language": request.form.get('default_language', 'python'),
-            "default_time_period": request.form.get('default_time_period', 'weekly'),
-            "default_limit": int(request.form.get('default_limit', 10)),
-            "search_topics": [],
-            "custom_search_queries": [],
-            "languages": ["python", "javascript", "typescript", "go", "rust", "java", "cpp", "csharp", "swift", "kotlin"],
-            "time_periods": ["daily", "weekly", "monthly"]
-        }
-        
-        # Arama konularını al (virgülle ayrılmış)
-        topics_input = request.form.get('search_topics', '')
-        if topics_input.strip():
-            settings["search_topics"] = [topic.strip() for topic in topics_input.split(',') if topic.strip()]
-        else:
-            # Varsayılan konuları ekle
-            settings["search_topics"] = ["ai", "machine-learning", "deep-learning"]
-        
-        # Özel arama sorgularını al (virgülle ayrılmış)
-        queries_input = request.form.get('custom_search_queries', '')
-        if queries_input.strip():
-            settings["custom_search_queries"] = [query.strip() for query in queries_input.split(',') if query.strip()]
-        
-        terminal_log(f"💾 GitHub ayarları kaydediliyor: {settings}", "info")
-        
-        # Ayarları kaydet
-        try:
-            if save_github_settings(settings):
-                flash('GitHub ayarları başarıyla kaydedildi!', 'success')
-                terminal_log("✅ GitHub ayarları başarıyla kaydedildi", "success")
-            else:
-                flash('GitHub ayarları kaydedilemedi!', 'error')
-                terminal_log("❌ GitHub ayarları kaydedilemedi", "error")
-        except Exception as save_error:
-            terminal_log(f"❌ GitHub ayarları kaydetme exception: {save_error}", "error")
-            flash(f'GitHub ayarları kaydetme hatası: {str(save_error)}', 'error')
-        
-        return redirect(url_for('github_settings'))
-        
-    except Exception as e:
-        terminal_log(f"❌ GitHub ayarları kaydetme hatası: {e}", "error")
-        flash(f'GitHub ayarları kaydetme hatası: {str(e)}', 'error')
-        return redirect(url_for('github_settings'))
-
-@app.route('/fetch_github_repos_with_settings', methods=['POST'])
-@login_required
-def fetch_github_repos_with_settings():
-    """Ayarlara göre GitHub repolarını çek"""
-    try:
-        if not GITHUB_MODULE_AVAILABLE:
-            return jsonify({"success": False, "error": "GitHub modülü kullanılamıyor"})
-        
-        data = request.get_json()
-        
-        # Ayarları yükle
-        settings = load_github_settings()
-        
-        # Parametreleri al (form'dan gelen değerler öncelikli)
-        language = data.get('language', settings.get('default_language', 'python'))
-        time_period = data.get('time_period', settings.get('default_time_period', 'weekly'))
-        limit = min(int(data.get('limit', settings.get('default_limit', 10))), 20)
-        use_topics = data.get('use_topics', False)
-        custom_topics = data.get('custom_topics', '')
-        
-        terminal_log(f"🔍 GitHub repoları çekiliyor - Dil: {language}, Dönem: {time_period}, Limit: {limit}", "info")
-        
-        repos = []
-        
-        if use_topics:
-            # Konulara göre arama yap
-            topics_to_search = []
-            
-            # Özel konular varsa ekle
-            if custom_topics.strip():
-                custom_topic_list = [topic.strip() for topic in custom_topics.split(',') if topic.strip()]
-                topics_to_search.extend(custom_topic_list)
-            else:
-                # Varsayılan konuları kullan
-                topics_to_search = settings.get('search_topics', ['ai', 'machine-learning'])
-            
-            terminal_log(f"🎯 Konulara göre arama: {topics_to_search}", "info")
-            repos = search_github_repos_by_topics(
-                topics=topics_to_search,
-                language=language,
-                time_period=time_period,
-                limit=limit
-            )
-        else:
-            # Normal trend arama (GitHub trending sayfasından)
-            repos = fetch_trending_github_repos(
-                language=language,
-                time_period=time_period,
-                limit=limit
-            )
-        
-        if not repos:
-            return jsonify({"success": False, "error": "GitHub repo bulunamadı"})
-        
-        # Mevcut pending tweets'leri yükle
-        try:
-            pending_tweets = load_json('pending_tweets.json')
-        except:
-            pending_tweets = []
-        
-        # Mevcut GitHub repo URL'lerini kontrol et (duplikasyon önleme)
-        existing_urls = set()
-        for tweet in pending_tweets:
-            if tweet.get('source_type') == 'github' and tweet.get('url'):
-                existing_urls.add(tweet.get('url'))
-        
-        # Mevcut paylaşılan repoları da kontrol et
-        try:
-            posted_articles = load_json("posted_articles.json")
-        except:
-            posted_articles = []
-        
-        posted_urls = set()
-        for article in posted_articles:
-            if article.get('url'):
-                posted_urls.add(article.get('url'))
-        
-        # Tüm mevcut URL'leri birleştir
-        all_existing_urls = existing_urls.union(posted_urls)
-        
-        terminal_log(f"📊 Duplikasyon kontrolü - Mevcut: {len(existing_urls)} pending, {len(posted_urls)} posted", "info")
-        
-        # Tweet'leri oluştur
-        new_tweets = []
-        api_key = os.environ.get('GOOGLE_API_KEY')
-        
-        for repo in repos:
-            try:
-                # Duplikasyon kontrolü
-                if repo["url"] in all_existing_urls:
-                    terminal_log(f"⚠️ GitHub repo zaten mevcut: {repo['name']}", "warning")
-                    continue
-                
-                # AI ile tweet oluştur
-                tweet_result = generate_github_tweet(repo, api_key)
-                
-                if tweet_result.get("success"):
-                    # Benzersiz ID oluştur
-                    tweet_id = len(pending_tweets) + len(new_tweets) + 1
-                    
-                    tweet_data = {
-                        "id": tweet_id,
-                        "title": f"GitHub: {repo['name']}",
-                        "content": tweet_result["tweet"],
-                        "url": repo["url"],
-                        "source": "GitHub",
-                        "source_type": "github",
-                        "created_at": datetime.now().isoformat(),
-                        "repo_data": repo,
-                        "is_posted": False,
-                        "language": repo.get("language", ""),
-                        "stars": repo.get("stars", 0),
-                        "forks": repo.get("forks", 0),
-                        "owner": repo.get("owner", {}).get("login", ""),
-                        "topics": repo.get("topics", [])[:5],
-                        "search_topics": repo.get("search_topics", []),  # Hangi konularla bulundu
-                        "hash": hashlib.md5(repo["url"].encode()).hexdigest()
-                    }
-                    new_tweets.append(tweet_data)
-                    terminal_log(f"✅ GitHub tweet hazırlandı: {repo['name']}", "success")
-                else:
-                    # Fallback tweet oluştur
-                    tweet_text = create_fallback_github_tweet(repo)
-                    tweet_id = len(pending_tweets) + len(new_tweets) + 1
-                    
-                    tweet_data = {
-                        "id": tweet_id,
-                        "title": f"GitHub: {repo['name']}",
-                        "content": tweet_text,
-                        "url": repo["url"],
-                        "source": "GitHub",
-                        "source_type": "github",
-                        "created_at": datetime.now().isoformat(),
-                        "repo_data": repo,
-                        "is_posted": False,
-                        "language": repo.get("language", ""),
-                        "stars": repo.get("stars", 0),
-                        "forks": repo.get("forks", 0),
-                        "owner": repo.get("owner", {}).get("login", ""),
-                        "topics": repo.get("topics", [])[:5],
-                        "search_topics": repo.get("search_topics", []),
-                        "hash": hashlib.md5(repo["url"].encode()).hexdigest()
-                    }
-                    new_tweets.append(tweet_data)
-                    terminal_log(f"⚠️ GitHub fallback tweet oluşturuldu: {repo['name']}", "warning")
-                    
-            except Exception as e:
-                terminal_log(f"❌ GitHub tweet hatası ({repo['name']}): {e}", "error")
-                continue
-        
-        if new_tweets:
-            # Yeni tweet'leri pending listesine ekle
-            pending_tweets.extend(new_tweets)
-            save_json('pending_tweets.json', pending_tweets)
-            
-            terminal_log(f"✅ {len(new_tweets)} GitHub tweet'i pending listesine eklendi", "success")
-            
-            return jsonify({
-                "success": True,
-                "message": f"{len(new_tweets)} yeni GitHub repo tweet'i oluşturuldu",
-                "total_repos": len(repos),
-                "new_tweets": len(new_tweets),
-                "search_method": "topics" if use_topics else "trending",
-                "search_topics": topics_to_search if use_topics else None
-            })
-        else:
-            # Hiç yeni tweet oluşturulamadıysa detaylı bilgi ver
-            duplicate_count = len([repo for repo in repos if repo["url"] in all_existing_urls])
-            
-            return jsonify({
-                "success": False,
-                "error": f"Yeni GitHub tweet'i oluşturulamadı. {len(repos)} repo bulundu, {duplicate_count} tanesi zaten mevcut.",
-                "total_repos": len(repos),
-                "duplicate_count": duplicate_count,
-                "search_method": "topics" if use_topics else "trending",
-                "search_topics": topics_to_search if use_topics else None,
-                "language": language,
-                "time_period": time_period
-            })
-        
-    except Exception as e:
-        terminal_log(f"❌ GitHub repo çekme hatası: {e}", "error")
-        return jsonify({"success": False, "error": str(e)})
-
-@app.route('/api/github_settings')
-@login_required
-def get_github_settings_api():
-    """GitHub ayarlarını JSON olarak döndür"""
-    try:
-        if not GITHUB_MODULE_AVAILABLE:
-            return jsonify({"success": False, "error": "GitHub modülü kullanılamıyor"})
-        
-        settings = load_github_settings()
-        return jsonify({
-            "success": True,
-            "settings": settings
-        })
         
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
@@ -4961,6 +4472,173 @@ def toggle_ai_keyword():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
+@app.route('/shared_tweets')
+@login_required
+def shared_tweets():
+    """Paylaşılan tweetler sayfası"""
+    try:
+        # Paylaşılan makaleleri yükle
+        articles = load_json(HISTORY_FILE)
+        
+        # Sadece paylaşılan tweetleri filtrele (silinmemiş olanlar)
+        shared_articles = [article for article in articles if not article.get('deleted', False)]
+        
+        return render_template('shared_tweets.html', articles=shared_articles)
+    except Exception as e:
+        flash(f'Sayfa yükleme hatası: {str(e)}', 'danger')
+        return redirect(url_for('index'))
+
+@app.route('/api/create_tweet_homepage', methods=['POST'])
+@login_required
+def create_tweet_homepage():
+    """Ana sayfa manuel tweet oluşturma için özel endpoint - JSON response döner"""
+    try:
+        # Form verilerini al
+        tweet_mode = request.form.get('tweet_mode', 'text')
+        tweet_theme = request.form.get('tweet_theme', 'bilgilendirici')
+        action = request.form.get('action', 'preview')
+        save_as_draft = request.form.get('save_as_draft') == 'true'
+        
+        terminal_log(f"🏠 Ana sayfa tweet oluşturma - Mode: {tweet_mode}, Tema: {tweet_theme}", "info")
+        
+        # Mode'a göre işlem yap
+        tweet_content = None
+        source_data = {
+            'type': tweet_mode,
+            'theme': tweet_theme,
+            'created_via': 'homepage'
+        }
+        
+        if tweet_mode == 'text':
+            tweet_text = request.form.get('tweet_text', '').strip()
+            if not tweet_text or len(tweet_text) < 10:
+                return jsonify({'success': False, 'error': 'Tweet en az 10 karakter olmalıdır!'})
+            
+            # AI ile optimize et
+            from utils import generate_ai_tweet_with_content
+            api_key = os.environ.get('GOOGLE_API_KEY')
+            
+            article_data = {
+                'title': tweet_text[:100],
+                'content': tweet_text,
+                'url': '',
+                'lang': 'tr'
+            }
+            
+            tweet_data = generate_ai_tweet_with_content(article_data, api_key, tweet_theme)
+            tweet_content = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
+            
+            source_data.update({
+                'original_text': tweet_text
+            })
+            
+        elif tweet_mode == 'image':
+            image_file = request.files.get('tweet_image')
+            if not image_file or not image_file.filename:
+                return jsonify({'success': False, 'error': 'Lütfen bir resim seçin!'})
+            
+            # Resmi kaydet
+            filename = secure_filename(image_file.filename)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"{timestamp}_{filename}"
+            image_path = os.path.join('static', 'uploads', filename)
+            
+            os.makedirs(os.path.dirname(image_path), exist_ok=True)
+            image_file.save(image_path)
+            
+            # OCR ile resimden metin çıkar
+            from utils import gemini_ocr_image, generate_ai_tweet_with_content
+            ocr_text = gemini_ocr_image(image_path)
+            
+            if not ocr_text or len(ocr_text.strip()) < 10:
+                return jsonify({'success': False, 'error': 'Resimden yeterli metin çıkarılamadı.'})
+            
+            # AI ile tweet oluştur
+            api_key = os.environ.get('GOOGLE_API_KEY')
+            article_data = {
+                'title': ocr_text[:100],
+                'content': ocr_text,
+                'url': '',
+                'lang': 'en'
+            }
+            
+            tweet_data = generate_ai_tweet_with_content(article_data, api_key, tweet_theme)
+            tweet_content = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
+            
+            source_data.update({
+                'image_path': image_path,
+                'original_filename': image_file.filename,
+                'ocr_text': ocr_text
+            })
+            
+        elif tweet_mode == 'link':
+            url = request.form.get('tweet_url', '').strip()
+            if not url:
+                return jsonify({'success': False, 'error': 'Lütfen bir URL girin!'})
+            
+            # URL içeriğini çek
+            from utils import fetch_article_content_with_mcp_only, generate_ai_tweet_with_content
+            article_data = fetch_article_content_with_mcp_only(url)
+            
+            if not article_data or not article_data.get('content'):
+                return jsonify({'success': False, 'error': 'URL içeriği çekilemedi.'})
+            
+            # AI ile tweet oluştur
+            api_key = os.environ.get('GOOGLE_API_KEY')
+            tweet_data = generate_ai_tweet_with_content(article_data, api_key, tweet_theme)
+            tweet_content = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
+            
+            source_data.update({
+                'source_url': url,
+                'fetched_title': article_data.get('title', ''),
+                'fetched_content': article_data.get('content', '')[:200]
+            })
+        
+        if not tweet_content:
+            return jsonify({'success': False, 'error': 'Tweet içeriği oluşturulamadı.'})
+        
+        # Tweet'i kaydet
+        tweet_id = str(uuid.uuid4())
+        tweet_data = {
+            'id': tweet_id,
+            'content': tweet_content,
+            'status': 'draft' if save_as_draft else 'ready',
+            'created_at': datetime.now().isoformat(),
+            'theme': tweet_theme,
+            'source_data': source_data,
+            'is_posted': False,
+            'char_count': len(tweet_content),
+            'created_via': 'homepage'
+        }
+        
+        # Manuel tweets'e kaydet
+        manual_tweets = load_manual_tweets()
+        manual_tweets.append(tweet_data)
+        save_manual_tweets(manual_tweets)
+        
+        terminal_log(f"✅ Ana sayfa tweet oluşturuldu - ID: {tweet_id}, {len(tweet_content)} karakter", "success")
+        
+        # Response döndür
+        return jsonify({
+            'success': True,
+            'tweet': {
+                'id': tweet_id,
+                'content': tweet_content,
+                'mode': tweet_mode,
+                'theme': tweet_theme,
+                'isDraft': save_as_draft,
+                'charCount': len(tweet_content),
+                'imagePath': source_data.get('image_path'),
+                'originalFilename': source_data.get('original_filename'),
+                'sourceUrl': source_data.get('source_url'),
+                'fetchedTitle': source_data.get('fetched_title')
+            }
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Ana sayfa tweet oluşturma hatası: {e}", "error")
+        return jsonify({'success': False, 'error': str(e)})
+
 if __name__ == '__main__':
     # Arka plan zamanlayıcısını başlat
     start_background_scheduler()
@@ -4969,5 +4647,5 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') == 'development'
     
-    terminal_log(f"Flask uygulaması başlatılıyor - Port: {port}", "info")
+    terminal_log(f"Flask uygulaması başlatılıyor - Port: {port}, Debug: {debug}", "info")
     app.run(host='0.0.0.0', port=port, debug=debug)

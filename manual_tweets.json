@@ -23,5 +23,126 @@
     "version": 1,
     "manual_post": true,
     "confirmed_at": "2025-06-18T15:18:01.562629"
+  },
+  {
+    "id": "manual_1754476042_108",
+    "content": "🎯⚡ AI now ranks stocks like a pro! New code uses MCDM, achieving data-driven investment decisions for companies like TUPRS & SISE. #AI #Tech #Finance #Investment\n\n🔗 ",
+    "theme": "bilgilendirici",
+    "source_data": {
+      "type": "image",
+      "image_path": "static\\uploads\\GvVFOuUWYAAPS10.png",
+      "ocr_text": "```text\nimport numpy as np\nimport pandas as pd\n#1. Karar Matrisi (gerçek finansal oranlar örnek olarak verilmiştir)\ndata = {\n}\n'Hisse': ['TUPRS', 'SISE', 'EREGL'],\n'Net Kar Marjı': [12.4, 15.1, 10.8],\n'ROE': [28.7, 22.5, 18.4],\n'ROA': [16.5, 14.3, 11.1],\n'Borç/Özsermaye': [0.90, 0.75, 0.65]\ndf = pd.DataFrame(data)\nX = df.iloc[:, 1:].values.astype(float)\nX_norm = np.zeros_like(X)\nfor j in range(✗.shape[1]):\nif df.columns[j+1] == 'Borç/Özsermaye':\nX_norm[:, j] = np.min(X[:, j]) / X[:, j]\nelse:\nX_norm[:, j] = X[:, j] / np.sqrt(np.sum(X[:, j]**2))\n#--- 3. Ağırlıklar (isteğe bağlı olarak eşit veya uzman görüşüyle)\nweights = np.array ([0.3, 0.3, 0.2, 0.2]) # Toplamı 1 olacak şekilde\nX_weighted = X_norm weights\nideal_pos = np.max(X_weighted, axis=0)\nideal_neg = np.min(X_weighted, axis=0)\nD_pos = np.sqrt(np.sum((X_weighted\nD_neg = np.sqrt(np.sum((X_weighted\nCi = D_neg / (D_pos + D_neg)\ndf[ 'Yakınlık İndeksi'] = Ci\nideal_pos)**2, axis=1))\nideal_neg) **2, axis=1))\ndf = df.sort_values(by='Yakınlık İndeksi', ascending=False).reset_index(drop=True)\nprint(df[['Hisse', 'Yakınlık İndeksi']])\nHisse Yakınlık İndeksi\nØ SISE\n1 TUPRS\n2 EREGL\n0.576603\n0.576055\n0.346221\n```",
+      "original_filename": "GvVFOuUWYAAPS10.png"
+    },
+    "status": "ready",
+    "created_at": "2025-08-06T13:27:22.030727",
+    "updated_at": "2025-08-06T13:27:22.030727",
+    "hash": "6d48427f3e3f193d2449126949022254",
+    "char_count": 165,
+    "hashtag_count": 4,
+    "emoji_count": 3,
+    "is_posted": false,
+    "posted_at": null,
+    "posted_url": null,
+    "created_by": "manual",
+    "version": 1
+  },
+  {
+    "id": "manual_1754476487_652",
+    "content": "📊🎯 Financial decision-making, streamlined! Code normalizes & weights financial ratios (TUPRS, SISE) using NumPy/Pandas. Faster, data-driven insights. #AI #Tech #Finance #DataAnalysis\n\n🔗 ",
+    "theme": "bilgilendirici",
+    "source_data": {
+      "type": "image",
+      "image_path": "static\\uploads\\GvVFOuUWYAAPS10.png",
+      "ocr_text": "import numpy as np\nimport pandas as pd\n#1. Karar Matrisi (gerçek finansal oranlar örnek olarak verilmiştir)\ndata = {\n}\n'Hisse': ['TUPRS', 'SISE', 'EREGL'],\n'Net Kar Marjı': [12.4, 15.1, 10.8],\n'ROE': [28.7, 22.5, 18.4],\n'ROA': [16.5, 14.3, 11.1],\n'Borç/Özsermaye': [0.90, 0.75, 0.65]\ndf = pd.DataFrame(data)\nX = df.iloc[:, 1:].values.astype(float)\nX_norm = np.zeros_like(X)\nfor j in range(✗.shape[1]):\nif df.columns[j+1] == 'Borç/Özsermaye':\nX_norm[:, j] = np.min(X[:, j]) / X[:, j]\nelse:\nX_norm[:, j] = X[:, j] / np.sqrt(np.sum(X[:, j]**2))\n#--- 3. Ağırlıklar (isteğe bağlı olarak eşit veya uzman görüşüyle)\nweights = np.array ([0.3, 0.3, 0.2, 0.2]) # Toplamı 1 olacak şekilde\nX_weighted = X_norm weights\nideal_pos = np.max(X_weighted, axis=0)\nideal_neg = np.min(X_weighted, axis=0)\nD_pos = np.sqrt(np.sum((X_weighted\nD_neg = np.sqrt(np.sum((X_weighted\nCi = D_neg / (D_pos + D_neg)\ndf[ 'Yakınlık İndeksi'] = Ci\nideal_pos)**2, axis=1))\nideal_neg) **2, axis=1))\ndf = df.sort_values(by='Yakınlık İndeksi', ascending=False).reset_index(drop=True)\nprint(df[['Hisse', 'Yakınlık İndeksi']])\nHisse Yakınlık İndeksi\nØ SISE\n1 TUPRS\n2 EREGL\n0.576603\n0.576055\n0.346221",
+      "original_filename": "GvVFOuUWYAAPS10.png"
+    },
+    "status": "ready",
+    "created_at": "2025-08-06T13:34:47.685026",
+    "updated_at": "2025-08-06T13:34:47.685026",
+    "hash": "1af136a1525f1f03fc8d1bd217f10b53",
+    "char_count": 186,
+    "hashtag_count": 4,
+    "emoji_count": 3,
+    "is_posted": false,
+    "posted_at": null,
+    "posted_url": null,
+    "created_by": "manual",
+    "version": 1
+  },
+  {
+    "id": "manual_1754476915_173",
+    "content": "🎯📊 Code ranks stocks (TUPRS, SISE) using financial ratios (Net Profit Margin, ROE, ROA, Debt/Equity) in a decision matrix. Data-driven investing, simplified. #AI #Tech #Finance #DataAnalysis\n\n🔗 ",
+    "theme": "bilgilendirici",
+    "source_data": {
+      "type": "image",
+      "image_path": "static\\uploads\\GvVFOuUWYAAPS10.png",
+      "ocr_text": "import numpy as np\nimport pandas as pd\n#1. Karar Matrisi (gerçek finansal oranlar örnek olarak verilmiştir)\ndata = {\n}\n'Hisse': ['TUPRS', 'SISE', 'EREGL'],\n'Net Kar Marjı': [12.4, 15.1, 10.8],\n'ROE': [28.7, 22.5, 18.4],\n'ROA': [16.5, 14.3, 11.1],\n'Borç/Özsermaye': [0.90, 0.75, 0.65]\ndf = pd.DataFrame(data)\nX = df.iloc[:, 1:].values.astype(float)\nX_norm = np.zeros_like(X)\nfor j in range(✗.shape[1]):\nif df.columns[j+1] == 'Borç/Özsermaye':\nX_norm[:, j] = np.min(X[:, j]) / X[:, j]\nelse:\nX_norm[:, j] = X[:, j] / np.sqrt(np.sum(X[:, j]**2))\n#--- 3. Ağırlıklar (isteğe bağlı olarak eşit veya uzman görüşüyle)\nweights = np.array ([0.3, 0.3, 0.2, 0.2]) # Toplamı 1 olacak şekilde\nX_weighted = X_norm * weights\nideal_pos = np.max(X_weighted, axis=0)\nideal_neg = np.min(X_weighted, axis=0)\nD_pos = np.sqrt(np.sum((X_weighted\nD_neg = np.sqrt(np.sum((X_weighted\nCi = D_neg / (D_pos + D_neg)\ndf[ 'Yakınlık İndeksi'] = Ci\nideal_pos)**2, axis=1))\nideal_neg) **2, axis=1))\ndf = df.sort_values(by='Yakınlık İndeksi', ascending=False).reset_index(drop=True)\nprint(df[['Hisse', 'Yakınlık İndeksi']])\nHisse Yakınlık İndeksi\nØ SISE\n1 TUPRS\n2 EREGL\n0.576603\n0.576055\n0.346221",
+      "original_filename": "GvVFOuUWYAAPS10.png"
+    },
+    "status": "ready",
+    "created_at": "2025-08-06T13:41:55.011085",
+    "updated_at": "2025-08-06T13:41:55.011085",
+    "hash": "831c8fe47cd6dce0a6326d927eb1529a",
+    "char_count": 194,
+    "hashtag_count": 4,
+    "emoji_count": 3,
+    "is_posted": false,
+    "posted_at": null,
+    "posted_url": null,
+    "created_by": "manual",
+    "version": 1
+  },
+  {
+    "id": "e31b7214-f367-44ee-891f-3d283578088f",
+    "content": "📊🔍 Sharpe Ratio & Expectancy: Understand core algorithmic trading formulas at a glance. U.S. Treasury provides clarity for informed decisions. #AI #Tech #AlgorithmicTrading #QuantitativeFinance\n\n🔗 ",
+    "status": "ready",
+    "created_at": "2025-08-06T14:01:51.375543",
+    "theme": "bilgilendirici",
+    "source_data": {
+      "type": "image",
+      "theme": "bilgilendirici",
+      "created_via": "homepage",
+      "image_path": "static\\uploads\\20250806_140133_GtvpwbVXAAAvFmc.jpg",
+      "original_filename": "GtvpwbVXAAAvFmc.jpg",
+      "ocr_text": "Algorithmic trading formula sheet\nSharpe Ratio\nSharpe Ratio =\nRp - Rf\nσρ\nExpectancy\nExpectancy =\n(AWR)-(XALR)\nExplanation of the Variables\n• Rp: The expected return of the portfolio or investment. This is the average\nreturn that the portfolio has generated over a specific period.\nRf: The risk-free rate of return. This is typically the return on a risk-free\nasset, such as a U.S. Treasury bond, over the same period.\n• ση: The standard deviation of the portfolio's excess return (i.e., the portfolio\nreturn minus the risk-free rate). This represents the portfolio's total risk or\nvolatility.\nExplanation:\nW: The number of winning trades.\nL: The number of losing trades.\nT: The total number of trades (i.e., T = W + L).\nAWR: The average win ratio, which is the average profit made on winning\ntrades.\nALR: The average loss ratio, which is the average loss incurred on losing\ntrades.\nValue at Risk\nVaRa = P(AP < -V) = α\nMean Adverse Excursion\nMAE = max(Pentry Pmin)\nExplanation:\n• VaR: Value at Risk at a confidence level a. It represents the maximum\npotential loss over a specific time period, given a certain confidence level.\nP: Probability.\nAP: Change in the value of the portfolio.\nV: Threshold value that the portfolio could lose.\na: Confidence level (e.g., 95% or 99%).\nExplanation:\nPentry: The entry price of the trade.\nPmin: The minimum price reached by the asset during the holding period of\nthe trade.\nmax(Pentry Pmin): The maximum adverse excursion, which represents\nthe largest unrealized loss experienced during the trade.\nConditional Value at Risk\nCVaR E [Loss | Loss > VaRa]\nDrawdown\nDrawdown\nPeak Value Trough Value\nPeak Value\nExplanation:\n• CVaRa: Conditional Value at Risk at a confidence level a. It represents the\nexpected loss, given that the loss has exceeded the Value at Risk (VaR)\nthreshold.\nE [Loss | Loss > VaRa]: The expected value of the loss, conditional on\nthe loss being greater than or equal to the VaR at the confidence level a.\nSortino Ratio\nExplanation:\nPeak Value: The highest value of the portfolio or investment before the\ndrawdown occurs.\nTrough Value: The lowest value of the portfolio or investment during the\ndrawdown period.\nDrawdown: The percentage decline from the peak value to the trough value.\nIt measures the extent of the decline in a portfolio or asset's value, indicating\nthe severity of a loss during a specific period.\nExplanation:\nSortino Ratio\nRp - Rf\nσα\nRp: The expected return of the portfolio or investment. This is the average\nreturn that the portfolio has generated over a specific period.\nRf: The risk-free rate of return. This is typically the return on a risk-free\nasset, such as a U.S. Treasury bond, over the same period.\nσα: The standard deviation of the portfolio's downside deviation. This\nmeasures the volatility of negative returns or the downside risk, which is the\nvariation of returns that fall below a certain threshold, typically the risk-free\nrate.\nCalmar Ratio\nCalmar Ratio\nRp\nMax Drawdown\nExplanation:\nRp: The compound annual growth rate (CAGR) or average annual return of\nthe portfolio or investment.\nMax Drawdown: The maximum observed loss from a peak to a trough of a\nportfolio, before a new peak is attained.\npyquantnews.com"
+    },
+    "is_posted": false,
+    "char_count": 197,
+    "created_via": "homepage"
+  },
+  {
+    "id": "655b29ee-6e0b-4a84-85f2-d9cb50b6ad90",
+    "content": "📈💡 Civil engineer with hydraulics expertise & 5+ yrs coding! Bridging fluid dynamics knowledge with custom software solutions. #AI #Tech #ArtificialIntelligence #MachineLearning\n\n🔗 ",
+    "status": "ready",
+    "created_at": "2025-08-06T14:04:46.426470",
+    "theme": "bilgilendirici",
+    "source_data": {
+      "type": "text",
+      "theme": "bilgilendirici",
+      "created_via": "homepage",
+      "original_text": "I'm a civil engineer specializing in hydraulics. I've been developing software as a hobby for 5+ years, with various projects on GitHub. I combine my engineering knowledge and software skills to create innovative solutions.\r\n\r\n🌍  I'm based in Tunceli, Turkey\r\n🖥️  See my portfolio at my page\r\n✉️  You can contact me at umutcelik230@gmail.com\r\n🧠  I'm learning Typscript\r\n🤝  I'm open to collaborating on hobby for now\r\n⚡  That's all for now. I'll be back if anything happens."
+    },
+    "is_posted": false,
+    "char_count": 181,
+    "created_via": "homepage"
+  },
+  {
+    "id": "61cdd491-5c14-42ce-bead-cf9608c93fcc",
+    "content": "⚡💡 GitHub enhances engineering workflows with AI-powered tools, enabling civil engineers to streamline project collaboration and code management. A game-changer for infrastructure development. (199 characters) #AI #Tech #CivilEngineering #SoftwareDevelopment\n\n🔗 ",
+    "status": "ready",
+    "created_at": "2025-08-06T14:08:48.936059",
+    "theme": "bilgilendirici",
+    "source_data": {
+      "type": "link",
+      "theme": "bilgilendirici",
+      "created_via": "homepage",
+      "source_url": "https://github.com/palamut62",
+      "fetched_title": "Başlık bulunamadı",
+      "fetched_content": "HiMy name is umut çelikI'm a civil engineer specializing in hydraulics. I've been developing software as a hobby for 5+ years, with various projects on GitHub. I combine my engineering knowledge and s"
+    },
+    "is_posted": false,
+    "char_count": 262,
+    "created_via": "homepage"
   }
 ]

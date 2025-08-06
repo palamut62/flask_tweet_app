@@ -96,6 +96,7 @@
         }
     </script>
     <style>
+        /* stylelint-disable */
         .glass-effect {
             backdrop-filter: blur(10px);
             background: rgba(255, 255, 255, 0.1);
@@ -150,7 +151,14 @@
         
         /* Global mobil-friendly sınıflar */
         .card-modern {
-            @apply bg-white rounded-2xl shadow-lg border border-gray-100 transition-all duration-200 hover:shadow-xl;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f3f4f6;
+            transition: all 0.2s ease;
+        }
+        .card-modern:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
         .btn-mobile {
@@ -221,51 +229,137 @@
         
         /* Navigation Styles */
         .nav-item {
-            @apply flex flex-col items-center space-y-1 px-4 py-3 rounded-xl transition-all duration-200 hover:bg-gray-50 text-gray-700 font-medium text-sm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease;
+            color: #374151;
+            font-weight: 500;
+            font-size: 0.875rem;
         }
         
         .nav-item:hover {
-            @apply transform scale-105;
+            transform: scale(1.05);
+            background-color: #f9fafb;
         }
         
         .nav-item-active {
-            @apply bg-white shadow-md;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         
         .nav-item-active .nav-icon {
-            @apply shadow-sm;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
         
         .nav-icon {
-            @apply w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all duration-200;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        
+        /* Minimal Navigation Styles */
+        .nav-item-minimal {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.75rem 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            color: #6b7280;
+            font-weight: 500;
+            min-width: 60px;
+        }
+        
+        .nav-item-minimal:hover {
+            color: #374151;
+            background-color: #f9fafb;
+            transform: translateY(-1px);
+        }
+        
+        .nav-item-active-minimal {
+            color: #2563eb;
+            background-color: #eff6ff;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dropdown-item-minimal {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            color: #374151;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            min-height: 48px;
+            margin: 2px 4px;
+        }
+        
+        .dropdown-item-minimal:hover {
+            background-color: #f9fafb;
+            transform: translateX(2px);
         }
         
         .mobile-nav-link {
-            @apply flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium;
-            min-height: 48px; /* Dokunma dostu minimum boyut */
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            color: #374151;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            min-height: 48px;
         }
         
         .mobile-nav-link:hover {
-            @apply transform translate-x-1;
+            transform: translateX(0.25rem);
+            background-color: #f9fafb;
         }
         
         /* Dropdown Styles */
         .dropdown-container:hover .dropdown-menu {
-            @apply opacity-100 visible transform scale-100;
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
         }
         
         .dropdown-trigger:hover .fa-chevron-down {
-            @apply transform rotate-180;
+            transform: rotate(180deg);
+        }
+        
+        .dropdown-menu {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
         .dropdown-item {
-            @apply flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium rounded-lg;
-            min-height: 56px; /* Daha büyük dokunma alanı */
-            margin: 4px 12px; /* Kenarlardan boşluk */
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            color: #374151;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            min-height: 56px;
+            margin: 4px 12px;
         }
         
         .dropdown-item:hover {
-            @apply transform translate-x-1;
+            transform: translateX(0.25rem);
+            background-color: #f9fafb;
         }
         
         .dropdown-menu {
@@ -291,27 +385,38 @@
                 transform: translateX(-50%) scale(1);
             }
             
-            .dropdown-item {
+            .dropdown-item,
+            .dropdown-item-minimal {
                 padding: 16px 20px;
                 min-height: 64px;
-                margin: 6px 16px; /* Mobile'da daha fazla kenar boşluğu */
+                margin: 6px 16px;
+            }
+            
+            .nav-item-minimal {
+                min-width: 50px;
+                padding: 0.5rem 0.25rem;
+            }
+            
+            .nav-item-minimal span {
+                font-size: 10px;
             }
         }
         
         /* Mobil optimizasyonları - Tüm sayfalar için */
         @media (max-width: 768px) {
             .card-modern {
-                @apply mx-2;
+                margin-left: 0.5rem;
+                margin-right: 0.5rem;
             }
             
             .btn-primary, .btn-secondary, .btn-success, .btn-warning, .btn-danger, .btn-info {
                 min-height: 48px;
-                font-size: 16px; /* iOS zoom'u önlemek için */
+                font-size: 16px;
                 padding: 12px 16px;
             }
             
             input, textarea, select {
-                font-size: 16px; /* iOS zoom'u önlemek için */
+                font-size: 16px;
                 min-height: 48px;
                 padding: 12px 16px;
             }
@@ -320,26 +425,22 @@
                 font-size: 14px;
             }
             
-            /* Kart ve container'lar */
             .container, .max-w-7xl {
                 padding-left: 1rem;
                 padding-right: 1rem;
             }
             
-            /* Form elemanları */
             .form-control, .form-select {
                 min-height: 48px;
                 font-size: 16px;
                 border-radius: 8px;
             }
             
-            /* Modal ve popup'lar */
             .modal-dialog {
                 margin: 1rem;
                 max-width: calc(100vw - 2rem);
             }
             
-            /* Tablo responsive */
             .table {
                 font-size: 14px;
             }
@@ -349,26 +450,22 @@
                 white-space: nowrap;
             }
             
-            /* Alert ve notification'lar */
             .alert {
                 margin: 0.5rem;
                 padding: 12px;
                 border-radius: 8px;
             }
             
-            /* Grid sistemleri */
             .grid {
                 gap: 1rem;
             }
             
-            /* Text boyutları */
             h1 { font-size: 1.75rem; }
             h2 { font-size: 1.5rem; }
             h3 { font-size: 1.25rem; }
             h4 { font-size: 1.125rem; }
             h5 { font-size: 1rem; }
             
-            /* Spacing optimizasyonu */
             .p-6 { padding: 1rem; }
             .p-8 { padding: 1.5rem; }
             .py-8 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
@@ -392,18 +489,15 @@
                 gap: 0.75rem;
             }
             
-            /* Navigation optimizasyonu */
             .nav-item span {
                 font-size: 12px;
             }
             
-            /* Tablo scroll */
             .table-responsive {
                 border-radius: 8px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             }
             
-            /* Form grup spacing */
             .mb-3, .mb-4 {
                 margin-bottom: 1rem;
             }
@@ -420,7 +514,6 @@
                 margin: 0.5rem 0;
             }
             
-            /* Navigation height reduction */
             .h-20 {
                 height: 60px;
             }
@@ -439,46 +532,66 @@
         
         /* Haber Kaynağı Stilleri */
         .source-badge {
-            @apply inline-flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
         
         .source-badge-primary {
-            @apply bg-blue-50 border border-blue-200 text-blue-800;
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
         }
         
         .source-badge-success {
-            @apply bg-green-50 border border-green-200 text-green-800;
+            background-color: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
         }
         
         .source-badge-fallback {
-            @apply bg-gray-50 border border-gray-200 text-gray-800;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            color: #374151;
         }
         
         .source-icon {
-            @apply w-4 h-4 flex-shrink-0;
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
         }
         
         .source-name {
-            @apply font-semibold;
+            font-weight: 600;
         }
         
         .source-id {
-            @apply px-2 py-1 bg-white/50 rounded text-xs font-mono;
+            padding: 0.25rem 0.5rem;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-family: monospace;
         }
         
         /* Kaynak türüne göre özel renkler */
-        .source-techcrunch { @apply bg-green-50 border-green-200 text-green-800; }
-        .source-venturebeat { @apply bg-orange-50 border-orange-200 text-orange-800; }
-        .source-wired { @apply bg-purple-50 border-purple-200 text-purple-800; }
-        .source-reddit { @apply bg-red-50 border-red-200 text-red-800; }
-        .source-economist { @apply bg-indigo-50 border-indigo-200 text-indigo-800; }
-        .source-atlantic { @apply bg-cyan-50 border-cyan-200 text-cyan-800; }
-        .source-guardian { @apply bg-blue-50 border-blue-200 text-blue-800; }
-        .source-apple { @apply bg-gray-50 border-gray-200 text-gray-800; }
-        .source-hackernews { @apply bg-yellow-50 border-yellow-200 text-yellow-800; }
+        .source-techcrunch { background-color: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+        .source-venturebeat { background-color: #fef3c7; border-color: #fcd34d; color: #92400e; }
+        .source-wired { background-color: #f3e8ff; border-color: #c4b5fd; color: #6b21a8; }
+        .source-reddit { background-color: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+        .source-economist { background-color: #eef2ff; border-color: #a5b4fc; color: #3730a3; }
+        .source-atlantic { background-color: #ecfeff; border-color: #67e8f9; color: #0e7490; }
+        .source-guardian { background-color: #eff6ff; border-color: #93c5fd; color: #1e40af; }
+        .source-apple { background-color: #f9fafb; border-color: #d1d5db; color: #374151; }
+        .source-hackernews { background-color: #fef3c7; border-color: #fbbf24; color: #92400e; }
+        /* stylelint-enable */
     </style>
 </head>
-<body class="h-full bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 font-sans flex flex-col min-h-screen relative overflow-x-hidden">
+<body class="bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 font-sans relative overflow-x-hidden">
     <!-- Modern Background Pattern -->
     <div class="fixed inset-0 z-0 opacity-30">
         <div class="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse-slow"></div>
@@ -508,148 +621,99 @@
                             <i class="fas fa-robot text-white text-xl"></i>
                         </div>
                         <div class="hidden sm:block">
-                            <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                AI Tweet Bot
-                            </span>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                    AI Tweet Bot
+                                </span>
+                                <span class="px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold rounded-full shadow-sm">
+                                    v{{ app_version }}
+                                </span>
+                            </div>
                             <div class="text-xs text-gray-500 font-medium">Otomatik Tweet Sistemi</div>
                         </div>
                     </a>
                 </div>
 
                 <!-- Desktop Navigation -->
-                <div class="hidden lg:flex items-center space-x-2">
+                <div class="hidden lg:flex items-center space-x-1">
                     <!-- Ana Sayfa -->
-                    <a href="{{ url_for('index') }}" class="nav-item {% if request.endpoint == 'index' %}nav-item-active{% endif %}">
-                        <div class="nav-icon bg-blue-100 text-blue-600">
-                            <i class="fas fa-home"></i>
-                        </div>
-                        <span>Ana Sayfa</span>
+                    <a href="{{ url_for('index') }}" class="nav-item-minimal {% if request.endpoint == 'index' %}nav-item-active-minimal{% endif %}">
+                        <i class="fas fa-home text-lg"></i>
+                        <span class="text-xs">Ana Sayfa</span>
                     </a>
                     
-                    <!-- Tweet İşlemleri Dropdown -->
+                    <!-- Tweet İşlemleri -->
+                    <a href="{{ url_for('create_tweet') }}" class="nav-item-minimal {% if request.endpoint == 'create_tweet' %}nav-item-active-minimal{% endif %}">
+                        <i class="fas fa-pen-nib text-lg"></i>
+                        <span class="text-xs">Tweet</span>
+                    </a>
+                    
+                    <!-- Paylaşılan Tweetler -->
+                    <a href="{{ url_for('shared_tweets') }}" class="nav-item-minimal {% if request.endpoint == 'shared_tweets' %}nav-item-active-minimal{% endif %}">
+                        <i class="fab fa-twitter text-lg"></i>
+                        <span class="text-xs">Paylaşılanlar</span>
+                    </a>
+                    
+                    <!-- Ayarlar Dropdown -->
                     <div class="relative dropdown-container">
-                        <button class="nav-item dropdown-trigger {% if request.endpoint in ['create_tweet'] %}nav-item-active{% endif %}">
-                            <div class="nav-icon bg-green-100 text-green-600">
-                                <i class="fas fa-pen-nib"></i>
-                            </div>
-                            <span>Tweet İşlemleri</span>
+                        <button class="nav-item-minimal dropdown-trigger {% if request.endpoint in ['settings', 'news_sources', 'security_check'] %}nav-item-active-minimal{% endif %}">
+                            <i class="fas fa-cog text-lg"></i>
+                            <span class="text-xs">Ayarlar</span>
                             <i class="fas fa-chevron-down text-xs ml-1 transition-transform duration-200"></i>
                         </button>
-                        <div class="dropdown-menu absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200/50 py-4 px-2 z-50 opacity-0 invisible transform scale-95 transition-all duration-200">
-                            <a href="{{ url_for('create_tweet') }}" class="dropdown-item {% if request.endpoint == 'create_tweet' %}bg-green-50 text-green-700{% endif %}">
-                                <div class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-pen-nib"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="font-medium text-gray-900">Tweet Oluştur</div>
-                                    <div class="text-xs text-gray-500 mt-0.5">Manuel tweet yazma</div>
-                                </div>
+                        <div class="dropdown-menu absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-200/50 py-3 px-2 z-50 opacity-0 invisible transform scale-95 transition-all duration-200">
+                            <a href="{{ url_for('settings') }}" class="dropdown-item-minimal {% if request.endpoint == 'settings' %}bg-gray-50 text-gray-700{% endif %}">
+                                <i class="fas fa-cog text-sm"></i>
+                                <span>Ayarlar</span>
                             </a>
-                            <a href="{{ url_for('github_repos') }}" class="dropdown-item {% if request.endpoint == 'github_repos' %}bg-purple-50 text-purple-700{% endif %}">
-                                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i class="fab fa-github"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="font-medium text-gray-900">GitHub Repoları</div>
-                                    <div class="text-xs text-gray-500 mt-0.5">Trend repoları keşfet</div>
-                                </div>
+                            <a href="{{ url_for('news_sources') }}" class="dropdown-item-minimal {% if request.endpoint == 'news_sources' %}bg-purple-50 text-purple-700{% endif %}">
+                                <i class="fas fa-newspaper text-sm"></i>
+                                <span>Haber Kaynakları</span>
                             </a>
-                            <div class="border-t border-gray-100 my-2 mx-3"></div>
-                            <a href="{{ url_for('check_articles') }}" class="dropdown-item">
-                                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-sync-alt"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="font-medium text-gray-900">Şimdi Kontrol Et</div>
-                                    <div class="text-xs text-gray-500 mt-0.5">Yeni makaleleri kontrol et</div>
-                                </div>
+                            <a href="{{ url_for('ai_keywords') }}" class="dropdown-item-minimal {% if request.endpoint == 'ai_keywords' %}bg-blue-50 text-blue-700{% endif %}">
+                                <i class="fas fa-brain text-sm"></i>
+                                <span>AI Anahtar Kelimeler</span>
+                            </a>
+                            <a href="{{ url_for('security_check') }}" class="dropdown-item-minimal {% if request.endpoint == 'security_check' %}bg-red-50 text-red-700{% endif %}">
+                                <i class="fas fa-shield-alt text-sm"></i>
+                                <span>Güvenlik</span>
                             </a>
                         </div>
                     </div>
                     
-                    <!-- Yönetim Dropdown -->
+                    <!-- Analiz Dropdown -->
                     <div class="relative dropdown-container">
-                        <button class="nav-item dropdown-trigger {% if request.endpoint in ['settings', 'news_sources', 'security_check'] %}nav-item-active{% endif %}">
-                            <div class="nav-icon bg-gray-100 text-gray-600">
-                                <i class="fas fa-cog"></i>
-                            </div>
-                            <span>Yönetim</span>
+                        <button class="nav-item-minimal dropdown-trigger {% if request.endpoint in ['statistics', 'deleted_tweets'] %}nav-item-active-minimal{% endif %}">
+                            <i class="fas fa-chart-bar text-lg"></i>
+                            <span class="text-xs">Analiz</span>
                             <i class="fas fa-chevron-down text-xs ml-1 transition-transform duration-200"></i>
                         </button>
-                        <div class="dropdown-menu absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200/50 py-4 px-2 z-50 opacity-0 invisible transform scale-95 transition-all duration-200">
-                            <a href="{{ url_for('settings') }}" class="dropdown-item {% if request.endpoint == 'settings' %}bg-gray-50 text-gray-700{% endif %}">
-                                <div class="w-10 h-10 bg-gray-100 text-gray-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-cog"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="font-medium text-gray-900">Ayarlar</div>
-                                    <div class="text-xs text-gray-500 mt-0.5">Sistem yapılandırması</div>
-                                </div>
+                        <div class="dropdown-menu absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-200/50 py-3 px-2 z-50 opacity-0 invisible transform scale-95 transition-all duration-200">
+                            <a href="{{ url_for('statistics') }}" class="dropdown-item-minimal {% if request.endpoint == 'statistics' %}bg-indigo-50 text-indigo-700{% endif %}">
+                                <i class="fas fa-chart-bar text-sm"></i>
+                                <span>İstatistikler</span>
                             </a>
-                            <a href="{{ url_for('news_sources') }}" class="dropdown-item {% if request.endpoint == 'news_sources' %}bg-purple-50 text-purple-700{% endif %}">
-                                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-newspaper"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="font-medium text-gray-900">Haber Kaynakları</div>
-                                    <div class="text-xs text-gray-500 mt-0.5">Kaynak yönetimi</div>
-                                </div>
+                            <a href="{{ url_for('deleted_tweets') }}" class="dropdown-item-minimal {% if request.endpoint == 'deleted_tweets' %}bg-red-50 text-red-700{% endif %}">
+                                <i class="fas fa-trash text-sm"></i>
+                                <span>Silinmiş Tweetler</span>
                             </a>
-                            <a href="{{ url_for('ai_keywords') }}" class="dropdown-item {% if request.endpoint == 'ai_keywords' %}bg-blue-50 text-blue-700{% endif %}">
-                                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-brain"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="font-medium text-gray-900">AI Anahtar Kelimeler</div>
-                                    <div class="text-xs text-gray-500 mt-0.5">Gelişmiş AI haber araması</div>
-                                </div>
-                            </a>
-                            <a href="{{ url_for('security_check') }}" class="dropdown-item {% if request.endpoint == 'security_check' %}bg-red-50 text-red-700{% endif %}">
-                                <div class="w-10 h-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-shield-alt"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="font-medium text-gray-900">Güvenlik</div>
-                                    <div class="text-xs text-gray-500 mt-0.5">Güvenlik kontrolleri</div>
-                                </div>
+                            <a href="{{ url_for('session_info') }}" class="dropdown-item-minimal" target="_blank">
+                                <i class="fas fa-info-circle text-sm"></i>
+                                <span>Oturum Bilgisi</span>
                             </a>
                         </div>
-                    </div>
-                    
-                    <!-- Analiz & Raporlar Dropdown -->
-                    <div class="relative dropdown-container">
-                                            <button class="nav-item dropdown-trigger {% if request.endpoint in ['statistics', 'deleted_tweets'] %}nav-item-active{% endif %}">
-                        <div class="nav-icon bg-indigo-100 text-indigo-600">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
-                        <span>Analiz & Raporlar</span>
-                        <i class="fas fa-chevron-down text-xs ml-1 transition-transform duration-200"></i>
-                    </button>
-                    <div class="dropdown-menu absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200/50 py-4 px-2 z-50 opacity-0 invisible transform scale-95 transition-all duration-200">
-                        <a href="{{ url_for('statistics') }}" class="dropdown-item {% if request.endpoint == 'statistics' %}bg-indigo-50 text-indigo-700{% endif %}">
-                            <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-chart-bar"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="font-medium text-gray-900">İstatistikler</div>
-                                <div class="text-xs text-gray-500 mt-0.5">Performans metrikleri</div>
-                            </div>
-                        </a>
-                        <a href="{{ url_for('deleted_tweets') }}" class="dropdown-item {% if request.endpoint == 'deleted_tweets' %}bg-red-50 text-red-700{% endif %}">
-                            <div class="w-10 h-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-trash"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="font-medium text-gray-900">Silinmiş Tweetler</div>
-                                <div class="text-xs text-gray-500 mt-0.5">Arşiv görüntüleme</div>
-                            </div>
-                        </a>
-                    </div>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-4">
+                    
+                    <!-- Version Badge (Mobile) -->
+                    <div class="sm:hidden">
+                        <span class="px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold rounded-full shadow-sm">
+                            v{{ app_version }}
+                        </span>
+                    </div>
                     
                     <!-- Session Info -->
                     <div class="hidden md:flex items-center space-x-3 px-3 py-2 bg-gray-50 rounded-lg">
@@ -720,12 +784,13 @@
                         </div>
                         <span>Tweet Oluştur</span>
                     </a>
-                    <a href="{{ url_for('github_repos') }}" class="mobile-nav-link {% if request.endpoint == 'github_repos' %}bg-purple-50 text-purple-700{% endif %}">
-                        <div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
-                            <i class="fab fa-github text-sm"></i>
+                    <a href="{{ url_for('shared_tweets') }}" class="mobile-nav-link {% if request.endpoint == 'shared_tweets' %}bg-blue-50 text-blue-700{% endif %}">
+                        <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                            <i class="fab fa-twitter text-sm"></i>
                         </div>
-                        <span>GitHub Repoları</span>
+                        <span>Paylaşılan Tweetler</span>
                     </a>
+
                 </div>
                 
                 <!-- Yönetim Bölümü -->
@@ -815,18 +880,23 @@
     {% endwith %}
 
     <!-- Main Content -->
-    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
     <footer class="bg-white/95 backdrop-blur-lg border-t border-gray-200/50 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                 <div class="text-center md:text-left">
-                    <h3 class="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        AI Tweet Bot
-                    </h3>
+                    <div class="flex items-center justify-center md:justify-start space-x-2">
+                        <h3 class="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            AI Tweet Bot
+                        </h3>
+                        <span class="px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold rounded-full shadow-sm">
+                            v{{ app_version }}
+                        </span>
+                    </div>
                     <p class="text-gray-600 text-sm mt-1">Otomatik AI haber tweet'leme sistemi</p>
                 </div>
                 <div class="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 text-sm text-gray-500">
@@ -841,6 +911,13 @@
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-user-tie text-purple-500"></i>
                         <span class="font-medium">Tasarım: palamut62</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-history text-green-500"></i>
+                        <span class="font-medium">v{{ app_version }} - 2025</span>
+                        <div class="text-xs text-gray-400">
+                            ({{ version_changelog[app_version] }})
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1089,33 +1166,106 @@
     </script>
     
     <style>
+        /* stylelint-disable */
         .nav-link {
-            @apply flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 font-medium;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            color: #4b5563;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        .nav-link:hover {
+            color: #2563eb;
+            background-color: #eff6ff;
         }
         
         .mobile-nav-link {
-            @apply flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 font-medium;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            color: #4b5563;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        .mobile-nav-link:hover {
+            color: #2563eb;
+            background-color: #eff6ff;
         }
         
         .card-modern {
-            @apply bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            transition: all 0.3s ease;
+        }
+        .card-modern:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
         .btn-primary {
-            @apply px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(to right, #3b82f6, #2563eb);
+            color: white;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: scale(1.05);
         }
         
         .btn-secondary {
-            @apply px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium;
+            padding: 0.75rem 1.5rem;
+            background-color: #f3f4f6;
+            color: #374151;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        .btn-secondary:hover {
+            background-color: #e5e7eb;
         }
         
         .btn-success {
-            @apply px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(to right, #10b981, #059669);
+            color: white;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+        }
+        .btn-success:hover {
+            background: linear-gradient(to right, #059669, #047857);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: scale(1.05);
         }
         
         .btn-danger {
-            @apply px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 font-medium;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(to right, #ef4444, #dc2626);
+            color: white;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            font-weight: 500;
         }
+        .btn-danger:hover {
+            background: linear-gradient(to right, #dc2626, #b91c1c);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: scale(1.05);
+        }
+        /* stylelint-enable */
     </style>
     
     {% block scripts %}{% endblock %}

@@ -1315,7 +1315,7 @@ Tweet text:"""
         }
 
 def generate_ai_tweet_with_content(article_data, api_key, theme="bilgilendirici"):
-    """Ana tweet oluşturma fonksiyonu - MCP analizi öncelikli - Tema desteği"""
+    """Ana tweet oluşturma fonksiyonu - MCP analizi öncelikli - Tema desteği - Kalite kontrollü"""
     try:
         # Önce MCP analizi ile dene
         tweet_data = generate_ai_tweet_with_mcp_analysis(article_data, api_key, theme)
@@ -1324,7 +1324,7 @@ def generate_ai_tweet_with_content(article_data, api_key, theme="bilgilendirici"
         if not tweet_data or not tweet_data.get('tweet') or len(tweet_data.get('tweet', '')) < 50:
             print("🔄 MCP analizi yetersiz, fallback yöntemi deneniyor...")
             fallback_tweet = generate_ai_tweet_with_content_fallback(article_data, api_key, theme)
-            return {
+            tweet_data = {
                 "tweet": fallback_tweet,
                 "impact_score": 6,
                 "analysis": {"audience": "General", "companies": [], "hashtags": [], "emojis": []},
@@ -1332,17 +1332,43 @@ def generate_ai_tweet_with_content(article_data, api_key, theme="bilgilendirici"
                 "source": "fallback"
             }
         
+        # Tweet kalite kontrol
+        if tweet_data and tweet_data.get('tweet'):
+            quality_analysis = analyze_tweet_quality(
+                tweet_data['tweet'], 
+                article_data.get('title', ''), 
+                api_key
+            )
+            
+            # Kalite verilerini tweet_data'ya ekle
+            tweet_data['quality_analysis'] = quality_analysis
+            tweet_data['is_valid'] = quality_analysis['is_valid']
+            tweet_data['quality_score'] = quality_analysis['quality_score']
+            
+            # Kalite sorunları varsa logla
+            if not quality_analysis['is_valid']:
+                terminal_log(f"❌ Düşük kaliteli tweet tespit edildi: {quality_analysis['issues']}", "warning")
+            elif quality_analysis['warnings']:
+                terminal_log(f"⚠️ Tweet uyarıları: {quality_analysis['warnings']}", "info")
+        
         return tweet_data
         
     except Exception as e:
         print(f"Ana tweet oluşturma hatası: {e}")
         fallback_tweet = generate_ai_tweet_with_content_fallback(article_data, api_key, theme)
+        
+        # Hata durumunda da kalite kontrol yap
+        quality_analysis = analyze_tweet_quality(fallback_tweet, article_data.get('title', ''), api_key)
+        
         return {
             "tweet": fallback_tweet,
             "impact_score": 6,
             "analysis": {"audience": "General", "companies": [], "hashtags": [], "emojis": []},
             "theme": theme,
-            "source": "fallback"
+            "source": "fallback",
+            "quality_analysis": quality_analysis,
+            "is_valid": quality_analysis['is_valid'],
+            "quality_score": quality_analysis['quality_score']
         }
 
 def generate_ai_tweet_with_content_fallback(article_data, api_key, theme="bilgilendirici"):
@@ -7151,6 +7177,11 @@ def extract_article_date_from_content(content):
         print(f"⚠️ Tarih çıkarma hatası: {e}")
         return None
 
+# Wrapper fonksiyon - eski import'lar için uyumluluk
+def fetch_article_content_mcp(url):
+    """Eski isim ile uyumluluk için wrapper"""
+    return fetch_article_content_with_mcp_only(url)
+
 def fetch_article_content_with_mcp_only(url):
     """Sadece MCP ile makale içeriği çekme"""
     try:
@@ -8193,3 +8224,119 @@ def get_ai_keywords_stats():
     except Exception as e:
         terminal_log(f"❌ AI keywords stats hatası: {e}", "error")
         return {}
+
+def analyze_tweet_quality(tweet_text, article_title="", api_key=None):
+    """AI ile tweet kalitesini analiz et"""
+    try:
+        if not api_key:
+            api_key = os.environ.get('GOOGLE_API_KEY')
+            
+        if not api_key:
+            return {
+                "is_valid": True,  # API yoksa varsayılan olarak geçerli kabul et
+                "quality_score": 7,
+                "issues": [],
+                "warnings": []
+            }
+        
+        # Temel kontroller
+        issues = []
+        warnings = []
+        
+        # Karakter kontrolü
+        if len(tweet_text) < 20:
+            issues.append("Tweet çok kısa (20 karakterden az)")
+        elif len(tweet_text) > 280:
+            issues.append("Tweet çok uzun (280 karakterden fazla)")
+        
+        # İçerik kontrolleri
+        if not tweet_text.strip():
+            issues.append("Tweet boş")
+        
+        # Hashtag kontrolü - çok fazla hashtag
+        hashtag_count = tweet_text.count('#')
+        if hashtag_count > 6:
+            warnings.append(f"Çok fazla hashtag ({hashtag_count})")
+        
+        # Emoji kontrolü - çok fazla emoji
+        emoji_count = len([c for c in tweet_text if ord(c) > 127])
+        if emoji_count > tweet_text.count(' ') and emoji_count > 20:
+            warnings.append("Çok fazla emoji")
+        
+        # Tekrarlanan kelimeler
+        words = tweet_text.lower().split()
+        word_counts = {}
+        for word in words:
+            if len(word) > 3:  # Kısa kelimeler hariç
+                word_counts[word] = word_counts.get(word, 0) + 1
+        
+        repeated_words = [word for word, count in word_counts.items() if count > 2]
+        if repeated_words:
+            warnings.append(f"Tekrarlanan kelimeler: {', '.join(repeated_words[:3])}")
+        
+        # AI ile daha detaylı analiz
+        prompt = f"""
+        Bu tweet'in kalitesini analiz et ve 1-10 arasında puan ver:
+        
+        Tweet: "{tweet_text}"
+        Makale Başlığı: "{article_title}"
+        
+        Değerlendirme kriterleri:
+        - İçerik kalitesi ve anlamlılık
+        - Gramer ve yazım
+        - Bilgilendirici olma
+        - Twitter formatına uygunluk
+        - Spam/anlamsız içerik olup olmadığı
+        
+        Sadece sayısal puan ver (1-10):
+        """
+        
+        try:
+            ai_response = gemini_call(prompt, api_key, max_tokens=10)
+            quality_score = int(ai_response.strip().split()[0])
+            if quality_score < 1 or quality_score > 10:
+                quality_score = 7  # Varsayılan puan
+        except:
+            quality_score = 7  # AI hatası durumunda varsayılan puan
+        
+        # Kalite puanına göre sorun ekleme
+        if quality_score <= 3:
+            issues.append("AI analizi: Tweet kalitesi çok düşük")
+        elif quality_score <= 5:
+            warnings.append("AI analizi: Tweet kalitesi orta düzeyde")
+        
+        # Anlamsız içerik tespiti
+        meaningless_patterns = [
+            "no tweet possible",
+            "tweet oluşturulamaz", 
+            "uygun değil",
+            "anlamsız",
+            "hata",
+            "geçersiz",
+            "tweet yapılamaz"
+        ]
+        
+        for pattern in meaningless_patterns:
+            if pattern.lower() in tweet_text.lower():
+                issues.append(f"Anlamsız içerik tespit edildi: {pattern}")
+        
+        # Final değerlendirme
+        is_valid = len(issues) == 0 and quality_score >= 5
+        
+        return {
+            "is_valid": is_valid,
+            "quality_score": quality_score,
+            "issues": issues,
+            "warnings": warnings,
+            "character_count": len(tweet_text),
+            "hashtag_count": hashtag_count
+        }
+        
+    except Exception as e:
+        terminal_log(f"❌ Tweet kalite analizi hatası: {e}", "error")
+        return {
+            "is_valid": True,  # Hata durumunda varsayılan olarak geçerli
+            "quality_score": 7,
+            "issues": [],
+            "warnings": [f"Analiz hatası: {str(e)}"]
+        }
