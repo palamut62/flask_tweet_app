@@ -12461,5 +12461,55 @@
     "tweet_text": "🔍💡 Apple develops an AI answer engine, rivaling ChatGPT. This new tech could reshape search and information retrieval for Apple users. #AI #Tech #AppleAI #AIAnswerEngine\n\n🔗 https://techcrunch.com/2025/08/03/apple-might-be-building-its-own-ai-answer-engine/",
     "deletion_reason": "Manuel olarak silindi",
     "is_posted": false
+  },
+  {
+    "title": "Clay confirms it closed $100M round at $3.1B valuation",
+    "url": "https://techcrunch.com/2025/08/05/clay-confirms-it-closed-100m-round-at-3-1b-valuation/",
+    "hash": "d41d3c34a512ada67ea50e84af78e3db",
+    "posted_date": "2025-08-06T09:03:13.985026",
+    "tweet_id": "1952973709167268038",
+    "tweet_url": "https://twitter.com/user/status/1952973709167268038",
+    "manual_post": false,
+    "post_method": "api"
+  },
+  {
+    "title": "For the first time, OpenAI models are available on AWS",
+    "url": "https://techcrunch.com/2025/08/05/for-the-first-time-openai-models-are-available-on-aws/",
+    "hash": "0c2b1cb4311d2477eeb5bcc04ec6e665",
+    "posted_date": "2025-08-06T09:03:25.648787",
+    "tweet_id": "1952973758630613503",
+    "tweet_url": "https://twitter.com/user/status/1952973758630613503",
+    "manual_post": false,
+    "post_method": "api"
+  },
+  {
+    "title": "OpenAI launches two ‘open’ AI reasoning models",
+    "url": "https://techcrunch.com/2025/08/05/openai-launches-two-open-ai-reasoning-models/",
+    "hash": "5ffff717f89e92f21aa840b1a9740366",
+    "posted_date": "2025-08-06T09:03:55.997694",
+    "tweet_id": "1952973881423097976",
+    "tweet_url": "https://twitter.com/user/status/1952973881423097976",
+    "manual_post": false,
+    "post_method": "api"
+  },
+  {
+    "title": "Some people are defending Perplexity after Cloudflare ‘named and shamed’ it",
+    "url": "https://techcrunch.com/2025/08/05/some-people-are-defending-perplexity-after-cloudflare-named-and-shamed-it/",
+    "hash": "b012ba6c371104f8c64cb256eb76ee24",
+    "posted_date": "2025-08-06T09:04:07.773184",
+    "tweet_id": "1952973933172383838",
+    "tweet_url": "https://twitter.com/user/status/1952973933172383838",
+    "manual_post": false,
+    "post_method": "api"
+  },
+  {
+    "title": "The EU AI Act aims to create a level playing field for AI innovation: Here’s what it is",
+    "url": "https://techcrunch.com/2025/08/05/the-eu-ai-act-aims-to-create-a-level-playing-field-for-ai-innovation-heres-what-it-is/",
+    "hash": "deb0facf16a5bbe6a096760485a5a669",
+    "posted_date": "2025-08-06T09:04:52.522302",
+    "tweet_id": "1952974119475023999",
+    "tweet_url": "https://twitter.com/user/status/1952974119475023999",
+    "manual_post": false,
+    "post_method": "api"
   }
 ]
