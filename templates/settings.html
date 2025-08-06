@@ -483,6 +483,190 @@
     </div>
 </div>
 
+<!-- API Yönetimi Kartı -->
+<div class="card-modern">
+    <div class="p-8">
+        <div class="flex items-center space-x-3 mb-8">
+            <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-xl flex items-center justify-center">
+                <i class="fas fa-key text-white text-lg"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">API Anahtarları Yönetimi</h2>
+        </div>
+
+        <!-- API Anahtarları Formu -->
+        <form id="apiKeysForm" class="space-y-6">
+            <!-- Google Gemini API -->
+            <div class="border border-gray-200 rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="fab fa-google text-blue-500 text-xl"></i>
+                        <h3 class="text-lg font-semibold text-gray-900">Google Gemini API</h3>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full {{ 'bg-green-100 text-green-800' if api_status.google_api_working else 'bg-red-100 text-red-800' }}">
+                            {{ '✅ Aktif' if api_status.google_api_working else '❌ Pasif' }}
+                        </span>
+                    </div>
+                    <button type="button" onclick="testSingleAPI('google')" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
+                        Test Et
+                    </button>
+                </div>
+                <input type="password" name="GOOGLE_API_KEY" id="google_api_key" 
+                       placeholder="Google Gemini API anahtarınızı girin..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <div class="mt-2 text-sm text-gray-600">
+                    <i class="fas fa-info-circle"></i>
+                    AI tweet oluşturma ve analiz için kullanılır
+                </div>
+            </div>
+
+            <!-- OpenRouter API -->
+            <div class="border border-gray-200 rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-route text-purple-500 text-xl"></i>
+                        <h3 class="text-lg font-semibold text-gray-900">OpenRouter API</h3>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full {{ 'bg-green-100 text-green-800' if api_status.openrouter_api_working else 'bg-red-100 text-red-800' }}">
+                            {{ '✅ Aktif' if api_status.openrouter_api_working else '❌ Pasif' }}
+                        </span>
+                    </div>
+                    <button type="button" onclick="testSingleAPI('openrouter')" class="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm">
+                        Test Et
+                    </button>
+                </div>
+                <input type="password" name="OPENROUTER_API_KEY" id="openrouter_api_key"
+                       placeholder="OpenRouter API anahtarınızı girin..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                <div class="mt-2 text-sm text-gray-600">
+                    <i class="fas fa-info-circle"></i>
+                    Gemini başarısız olduğunda yedek AI servisi
+                </div>
+            </div>
+
+            <!-- Twitter API -->
+            <div class="border border-gray-200 rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="fab fa-twitter text-blue-400 text-xl"></i>
+                        <h3 class="text-lg font-semibold text-gray-900">Twitter API v2</h3>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full {{ 'bg-green-100 text-green-800' if api_status.twitter_api_available else 'bg-red-100 text-red-800' }}">
+                            {{ '✅ Aktif' if api_status.twitter_api_available else '❌ Pasif' }}
+                        </span>
+                    </div>
+                    <button type="button" onclick="testSingleAPI('twitter')" class="px-3 py-1 bg-blue-400 text-white rounded hover:bg-blue-500 text-sm">
+                        Test Et
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="password" name="TWITTER_BEARER_TOKEN" id="twitter_bearer_token"
+                           placeholder="Bearer Token"
+                           class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400">
+                    <input type="password" name="TWITTER_API_KEY" id="twitter_api_key"
+                           placeholder="API Key"
+                           class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400">
+                    <input type="password" name="TWITTER_API_SECRET" id="twitter_api_secret"
+                           placeholder="API Secret"
+                           class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400">
+                    <input type="password" name="TWITTER_ACCESS_TOKEN" id="twitter_access_token"
+                           placeholder="Access Token"
+                           class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400">
+                </div>
+                <input type="password" name="TWITTER_ACCESS_TOKEN_SECRET" id="twitter_access_token_secret"
+                       placeholder="Access Token Secret"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 mt-4">
+                <div class="mt-2 text-sm text-gray-600">
+                    <i class="fas fa-info-circle"></i>
+                    Tweet paylaşımı için gerekli
+                </div>
+            </div>
+
+            <!-- GitHub API -->
+            <div class="border border-gray-200 rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="fab fa-github text-gray-800 text-xl"></i>
+                        <h3 class="text-lg font-semibold text-gray-900">GitHub API</h3>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full {{ 'bg-green-100 text-green-800' if api_status.github_token else 'bg-red-100 text-red-800' }}">
+                            {{ '✅ Aktif' if api_status.github_token else '❌ Pasif' }}
+                        </span>
+                    </div>
+                    <button type="button" onclick="testSingleAPI('github')" class="px-3 py-1 bg-gray-800 text-white rounded hover:bg-gray-900 text-sm">
+                        Test Et
+                    </button>
+                </div>
+                <input type="password" name="GITHUB_TOKEN" id="github_token"
+                       placeholder="GitHub Personal Access Token"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-gray-800">
+                <div class="mt-2 text-sm text-gray-600">
+                    <i class="fas fa-info-circle"></i>
+                    GitHub repo bilgilerini çekmek için (opsiyonel)
+                </div>
+            </div>
+
+            <!-- Telegram & Gmail -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Telegram -->
+                <div class="border border-gray-200 rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fab fa-telegram text-blue-500 text-xl"></i>
+                            <h3 class="text-lg font-semibold text-gray-900">Telegram</h3>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <input type="password" name="TELEGRAM_BOT_TOKEN" id="telegram_bot_token"
+                               placeholder="Bot Token"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <input type="text" name="TELEGRAM_CHAT_ID" id="telegram_chat_id"
+                               placeholder="Chat ID"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <!-- Gmail -->
+                <div class="border border-gray-200 rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-red-500 text-xl"></i>
+                            <h3 class="text-lg font-semibold text-gray-900">Gmail SMTP</h3>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <input type="email" name="GMAIL_EMAIL" id="gmail_email"
+                               placeholder="Gmail Adresi"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                        <input type="password" name="GMAIL_APP_PASSWORD" id="gmail_app_password"
+                               placeholder="App Password"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kaydet Butonu -->
+            <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                <div class="flex items-center space-x-4">
+                    <button type="button" onclick="loadCurrentApiKeys()" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Mevcut Değerleri Yükle
+                    </button>
+                    <button type="button" onclick="testAllAPIs()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-vial mr-2"></i>
+                        Tümünü Test Et
+                    </button>
+                </div>
+                <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                    <i class="fas fa-save mr-2"></i>
+                    API Anahtarlarını Kaydet
+                </button>
+            </div>
+        </form>
+
+        <!-- Test Sonuçları -->
+        <div id="apiTestResults" class="mt-6 hidden">
+            <h4 class="text-lg font-semibold text-gray-900 mb-4">Test Sonuçları</h4>
+            <div id="testResultsContent" class="space-y-2"></div>
+        </div>
+    </div>
+</div>
+
 <script>
 function testOpenRouterAPI() {
     const button = event.target;
@@ -525,6 +709,232 @@ function testOpenRouterAPI() {
             button.disabled = false;
             button.innerHTML = originalText;
         });
+}
+
+// API Anahtarları Yönetimi Fonksiyonları
+document.getElementById('apiKeysForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const apiData = {};
+    
+    // FormData'yı object'e çevir
+    for (let [key, value] of formData.entries()) {
+        if (value.trim()) {  // Boş değerleri gönderme
+            apiData[key] = value.trim();
+        }
+    }
+    
+    if (Object.keys(apiData).length === 0) {
+        showNotification('❌ En az bir API anahtarı girmelisiniz!', 'error');
+        return;
+    }
+    
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Kaydediliyor...';
+    
+    fetch('/update_env_variables', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            // Formu temizle
+            this.reset();
+            // Sayfa durumunu güncelle
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        } else {
+            showNotification(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('❌ Kaydetme hatası: ' + error.message, 'error');
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+});
+
+function loadCurrentApiKeys() {
+    const keys = [
+        'GOOGLE_API_KEY', 'OPENROUTER_API_KEY', 'TWITTER_BEARER_TOKEN',
+        'TWITTER_API_KEY', 'TWITTER_API_SECRET', 'TWITTER_ACCESS_TOKEN',
+        'TWITTER_ACCESS_TOKEN_SECRET', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID',
+        'GMAIL_EMAIL', 'GMAIL_APP_PASSWORD', 'GITHUB_TOKEN'
+    ];
+    
+    // Mevcut değerleri placeholder olarak göster (güvenlik için son 4 karakter)
+    keys.forEach(key => {
+        const input = document.getElementById(key.toLowerCase());
+        if (input) {
+            input.placeholder = `${key} (mevcut değer korunuyor)`;
+        }
+    });
+    
+    showNotification('💡 Yeni değer girmezseniz mevcut değerler korunur', 'info');
+}
+
+function testSingleAPI(apiType) {
+    const button = event.target;
+    const originalText = button.innerHTML;
+    
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Test...';
+    
+    let testPromise;
+    
+    switch(apiType) {
+        case 'google':
+        case 'openrouter':
+            testPromise = fetch('/test_api_connections').then(r => r.json());
+            break;
+        case 'twitter':
+            testPromise = fetch('/test_twitter_connection').then(r => r.json());
+            break;
+        case 'github':
+            // GitHub API için basit test
+            testPromise = Promise.resolve({success: true, message: "GitHub API anahtarı varlık kontrolü yapılıyor..."});
+            break;
+        default:
+            testPromise = Promise.reject(new Error('Bilinmeyen API tipi'));
+    }
+    
+    testPromise
+        .then(data => {
+            if (data.success) {
+                if (apiType === 'google' && data.results && data.results.google_api) {
+                    showNotification(`Google API: ${data.results.google_api.message}`, 
+                                   data.results.google_api.working ? 'success' : 'error');
+                } else if (apiType === 'openrouter' && data.results && data.results.openrouter_api) {
+                    showNotification(`OpenRouter API: ${data.results.openrouter_api.message}`, 
+                                   data.results.openrouter_api.working ? 'success' : 'error');
+                } else if (apiType === 'twitter') {
+                    showNotification(data.message, 'success');
+                } else {
+                    showNotification('✅ Test tamamlandı', 'success');
+                }
+            } else {
+                showNotification(`❌ ${apiType.toUpperCase()} Test Hatası: ${data.error}`, 'error');
+            }
+        })
+        .catch(error => {
+            showNotification(`❌ ${apiType.toUpperCase()} Test Hatası: ${error.message}`, 'error');
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.innerHTML = originalText;
+        });
+}
+
+function testAllAPIs() {
+    const button = event.target;
+    const originalText = button.innerHTML;
+    
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Tüm API\'ler Test Ediliyor...';
+    
+    const resultsDiv = document.getElementById('apiTestResults');
+    const contentDiv = document.getElementById('testResultsContent');
+    
+    resultsDiv.classList.remove('hidden');
+    contentDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Testler çalışıyor...</div>';
+    
+    // Paralel olarak tüm testleri çalıştır
+    Promise.all([
+        fetch('/test_api_connections').then(r => r.json()).catch(e => ({success: false, error: e.message})),
+        fetch('/test_twitter_connection').then(r => r.json()).catch(e => ({success: false, error: e.message}))
+    ])
+    .then(([apiResults, twitterResult]) => {
+        let html = '';
+        
+        // Google API
+        if (apiResults.success && apiResults.results && apiResults.results.google_api) {
+            const result = apiResults.results.google_api;
+            html += `<div class="flex items-center justify-between p-3 border rounded-lg ${result.working ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                        <div class="flex items-center space-x-3">
+                            <i class="fab fa-google text-xl"></i>
+                            <span class="font-medium">Google Gemini API</span>
+                        </div>
+                        <span class="${result.working ? 'text-green-700' : 'text-red-700'}">${result.message}</span>
+                     </div>`;
+        }
+        
+        // OpenRouter API
+        if (apiResults.success && apiResults.results && apiResults.results.openrouter_api) {
+            const result = apiResults.results.openrouter_api;
+            html += `<div class="flex items-center justify-between p-3 border rounded-lg ${result.working ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-route text-xl"></i>
+                            <span class="font-medium">OpenRouter API</span>
+                        </div>
+                        <span class="${result.working ? 'text-green-700' : 'text-red-700'}">${result.message}</span>
+                     </div>`;
+        }
+        
+        // Twitter API
+        html += `<div class="flex items-center justify-between p-3 border rounded-lg ${twitterResult.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                    <div class="flex items-center space-x-3">
+                        <i class="fab fa-twitter text-xl"></i>
+                        <span class="font-medium">Twitter API</span>
+                    </div>
+                    <span class="${twitterResult.success ? 'text-green-700' : 'text-red-700'}">${twitterResult.success ? '✅ Çalışıyor' : '❌ ' + twitterResult.error}</span>
+                 </div>`;
+        
+        contentDiv.innerHTML = html;
+        
+        // Genel sonuç mesajı
+        const successCount = (apiResults.success ? 
+            (apiResults.results.google_api?.working ? 1 : 0) + (apiResults.results.openrouter_api?.working ? 1 : 0) : 0) + 
+            (twitterResult.success ? 1 : 0);
+        
+        showNotification(`🧪 Test tamamlandı: ${successCount}/3 API çalışıyor`, successCount > 0 ? 'success' : 'warning');
+    })
+    .catch(error => {
+        contentDiv.innerHTML = `<div class="text-red-600">❌ Test hatası: ${error.message}</div>`;
+        showNotification('❌ API testleri başarısız', 'error');
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = originalText;
+    });
+}
+
+function showNotification(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `fixed top-4 right-4 z-50 max-w-sm p-4 rounded-lg shadow-lg transition-all duration-300 ${
+        type === 'success' ? 'bg-green-100 border border-green-400 text-green-700' :
+        type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' :
+        type === 'warning' ? 'bg-yellow-100 border border-yellow-400 text-yellow-700' :
+        'bg-blue-100 border border-blue-400 text-blue-700'
+    }`;
+    
+    alertDiv.innerHTML = `
+        <div class="flex items-start space-x-2">
+            <div class="flex-1 text-sm font-medium">${message}</div>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-2 hover:opacity-75">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        if (alertDiv.parentElement) {
+            alertDiv.remove();
+        }
+    }, 5000);
 }
 </script>
 

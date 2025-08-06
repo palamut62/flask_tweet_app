@@ -1588,9 +1588,11 @@ def settings():
             "twitter_api_secret": os.environ.get('TWITTER_API_SECRET') is not None,
             "twitter_access_token": os.environ.get('TWITTER_ACCESS_TOKEN') is not None,
             "twitter_access_secret": os.environ.get('TWITTER_ACCESS_TOKEN_SECRET') is not None,
+            "twitter_api_available": bool(os.environ.get('TWITTER_BEARER_TOKEN') and os.environ.get('TWITTER_API_KEY')),
             "telegram_bot_token": os.environ.get('TELEGRAM_BOT_TOKEN') is not None,
             "gmail_email": os.environ.get('GMAIL_EMAIL') is not None,
-            "gmail_password": os.environ.get('GMAIL_APP_PASSWORD') is not None
+            "gmail_password": os.environ.get('GMAIL_APP_PASSWORD') is not None,
+            "github_token": os.environ.get('GITHUB_TOKEN') is not None
         }
         
         # MCP durumunu kontrol et
@@ -1613,6 +1615,67 @@ def settings():
                              telegram_config={},
                              api_status={},
                              error=str(e))
+
+@app.route('/update_env_variables', methods=['POST'])
+@login_required
+def update_env_variables():
+    """Environment variables güncelleme"""
+    try:
+        data = request.get_json()
+        
+        # Güvenlik kontrolü - sadece belirli anahtarların güncellenmesine izin ver
+        allowed_keys = {
+            'GOOGLE_API_KEY', 'OPENROUTER_API_KEY', 'TWITTER_BEARER_TOKEN',
+            'TWITTER_API_KEY', 'TWITTER_API_SECRET', 'TWITTER_ACCESS_TOKEN',
+            'TWITTER_ACCESS_TOKEN_SECRET', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID',
+            'GMAIL_EMAIL', 'GMAIL_APP_PASSWORD', 'GITHUB_TOKEN'
+        }
+        
+        # .env dosyasını oku
+        env_path = '.env'
+        env_lines = []
+        
+        if os.path.exists(env_path):
+            with open(env_path, 'r', encoding='utf-8') as f:
+                env_lines = f.readlines()
+        
+        # Güncellenen anahtarları işle
+        updated_keys = set()
+        for i, line in enumerate(env_lines):
+            line = line.strip()
+            if '=' in line and not line.startswith('#'):
+                key = line.split('=')[0].strip()
+                if key in data and key in allowed_keys:
+                    # Anahtar güncelle
+                    new_value = data[key].strip()
+                    if new_value:  # Boş değer kontrolü
+                        env_lines[i] = f"{key}={new_value}\n"
+                        updated_keys.add(key)
+                        # Environment variable'ı runtime'da da güncelle
+                        os.environ[key] = new_value
+        
+        # Yeni anahtarları ekle
+        for key, value in data.items():
+            if key in allowed_keys and key not in updated_keys and value.strip():
+                env_lines.append(f"{key}={value.strip()}\n")
+                os.environ[key] = value.strip()
+                updated_keys.add(key)
+        
+        # .env dosyasını yaz
+        with open(env_path, 'w', encoding='utf-8') as f:
+            f.writelines(env_lines)
+        
+        return jsonify({
+            "success": True,
+            "message": f"✅ {len(updated_keys)} API anahtarı güncellendi",
+            "updated_keys": list(updated_keys)
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"❌ Güncelleme hatası: {str(e)}"
+        })
 
 @app.route('/save_settings', methods=['POST'])
 @login_required
