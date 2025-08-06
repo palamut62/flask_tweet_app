@@ -825,15 +825,34 @@ function performActualCheck() {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
-    .then(response => {
-        if (response.redirected) {
-            // Başarılı - sayfayı yenile
-            text.textContent = "✅ Başarılı! Sayfa yenileniyor...";
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.new_articles > 0) {
+                let detailText = '';
+                if (data.posted_count > 0 && data.pending_count > 0) {
+                    detailText = `${data.posted_count} paylaşıldı, ${data.pending_count} onay bekliyor`;
+                } else if (data.posted_count > 0) {
+                    detailText = `${data.posted_count} tweet paylaşıldı`;
+                } else if (data.pending_count > 0) {
+                    detailText = `${data.pending_count} tweet onay bekliyor`;
+                }
+                
+                text.textContent = `✅ ${data.new_articles} yeni haber bulundu! (${detailText}) Sayfa yenileniyor...`;
+                
+                // Yeni haber bildirimi göster
+                showNewArticlesNotification(data.new_articles, detailText);
+                
+                // Otomatik yenileme
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                text.textContent = "✅ Kontrol tamamlandı! Yeni haber bulunamadı.";
+                resetButton();
+            }
         } else {
-            throw new Error('İstek başarısız');
+            throw new Error(data.error || 'Bilinmeyen hata');
         }
     })
     .catch(error => {
@@ -1230,6 +1249,36 @@ function showNewTweetsNotification(count) {
     }, 10000);
 }
 
+function showNewArticlesNotification(count, detailText = '') {
+    // Yeni haber makaleleri için bildirim göster
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-up';
+    
+    const detailHtml = detailText ? `<div class="text-xs opacity-90 mt-1">${detailText}</div>` : '';
+    
+    notification.innerHTML = `
+        <div class="flex items-center gap-3">
+            <i class="fas fa-newspaper"></i>
+            <div>
+                <span>${count} yeni haber makalesi bulundu!</span>
+                ${detailHtml}
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-gray-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // 6 saniye sonra otomatik kaldır (detay varsa biraz daha uzun)
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, detailText ? 6000 : 5000);
+}
+
 // Sayfa yüklendiğinde auto-refresh'i başlat
 document.addEventListener('DOMContentLoaded', function() {
     updateLastUpdateTime();
@@ -1259,23 +1308,45 @@ function quickCheckArticles() {
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Kontrol Ediliyor...</span>';
     button.disabled = true;
     
-    fetch('/check_articles')
+    fetch('/check_articles', {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert(`✅ Kontrol tamamlandı! ${data.new_articles || 0} yeni makale bulundu.`);
                 if (data.new_articles > 0) {
-                    setTimeout(() => location.reload(), 1000);
+                    let detailText = '';
+                    if (data.posted_count > 0 && data.pending_count > 0) {
+                        detailText = `${data.posted_count} paylaşıldı, ${data.pending_count} onay bekliyor`;
+                    } else if (data.posted_count > 0) {
+                        detailText = `${data.posted_count} tweet paylaşıldı`;
+                    } else if (data.pending_count > 0) {
+                        detailText = `${data.pending_count} tweet onay bekliyor`;
+                    }
+                    
+                    // Yeni haber bildirimi göster
+                    showNewArticlesNotification(data.new_articles, detailText);
+                    
+                    // Otomatik yenileme
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    alert(`✅ Kontrol tamamlandı! Yeni makale bulunamadı.`);
+                    button.innerHTML = originalText;
+                    button.disabled = false;
                 }
             } else {
                 alert(`❌ Kontrol başarısız: ${data.error || 'Bilinmeyen hata'}`);
+                button.innerHTML = originalText;
+                button.disabled = false;
             }
         })
         .catch(error => {
             console.error('Quick check error:', error);
             alert('❌ Kontrol sırasında hata oluştu!');
-        })
-        .finally(() => {
             button.innerHTML = originalText;
             button.disabled = false;
         });

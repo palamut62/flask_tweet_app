@@ -432,11 +432,36 @@ def check_articles():
     """Manuel makale kontrolü"""
     try:
         result = check_and_post_articles()
-        flash(f"Kontrol tamamlandı: {result['message']}", 'success')
+        
+        # AJAX isteği mi kontrol et
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            posted_count = result.get('posted_count', 0)
+            pending_count = result.get('pending_count', 0)
+            new_articles = posted_count + pending_count  # Toplam yeni tweet sayısı
+            
+            return jsonify({
+                'success': True,
+                'message': result['message'],
+                'new_articles': new_articles,
+                'posted_count': posted_count,
+                'pending_count': pending_count,
+                'total_pending': len(load_json("pending_tweets.json")),
+                'should_refresh': new_articles > 0
+            })
+        else:
+            flash(f"Kontrol tamamlandı: {result['message']}", 'success')
+            return redirect(url_for('index'))
+            
     except Exception as e:
-        flash(f"Hata: {str(e)}", 'error')
-    
-    return redirect(url_for('index'))
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'success': False,
+                'error': str(e),
+                'message': f"Hata: {str(e)}"
+            })
+        else:
+            flash(f"Hata: {str(e)}", 'error')
+            return redirect(url_for('index'))
 
 def fetch_latest_ai_articles_with_mcp():
     """Özel haber kaynaklarından ve MCP ile AI makalelerini çek"""
@@ -607,6 +632,7 @@ def check_and_post_articles():
             return {"success": True, "message": "Yeni makale bulunamadı"}
         
         posted_count = 0
+        pending_count = 0
         max_articles = settings.get('max_articles_per_run', 3)
         min_score = settings.get('min_score_threshold', 5)
         auto_post = settings.get('auto_post_enabled', False)
@@ -684,6 +710,7 @@ def check_and_post_articles():
                         if not is_duplicate:
                             pending_tweets.append(new_tweet)
                             save_json("pending_tweets.json", pending_tweets)
+                            pending_count += 1
                             terminal_log(f"✅ Tweet pending listesine eklendi: {article['title'][:50]}...", "success")
                         else:
                             terminal_log(f"🔄 Duplikat tweet pending listesine eklenmedi", "info")
@@ -718,6 +745,7 @@ def check_and_post_articles():
                         new_tweet['id'] = len(pending_tweets) + 1
                         pending_tweets.append(new_tweet)
                         save_json("pending_tweets.json", pending_tweets)
+                        pending_count += 1
                         terminal_log(f"📝 Tweet onay bekliyor: {article['title'][:50]}... (ID: {new_tweet['id']})", "success")
                     else:
                         terminal_log(f"🔄 Duplikat tweet onay listesine eklenmedi: {article['title'][:50]}...", "warning")
@@ -727,9 +755,17 @@ def check_and_post_articles():
                 terminal_log(f"❌ Makale işleme hatası: {article_error}", "error")
                 continue
         
-        message = f"{len(articles)} makale bulundu, {posted_count} tweet paylaşıldı"
+        if posted_count > 0 and pending_count > 0:
+            message = f"{len(articles)} makale bulundu, {posted_count} tweet paylaşıldı, {pending_count} tweet onay bekliyor"
+        elif posted_count > 0:
+            message = f"{len(articles)} makale bulundu, {posted_count} tweet paylaşıldı"
+        elif pending_count > 0:
+            message = f"{len(articles)} makale bulundu, {pending_count} yeni tweet onay bekliyor"
+        else:
+            message = f"{len(articles)} makale bulundu, ancak hiçbiri tweet haline dönüştürülemedi"
+        
         terminal_log(f"✅ Otomatik kontrol tamamlandı: {message}", "success")
-        return {"success": True, "message": message}
+        return {"success": True, "message": message, "posted_count": posted_count, "pending_count": pending_count}
         
     except Exception as e:
         terminal_log(f"❌ Makale kontrol hatası: {e}", "error")
@@ -999,21 +1035,40 @@ def manual_post_tweet_route():
             if 'article' in tweet_to_post:
                 # Normal makale tweet'i
                 tweet_to_post['article']['tweet_text'] = tweet_text
+                # Hash yoksa oluştur
+                if not tweet_to_post['article'].get('hash'):
+                    import hashlib
+                    title = tweet_to_post['article'].get('title', '')
+                    if title:
+                        tweet_to_post['article']['hash'] = hashlib.md5(title.encode()).hexdigest()
                 mark_article_as_posted(tweet_to_post['article'], manual_tweet_result)
             else:
                 # GitHub repo tweet'i veya diğer türler
                 posted_articles = load_json('posted_articles.json')
                 
+                # Hash yoksa oluştur
+                hash_value = tweet_to_post.get('hash', '')
+                if not hash_value:
+                    import hashlib
+                    title = tweet_to_post.get('title', '')
+                    if title:
+                        hash_value = hashlib.md5(title.encode()).hexdigest()
+                
                 # Tweet verilerini posted article formatına çevir
                 posted_article = {
                     "title": tweet_to_post.get('title', ''),
                     "url": tweet_to_post.get('url', ''),
+                    "hash": hash_value,
                     "content": tweet_to_post.get('content', ''),
                     "source": tweet_to_post.get('source', ''),
                     "source_type": tweet_to_post.get('source_type', 'article'),
                     "posted_date": datetime.now().isoformat(),
                     "tweet_content": tweet_to_post.get('content', ''),
+                    "tweet_text": tweet_text,
+                    "tweet_id": manual_tweet_result.get("tweet_id", ""),
+                    "tweet_url": manual_tweet_result.get("url", ""),
                     "manual_post": True,
+                    "post_method": "manuel",
                     "confirmed_at": datetime.now().isoformat(),
                     "type": tweet_to_post.get('source_type', 'article')
                 }
@@ -1123,10 +1178,19 @@ def bulk_tweet_action():
                         tweet_result = post_tweet(tweet_to_process.get('content', ''))
                         
                         if tweet_result.get('success'):
+                            # Hash yoksa oluştur
+                            hash_value = tweet_to_process.get('hash', '')
+                            if not hash_value:
+                                import hashlib
+                                title = tweet_to_process.get('title', '')
+                                if title:
+                                    hash_value = hashlib.md5(title.encode()).hexdigest()
+                            
                             # Paylaşılan tweet'lere ekle
                             mark_article_as_posted({
                                 'id': tweet_to_process.get('id'),
                                 'title': tweet_to_process.get('title', ''),
+                                'hash': hash_value,
                                 'content': tweet_to_process.get('content', ''),
                                 'url': tweet_to_process.get('url', ''),
                                 'source': tweet_to_process.get('source', ''),
@@ -1151,22 +1215,56 @@ def bulk_tweet_action():
                         errors.append(f"Tweet ID {tweet_id} paylaşım hatası: {str(e)}")
                 
                 elif action == 'reject':
-                    # Tweet'i sil
+                    # Tweet'i sil ve posted_articles.json'a deleted:true ile kaydet
                     try:
-                        # Silinmiş tweet'lere ekle
-                        deleted_articles = load_json("deleted_articles.json", [])
-                        deleted_tweet = dict(tweet_to_process)
-                        deleted_tweet['deleted_date'] = datetime.now().isoformat()
-                        deleted_tweet['deletion_reason'] = 'Bulk rejection'
-                        deleted_tweet['bulk_operation'] = True
-                        deleted_articles.append(deleted_tweet)
-                        save_json("deleted_articles.json", deleted_articles)
+                        # Hash yoksa oluştur
+                        hash_value = tweet_to_process.get('hash', '')
+                        if not hash_value:
+                            import hashlib
+                            title = tweet_to_process.get('title', '')
+                            if title:
+                                hash_value = hashlib.md5(title.encode()).hexdigest()
+                        
+                        # Posted articles'a "silindi" olarak ekle
+                        posted_articles = load_json("posted_articles.json")
+                        
+                        deleted_article = {
+                            "title": tweet_to_process.get('title', ''),
+                            "url": tweet_to_process.get('url', ''),
+                            "hash": hash_value,
+                            "content": tweet_to_process.get('content', ''),
+                            "source": tweet_to_process.get('source', ''),
+                            "source_type": tweet_to_process.get('source_type', 'news'),
+                            "published_date": tweet_to_process.get('created_at', datetime.now().isoformat()),
+                            "posted_date": datetime.now().isoformat(),
+                            "tweet_text": tweet_to_process.get('content', ''),
+                            "deleted": True,
+                            "deleted_date": datetime.now().isoformat(),
+                            "deletion_reason": 'Bulk rejection',
+                            "bulk_operation": True,
+                            "is_posted": False
+                        }
+                        
+                        # GitHub repo ise ek bilgileri ekle
+                        if tweet_to_process.get('source_type') == 'github':
+                            deleted_article.update({
+                                "type": "github_repo",
+                                "repo_data": tweet_to_process.get('repo_data', {}),
+                                "language": tweet_to_process.get('language', ''),
+                                "stars": tweet_to_process.get('stars', 0),
+                                "forks": tweet_to_process.get('forks', 0),
+                                "owner": tweet_to_process.get('owner', ''),
+                                "topics": tweet_to_process.get('topics', [])
+                            })
+                        
+                        posted_articles.append(deleted_article)
+                        save_json("posted_articles.json", posted_articles)
                         
                         # Pending'den kaldır
                         pending_tweets.pop(tweet_index)
                         processed_count += 1
                         
-                        terminal_log(f"🗑️ Bulk reject: Tweet {tweet_id} silindi", "info")
+                        terminal_log(f"🗑️ Bulk reject: Tweet {tweet_id} silindi olarak işaretlendi", "info")
                         
                     except Exception as e:
                         errors.append(f"Tweet ID {tweet_id} silme hatası: {str(e)}")
@@ -1267,21 +1365,40 @@ def confirm_manual_post():
         if 'article' in tweet_to_post:
             # Normal makale tweet'i
             tweet_to_post['article']['tweet_text'] = tweet_to_post['tweet_data']['tweet']
+            # Hash yoksa oluştur
+            if not tweet_to_post['article'].get('hash'):
+                import hashlib
+                title = tweet_to_post['article'].get('title', '')
+                if title:
+                    tweet_to_post['article']['hash'] = hashlib.md5(title.encode()).hexdigest()
             mark_article_as_posted(tweet_to_post['article'], manual_tweet_result)
         else:
             # GitHub repo tweet'i veya diğer türler
             posted_articles = load_json('posted_articles.json')
             
+            # Hash yoksa oluştur
+            hash_value = tweet_to_post.get('hash', '')
+            if not hash_value:
+                import hashlib
+                title = tweet_to_post.get('title', '')
+                if title:
+                    hash_value = hashlib.md5(title.encode()).hexdigest()
+            
             # Tweet verilerini posted article formatına çevir
             posted_article = {
                 "title": tweet_to_post.get('title', ''),
                 "url": tweet_to_post.get('url', ''),
+                "hash": hash_value,
                 "content": tweet_to_post.get('content', ''),
                 "source": tweet_to_post.get('source', ''),
                 "source_type": tweet_to_post.get('source_type', 'article'),
                 "posted_date": datetime.now().isoformat(),
                 "tweet_content": tweet_to_post.get('content', ''),
+                "tweet_text": tweet_content,
+                "tweet_id": manual_tweet_result.get("tweet_id", ""),
+                "tweet_url": manual_tweet_result.get("url", ""),
                 "manual_post": True,
+                "post_method": "manuel",
                 "confirmed_at": datetime.now().isoformat(),
                 "type": tweet_to_post.get('source_type', 'article')
             }
