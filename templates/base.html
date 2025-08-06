@@ -1073,9 +1073,30 @@
                         updateRateLimitStatus(); // Rate limit durumunu güncelle
                         setTimeout(() => window.location.reload(), 1000);
                     } else {
-                        if (data.rate_limited) {
+                        if (data.rate_limited && data.manual_share_url) {
+                            // Rate limit durumunda manuel paylaşım seçeneği sun
+                            const waitMinutes = data.wait_minutes || 15;
+                            const manualShare = confirm(
+                                `⚠️ Twitter API rate limit aşıldı (${waitMinutes} dakika bekleyin).\n\n` +
+                                `🔄 Manuel olarak Twitter'da paylaşmak ister misiniz?\n` +
+                                `(Tweet metni otomatik olarak doldurulacak)`
+                            );
+                            
+                            if (manualShare) {
+                                // Manuel paylaşım URL'sini aç
+                                window.open(data.manual_share_url, '_blank');
+                                
+                                // Tweet'i manuel olarak işlenmiş olarak işaretle
+                                manualPostTweet(tweetId);
+                                
+                                showNotification('🚀 Twitter\'da manuel paylaşım sayfası açıldı!', 'info');
+                            } else {
+                                showNotification(`⏰ ${waitMinutes} dakika sonra tekrar deneyin.`, 'warning');
+                            }
+                            updateRateLimitStatus();
+                        } else if (data.rate_limited) {
                             showNotification(`Rate limit hatası: ${data.error}`, 'warning');
-                            updateRateLimitStatus(); // Rate limit durumunu güncelle
+                            updateRateLimitStatus();
                         } else {
                             showNotification('Hata: ' + data.error, 'error');
                         }

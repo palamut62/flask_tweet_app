@@ -2976,9 +2976,11 @@ def post_text_tweet_v2(tweet_text):
         
         if hasattr(response, 'data') and response.data and 'id' in response.data:
             tweet_id = response.data['id']
-            tweet_url = f"https://twitter.com/user/status/{tweet_id}"
+            # Twitter URL düzeltmesi - doğru format kullan
+            tweet_url = f"https://x.com/i/status/{tweet_id}"
             safe_log(f"Tweet başarıyla gönderildi: {tweet_url}", "INFO")
-            return {"success": True, "tweet_id": tweet_id, "url": tweet_url}
+            safe_log(f"Tweet ID: {tweet_id}", "DEBUG")
+            return {"success": True, "tweet_id": tweet_id, "url": tweet_url, "tweet_url": tweet_url}
         else:
             safe_log(f"Tweet gönderilemedi: {response}", "ERROR")
             return {"success": False, "error": "Tweet gönderilemedi"}

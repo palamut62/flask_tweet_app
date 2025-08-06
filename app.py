@@ -358,21 +358,35 @@ def index():
         # Tarihe göre sırala
         pending_tweets.sort(key=lambda x: x.get('created_at', ''), reverse=True)
         
+        # News count hesapla (haber kaynaklı tweet'ler)
+        news_count = 0
+        for tweet in pending_tweets:
+            if 'article' in tweet and tweet['article'].get('source_type') == 'news':
+                news_count += 1
+        
         # İstatistikleri ve durumu al
         stats = get_data_statistics()
         automation_status = get_automation_status()
         
         # Terminal log
-        terminal_log(f"📊 Ana sayfa yüklendi: {len(pending_tweets)} bekleyen tweet, {len(articles)} son makale", "info")
+        terminal_log(f"📊 Ana sayfa yüklendi: {len(pending_tweets)} bekleyen tweet, {len(articles)} son makale, {news_count} haber", "info")
         
-        # API durumu kontrolü - minimal versiyon
-        api_check = {
-            "twitter_api_available": bool(os.environ.get('TWITTER_BEARER_TOKEN') and os.environ.get('TWITTER_API_KEY')),
-            "telegram_available": bool(os.environ.get('TELEGRAM_BOT_TOKEN'))
-        }
+        # API durumu kontrolü - geliştirilmiş versiyon
+        try:
+            api_check = {
+                "twitter_api_available": bool(os.environ.get('TWITTER_BEARER_TOKEN') and os.environ.get('TWITTER_API_KEY')),
+                "telegram_available": bool(os.environ.get('TELEGRAM_BOT_TOKEN'))
+            }
+        except Exception as e:
+            terminal_log(f"⚠️ API durumu kontrol edilemedi: {str(e)}", "warning")
+            api_check = {"twitter_api_available": False, "telegram_available": False}
         
-        # Ayarları yükle
-        settings = load_automation_settings()
+        # Ayarları yükle - hata yakalama ile
+        try:
+            settings = load_automation_settings()
+        except Exception as e:
+            terminal_log(f"⚠️ Otomasyon ayarları yüklenemedi: {str(e)}", "warning")
+            settings = {}
         
         return render_template('index.html', 
                              articles=articles[-10:],
@@ -381,6 +395,7 @@ def index():
                              automation_status=automation_status,
                              api_check=api_check,
                              settings=settings,
+                             news_count=news_count,
                              last_check=last_check_time)
                              
     except Exception as e:
@@ -393,6 +408,7 @@ def index():
                              automation_status={},
                              api_check={},
                              settings={},
+                             news_count=0,
                              error=str(e))
 
 @app.route('/check_articles')
@@ -602,12 +618,46 @@ def check_and_post_articles():
         
         posted_count = 0
         pending_count = 0
+        ai_failures = 0  # AI API başarısızlık sayacı
         max_articles = settings.get('max_articles_per_run', 3)
         min_score = settings.get('min_score_threshold', 5)
         auto_post = settings.get('auto_post_enabled', False)
         
+        # İşlenmiş makaleleri yükle (duplikat kontrolü için)
+        posted_articles = load_json("posted_articles.json")
+        pending_tweets = load_json("pending_tweets.json")
+        
         for article in articles[:max_articles]:
             try:
+                # Makale zaten işlenmiş mi kontrol et
+                article_url = article.get('url', '')
+                article_hash = article.get('hash', '')
+                
+                # Posted articles kontrolü
+                already_posted = False
+                for posted in posted_articles:
+                    if (article_url and article_url == posted.get('url', '')) or \
+                       (article_hash and article_hash == posted.get('hash', '')):
+                        already_posted = True
+                        break
+                
+                # Pending tweets kontrolü
+                already_pending = False
+                for pending in pending_tweets:
+                    pending_article = pending.get('article', {})
+                    if (article_url and article_url == pending_article.get('url', '')) or \
+                       (article_hash and article_hash == pending_article.get('hash', '')):
+                        already_pending = True
+                        break
+                
+                if already_posted:
+                    terminal_log(f"⏭️ Makale zaten paylaşılmış, atlanıyor: {article['title'][:50]}...", "info")
+                    continue
+                    
+                if already_pending:
+                    terminal_log(f"⏭️ Makale zaten onay bekliyor, atlanıyor: {article['title'][:50]}...", "info")
+                    continue
+                
                 # Tweet oluştur - tema ile
                 theme = settings.get('tweet_theme', 'bilgilendirici')
                 terminal_log(f"🤖 Tweet oluşturuluyor (tema: {theme}): {article['title'][:50]}...", "info")
@@ -615,6 +665,19 @@ def check_and_post_articles():
                 
                 if not tweet_data or not tweet_data.get('tweet'):
                     terminal_log(f"❌ Tweet oluşturulamadı: {article['title'][:50]}...", "error")
+                    ai_failures += 1
+                    
+                    # AI API sürekli başarısız oluyorsa sistemi durdur
+                    if ai_failures >= 3:
+                        terminal_log(f"🚫 AI API'lar sürekli başarısız oluyor ({ai_failures} başarısızlık). Sistem durduruluyor.", "warning")
+                        
+                        # Otomatik sistemi durdur
+                        settings['auto_post_enabled'] = False
+                        settings['auto_mode'] = False
+                        save_automation_settings(settings)
+                        
+                        return {"success": False, "message": f"AI API'lar sürekli başarısız olduğu için sistem durdu. API kotalarınızı kontrol edin.", "posted_count": posted_count, "pending_count": pending_count}
+                    
                     continue
                 
                 # Tweet kalite kontrolü - OTOMATIK SİSTEMDE KALİTELİ TWEET ZORUNLULUĞU
@@ -660,6 +723,51 @@ def check_and_post_articles():
                         error_msg = tweet_result.get('error', 'Bilinmeyen hata')
                         
                         terminal_log(f"❌ Tweet paylaşım hatası: {error_msg}", "error")
+                        
+                        # Rate limit hatası ise sistemi durdur
+                        if tweet_result.get('rate_limited', False):
+                            wait_minutes = tweet_result.get('wait_minutes', 15)
+                            terminal_log(f"🚫 Rate limit nedeniyle otomatik sistem durduruluyor. {wait_minutes} dakika bekleyin.", "warning")
+                            
+                            # Otomatik sistemi durdur
+                            settings['auto_post_enabled'] = False
+                            settings['auto_mode'] = False
+                            save_automation_settings(settings)
+                            
+                            # Bu makaleyi de pending'e ekle ve döngüyü kır
+                            pending_tweets = load_json("pending_tweets.json")
+                            
+                            new_tweet = {
+                                "article": article,
+                                "tweet_data": tweet_data,
+                                "created_date": datetime.now().isoformat(),
+                                "created_at": datetime.now().isoformat(),
+                                "status": "pending",
+                                "error_reason": error_msg,
+                                "retry_count": 0
+                            }
+                            
+                            # Duplikat kontrolü
+                            article_url = article.get('url', '')
+                            article_hash = article.get('hash', '')
+                            
+                            is_duplicate = False
+                            for existing_tweet in pending_tweets:
+                                existing_article = existing_tweet.get('article', {})
+                                if (article_url and article_url == existing_article.get('url', '')) or \
+                                   (article_hash and article_hash == existing_article.get('hash', '')):
+                                    is_duplicate = True
+                                    break
+                            
+                            if not is_duplicate:
+                                pending_tweets.append(new_tweet)
+                                save_json("pending_tweets.json", pending_tweets)
+                                pending_count += 1
+                                terminal_log(f"📝 Tweet pending listesine eklendi: {article['title'][:50]}...", "info")
+                            
+                            # Rate limit nedeniyle işlemi durdur
+                            return {"success": False, "message": f"Rate limit nedeniyle sistem durdu. {wait_minutes} dakika sonra tekrar deneyin.", "posted_count": posted_count, "pending_count": pending_count}
+                        
                         terminal_log(f"📝 Tweet pending listesine ekleniyor: {article['title'][:50]}...", "info")
                         
                         pending_tweets = load_json("pending_tweets.json")
@@ -858,10 +966,20 @@ def post_tweet_route():
             error_msg = tweet_result.get('error', 'Bilinmeyen hata')
             is_rate_limited = 'rate limit' in error_msg.lower() or 'too many requests' in error_msg.lower()
             
+            # Rate limit durumunda manuel paylaşım URL'si oluştur
+            manual_share_url = None
+            if is_rate_limited:
+                import urllib.parse
+                encoded_text = urllib.parse.quote(tweet_text)
+                manual_share_url = f"https://x.com/intent/tweet?text={encoded_text}"
+            
             return jsonify({
                 "success": False, 
                 "error": error_msg,
-                "rate_limited": is_rate_limited
+                "rate_limited": is_rate_limited,
+                "manual_share_url": manual_share_url,
+                "tweet_text": tweet_text,
+                "wait_minutes": tweet_result.get('wait_minutes', 15)
             })
             
     except Exception as e:
@@ -999,15 +1117,25 @@ def manual_post_tweet_route():
         tweet_text = tweet_to_post.get('content', '')
         article_url = tweet_to_post.get('url', '')
         
-        # Manuel paylaşım sonrası tweet'i posted_articles.json'a kaydet
+        # Manuel tweet'i gerçekten Twitter'a paylaş
         try:
-            from utils import mark_article_as_posted
+            from utils import post_tweet
             
-            # Manuel tweet sonucu oluştur
+            # Gerçek Twitter API ile tweet paylaş
+            tweet_result = post_tweet(tweet_text, "Manuel Tweet")
+            
+            if not tweet_result.get('success'):
+                return jsonify({
+                    "success": False,
+                    "error": f"Tweet paylaşım hatası: {tweet_result.get('error', 'Bilinmeyen hata')}"
+                })
+            
+            # Başarılı paylaşım sonucu
             manual_tweet_result = {
                 "success": True,
-                "tweet_id": f"manual_{int(datetime.now().timestamp())}",
-                "url": f"https://x.com/search?q={urllib.parse.quote(tweet_text[:50])}",
+                "tweet_id": tweet_result.get('tweet_id'),
+                "url": tweet_result.get('url'),
+                "tweet_url": tweet_result.get('tweet_url', tweet_result.get('url')),
                 "manual_post": True,
                 "posted_at": datetime.now().isoformat()
             }
@@ -2940,6 +3068,84 @@ def terminal_log(message, level='info'):
     timestamp = time.strftime('%H:%M:%S')
     
     print(f"{color}[{timestamp}] [{level.upper()}] {message}{reset}")
+
+@app.route('/test_twitter_connection')
+@login_required 
+def test_twitter_connection():
+    """Twitter API bağlantısını test et"""
+    try:
+        from utils import setup_twitter_v2_client, check_rate_limit
+        import tweepy
+        
+        # Rate limit kontrolü
+        rate_check = check_rate_limit("tweets")
+        if not rate_check.get("allowed", True):
+            wait_minutes = int(rate_check.get("wait_time", 0) / 60) + 1
+            return jsonify({
+                "success": False, 
+                "error": f"Rate limit aşıldı. {wait_minutes} dakika bekleyin.",
+                "rate_limit": True,
+                "wait_minutes": wait_minutes,
+                "requests_made": rate_check.get('requests_made', 0),
+                "limit": rate_check.get('limit', 5)
+            })
+        
+        # Twitter client oluştur
+        client = setup_twitter_v2_client()
+        
+        # Basit bir test tweet metni
+        test_tweet = f"🔧 Twitter API bağlantı testi - {datetime.now().strftime('%H:%M:%S')}"
+        
+        # Tweet'i gönder
+        response = client.create_tweet(text=test_tweet)
+        
+        if hasattr(response, 'data') and response.data and 'id' in response.data:
+            tweet_id = response.data['id']
+            tweet_url = f"https://x.com/i/status/{tweet_id}"
+            
+            # Rate limit kullanımını güncelle
+            from utils import update_rate_limit_usage
+            update_rate_limit_usage("tweets")
+            
+            return jsonify({
+                "success": True,
+                "message": "Twitter API bağlantısı başarılı!",
+                "tweet_id": tweet_id,
+                "tweet_url": tweet_url,
+                "tweet_text": test_tweet
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Tweet gönderilemedi - API response problemi",
+                "response": str(response)
+            })
+            
+    except tweepy.TooManyRequests as e:
+        return jsonify({
+            "success": False,
+            "error": "Twitter API rate limit aşıldı",
+            "rate_limit": True,
+            "details": str(e)
+        })
+    except tweepy.Unauthorized as e:
+        return jsonify({
+            "success": False,
+            "error": "Twitter API kimlik doğrulama hatası - API anahtarlarını kontrol edin",
+            "details": str(e)
+        })
+    except tweepy.Forbidden as e:
+        return jsonify({
+            "success": False,
+            "error": "Twitter API yasak işlem - Hesap kısıtlaması olabilir",
+            "details": str(e)
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Twitter API test hatası: {str(e)}",
+            "details": str(e)
+        })
 
 @app.route('/test_duplicate_detection')
 @login_required
