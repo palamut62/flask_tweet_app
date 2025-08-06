@@ -1677,6 +1677,55 @@ def update_env_variables():
             "error": f"❌ Güncelleme hatası: {str(e)}"
         })
 
+@app.route('/get_env_variables', methods=['GET'])
+@login_required
+def get_env_variables():
+    """Mevcut environment variables'ları getir"""
+    try:
+        # Güvenlik kontrolü - sadece belirli anahtarların okunmasına izin ver
+        allowed_keys = {
+            'GOOGLE_API_KEY', 'OPENROUTER_API_KEY', 'TWITTER_BEARER_TOKEN',
+            'TWITTER_API_KEY', 'TWITTER_API_SECRET', 'TWITTER_ACCESS_TOKEN',
+            'TWITTER_ACCESS_TOKEN_SECRET', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID',
+            'GMAIL_EMAIL', 'GMAIL_APP_PASSWORD', 'GITHUB_TOKEN'
+        }
+        
+        env_values = {}
+        
+        for key in allowed_keys:
+            value = os.environ.get(key, '')
+            if value:
+                # Güvenlik için değeri maskele (ilk 4 ve son 4 karakter hariç)
+                if len(value) > 8:
+                    masked_value = value[:4] + '*' * (len(value) - 8) + value[-4:]
+                elif len(value) > 4:
+                    masked_value = value[:2] + '*' * (len(value) - 4) + value[-2:]
+                else:
+                    masked_value = '*' * len(value)
+                
+                env_values[key] = {
+                    'exists': True,
+                    'masked_value': masked_value,
+                    'length': len(value)
+                }
+            else:
+                env_values[key] = {
+                    'exists': False,
+                    'masked_value': '',
+                    'length': 0
+                }
+        
+        return jsonify({
+            "success": True,
+            "env_values": env_values
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"❌ .env okuma hatası: {str(e)}"
+        })
+
 @app.route('/save_settings', methods=['POST'])
 @login_required
 def save_settings():

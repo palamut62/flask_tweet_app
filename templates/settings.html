@@ -711,6 +711,113 @@ function testOpenRouterAPI() {
         });
 }
 
+// Sayfa yüklendiğinde mevcut API anahtarlarını otomatik yükle
+document.addEventListener('DOMContentLoaded', function() {
+    // API yönetim formuna otomatik mevcut değerleri yükle
+    setTimeout(() => {
+        const apiForm = document.getElementById('apiKeysForm');
+        if (apiForm) {
+            loadCurrentApiKeysAutomatic();
+        }
+    }, 1000);
+});
+
+function loadCurrentApiKeysAutomatic() {
+    fetch('/get_env_variables')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const envValues = data.env_values;
+                
+                // Her input için mevcut değeri göster
+                Object.keys(envValues).forEach(key => {
+                    const input = document.getElementById(key.toLowerCase());
+                    if (input && envValues[key]) {
+                        const envData = envValues[key];
+                        
+                        if (envData.exists) {
+                            // Mevcut değeri placeholder'da göster
+                            input.placeholder = `Mevcut: ${envData.masked_value} (${envData.length} karakter)`;
+                            input.style.borderColor = '#10B981'; // Yeşil border
+                            input.style.backgroundColor = '#F0FDF4'; // Açık yeşil background
+                            
+                            // Input'un yanına durum ikonu ekle
+                            let statusIcon = input.parentElement.querySelector('.status-icon');
+                            if (!statusIcon) {
+                                statusIcon = document.createElement('div');
+                                statusIcon.className = 'status-icon absolute right-3 top-1/2 transform -translate-y-1/2';
+                                input.parentElement.style.position = 'relative';
+                                input.parentElement.appendChild(statusIcon);
+                            }
+                            statusIcon.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
+                        } else {
+                            // Değer yok
+                            input.placeholder = `${key} (henüz girilmemiş)`;
+                            input.style.borderColor = '#EF4444'; // Kırmızı border
+                            input.style.backgroundColor = '#FEF2F2'; // Açık kırmızı background
+                            
+                            let statusIcon = input.parentElement.querySelector('.status-icon');
+                            if (!statusIcon) {
+                                statusIcon = document.createElement('div');
+                                statusIcon.className = 'status-icon absolute right-3 top-1/2 transform -translate-y-1/2';
+                                input.parentElement.style.position = 'relative';
+                                input.parentElement.appendChild(statusIcon);
+                            }
+                            statusIcon.innerHTML = '<i class="fas fa-exclamation-circle text-red-500"></i>';
+                        }
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.log('Otomatik API değerleri yüklenemedi:', error);
+        });
+}
+
+// Input alanlarına event listener ekle - kullanıcı yazmaya başladığında stili temizle
+function setupInputEventListeners() {
+    const keys = [
+        'GOOGLE_API_KEY', 'OPENROUTER_API_KEY', 'TWITTER_BEARER_TOKEN',
+        'TWITTER_API_KEY', 'TWITTER_API_SECRET', 'TWITTER_ACCESS_TOKEN',
+        'TWITTER_ACCESS_TOKEN_SECRET', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID',
+        'GMAIL_EMAIL', 'GMAIL_APP_PASSWORD', 'GITHUB_TOKEN'
+    ];
+    
+    keys.forEach(key => {
+        const input = document.getElementById(key.toLowerCase());
+        if (input) {
+            input.addEventListener('input', function() {
+                // Kullanıcı yazmaya başladığında stili sıfırla
+                this.style.borderColor = '';
+                this.style.backgroundColor = '';
+                
+                // Durum ikonunu kaldır
+                const statusIcon = this.parentElement.querySelector('.status-icon');
+                if (statusIcon) {
+                    statusIcon.remove();
+                }
+                
+                // Placeholder'ı güncelle
+                if (this.value.trim()) {
+                    this.placeholder = 'Yeni değer giriliyor...';
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                // Eğer boşsa eski placeholder'ı geri getir
+                if (!this.value.trim()) {
+                    loadCurrentApiKeysAutomatic();
+                }
+            });
+        }
+    });
+}
+
+// Sayfa yüklendiğinde input event listener'larını da kur
+setTimeout(() => {
+    setupInputEventListeners();
+}, 1500);
+
 // API Anahtarları Yönetimi Fonksiyonları
 document.getElementById('apiKeysForm').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -767,22 +874,72 @@ document.getElementById('apiKeysForm').addEventListener('submit', function(e) {
 });
 
 function loadCurrentApiKeys() {
-    const keys = [
-        'GOOGLE_API_KEY', 'OPENROUTER_API_KEY', 'TWITTER_BEARER_TOKEN',
-        'TWITTER_API_KEY', 'TWITTER_API_SECRET', 'TWITTER_ACCESS_TOKEN',
-        'TWITTER_ACCESS_TOKEN_SECRET', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID',
-        'GMAIL_EMAIL', 'GMAIL_APP_PASSWORD', 'GITHUB_TOKEN'
-    ];
+    const button = event.target;
+    const originalText = button.innerHTML;
     
-    // Mevcut değerleri placeholder olarak göster (güvenlik için son 4 karakter)
-    keys.forEach(key => {
-        const input = document.getElementById(key.toLowerCase());
-        if (input) {
-            input.placeholder = `${key} (mevcut değer korunuyor)`;
-        }
-    });
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Yükleniyor...';
     
-    showNotification('💡 Yeni değer girmezseniz mevcut değerler korunur', 'info');
+    fetch('/get_env_variables')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const envValues = data.env_values;
+                
+                // Her input için mevcut değeri göster
+                Object.keys(envValues).forEach(key => {
+                    const input = document.getElementById(key.toLowerCase());
+                    if (input && envValues[key]) {
+                        const envData = envValues[key];
+                        
+                        if (envData.exists) {
+                            // Mevcut değeri placeholder'da göster
+                            input.placeholder = `Mevcut: ${envData.masked_value} (${envData.length} karakter)`;
+                            input.style.borderColor = '#10B981'; // Yeşil border
+                            input.style.backgroundColor = '#F0FDF4'; // Açık yeşil background
+                            
+                            // Input'un yanına durum ikonu ekle
+                            let statusIcon = input.parentElement.querySelector('.status-icon');
+                            if (!statusIcon) {
+                                statusIcon = document.createElement('div');
+                                statusIcon.className = 'status-icon absolute right-3 top-1/2 transform -translate-y-1/2';
+                                input.parentElement.style.position = 'relative';
+                                input.parentElement.appendChild(statusIcon);
+                            }
+                            statusIcon.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
+                        } else {
+                            // Değer yok
+                            input.placeholder = `${key} (henüz girilmemiş)`;
+                            input.style.borderColor = '#EF4444'; // Kırmızı border
+                            input.style.backgroundColor = '#FEF2F2'; // Açık kırmızı background
+                            
+                            let statusIcon = input.parentElement.querySelector('.status-icon');
+                            if (!statusIcon) {
+                                statusIcon = document.createElement('div');
+                                statusIcon.className = 'status-icon absolute right-3 top-1/2 transform -translate-y-1/2';
+                                input.parentElement.style.position = 'relative';
+                                input.parentElement.appendChild(statusIcon);
+                            }
+                            statusIcon.innerHTML = '<i class="fas fa-exclamation-circle text-red-500"></i>';
+                        }
+                    }
+                });
+                
+                const existingCount = Object.values(envValues).filter(v => v.exists).length;
+                const totalCount = Object.keys(envValues).length;
+                
+                showNotification(`📊 ${existingCount}/${totalCount} API anahtarı mevcut. Yeni değer girmezseniz mevcut değerler korunur.`, 'info');
+            } else {
+                showNotification(data.error, 'error');
+            }
+        })
+        .catch(error => {
+            showNotification('❌ Mevcut değerler yüklenemedi: ' + error.message, 'error');
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.innerHTML = originalText;
+        });
 }
 
 function testSingleAPI(apiType) {
