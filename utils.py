@@ -336,12 +336,12 @@ def fetch_latest_ai_articles():
         return fetch_latest_ai_articles_smart()
         
     except Exception as e:
-        print(f"❌ Ana haber çekme hatası: {e}")
-        print("🔄 Son çare fallback deneniyor...")
+        safe_print(f"[HATA] Ana haber çekme hatası: {e}")
+        safe_print("[DENEME] Son çare fallback deneniyor...")
         try:
             return fetch_latest_ai_articles_fallback()
         except Exception as fallback_error:
-            print(f"❌ Fallback da başarısız: {fallback_error}")
+            safe_print(f"[HATA] Fallback da başarısız: {fallback_error}")
             return []
 
 def fetch_latest_ai_articles_fallback():
@@ -357,7 +357,7 @@ def fetch_latest_ai_articles_fallback():
         soup = BeautifulSoup(html, "html.parser")
         article_links = soup.select("a.loop-card__title-link")[:4]  # Sadece son 4 makale
         
-        print(f"🔍 Fallback: TechCrunch AI kategorisinden son {len(article_links)} makale kontrol ediliyor...")
+        safe_print(f"[FALLBACK] TechCrunch AI kategorisinden son {len(article_links)} makale kontrol ediliyor...")
         
         articles_data = []
         for link_tag in article_links:
@@ -371,7 +371,7 @@ def fetch_latest_ai_articles_fallback():
             is_already_posted = url in posted_urls or article_hash in posted_hashes
             
             if is_already_posted:
-                print(f"✅ Makale zaten paylaşılmış, atlanıyor: {title[:50]}...")
+                safe_print(f"[ATLA] Makale zaten paylaşılmış, atlanıyor: {title[:50]}...")
                 continue
             
             # Makale içeriğini gelişmiş şekilde çek
@@ -388,11 +388,11 @@ def fetch_latest_ai_articles_fallback():
                     "already_posted": False,
                     "source": "fallback"
                 })
-                print(f"🆕 Fallback ile yeni makale bulundu: {title[:50]}...")
+                safe_print(f"[YENI] Fallback ile yeni makale bulundu: {title[:50]}...")
             else:
-                print(f"⚠️ İçerik yetersiz, atlanıyor: {title[:50]}...")
+                safe_print(f"[ATLA] İçerik yetersiz, atlanıyor: {title[:50]}...")
         
-        print(f"📊 Fallback ile toplam {len(articles_data)} yeni makale bulundu")
+        safe_print(f"[FALLBACK] Toplam {len(articles_data)} yeni makale bulundu")
         
         # Duplikat filtreleme uygula
         if articles_data:
@@ -402,11 +402,11 @@ def fetch_latest_ai_articles_fallback():
         main_settings = load_automation_settings()
         max_articles = main_settings.get('max_articles_per_run', 5)
         
-        print(f"🔢 Kullanıcı ayarına göre {max_articles} makale döndürülüyor")
+        safe_print(f"[FALLBACK] Kullanıcı ayarına göre {max_articles} makale döndürülüyor")
         return articles_data[:max_articles]
         
     except Exception as e:
-        print(f"Fallback haber çekme hatası: {e}")
+        safe_print(f"[HATA] Fallback haber çekme hatası: {e}")
         return []
 
 def fetch_article_content_with_firecrawl(url):
@@ -612,7 +612,7 @@ Seçenekler: Developer, Investor, General
 Cevap:"""
     return gemini_call(prompt, api_key, max_tokens=10).strip()
 
-def openrouter_call(prompt, api_key, max_tokens=100, model="qwen/qwen3-8b:free"):
+def openrouter_call(prompt, api_key, max_tokens=100, model="openrouter/horizon-beta"):
     """OpenRouter API çağrısı - Ücretsiz model ile yedek sistem"""
     if not api_key:
         safe_log("OpenRouter API anahtarı bulunamadı", "WARNING")
@@ -733,45 +733,46 @@ def try_openrouter_fallback(prompt, max_tokens=100):
         # OpenRouter API anahtarını kontrol et
         openrouter_key = os.environ.get('OPENROUTER_API_KEY')
         if not openrouter_key:
-            safe_log("⚠️ OpenRouter API anahtarı bulunamadı, yedek sistem kullanılamıyor", "WARNING")
+            safe_log("[UYARI] OpenRouter API anahtarı bulunamadı, yedek sistem kullanılamıyor", "WARNING")
             return "API hatası"
         
-        safe_log("🔄 Gemini başarısız, OpenRouter yedek sistemi deneniyor...", "INFO")
+        safe_log("[FALLBACK] Gemini başarısız, OpenRouter yedek sistemi deneniyor...", "INFO")
         
-        # Güncel ücretsiz modeller listesi (2025 güncel - öncelik sırasına göre)
+        # Güncel ücretsiz modeller listesi (2025 - kullanıcı tarafından belirtilen modeller öncelikli)
         free_models = [
-            "qwen/qwen3-8b:free",                           # Yeni Qwen3 8B - En güvenilir
-            "qwen/qwen3-30b-a3b:free",                      # Yeni Qwen3 30B A3B - Güçlü
-            "qwen/qwen3-4b:free",                           # Yeni Qwen3 4B - Hızlı
-            "deepseek/deepseek-chat-v3-0324:free",         # DeepSeek Chat - Güvenilir
-            "deepseek/deepseek-r1-zero:free",              # DeepSeek R1 - Reasoning
-            "deepseek/deepseek-v3-base:free",              # DeepSeek V3 Base
-            "nousresearch/deephermes-3-llama-3-8b-preview:free"  # DeepHermes 3 - Fallback
+            "openrouter/horizon-beta",                      # Kullanıcı tercihi 1 - Horizon Beta
+            "z-ai/glm-4.5-air:free",                       # Kullanıcı tercihi 2 - GLM 4.5 Air
+            "moonshotai/kimi-k2:free",                      # Kullanıcı tercihi 3 - Kimi K2
+            "qwen/qwen3-30b-a3b:free",                      # Kullanıcı tercihi 4 - Qwen3 30B A3B
+            "qwen/qwen3-8b:free",                           # Yedek - Qwen3 8B
+            "deepseek/deepseek-chat-v3-0324:free",         # Yedek - DeepSeek Chat
+            "deepseek/deepseek-r1-zero:free",              # Yedek - DeepSeek R1
+            "nousresearch/deephermes-3-llama-3-8b-preview:free"  # Son yedek - DeepHermes 3
         ]
         
         # Her modeli sırayla dene
         for model in free_models:
             try:
-                safe_log(f"🧪 OpenRouter modeli deneniyor: {model}", "DEBUG")
+                safe_log(f"[TEST] OpenRouter modeli deneniyor: {model}", "DEBUG")
                 result = openrouter_call(prompt, openrouter_key, max_tokens, model)
                 
                 if result and len(result.strip()) > 5:
-                    safe_log(f"✅ OpenRouter başarılı! Model: {model}", "SUCCESS")
+                    safe_log(f"[BASARILI] OpenRouter başarılı! Model: {model}", "SUCCESS")
                     return result
                 else:
-                    safe_log(f"⚠️ OpenRouter model yanıt vermedi: {model}", "WARNING")
+                    safe_log(f"[UYARI] OpenRouter model yanıt vermedi: {model}", "WARNING")
                     continue
                     
             except Exception as model_error:
-                safe_log(f"❌ OpenRouter model hatası ({model}): {model_error}", "ERROR")
+                safe_log(f"[HATA] OpenRouter model hatası ({model}): {model_error}", "ERROR")
                 continue
         
         # Hiçbir model çalışmazsa
-        safe_log("❌ Tüm OpenRouter modelleri başarısız", "ERROR")
+        safe_log("[HATA] Tüm OpenRouter modelleri başarısız", "ERROR")
         return "API hatası"
         
     except Exception as e:
-        safe_log(f"❌ OpenRouter yedek sistem hatası: {e}", "ERROR")
+        safe_log(f"[HATA] OpenRouter yedek sistem hatası: {e}", "ERROR")
         return "API hatası"
 def generate_smart_hashtags(title, content):
     """Makale içeriğine göre akıllı hashtag oluşturma - 5 popüler hashtag"""
@@ -3000,15 +3001,39 @@ def setup_twitter_v2_client():
     """Tweepy v2 API Client ile kimlik doğrulama (sadece metinli tweet için)"""
     import tweepy
     import os
-    # v2 API Client
-    client = tweepy.Client(
-        bearer_token=os.environ.get('TWITTER_BEARER_TOKEN'),
-        consumer_key=os.environ.get('TWITTER_API_KEY'),
-        consumer_secret=os.environ.get('TWITTER_API_SECRET'),
-        access_token=os.environ.get('TWITTER_ACCESS_TOKEN'),
-        access_token_secret=os.environ.get('TWITTER_ACCESS_TOKEN_SECRET')
-    )
-    return client
+    
+    # API anahtarlarını kontrol et
+    required_keys = {
+        'TWITTER_BEARER_TOKEN': os.environ.get('TWITTER_BEARER_TOKEN'),
+        'TWITTER_API_KEY': os.environ.get('TWITTER_API_KEY'),
+        'TWITTER_API_SECRET': os.environ.get('TWITTER_API_SECRET'),
+        'TWITTER_ACCESS_TOKEN': os.environ.get('TWITTER_ACCESS_TOKEN'),
+        'TWITTER_ACCESS_TOKEN_SECRET': os.environ.get('TWITTER_ACCESS_TOKEN_SECRET')
+    }
+    
+    # Eksik anahtarları kontrol et
+    missing_keys = [key for key, value in required_keys.items() if not value or value.strip() == '']
+    if missing_keys:
+        safe_log(f"⚠️ Eksik Twitter API anahtarları: {', '.join(missing_keys)}", "ERROR")
+        raise ValueError(f"Twitter API anahtarları eksik veya boş: {', '.join(missing_keys)}")
+    
+    try:
+        # v2 API Client
+        client = tweepy.Client(
+            bearer_token=required_keys['TWITTER_BEARER_TOKEN'],
+            consumer_key=required_keys['TWITTER_API_KEY'],
+            consumer_secret=required_keys['TWITTER_API_SECRET'],
+            access_token=required_keys['TWITTER_ACCESS_TOKEN'],
+            access_token_secret=required_keys['TWITTER_ACCESS_TOKEN_SECRET']
+        )
+        
+        # Basit bağlantı testi (isteğe bağlı)
+        safe_log("✅ Twitter API Client başarıyla oluşturuldu", "DEBUG")
+        return client
+        
+    except Exception as e:
+        safe_log(f"❌ Twitter API Client oluşturma hatası: {e}", "ERROR")
+        raise
 
 
 
@@ -3025,12 +3050,30 @@ def post_text_tweet_v2(tweet_text):
             safe_log(error_msg, "WARNING")
             return {"success": False, "error": error_msg, "rate_limited": True, "wait_minutes": wait_minutes}
         
-        client = setup_twitter_v2_client()
+        # Twitter API client oluştur
+        try:
+            client = setup_twitter_v2_client()
+        except ValueError as ve:
+            error_msg = f"Twitter API yapılandırma hatası: {ve}"
+            safe_log(error_msg, "ERROR")
+            return {"success": False, "error": error_msg, "config_error": True}
+        except Exception as ce:
+            error_msg = f"Twitter API bağlantı hatası: {ce}"
+            safe_log(error_msg, "ERROR")
+            return {"success": False, "error": error_msg, "connection_error": True}
+        
+        # Tweet metnini kontrol et ve kısalt
+        if not tweet_text or not tweet_text.strip():
+            error_msg = "Tweet metni boş olamaz"
+            safe_log(error_msg, "ERROR")
+            return {"success": False, "error": error_msg, "validation_error": True}
+            
         TWITTER_LIMIT = 280
         if len(tweet_text) > TWITTER_LIMIT:
             tweet_text = tweet_text[:TWITTER_LIMIT-3] + "..."
         safe_log(f"Tweet uzunluğu: {len(tweet_text)}", "DEBUG")
         
+        # Tweet gönder
         response = client.create_tweet(text=tweet_text)
         
         # Rate limit kullanımını güncelle
@@ -5094,14 +5137,14 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
         
         # Eğer duplikat tespiti kapalıysa, sadece temel kontrolleri yap
         if not settings.get('enable_duplicate_detection', True):
-            print("🔄 Gelişmiş duplikat tespiti kapalı, sadece temel kontroller yapılıyor...")
+            safe_print("[FILTRE] Gelişmiş duplikat tespiti kapalı, sadece temel kontroller yapılıyor...")
             return basic_duplicate_filter(new_articles, existing_articles)
         
         # Eşik değerlerini ayarlardan al - AI Keywords için çok gevşek
         title_threshold = settings.get('title_similarity_threshold', 0.95)  # 0.9 → 0.95 (çok gevşek)
         content_threshold = settings.get('content_similarity_threshold', 0.9)  # 0.8 → 0.9 (çok gevşek)
         
-        print(f"🔍 Gelişmiş duplikat tespiti aktif (Başlık: {title_threshold:.0%}, İçerik: {content_threshold:.0%})")
+        safe_print(f"[FILTRE] Gelişmiş duplikat tespiti aktif (Başlık: {title_threshold:.0%}, İçerik: {content_threshold:.0%})")
         
         if existing_articles is None:
             # Mevcut paylaşılan makaleleri yükle
@@ -5197,11 +5240,11 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
             else:
                 duplicate_count += 1
         
-        print(f"📊 Duplikat filtreleme tamamlandı: {len(new_articles)} makale → {len(filtered_articles)} benzersiz makale ({duplicate_count} duplikat)")
+        safe_print(f"[FILTRE] Duplikat filtreleme tamamlandı: {len(new_articles)} makale → {len(filtered_articles)} benzersiz makale ({duplicate_count} duplikat)")
         return filtered_articles
         
     except Exception as e:
-        print(f"Duplikat filtreleme hatası: {e}")
+        safe_print(f"[HATA] Duplikat filtreleme hatası: {e}")
         return new_articles  # Hata durumunda orijinal listeyi döndür
 def basic_duplicate_filter(new_articles, existing_articles=None):
     """Temel duplikat filtreleme - sadece URL ve hash kontrolü"""
@@ -5350,9 +5393,9 @@ def clean_duplicate_pending_tweets():
 # Rate limit yönetimi için global değişkenler
 RATE_LIMIT_FILE = "rate_limit_status.json"
 TWITTER_RATE_LIMITS = {
-    "tweets": {"limit": 5, "window": 900},  # 15 dakikada 5 tweet (Free plan için güvenli)
-    "user_lookup": {"limit": 50, "window": 900},  # 15 dakikada 50 kullanıcı sorgusu
-    "timeline": {"limit": 30, "window": 900}  # 15 dakikada 30 timeline sorgusu
+    "tweets": {"limit": 20, "window": 3600},  # Saatte 20 tweet (Free plan 25, güvenli margin)
+    "user_lookup": {"limit": 90, "window": 900},  # 15 dakikada 90 kullanıcı sorgusu (Free plan 100)
+    "timeline": {"limit": 25, "window": 900}  # 15 dakikada 25 timeline sorgusu (Free plan 30)
 }
 
 def load_rate_limit_status():
@@ -6037,7 +6080,7 @@ def fetch_articles_from_single_source_pythonanywhere(source):
 def fetch_articles_with_rss_only():
     """Sadece RSS yöntemi ile haber kaynaklarından makale çekme - Son 7 gün filtreli"""
     try:
-        print("🔍 RSS yöntemi ile haber çekme başlatılıyor (Son 7 gün)...")
+        safe_print("[RSS] RSS yöntemi ile haber çekme başlatılıyor (Son 7 gün)...")
         
         # Bugünün tarih ve saatini al
         now = datetime.now()
@@ -6239,7 +6282,7 @@ def fetch_articles_with_rss_only():
         print("⚠️ feedparser modülü bulunamadı, RSS atlanıyor")
         return []
     except Exception as e:
-        print(f"❌ RSS haber çekme genel hatası: {e}")
+        safe_print(f"[HATA] RSS haber çekme genel hatası: {e}")
         return []
 
 def fetch_articles_hybrid_mcp_rss():
@@ -6650,6 +6693,16 @@ def get_news_fetching_method():
             'mcp_enabled': False,
             'available_methods': ['auto', 'ai_keywords_only', 'mcp_only', 'pythonanywhere_only', 'custom_sources_only']
         }
+def safe_print(text):
+    """Windows emoji encoding sorununu çözen güvenli print"""
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        # Emoji'leri kaldır ve basit karakterlere çevir
+        import re
+        clean_text = re.sub(r'[^\x00-\x7F]+', '?', text)
+        print(clean_text)
+
 def fetch_latest_ai_articles_smart():
     """Akıllı haber çekme - Ayarlara göre yöntem seçer"""
     try:
@@ -6661,8 +6714,8 @@ def fetch_latest_ai_articles_smart():
         method = method_info['method']
         mcp_enabled = method_info['mcp_enabled']
         
-        print(f"🎯 Haber çekme yöntemi: {method} (MCP: {'Aktif' if mcp_enabled else 'Pasif'})")
-        print(f"📊 Maksimum makale limiti: {max_articles}")
+        safe_print(f"[HEDEF] Haber çekme yöntemi: {method} (MCP: {'Aktif' if mcp_enabled else 'Pasif'})")
+        safe_print(f"[BILGI] Maksimum makale limiti: {max_articles}")
         
         if method == 'ai_keywords_only':
             # Sadece AI Keywords kullan
@@ -6804,7 +6857,7 @@ def fetch_latest_ai_articles_smart():
             return []
         
     except Exception as e:
-        print(f"❌ Akıllı haber çekme hatası: {e}")
+        safe_print(f"[HATA] Akıllı haber çekme hatası: {e}")
         # Son çare fallback
         return fetch_latest_ai_articles_fallback()
 

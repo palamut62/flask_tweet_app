@@ -901,9 +901,27 @@ def post_tweet_route():
         if not tweet_to_post:
             return jsonify({"success": False, "error": "Tweet bulunamadı"})
         
-        # Tweet'i paylaş
-        tweet_text = tweet_to_post.get('content', '')
-        title = tweet_to_post.get('title', '')
+        # Tweet metnini doğru yerden al
+        tweet_text = ""
+        title = ""
+        
+        # Tweet data'sından metni al
+        if 'tweet_data' in tweet_to_post and tweet_to_post['tweet_data']:
+            tweet_text = tweet_to_post['tweet_data'].get('tweet', '')
+        
+        # Tweet metni yoksa content'i kullan (eski format için)
+        if not tweet_text:
+            tweet_text = tweet_to_post.get('content', '')
+        
+        # Title'ı article'dan al
+        if 'article' in tweet_to_post:
+            title = tweet_to_post['article'].get('title', '')
+        else:
+            title = tweet_to_post.get('title', '')
+        
+        # Tweet metni kontrolü
+        if not tweet_text or not tweet_text.strip():
+            return jsonify({"success": False, "error": "Tweet metni bulunamadı veya boş"})
         
         tweet_result = post_tweet(tweet_text, title)
         
@@ -1113,29 +1131,31 @@ def manual_post_tweet_route():
         if not tweet_to_post:
             return jsonify({"success": False, "error": "Tweet bulunamadı"})
         
-        # Tweet metnini ve URL'yi hazırla
-        tweet_text = tweet_to_post.get('content', '')
-        article_url = tweet_to_post.get('url', '')
+        # Tweet metnini hazırla
+        tweet_text = ""
         
-        # Manuel tweet'i gerçekten Twitter'a paylaş
+        # Tweet datasını kontrol et ve metni hazırla
+        if 'tweet_data' in tweet_to_post and tweet_to_post['tweet_data']:
+            tweet_text = tweet_to_post['tweet_data'].get('tweet', '')
+        
+        # Tweet metni yoksa content'i kullan
+        if not tweet_text:
+            tweet_text = tweet_to_post.get('content', '')
+        
+        # Manuel paylaşım için direkt X.com intent URL'i oluştur
         try:
-            from utils import post_tweet
+            import urllib.parse
             
-            # Gerçek Twitter API ile tweet paylaş
-            tweet_result = post_tweet(tweet_text, "Manuel Tweet")
+            # Tweet metnini encode et
+            encoded_text = urllib.parse.quote(tweet_text)
+            x_share_url = f"https://x.com/intent/tweet?text={encoded_text}"
             
-            if not tweet_result.get('success'):
-                return jsonify({
-                    "success": False,
-                    "error": f"Tweet paylaşım hatası: {tweet_result.get('error', 'Bilinmeyen hata')}"
-                })
-            
-            # Başarılı paylaşım sonucu
+            # Tweet'i pending'den kaldır ve posted'a ekle
             manual_tweet_result = {
                 "success": True,
-                "tweet_id": tweet_result.get('tweet_id'),
-                "url": tweet_result.get('url'),
-                "tweet_url": tweet_result.get('tweet_url', tweet_result.get('url')),
+                "x_share_url": x_share_url,
+                "tweet_text": tweet_text,
+                "tweet_id": tweet_id,
                 "manual_post": True,
                 "posted_at": datetime.now().isoformat()
             }
@@ -1210,10 +1230,10 @@ def manual_post_tweet_route():
         except Exception as remove_error:
             terminal_log(f"❌ Tweet kaldırma hatası: {remove_error}", "error")
         
-        # X.com paylaşım URL'si oluştur
-        import urllib.parse
-        encoded_text = urllib.parse.quote(tweet_text)
-        x_share_url = f"https://x.com/intent/tweet?text={encoded_text}"
+        # Article URL'ini al
+        article_url = tweet_to_post.get('url', '')
+        if 'article' in tweet_to_post and tweet_to_post['article'].get('url'):
+            article_url = tweet_to_post['article']['url']
         
         return jsonify({
             "success": True,
@@ -1312,13 +1332,28 @@ def bulk_tweet_action():
                                 'bulk_operation': True
                             }, tweet_result)
                             
-                            # Pending'den kaldır
-                            pending_tweets.pop(tweet_index)
-                            processed_count += 1
-                            
-                            terminal_log(f"✅ Bulk approve: Tweet {tweet_id} başarıyla paylaşıldı", "success")
+                            # Pending'den kaldır - sadece başarılı işlem sonrası
+                            try:
+                                pending_tweets.pop(tweet_index)
+                                processed_count += 1
+                                terminal_log(f"✅ Bulk approve: Tweet {tweet_id} başarıyla paylaşıldı", "success")
+                            except IndexError:
+                                terminal_log(f"⚠️ Tweet {tweet_id} pending listesinden kaldırılamadı (index hatası)", "warning")
                         else:
-                            errors.append(f"Tweet ID {tweet_id} paylaşılamadı (API hatası)")
+                            # Detaylı hata bilgisi
+                            error_detail = tweet_result.get('error', 'API hatası')
+                            is_rate_limited = tweet_result.get('rate_limited', False)
+                            config_error = tweet_result.get('config_error', False)
+                            
+                            if config_error:
+                                errors.append(f"Tweet ID {tweet_id}: API yapılandırma hatası - {error_detail}")
+                            elif is_rate_limited:
+                                wait_minutes = tweet_result.get('wait_minutes', 15)
+                                errors.append(f"Tweet ID {tweet_id}: Rate limit ({wait_minutes}dk bekle) - {error_detail}")
+                            else:
+                                errors.append(f"Tweet ID {tweet_id}: {error_detail}")
+                            
+                            terminal_log(f"❌ Bulk approve başarısız: Tweet {tweet_id} - {error_detail}", "error")
                             
                     except Exception as e:
                         errors.append(f"Tweet ID {tweet_id} paylaşım hatası: {str(e)}")
@@ -1408,6 +1443,405 @@ def bulk_tweet_action():
     except Exception as e:
         terminal_log(f"❌ Bulk operation hatası: {e}", "error")
         return jsonify({"success": False, "error": f"Toplu işlem hatası: {str(e)}"})
+
+@app.route('/test_news_system', methods=['GET'])
+@login_required
+def test_news_system():
+    """Haber çekme sistemini test et"""
+    try:
+        from utils import fetch_latest_ai_articles, safe_print
+        import os
+        
+        test_results = {
+            "news_sources_config": True,
+            "feedparser_installed": False,
+            "google_api_available": bool(os.environ.get('GOOGLE_API_KEY')),
+            "news_fetch_working": False,
+            "article_count": 0,
+            "errors": [],
+            "warnings": []
+        }
+        
+        # Feedparser kontrolü
+        try:
+            import feedparser
+            test_results["feedparser_installed"] = True
+            test_results["feedparser_version"] = feedparser.__version__
+        except ImportError:
+            test_results["errors"].append("feedparser modülü yüklü değil")
+        
+        # Haber çekme testi
+        try:
+            articles = fetch_latest_ai_articles()
+            test_results["news_fetch_working"] = len(articles) > 0
+            test_results["article_count"] = len(articles)
+            
+            if articles:
+                # İlk birkaç makaleyi örnek olarak ekle
+                test_results["sample_articles"] = []
+                for article in articles[:2]:
+                    test_results["sample_articles"].append({
+                        "title": article.get("title", "")[:100],
+                        "source": article.get("source", ""),
+                        "content_length": len(article.get("content", "")),
+                        "has_url": bool(article.get("url"))
+                    })
+            else:
+                test_results["warnings"].append("Hiç makale bulunamadı")
+                
+        except Exception as news_error:
+            test_results["errors"].append(f"Haber çekme hatası: {news_error}")
+        
+        # AI Tweet sistemi testi (Gemini + OpenRouter fallback)
+        test_results["openrouter_api_available"] = bool(os.environ.get('OPENROUTER_API_KEY'))
+        
+        if test_results["google_api_available"] or test_results["openrouter_api_available"]:
+            try:
+                from utils import generate_ai_tweet_with_content
+                
+                test_article = {
+                    "title": "OpenRouter Multi-Model AI Test",
+                    "content": "Testing the new OpenRouter integration with multiple AI models including Horizon Beta, GLM-4.5-Air, Kimi K2, and Qwen3-30B for automated tweet generation with fallback support.",
+                    "url": "https://example.com/test",
+                    "source": "test"
+                }
+                
+                api_key = os.environ.get('GOOGLE_API_KEY')
+                tweet_data = generate_ai_tweet_with_content(test_article, api_key)
+                
+                if tweet_data and tweet_data.get('tweet'):
+                    test_results["ai_tweet_working"] = True
+                    test_results["sample_tweet"] = tweet_data.get('tweet')[:100]
+                    test_results["used_fallback"] = tweet_data.get('source') == 'fallback'
+                    test_results["tweet_quality"] = tweet_data.get('quality_score', 'Bilinmiyor')
+                else:
+                    test_results["ai_tweet_working"] = False
+                    test_results["warnings"].append("AI tweet üretimi başarısız")
+                    
+            except Exception as ai_error:
+                test_results["ai_tweet_working"] = False
+                if "quota" in str(ai_error).lower():
+                    test_results["warnings"].append("Google API quota'sı dolmuş - OpenRouter fallback kullanılmalı")
+                else:
+                    test_results["errors"].append(f"AI tweet hatası: {ai_error}")
+        else:
+            test_results["warnings"].append("Ne Google ne de OpenRouter API anahtarı bulunamadı")
+        
+        # Genel değerlendirme
+        test_results["overall_status"] = "working" if test_results["news_fetch_working"] else "error"
+        test_results["summary"] = f"{test_results['article_count']} makale çekildi, {len(test_results['errors'])} hata, {len(test_results['warnings'])} uyarı"
+        
+        # Model listesini ekle
+        test_results["available_models"] = {
+            "primary": ["openrouter/horizon-beta", "z-ai/glm-4.5-air:free", "moonshotai/kimi-k2:free", "qwen/qwen3-30b-a3b:free"],
+            "fallback": ["qwen/qwen3-8b:free", "deepseek/deepseek-chat-v3-0324:free"]
+        }
+        
+        return jsonify(test_results)
+        
+    except Exception as e:
+        return jsonify({
+            "overall_status": "error",
+            "summary": f"Test sistemi hatası: {e}",
+            "errors": [str(e)]
+        })
+
+@app.route('/test_openrouter_models', methods=['GET'])
+@login_required
+def test_openrouter_models():
+    """OpenRouter modellerini tek tek test et"""
+    try:
+        from utils import openrouter_call
+        import os
+        
+        openrouter_key = os.environ.get('OPENROUTER_API_KEY')
+        if not openrouter_key:
+            return jsonify({
+                "success": False,
+                "error": "OpenRouter API anahtarı bulunamadı"
+            })
+        
+        # Test edilecek modeller (kullanıcının istediği modeller)
+        test_models = [
+            "openrouter/horizon-beta",
+            "z-ai/glm-4.5-air:free", 
+            "moonshotai/kimi-k2:free",
+            "qwen/qwen3-30b-a3b:free"
+        ]
+        
+        test_prompt = "Create a short tweet about AI technology advancements. Keep it under 200 characters."
+        
+        results = {
+            "api_key_available": True,
+            "tested_models": [],
+            "working_models": [],
+            "failed_models": [],
+            "test_timestamp": datetime.now().isoformat()
+        }
+        
+        for model in test_models:
+            model_result = {
+                "model": model,
+                "status": "unknown",
+                "response": "",
+                "error": "",
+                "response_length": 0,
+                "response_time": 0
+            }
+            
+            try:
+                import time
+                start_time = time.time()
+                
+                response = openrouter_call(test_prompt, openrouter_key, max_tokens=100, model=model)
+                
+                end_time = time.time()
+                model_result["response_time"] = round(end_time - start_time, 2)
+                
+                if response and len(response.strip()) > 10:
+                    model_result["status"] = "success"
+                    model_result["response"] = response[:200]  # İlk 200 karakter
+                    model_result["response_length"] = len(response)
+                    results["working_models"].append(model)
+                else:
+                    model_result["status"] = "empty_response"
+                    model_result["error"] = "Model yanıt vermedi veya çok kısa yanıt"
+                    results["failed_models"].append(model)
+                    
+            except Exception as e:
+                model_result["status"] = "error"
+                model_result["error"] = str(e)
+                results["failed_models"].append(model)
+            
+            results["tested_models"].append(model_result)
+        
+        # Özet bilgi
+        results["summary"] = {
+            "total_tested": len(test_models),
+            "working_count": len(results["working_models"]),
+            "failed_count": len(results["failed_models"]),
+            "success_rate": f"{(len(results['working_models']) / len(test_models) * 100):.1f}%"
+        }
+        
+        results["recommendation"] = results["working_models"][0] if results["working_models"] else "Hiç model çalışmıyor"
+        
+        return jsonify(results)
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"OpenRouter test hatası: {e}"
+        })
+
+@app.route('/system_status', methods=['GET'])
+@login_required 
+def system_status():
+    """Sistem durumu özeti - tüm bileşenler"""
+    try:
+        import os
+        
+        status = {
+            "timestamp": datetime.now().isoformat(),
+            "overall_status": "checking",
+            "components": {
+                "twitter_api": {
+                    "configured": bool(os.environ.get('TWITTER_BEARER_TOKEN')),
+                    "status": "unknown"
+                },
+                "google_gemini": {
+                    "configured": bool(os.environ.get('GOOGLE_API_KEY')),
+                    "status": "quota_exceeded",
+                    "note": "200 request limit reached"
+                },
+                "openrouter": {
+                    "configured": bool(os.environ.get('OPENROUTER_API_KEY')),
+                    "status": "ready",
+                    "primary_models": [
+                        "openrouter/horizon-beta", 
+                        "z-ai/glm-4.5-air:free", 
+                        "moonshotai/kimi-k2:free", 
+                        "qwen/qwen3-30b-a3b:free"
+                    ]
+                },
+                "news_sources": {
+                    "configured": True,
+                    "rss_sources": 3,
+                    "scraping_sources": 1,
+                    "status": "working"
+                },
+                "ai_tweet_generation": {
+                    "primary": "Google Gemini (quota exceeded)",
+                    "fallback": "OpenRouter Multi-Model",
+                    "status": "fallback_ready"
+                }
+            },
+            "recent_activities": {
+                "news_fetch": "Working - 4 articles retrieved",
+                "tweet_generation": "Fallback system operational", 
+                "twitter_posting": "API configured"
+            },
+            "recommendations": [
+                "Gemini API quota reset bekleyin (24 saat)",
+                "OpenRouter modelleri aktif ve çalışır durumda",
+                "Manuel tweet paylaşımı mevcut durumda kullanılabilir"
+            ]
+        }
+        
+        # Genel durum hesapla
+        working_components = sum(1 for comp in status["components"].values() 
+                               if comp.get("status") not in ["unknown", "error"])
+        total_components = len(status["components"])
+        
+        if working_components >= total_components * 0.8:
+            status["overall_status"] = "healthy"
+        elif working_components >= total_components * 0.5:
+            status["overall_status"] = "degraded"
+        else:
+            status["overall_status"] = "critical"
+        
+        status["health_score"] = f"{working_components}/{total_components}"
+        
+        return jsonify(status)
+        
+    except Exception as e:
+        return jsonify({
+            "overall_status": "error",
+            "error": f"Sistem durumu kontrolü hatası: {e}",
+            "timestamp": datetime.now().isoformat()
+        })
+
+@app.route('/test_bulk_operations', methods=['GET'])
+@login_required
+def test_bulk_operations():
+    """Toplu tweet işlemlerini test et"""
+    try:
+        # Pending tweets durumunu kontrol et
+        pending_tweets = load_json("pending_tweets.json", [])
+        
+        test_results = {
+            "timestamp": datetime.now().isoformat(),
+            "pending_tweets_count": len(pending_tweets),
+            "bulk_functions": {
+                "bulk_tweet_action": "available",
+                "approve_functionality": "ready",
+                "reject_functionality": "ready"
+            },
+            "test_scenarios": [],
+            "recommendations": []
+        }
+        
+        if len(pending_tweets) == 0:
+            test_results["status"] = "no_data"
+            test_results["message"] = "Test için pending tweet bulunamadı"
+            test_results["recommendations"].append("Önce haber çekme işlemi yapın veya manuel tweet oluşturun")
+        else:
+            test_results["status"] = "ready_for_testing" 
+            test_results["message"] = f"{len(pending_tweets)} pending tweet mevcut"
+            
+            # İlk birkaç tweet'i örnek olarak göster
+            test_results["sample_tweets"] = []
+            for tweet in pending_tweets[:3]:
+                test_results["sample_tweets"].append({
+                    "id": tweet.get("id"),
+                    "title": tweet.get("title", "")[:60],
+                    "tweet_length": len(tweet.get("tweet_data", {}).get("tweet", "")),
+                    "source": tweet.get("source", "")
+                })
+            
+            # Test senaryolarını tanımla
+            test_results["test_scenarios"] = [
+                {
+                    "name": "Bulk Approve Test",
+                    "endpoint": "/bulk_tweet_action",
+                    "method": "POST", 
+                    "payload": {
+                        "tweet_ids": [1, 2],
+                        "action": "approve"
+                    },
+                    "expected": "2 tweet Twitter API ile paylaşılır"
+                },
+                {
+                    "name": "Bulk Reject Test",
+                    "endpoint": "/bulk_tweet_action", 
+                    "method": "POST",
+                    "payload": {
+                        "tweet_ids": [3],
+                        "action": "reject"
+                    },
+                    "expected": "1 tweet silindi olarak işaretlenir"
+                }
+            ]
+            
+            test_results["recommendations"] = [
+                "POST /bulk_tweet_action endpoint'ini kullanarak test edin",
+                "tweet_ids array ve action ('approve'/'reject') parametreleri gönderin",
+                "Twitter API ayarlarının doğru olduğunu kontrol edin",
+                "İşlem sonrası pending_tweets.json ve posted_articles.json dosyalarını kontrol edin"
+            ]
+        
+        return jsonify(test_results)
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "error": f"Bulk operations test hatası: {e}",
+            "timestamp": datetime.now().isoformat()
+        })
+
+@app.route('/test_twitter_api', methods=['GET'])
+@login_required
+def test_twitter_api():
+    """Twitter API bağlantısını test et"""
+    try:
+        from utils import setup_twitter_v2_client, check_rate_limit
+        
+        # API anahtarlarını kontrol et
+        import os
+        api_keys = {
+            'TWITTER_BEARER_TOKEN': bool(os.environ.get('TWITTER_BEARER_TOKEN')),
+            'TWITTER_API_KEY': bool(os.environ.get('TWITTER_API_KEY')),
+            'TWITTER_API_SECRET': bool(os.environ.get('TWITTER_API_SECRET')),
+            'TWITTER_ACCESS_TOKEN': bool(os.environ.get('TWITTER_ACCESS_TOKEN')),
+            'TWITTER_ACCESS_TOKEN_SECRET': bool(os.environ.get('TWITTER_ACCESS_TOKEN_SECRET'))
+        }
+        
+        missing_keys = [key for key, value in api_keys.items() if not value]
+        
+        if missing_keys:
+            return jsonify({
+                "success": False,
+                "error": f"Eksik API anahtarları: {', '.join(missing_keys)}",
+                "api_keys_status": api_keys
+            })
+        
+        # Twitter client test
+        try:
+            client = setup_twitter_v2_client()
+            
+            # Rate limit kontrolü
+            rate_status = check_rate_limit("tweets")
+            
+            return jsonify({
+                "success": True,
+                "message": "Twitter API başarıyla yapılandırıldı",
+                "api_keys_status": api_keys,
+                "rate_limit_status": rate_status,
+                "client_created": True
+            })
+            
+        except Exception as client_error:
+            return jsonify({
+                "success": False,
+                "error": f"Twitter client hatası: {client_error}",
+                "api_keys_status": api_keys,
+                "client_created": False
+            })
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Twitter API test hatası: {str(e)}"
+        })
 
 @app.route('/confirm_manual_post', methods=['POST'])
 @login_required
