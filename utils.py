@@ -48,7 +48,7 @@ load_dotenv()
 def mcp_firecrawl_scrape(params):
     """Firecrawl MCP scrape fonksiyonu - Gelişmiş alternatif sistemli"""
     try:
-        print(f"[MCP] Firecrawl scrape çağrısı: {params.get('url', 'unknown')}")
+        safe_print(f"[MCP] Firecrawl scrape çağrısı: {params.get('url', 'unknown')}")
         
         url = params.get('url', '')
         if not url:
@@ -62,13 +62,13 @@ def mcp_firecrawl_scrape(params):
         
         # Önce gelişmiş scraper dene
         try:
-            print(f"[MCP] Gelişmiş scraper deneniyor (JS: {use_js})...")
+            safe_print(f"[MCP] Gelişmiş scraper deneniyor (JS: {use_js})...")
             result = advanced_web_scraper(url, wait_time=3, use_js=use_js)
             
             if result.get("success") and result.get("content"):
                 content = result.get("content", "")
                 
-                print(f"[MCP] Gelişmiş scraper başarılı: {len(content)} karakter ({result.get('method', 'unknown')})")
+                safe_print(f"[MCP] Gelişmiş scraper başarılı: {len(content)} karakter ({result.get('method', 'unknown')})")
                 
                 # HTML içeriğinden linkleri çıkar
                 links = []
@@ -101,14 +101,14 @@ def mcp_firecrawl_scrape(params):
                     "method": result.get('method', 'unknown')
                 }
             else:
-                print(f"[MCP] Gelişmiş scraper başarısız: {result.get('error', 'Bilinmeyen hata')}")
+                safe_print(f"[MCP] Gelişmiş scraper başarısız: {result.get('error', 'Bilinmeyen hata')}")
                 
         except Exception as advanced_error:
-            print(f"[MCP] Gelişmiş scraper hatası: {advanced_error}")
+            safe_print(f"[MCP] Gelişmiş scraper hatası: {advanced_error}")
         
         # Fallback: Basit HTTP request
         try:
-            print(f"[MCP] Basit fallback deneniyor...")
+            safe_print(f"[MCP] Basit fallback deneniyor...")
             
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -128,7 +128,7 @@ def mcp_firecrawl_scrape(params):
             content = extract_main_content(soup)
             
             if content and len(content) > 100:
-                print(f"[MCP] Basit fallback başarılı: {len(content)} karakter")
+                safe_print(f"[MCP] Basit fallback başarılı: {len(content)} karakter")
                 
                 return {
                     "success": True,
@@ -137,14 +137,14 @@ def mcp_firecrawl_scrape(params):
                     "source": "simple_fallback"
                 }
             else:
-                print(f"[MCP] Basit fallback yetersiz içerik: {len(content) if content else 0} karakter")
+                safe_print(f"[MCP] Basit fallback yetersiz içerik: {len(content) if content else 0} karakter")
                 
         except Exception as fallback_error:
-            print(f"[MCP] Basit fallback hatası: {fallback_error}")
+            safe_print(f"[MCP] Basit fallback hatası: {fallback_error}")
         
         # Son çare: Sadece başlık çek
         try:
-            print(f"[MCP] Son çare: Sadece başlık çekiliyor...")
+            safe_print(f"[MCP] Son çare: Sadece başlık çekiliyor...")
             
             response = requests.get(url, timeout=15)
             soup = BeautifulSoup(response.text, 'html.parser')
@@ -160,7 +160,7 @@ def mcp_firecrawl_scrape(params):
                         break
             
             if title:
-                print(f"[MCP] Son çare başarılı: Başlık çekildi")
+                safe_print(f"[MCP] Son çare başarılı: Başlık çekildi")
                 return {
                     "success": True,
                     "content": title,
@@ -169,12 +169,12 @@ def mcp_firecrawl_scrape(params):
                 }
                 
         except Exception as title_error:
-            print(f"[MCP] Son çare hatası: {title_error}")
+            safe_print(f"[MCP] Son çare hatası: {title_error}")
         
         return {"success": False, "error": "Tüm yöntemler başarısız"}
         
     except Exception as e:
-        print(f"[MCP] Genel hata: {e}")
+        safe_print(f"[MCP] Genel hata: {e}")
         return {"success": False, "error": str(e)}
 
 HISTORY_FILE = "posted_articles.json"
@@ -191,7 +191,7 @@ def fetch_latest_ai_articles_with_firecrawl():
         posted_urls = [article.get('url', '') for article in posted_articles]
         posted_hashes = [article.get('hash', '') for article in posted_articles]
         
-        print("🔍 TechCrunch AI kategorisinden Firecrawl MCP ile makale çekiliyor...")
+        safe_print("🔍 TechCrunch AI kategorisinden Firecrawl MCP ile makale çekiliyor...")
         
         # Firecrawl MCP ile ana sayfa çek
         try:
@@ -204,14 +204,14 @@ def fetch_latest_ai_articles_with_firecrawl():
             })
             
             if not scrape_result.get("success", False):
-                print(f"⚠️ Firecrawl MCP hatası, fallback yönteme geçiliyor...")
+                safe_print(f"⚠️ Firecrawl MCP hatası, fallback yönteme geçiliyor...")
                 return fetch_latest_ai_articles_fallback()
             
             # Hem markdown hem de links formatından URL çıkar
             markdown_content = scrape_result.get("markdown", "")
             mcp_links = scrape_result.get("links", [])
             
-            print(f"📄 MCP'den {len(mcp_links)} link alındı, markdown: {len(markdown_content)} karakter")
+            safe_print(f"📄 MCP'den {len(mcp_links)} link alındı, markdown: {len(markdown_content)} karakter")
             
             import re
             current_year = datetime.now().year
@@ -265,15 +265,15 @@ def fetch_latest_ai_articles_with_firecrawl():
                         url not in article_urls and
                         len(article_urls) < 10):
                         article_urls.append(url)
-                        print(f"   📄 Markdown Link: {url}")
+                        safe_print(f"   📄 Markdown Link: {url}")
             
             # En yeni makaleleri al (sadece ilk 4)
             article_urls = article_urls[:4]
-            print(f"🔗 {len(article_urls)} makale URL'si bulundu")
+            safe_print(f"🔗 {len(article_urls)} makale URL'si bulundu")
             
         except Exception as firecrawl_error:
-            print(f"⚠️ Firecrawl MCP hatası: {firecrawl_error}")
-            print("🔄 Fallback yönteme geçiliyor...")
+            safe_print(f"⚠️ Firecrawl MCP hatası: {firecrawl_error}")
+            safe_print("🔄 Fallback yönteme geçiliyor...")
             return fetch_latest_ai_articles_fallback()
         
         articles_data = []
@@ -303,12 +303,12 @@ def fetch_latest_ai_articles_with_firecrawl():
                         })
                         print(f"🆕 Firecrawl ile yeni makale: {title[:50]}...")
                     else:
-                        print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
+                        safe_print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
                 else:
-                    print(f"⚠️ İçerik yetersiz: {url}")
+                    safe_print(f"⚠️ İçerik yetersiz: {url}")
                     
             except Exception as article_error:
-                print(f"❌ Makale çekme hatası ({url}): {article_error}")
+                safe_print(f"❌ Makale çekme hatası ({url}): {article_error}")
                 continue
         
         print(f"📊 Firecrawl MCP ile {len(articles_data)} yeni makale bulundu")
@@ -326,7 +326,7 @@ def fetch_latest_ai_articles_with_firecrawl():
         
     except Exception as e:
         print(f"Firecrawl MCP haber çekme hatası: {e}")
-        print("🔄 Fallback yönteme geçiliyor...")
+        safe_print("🔄 Fallback yönteme geçiliyor...")
         return fetch_latest_ai_articles_fallback()
 
 def fetch_latest_ai_articles():
@@ -412,7 +412,7 @@ def fetch_latest_ai_articles_fallback():
 def fetch_article_content_with_firecrawl(url):
     """Firecrawl MCP ile makale içeriği çekme"""
     try:
-        print(f"🔍 Firecrawl MCP ile makale çekiliyor: {url[:50]}...")
+        safe_print(f"🔍 Firecrawl MCP ile makale çekiliyor: {url[:50]}...")
         
         # Firecrawl MCP scrape fonksiyonunu kullan
         scrape_result = mcp_firecrawl_scrape({
@@ -424,14 +424,14 @@ def fetch_article_content_with_firecrawl(url):
         })
         
         if not scrape_result.get("success", False):
-            print(f"⚠️ Firecrawl MCP başarısız, fallback deneniyor...")
+            safe_print(f"⚠️ Firecrawl MCP başarısız, fallback deneniyor...")
             return fetch_article_content_advanced_fallback(url)
         
         # Markdown içeriğini al
         markdown_content = scrape_result.get("markdown", "")
         
         if not markdown_content or len(markdown_content) < 100:
-            print(f"⚠️ Firecrawl'dan yetersiz içerik, fallback deneniyor...")
+            safe_print(f"⚠️ Firecrawl'dan yetersiz içerik, fallback deneniyor...")
             return fetch_article_content_advanced_fallback(url)
         
         # Başlığı çıkar (genellikle ilk # ile başlar)
@@ -456,7 +456,7 @@ def fetch_article_content_with_firecrawl(url):
         # İçeriği sınırla
         content = content[:2500]
         
-        print(f"✅ Firecrawl ile içerik çekildi: {len(content)} karakter")
+        safe_print(f"✅ Firecrawl ile içerik çekildi: {len(content)} karakter")
         
         return {
             "title": title or "Başlık bulunamadı",
@@ -465,8 +465,8 @@ def fetch_article_content_with_firecrawl(url):
         }
         
     except Exception as e:
-        print(f"❌ Firecrawl MCP hatası ({url}): {e}")
-        print("🔄 Fallback yönteme geçiliyor...")
+        safe_print(f"❌ Firecrawl MCP hatası ({url}): {e}")
+        safe_print("🔄 Fallback yönteme geçiliyor...")
         return fetch_article_content_advanced_fallback(url)
 
 def fetch_article_content_advanced_fallback(url):
@@ -883,7 +883,7 @@ def generate_comprehensive_analysis(article_data, api_key):
     title = article_data.get("title", "")
     content = article_data.get("content", "")
     
-    print(f"🔍 Kapsamlı AI analizi başlatılıyor...")
+    safe_print(f"🔍 Kapsamlı AI analizi başlatılıyor...")
     
     # AI ile ilgili olmayan içerikleri kontrol et
     title_lower = title.lower()
@@ -901,8 +901,8 @@ def generate_comprehensive_analysis(article_data, api_key):
     
     # Eğer AI ile ilgili değilse veya AI olmayan içerik varsa uyarı ver
     if not has_ai_content or has_non_ai_content:
-        print(f"⚠️ Bu içerik AI/teknoloji ile ilgili görünmüyor: {title[:50]}...")
-        print(f"🔍 AI içerik: {has_ai_content}, AI olmayan içerik: {has_non_ai_content}")
+        safe_print(f"⚠️ Bu içerik AI/teknoloji ile ilgili görünmüyor: {title[:50]}...")
+        safe_print(f"🔍 AI içerik: {has_ai_content}, AI olmayan içerik: {has_non_ai_content}")
     
     analysis_result = {
         "innovation": "",
@@ -922,7 +922,7 @@ def generate_comprehensive_analysis(article_data, api_key):
         # İyileştirilmiş fallback sistemi
         if innovation == "API hatası" or not innovation or len(innovation.strip()) < 10:
             # Başlık ve içerikten akıllı fallback oluştur
-            print("⚠️ AI analizi başarısız, akıllı fallback oluşturuluyor...")
+            safe_print(f"⚠️ AI analizi başarısız, akıllı fallback oluşturuluyor...")
             
             # Başlıktan şirket adlarını çıkar
             import re
@@ -1074,15 +1074,15 @@ def generate_comprehensive_analysis(article_data, api_key):
             if emoji not in combined_emojis and len(combined_emojis) < 3:
                 combined_emojis.append(emoji)
         analysis_result["emojis"] = combined_emojis[:3]
-        print(f"✅ Kapsamlı analiz tamamlandı:")
+        safe_print(f"✅ Kapsamlı analiz tamamlandı:")
         print(f"🔬 Innovation: {analysis_result['innovation'][:50]}...")
         print(f"🏢 Companies: {', '.join(analysis_result['companies'])}")
-        print(f"🎯 Audience: {analysis_result['audience']}")
-        print(f"🏷️ Hashtags: {' '.join(analysis_result['hashtags'])}")
+        safe_print(f"🎯 Audience: {analysis_result['audience']}")
+        safe_print(f"🏷️ Hashtags: {' '.join(analysis_result['hashtags'])}")
         print(f"😊 Emojis: {''.join(analysis_result['emojis'])}")
         return analysis_result
     except Exception as e:
-        print(f"❌ Kapsamlı analiz hatası: {e}")
+        safe_print(f"❌ Kapsamlı analiz hatası: {e}")
         # Exception durumunda da akıllı fallback
         import re
         clean_title = re.sub(r'[^\w\s-]', '', title).strip()
@@ -1318,13 +1318,13 @@ Tweet text:"""
             else:
                 final_tweet = f"{main_content}{url_part}"
         
-        print(f"✅ AI analizi ile tweet oluşturuldu: {len(final_tweet)} karakter")
+        safe_print(f"✅ AI analizi ile tweet oluşturuldu: {len(final_tweet)} karakter")
         print(f"🎨 Tweet teması: {theme}")
-        print(f"📝 Tweet metni: {len(tweet_text)} karakter")
-        print(f"🏷️ Tema Hashtag'ler: {hashtag_text} ({len(hashtag_text)} karakter)")
+        safe_print(f"📝 Tweet metni: {len(tweet_text)} karakter")
+        safe_print(f"🏷️ Tema Hashtag'ler: {hashtag_text} ({len(hashtag_text)} karakter)")
         print(f"😊 Tema Emojiler: {emoji_text} ({len(emoji_text)} karakter)")
-        print(f"🔗 URL kısmı: {len(url_part)} karakter")
-        print(f"🎯 Hedef Kitle: {analysis['audience']}")
+        safe_print(f"🔗 URL kısmı: {len(url_part)} karakter")
+        safe_print(f"🎯 Hedef Kitle: {analysis['audience']}")
         print(f"📊 Impact Score: 8 (varsayılan)")
         
         # Dictionary formatında döndür
@@ -1338,8 +1338,8 @@ Tweet text:"""
         }
         
     except Exception as e:
-        print(f"❌ AI tweet oluşturma hatası: {e}")
-        print("🔄 Fallback yönteme geçiliyor...")
+        safe_print(f"❌ AI tweet oluşturma hatası: {e}")
+        safe_print("🔄 Fallback yönteme geçiliyor...")
         fallback_tweet = generate_ai_tweet_with_content_fallback(article_data, api_key, theme)
         return {
             "tweet": fallback_tweet,
@@ -1357,7 +1357,7 @@ def generate_ai_tweet_with_content(article_data, api_key, theme="bilgilendirici"
         
         # Eğer başarısızsa fallback kullan
         if not tweet_data or not tweet_data.get('tweet') or len(tweet_data.get('tweet', '')) < 50:
-            print("🔄 MCP analizi yetersiz, fallback yöntemi deneniyor...")
+            safe_print(f"🔄 MCP analizi yetersiz, fallback yöntemi deneniyor...")
             fallback_tweet = generate_ai_tweet_with_content_fallback(article_data, api_key, theme)
             tweet_data = {
                 "tweet": fallback_tweet,
@@ -2017,7 +2017,7 @@ def reset_all_data():
             if os.path.exists(file_path):
                 save_json(file_path, [])
                 reset_count += 1
-                print(f"✅ {file_path} sıfırlandı")
+                safe_print(f"✅ {file_path} sıfırlandı")
             else:
                 # Dosya yoksa boş oluştur
                 save_json(file_path, [])
@@ -3123,7 +3123,7 @@ def post_text_tweet_v2(tweet_text):
 def fetch_url_content_with_mcp(url):
     """MCP ile URL içeriği çekme - Tweet oluşturma için"""
     try:
-        print(f"🔍 MCP ile URL içeriği çekiliyor: {url}")
+        safe_print(f"🔍 MCP ile URL içeriği çekiliyor: {url}")
         
         # Firecrawl MCP scrape fonksiyonunu kullan
         scrape_result = mcp_firecrawl_scrape({
@@ -3135,14 +3135,14 @@ def fetch_url_content_with_mcp(url):
         })
         
         if not scrape_result.get("success", False):
-            print(f"⚠️ MCP başarısız, fallback deneniyor...")
+            safe_print(f"⚠️ MCP başarısız, fallback deneniyor...")
             return fetch_url_content_fallback(url)
         
         # Markdown içeriğini al
         markdown_content = scrape_result.get("markdown", "")
         
         if not markdown_content or len(markdown_content) < 100:
-            print(f"⚠️ MCP'den yetersiz içerik, fallback deneniyor...")
+            safe_print(f"⚠️ MCP'den yetersiz içerik, fallback deneniyor...")
             return fetch_url_content_fallback(url)
         
         # Başlığı çıkar (genellikle ilk # ile başlar)
@@ -3167,7 +3167,7 @@ def fetch_url_content_with_mcp(url):
         # İçeriği sınırla
         content = content[:2000]
         
-        print(f"✅ MCP ile URL içeriği çekildi: {len(content)} karakter")
+        safe_print(f"✅ MCP ile URL içeriği çekildi: {len(content)} karakter")
         
         return {
             "title": title or "Başlık bulunamadı",
@@ -3177,14 +3177,14 @@ def fetch_url_content_with_mcp(url):
         }
         
     except Exception as e:
-        print(f"❌ MCP URL çekme hatası ({url}): {e}")
-        print("🔄 Fallback yönteme geçiliyor...")
+        safe_print(f"❌ MCP URL çekme hatası ({url}): {e}")
+        safe_print("🔄 Fallback yönteme geçiliyor...")
         return fetch_url_content_fallback(url)
 
 def fetch_url_content_fallback(url):
     """Fallback URL içeriği çekme - BeautifulSoup ile"""
     try:
-        print(f"🔄 Fallback ile URL içeriği çekiliyor: {url}")
+        safe_print(f"🔄 Fallback ile URL içeriği çekiliyor: {url}")
         
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -3233,7 +3233,7 @@ def fetch_url_content_fallback(url):
         content = ' '.join(content.split())  # Çoklu boşlukları temizle
         content = content[:2000]  # İçeriği sınırla
         
-        print(f"✅ Fallback ile URL içeriği çekildi: {len(content)} karakter")
+        safe_print(f"✅ Fallback ile URL içeriği çekildi: {len(content)} karakter")
         
         return {
             "title": title or "Başlık bulunamadı",
@@ -3243,7 +3243,7 @@ def fetch_url_content_fallback(url):
         }
         
     except Exception as e:
-        print(f"❌ Fallback URL çekme hatası ({url}): {e}")
+        safe_print(f"❌ Fallback URL çekme hatası ({url}): {e}")
         return {
             "title": "İçerik çekilemedi",
             "content": f"URL: {url} - İçerik çekilemedi: {str(e)}",
@@ -3568,14 +3568,14 @@ def test_selectors_for_url(url):
             soup = BeautifulSoup(scrape_result.get("html", ""), 'html.parser')
             scrape_method = scrape_result.get("method", "advanced")
         
-        print(f"✅ Sayfa çekildi ({scrape_method})")
+        safe_print(f"✅ Sayfa çekildi ({scrape_method})")
         
         # Otomatik selector tespiti
-        print("🔍 Otomatik selector tespiti başlatılıyor...")
+        safe_print(f"🔍 Otomatik selector tespiti başlatılıyor...")
         selectors, container_count = auto_detect_selectors(soup, url)
         
         # Tespit edilen selector'ları doğrula
-        print("✅ Selector'lar doğrulanıyor...")
+        safe_print(f"✅ Selector'lar doğrulanıyor...")
         is_valid, validation_msg = validate_selectors(soup, selectors)
         
         if is_valid:
@@ -3586,7 +3586,7 @@ def test_selectors_for_url(url):
             
             for i, container in enumerate(containers[:5]):  # İlk 5 makale
                 try:
-                    print(f"🔍 Makale {i+1} işleniyor...")
+                    safe_print(f"🔍 Makale {i+1} işleniyor...")
                     
                     # Başlık ve link çek
                     title_elem = container.select_one(selectors["title"])
@@ -3622,10 +3622,10 @@ def test_selectors_for_url(url):
                                 "date": date_text,
                                 "excerpt": excerpt_text
                             })
-                            print(f"✅ Makale {i+1}: {title[:50]}...")
+                            safe_print(f"✅ Makale {i+1}: {title[:50]}...")
                         
                 except Exception as article_error:
-                    print(f"⚠️ Makale {i+1} hatası: {article_error}")
+                    safe_print(f"⚠️ Makale {i+1} hatası: {article_error}")
                     continue
             
             # Site türü tespiti
@@ -3663,7 +3663,7 @@ def test_selectors_for_url(url):
             }
             
     except Exception as e:
-        print(f"❌ URL test hatası: {e}")
+        safe_print(f"❌ URL test hatası: {e}")
         return {
             "success": False,
             "message": f"❌ URL test hatası: {str(e)}",
@@ -4214,7 +4214,7 @@ def fetch_articles_from_custom_sources():
         enabled_sources = [s for s in config["sources"] if s.get("enabled", True)]
         
         if not enabled_sources:
-            print("⚠️ Aktif haber kaynağı bulunamadı")
+            safe_print(f"⚠️ Aktif haber kaynağı bulunamadı")
             return []
         
         # Konsol log için import (terminal kaldırıldı)
@@ -4266,13 +4266,13 @@ def fetch_articles_from_custom_sources():
         return all_articles
         
     except Exception as e:
-        print(f"❌ Özel kaynaklardan makale çekme hatası: {e}")
+        safe_print(f"❌ Özel kaynaklardan makale çekme hatası: {e}")
         return []
 
 def auto_detect_selectors(soup, url):
     """Sayfadan otomatik olarak en iyi selector'ları tespit et - Gelişmiş AI destekli"""
     
-    print(f"🔍 Otomatik selector tespiti başlatılıyor: {url}")
+    safe_print(f"🔍 Otomatik selector tespiti başlatılıyor: {url}")
     
     # Site türüne göre özel pattern'ler
     site_patterns = {
@@ -4328,7 +4328,7 @@ def auto_detect_selectors(soup, url):
     # Site özel pattern'leri önce ekle
     if site_type and site_type in site_patterns:
         container_patterns.extend(site_patterns[site_type]['containers'])
-        print(f"✅ Site özel pattern'ler eklendi: {site_type}")
+        safe_print(f"✅ Site özel pattern'ler eklendi: {site_type}")
     
     # Genel pattern'leri ekle
     container_patterns.extend([
@@ -4364,7 +4364,7 @@ def auto_detect_selectors(soup, url):
     max_containers = 0
     best_score = 0
     
-    print(f"🔍 {len(container_patterns)} farklı pattern test ediliyor...")
+    safe_print(f"🔍 {len(container_patterns)} farklı pattern test ediliyor...")
     
     # Her pattern'i test et
     for i, pattern in enumerate(container_patterns):
@@ -4409,7 +4409,7 @@ def auto_detect_selectors(soup, url):
                             if title_elem and title_elem.get_text(strip=True) and len(title_elem.get_text(strip=True)) > 10:
                                 best_selectors["title"] = title_pattern
                                 best_selectors["link"] = title_pattern
-                                print(f"✅ Title pattern bulundu: {title_pattern}")
+                                safe_print(f"✅ Title pattern bulundu: {title_pattern}")
                                 break
                         
                         # Date selector
@@ -4426,7 +4426,7 @@ def auto_detect_selectors(soup, url):
                         for date_pattern in date_patterns:
                             if sample_container.select_one(date_pattern):
                                 best_selectors["date"] = date_pattern
-                                print(f"✅ Date pattern bulundu: {date_pattern}")
+                                safe_print(f"✅ Date pattern bulundu: {date_pattern}")
                                 break
                         
                         # Excerpt selector
@@ -4440,11 +4440,11 @@ def auto_detect_selectors(soup, url):
                             excerpt_elem = sample_container.select_one(excerpt_pattern)
                             if excerpt_elem and len(excerpt_elem.get_text(strip=True)) > 20:
                                 best_selectors["excerpt"] = excerpt_pattern
-                                print(f"✅ Excerpt pattern bulundu: {excerpt_pattern}")
+                                safe_print(f"✅ Excerpt pattern bulundu: {excerpt_pattern}")
                                 break
                         
         except Exception as pattern_error:
-            print(f"⚠️ Pattern test hatası ({pattern}): {pattern_error}")
+            safe_print(f"⚠️ Pattern test hatası ({pattern}): {pattern_error}")
             continue
     
     print(f"🏁 En iyi selector bulundu: {best_selectors['container']} ({max_containers} konteyner, skor: {best_score})")
@@ -4517,7 +4517,7 @@ def calculate_selector_quality(containers, pattern, url):
         return score / sample_size  # Ortalama skor
         
     except Exception as e:
-        print(f"❌ Kalite hesaplama hatası: {e}")
+        safe_print(f"❌ Kalite hesaplama hatası: {e}")
         return 0
 
 def validate_selectors(soup, selectors):
@@ -4598,37 +4598,37 @@ def fetch_articles_from_single_source(source):
         
         # Eğer selector_type auto_detect ise veya mevcut selector'lar çalışmıyorsa
         if source.get('selector_type') == 'auto_detect' or not selectors:
-            print(f"🔍 {source_name} için otomatik selector tespiti yapılıyor...")
+            safe_print(f"🔍 {source_name} için otomatik selector tespiti yapılıyor...")
             auto_selectors, container_count = auto_detect_selectors(soup, url)
             
             # Otomatik tespit edilen selector'ları doğrula
             is_valid, validation_msg = validate_selectors(soup, auto_selectors)
             
             if is_valid:
-                print(f"✅ Otomatik tespit başarılı: {validation_msg}")
+                safe_print(f"✅ Otomatik tespit başarılı: {validation_msg}")
                 selectors = auto_selectors
                 
                 # Başarılı selector'ları kaydet
                 source["article_selectors"] = auto_selectors
                 source["selector_type"] = "auto_detected"
             else:
-                print(f"❌ Otomatik tespit başarısız: {validation_msg}")
+                safe_print(f"❌ Otomatik tespit başarısız: {validation_msg}")
                 return []
         else:
             # Mevcut selector'ları doğrula
             is_valid, validation_msg = validate_selectors(soup, selectors)
             if not is_valid:
-                print(f"⚠️ Mevcut selector'lar çalışmıyor: {validation_msg}")
-                print(f"🔄 Otomatik tespit deneniyor...")
+                safe_print(f"⚠️ Mevcut selector'lar çalışmıyor: {validation_msg}")
+                safe_print(f"🔄 Otomatik tespit deneniyor...")
                 
                 auto_selectors, container_count = auto_detect_selectors(soup, url)
                 is_auto_valid, auto_validation_msg = validate_selectors(soup, auto_selectors)
                 
                 if is_auto_valid:
-                    print(f"✅ Otomatik tespit ile düzeltildi: {auto_validation_msg}")
+                    safe_print(f"✅ Otomatik tespit ile düzeltildi: {auto_validation_msg}")
                     selectors = auto_selectors
                 else:
-                    print(f"❌ Otomatik tespit de başarısız: {auto_validation_msg}")
+                    safe_print(f"❌ Otomatik tespit de başarısız: {auto_validation_msg}")
                     return []
         
         # Makale konteynerlerini bul
@@ -4649,10 +4649,10 @@ def fetch_articles_from_single_source(source):
             for alt_selector in alternative_selectors:
                 containers = soup.select(alt_selector)
                 if containers:
-                    print(f"🔄 Alternatif selector kullanıldı: {alt_selector}")
+                    safe_print(f"🔄 Alternatif selector kullanıldı: {alt_selector}")
                     break
         
-        print(f"🔍 {source['name']}: {len(containers)} konteyner bulundu")
+        safe_print(f"🔍 {source['name']}: {len(containers)} konteyner bulundu")
         
         for container in containers[:5]:  # İlk 5 makale
             try:
@@ -4740,7 +4740,7 @@ def fetch_articles_from_single_source(source):
                         content_text = ' '.join(content_text.split())[:2000]
                         
                     except Exception as content_error:
-                        print(f"⚠️ İçerik çekme hatası: {content_error}")
+                        safe_print(f"⚠️ İçerik çekme hatası: {content_error}")
                         content_text = excerpt or title  # Fallback olarak özet veya başlığı kullan
                     
                     # Hash oluştur
@@ -4761,13 +4761,13 @@ def fetch_articles_from_single_source(source):
                     })
                     
             except Exception as e:
-                print(f"⚠️ Makale parse hatası: {e}")
+                safe_print(f"⚠️ Makale parse hatası: {e}")
                 continue
         
         return articles
         
     except Exception as e:
-        print(f"❌ {source.get('name', 'Bilinmeyen')} kaynak hatası: {e}")
+        safe_print(f"❌ {source.get('name', 'Bilinmeyen')} kaynak hatası: {e}")
         return []
 
 def get_news_sources_stats():
@@ -4867,14 +4867,14 @@ def update_fetch_articles_function():
         has_techcrunch = any("techcrunch" in s.get("url", "").lower() for s in config["sources"] if s.get("enabled", True))
         
         if not has_techcrunch:
-            print("🔄 TechCrunch fallback ekleniyor...")
+            safe_print(f"🔄 TechCrunch fallback ekleniyor...")
             fallback_articles = fetch_latest_ai_articles_fallback()
             custom_articles.extend(fallback_articles)
         
         return custom_articles
         
     except Exception as e:
-        print(f"❌ Güncellenmiş makale çekme hatası: {e}")
+        safe_print(f"❌ Güncellenmiş makale çekme hatası: {e}")
         # Fallback olarak eski fonksiyonu çağır
         return fetch_latest_ai_articles_fallback()
 
@@ -5160,7 +5160,7 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
         # Silinen makaleleri de kontrol et (deleted=True olanlar)
         deleted_articles = [article for article in existing_articles if article.get('deleted', False)]
         if deleted_articles:
-            print(f"🗑️ {len(deleted_articles)} silinen makale duplikat kontrole dahil edildi")
+            safe_print(f"🗑️ {len(deleted_articles)} silinen makale duplikat kontrole dahil edildi")
         
         filtered_articles = []
         duplicate_count = 0
@@ -5197,7 +5197,7 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
             
             if url_is_duplicate:
                 duplicate_count += 1
-                print(f"🔄 URL duplikatı atlandı (son 7 gün): {new_article.get('title', '')[:50]}...")
+                safe_print(f"🔄 URL duplikatı atlandı (son 7 gün): {new_article.get('title', '')[:50]}...")
                 continue
             
             # Hash kontrolü (hızlı)
@@ -5210,7 +5210,7 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
             
             if is_duplicate:
                 duplicate_count += 1
-                print(f"🔄 Hash duplikatı atlandı: {new_article.get('title', '')[:50]}...")
+                safe_print(f"🔄 Hash duplikatı atlandı: {new_article.get('title', '')[:50]}...")
                 continue
             
             # İçerik benzerliği kontrolü (yavaş ama etkili)
@@ -5220,7 +5220,7 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
                 )
                 if is_similar:
                     is_duplicate = True
-                    print(f"🔄 İçerik benzerliği ({match_type}: {similarity_score:.2f}) - atlandı: {new_article.get('title', '')[:50]}...")
+                    safe_print(f"🔄 İçerik benzerliği ({match_type}: {similarity_score:.2f}) - atlandı: {new_article.get('title', '')[:50]}...")
                     break
             
             if not is_duplicate:
@@ -5231,12 +5231,12 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
                     )
                     if is_similar:
                         is_duplicate = True
-                        print(f"🔄 Batch içi benzerlik ({match_type}: {similarity_score:.2f}) - atlandı: {new_article.get('title', '')[:50]}...")
+                        safe_print(f"🔄 Batch içi benzerlik ({match_type}: {similarity_score:.2f}) - atlandı: {new_article.get('title', '')[:50]}...")
                         break
             
             if not is_duplicate:
                 filtered_articles.append(new_article)
-                print(f"✅ Yeni makale eklendi: {new_article.get('title', '')[:50]}...")
+                safe_print(f"✅ Yeni makale eklendi: {new_article.get('title', '')[:50]}...")
             else:
                 duplicate_count += 1
         
@@ -5262,7 +5262,7 @@ def basic_duplicate_filter(new_articles, existing_articles=None):
         # Silinen makaleleri de kontrol et (deleted=True olanlar)
         deleted_articles = [article for article in existing_articles if article.get('deleted', False)]
         if deleted_articles:
-            print(f"🗑️ {len(deleted_articles)} silinen makale temel duplikat kontrole dahil edildi")
+            safe_print(f"🗑️ {len(deleted_articles)} silinen makale temel duplikat kontrole dahil edildi")
         
         # Mevcut URL'ler ve hash'ler
         existing_urls = set(article.get('url', '') for article in all_existing)
@@ -5278,24 +5278,24 @@ def basic_duplicate_filter(new_articles, existing_articles=None):
             # URL kontrolü
             if new_url in existing_urls:
                 duplicate_count += 1
-                print(f"🔄 URL duplikatı atlandı: {new_article.get('title', '')[:50]}...")
+                safe_print(f"🔄 URL duplikatı atlandı: {new_article.get('title', '')[:50]}...")
                 continue
             
             # Hash kontrolü
             if new_hash and new_hash in existing_hashes:
                 duplicate_count += 1
-                print(f"🔄 Hash duplikatı atlandı: {new_article.get('title', '')[:50]}...")
+                safe_print(f"🔄 Hash duplikatı atlandı: {new_article.get('title', '')[:50]}...")
                 continue
             
             # Aynı batch içinde URL kontrolü
             batch_urls = set(article.get('url', '') for article in filtered_articles)
             if new_url in batch_urls:
                 duplicate_count += 1
-                print(f"🔄 Batch içi URL duplikatı atlandı: {new_article.get('title', '')[:50]}...")
+                safe_print(f"🔄 Batch içi URL duplikatı atlandı: {new_article.get('title', '')[:50]}...")
                 continue
             
             filtered_articles.append(new_article)
-            print(f"✅ Yeni makale eklendi: {new_article.get('title', '')[:50]}...")
+            safe_print(f"✅ Yeni makale eklendi: {new_article.get('title', '')[:50]}...")
         
         print(f"📊 Temel duplikat filtreleme tamamlandı: {len(new_articles)} makale → {len(filtered_articles)} benzersiz makale ({duplicate_count} duplikat)")
         return filtered_articles
@@ -5318,7 +5318,7 @@ def clean_duplicate_pending_tweets():
                 "removed_count": 0
             }
         
-        print(f"🔍 {len(pending_tweets)} bekleyen tweet kontrol ediliyor...")
+        safe_print(f"🔍 {len(pending_tweets)} bekleyen tweet kontrol ediliyor...")
         
         # Benzersiz tweet'leri saklamak için
         unique_tweets = []
@@ -5337,13 +5337,13 @@ def clean_duplicate_pending_tweets():
             # URL kontrolü
             if url and url in seen_urls:
                 duplicate_count += 1
-                print(f"🔄 URL duplikatı atlandı: {title[:50]}...")
+                safe_print(f"🔄 URL duplikatı atlandı: {title[:50]}...")
                 continue
             
             # Hash kontrolü
             if hash_val and hash_val in seen_hashes:
                 duplicate_count += 1
-                print(f"🔄 Hash duplikatı atlandı: {title[:50]}...")
+                safe_print(f"🔄 Hash duplikatı atlandı: {title[:50]}...")
                 continue
             
             # Başlık kontrolü (normalize edilmiş)
@@ -5351,7 +5351,7 @@ def clean_duplicate_pending_tweets():
                 normalized_title = normalize_title_for_comparison(title)
                 if normalized_title in seen_titles:
                     duplicate_count += 1
-                    print(f"🔄 Başlık duplikatı atlandı: {title[:50]}...")
+                    safe_print(f"🔄 Başlık duplikatı atlandı: {title[:50]}...")
                     continue
                 seen_titles.add(normalized_title)
             
@@ -5362,7 +5362,7 @@ def clean_duplicate_pending_tweets():
             if hash_val:
                 seen_hashes.add(hash_val)
             
-            print(f"✅ Benzersiz tweet korundu: {title[:50]}...")
+            safe_print(f"✅ Benzersiz tweet korundu: {title[:50]}...")
         
         # Temizlenmiş listeyi kaydet
         save_json("pending_tweets.json", unique_tweets)
@@ -5380,7 +5380,7 @@ def clean_duplicate_pending_tweets():
         return result
         
     except Exception as e:
-        print(f"❌ Duplikat temizleme hatası: {e}")
+        safe_print(f"❌ Duplikat temizleme hatası: {e}")
         return {
             "success": False,
             "message": f"❌ Temizleme hatası: {str(e)}",
@@ -5556,7 +5556,7 @@ def retry_pending_tweets_after_rate_limit():
         if not rate_limited_tweets:
             return {"success": True, "message": "Rate limit hatası olan tweet yok"}
         
-        print(f"🔄 {len(rate_limited_tweets)} rate limit hatası olan tweet tekrar deneniyor...")
+        safe_print(f"🔄 {len(rate_limited_tweets)} rate limit hatası olan tweet tekrar deneniyor...")
         
         successful_posts = 0
         failed_posts = 0
@@ -5587,7 +5587,7 @@ def retry_pending_tweets_after_rate_limit():
                     save_json("posted_articles.json", posted_articles)
                     
                     successful_posts += 1
-                    print(f"✅ Tweet başarıyla paylaşıldı: {article.get('title', '')[:50]}...")
+                    safe_print(f"✅ Tweet başarıyla paylaşıldı: {article.get('title', '')[:50]}...")
                     
                 else:
                     # Hala hata var - tweet'i other_tweets'e ekle
@@ -5595,7 +5595,7 @@ def retry_pending_tweets_after_rate_limit():
                     tweet['error_reason'] = result.get('error', 'Bilinmeyen hata')
                     other_tweets.append(tweet)
                     failed_posts += 1
-                    print(f"❌ Tweet paylaşım hatası: {result.get('error', 'Bilinmeyen hata')}")
+                    safe_print(f"❌ Tweet paylaşım hatası: {result.get('error', 'Bilinmeyen hata')}")
                     
                     # Rate limit hatası ise dur
                     if result.get('rate_limited'):
@@ -5629,7 +5629,7 @@ def retry_pending_tweets_after_rate_limit():
         }
         
     except Exception as e:
-        print(f"❌ Retry işlemi hatası: {e}")
+        safe_print(f"❌ Retry işlemi hatası: {e}")
         return {"success": False, "message": str(e)}
 
 # ... existing code ...
@@ -5656,7 +5656,7 @@ def terminal_log(message, level='info'):
 def advanced_web_scraper(url, wait_time=3, use_js=False, return_html=False):
     """Gelişmiş web scraping - MCP'ye alternatif"""
     try:
-        print(f"🔍 Gelişmiş scraper ile çekiliyor: {url}")
+        safe_print(f"🔍 Gelişmiş scraper ile çekiliyor: {url}")
         
         # Kullanılabilir yöntemleri kontrol et
         available_methods = []
@@ -5666,7 +5666,7 @@ def advanced_web_scraper(url, wait_time=3, use_js=False, return_html=False):
             available_methods.append("selenium")
         available_methods.append("requests")  # Her zaman mevcut
         
-        print(f"📋 Kullanılabilir yöntemler: {', '.join(available_methods)}")
+        safe_print(f"📋 Kullanılabilir yöntemler: {', '.join(available_methods)}")
         
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -5687,14 +5687,14 @@ def advanced_web_scraper(url, wait_time=3, use_js=False, return_html=False):
                 from requests_html import HTMLSession  # type: ignore
                 session = HTMLSession()
                 
-                print("🚀 requests-html ile JavaScript render ediliyor...")
+                safe_print(f"🚀 requests-html ile JavaScript render ediliyor...")
                 r = session.get(url, headers=headers, timeout=30)
                 r.html.render(wait=wait_time, timeout=20)
                 
                 content = r.html.html
                 soup = BeautifulSoup(content, 'html.parser')
                 
-                print(f"✅ requests-html başarılı: {len(content)} karakter")
+                safe_print(f"✅ requests-html başarılı: {len(content)} karakter")
                 return {
                     "success": True,
                     "content": extract_main_content(soup),
@@ -5703,12 +5703,12 @@ def advanced_web_scraper(url, wait_time=3, use_js=False, return_html=False):
                 }
                 
             except Exception as rh_error:
-                print(f"⚠️ requests-html hatası: {rh_error}")
+                safe_print(f"⚠️ requests-html hatası: {rh_error}")
         
         # Yöntem 2: Selenium (headless Chrome)
         if SELENIUM_AVAILABLE and use_js and webdriver and Options:
             try:
-                print("🚀 Selenium ile JavaScript render ediliyor...")
+                safe_print(f"🚀 Selenium ile JavaScript render ediliyor...")
                 
                 chrome_options = Options()
                 chrome_options.add_argument('--headless')
@@ -5739,7 +5739,7 @@ def advanced_web_scraper(url, wait_time=3, use_js=False, return_html=False):
                 
                 soup = BeautifulSoup(content, 'html.parser')
                 
-                print(f"✅ Selenium başarılı: {len(content)} karakter")
+                safe_print(f"✅ Selenium başarılı: {len(content)} karakter")
                 return {
                     "success": True,
                     "content": extract_main_content(soup),
@@ -5748,14 +5748,14 @@ def advanced_web_scraper(url, wait_time=3, use_js=False, return_html=False):
                 }
                 
             except Exception as selenium_error:
-                print(f"⚠️ Selenium hatası: {selenium_error}")
+                safe_print(f"⚠️ Selenium hatası: {selenium_error}")
                 try:
                     driver.quit()
                 except:
                     pass
         
         # Yöntem 3: Basit requests (fallback)
-        print("🔄 Basit HTTP request ile deneniyor...")
+        safe_print(f"🔄 Basit HTTP request ile deneniyor...")
         
         session = requests.Session()
         session.headers.update(headers)
@@ -5765,7 +5765,7 @@ def advanced_web_scraper(url, wait_time=3, use_js=False, return_html=False):
         
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        print(f"✅ Basit request başarılı: {len(response.text)} karakter")
+        safe_print(f"✅ Basit request başarılı: {len(response.text)} karakter")
         return {
             "success": True,
             "content": extract_main_content(soup),
@@ -5774,7 +5774,7 @@ def advanced_web_scraper(url, wait_time=3, use_js=False, return_html=False):
         }
         
     except Exception as e:
-        print(f"❌ Gelişmiş scraper hatası: {e}")
+        safe_print(f"❌ Gelişmiş scraper hatası: {e}")
         return {"success": False, "error": str(e)}
 
 def extract_main_content(soup):
@@ -5827,7 +5827,7 @@ def extract_main_content(soup):
         return content_text
         
     except Exception as e:
-        print(f"❌ İçerik çıkarma hatası: {e}")
+        safe_print(f"❌ İçerik çıkarma hatası: {e}")
         return ""
 
 # ==========================================
@@ -5842,7 +5842,7 @@ def fetch_latest_ai_articles_pythonanywhere():
         posted_urls = [article.get('url', '') for article in posted_articles]
         posted_hashes = [article.get('hash', '') for article in posted_articles]
         
-        print("🔍 PythonAnywhere uyumlu haber çekme sistemi başlatılıyor...")
+        safe_print(f"🔍 PythonAnywhere uyumlu haber çekme sistemi başlatılıyor...")
         
         all_articles = []
         
@@ -5851,36 +5851,36 @@ def fetch_latest_ai_articles_pythonanywhere():
             custom_articles = fetch_articles_from_custom_sources_pythonanywhere()
             if custom_articles:
                 all_articles.extend(custom_articles)
-                print(f"✅ Özel kaynaklardan {len(custom_articles)} makale bulundu")
+                safe_print(f"✅ Özel kaynaklardan {len(custom_articles)} makale bulundu")
         except Exception as custom_error:
-            print(f"⚠️ Özel kaynaklar hatası: {custom_error}")
+            safe_print(f"⚠️ Özel kaynaklar hatası: {custom_error}")
         
         # 2. RSS Feed'lerden makale çek (sadece özel kaynaklarda RSS yoksa)
         try:
             rss_articles = fetch_articles_from_rss_feeds()
             if rss_articles:
                 all_articles.extend(rss_articles)
-                print(f"✅ RSS'den {len(rss_articles)} makale bulundu")
+                safe_print(f"✅ RSS'den {len(rss_articles)} makale bulundu")
         except Exception as rss_error:
-            print(f"⚠️ RSS çekme hatası: {rss_error}")
+            safe_print(f"⚠️ RSS çekme hatası: {rss_error}")
         
         # 3. Hacker News API'den AI ile ilgili haberleri çek
         try:
             hn_articles = fetch_articles_from_hackernews()
             if hn_articles:
                 all_articles.extend(hn_articles)
-                print(f"✅ Hacker News'den {len(hn_articles)} makale bulundu")
+                safe_print(f"✅ Hacker News'den {len(hn_articles)} makale bulundu")
         except Exception as hn_error:
-            print(f"⚠️ Hacker News hatası: {hn_error}")
+            safe_print(f"⚠️ Hacker News hatası: {hn_error}")
         
         # 4. Reddit API'den AI subreddit'lerinden makale çek
         try:
             reddit_articles = fetch_articles_from_reddit()
             if reddit_articles:
                 all_articles.extend(reddit_articles)
-                print(f"✅ Reddit'den {len(reddit_articles)} makale bulundu")
+                safe_print(f"✅ Reddit'den {len(reddit_articles)} makale bulundu")
         except Exception as reddit_error:
-            print(f"⚠️ Reddit hatası: {reddit_error}")
+            safe_print(f"⚠️ Reddit hatası: {reddit_error}")
         
         # Duplikat filtreleme
         unique_articles = []
@@ -5914,7 +5914,7 @@ def fetch_latest_ai_articles_pythonanywhere():
         return unique_articles[:max_articles]
         
     except Exception as e:
-        print(f"❌ PythonAnywhere haber çekme hatası: {e}")
+        safe_print(f"❌ PythonAnywhere haber çekme hatası: {e}")
         return []
 
 def fetch_articles_from_custom_sources_pythonanywhere():
@@ -5926,10 +5926,10 @@ def fetch_articles_from_custom_sources_pythonanywhere():
         enabled_sources = [s for s in config["sources"] if s.get("enabled", True)]
         
         if not enabled_sources:
-            print("⚠️ Aktif haber kaynağı bulunamadı")
+            safe_print(f"⚠️ Aktif haber kaynağı bulunamadı")
             return []
         
-        print(f"🔍 {len(enabled_sources)} özel haber kaynağından makale çekiliyor (PythonAnywhere uyumlu)...")
+        safe_print(f"🔍 {len(enabled_sources)} özel haber kaynağından makale çekiliyor (PythonAnywhere uyumlu)...")
         
         for source in enabled_sources:
             try:
@@ -5942,15 +5942,15 @@ def fetch_articles_from_custom_sources_pythonanywhere():
                     all_articles.extend(articles)
                     source["article_count"] = len(articles)
                     source["success_rate"] = min(100, source.get("success_rate", 0) + 10)
-                    print(f"✅ {source['name']}: {len(articles)} makale bulundu")
+                    safe_print(f"✅ {source['name']}: {len(articles)} makale bulundu")
                 else:
                     source["success_rate"] = max(0, source.get("success_rate", 100) - 20)
-                    print(f"⚠️ {source['name']}: Makale bulunamadı")
+                    safe_print(f"⚠️ {source['name']}: Makale bulunamadı")
                 
                 source["last_checked"] = datetime.now().isoformat()
                 
             except Exception as e:
-                print(f"❌ {source['name']} hatası: {e}")
+                safe_print(f"❌ {source['name']} hatası: {e}")
                 source["success_rate"] = max(0, source.get("success_rate", 100) - 30)
                 source["last_checked"] = datetime.now().isoformat()
         
@@ -5958,13 +5958,13 @@ def fetch_articles_from_custom_sources_pythonanywhere():
         try:
             save_json(NEWS_SOURCES_FILE, config)
         except Exception as save_error:
-            print(f"⚠️ Haber kaynakları kaydetme hatası: {save_error}")
+            safe_print(f"⚠️ Haber kaynakları kaydetme hatası: {save_error}")
         
         print(f"📊 Özel kaynaklardan toplam {len(all_articles)} makale bulundu")
         return all_articles
         
     except Exception as e:
-        print(f"❌ Özel kaynaklar genel hatası: {e}")
+        safe_print(f"❌ Özel kaynaklar genel hatası: {e}")
         return []
 def fetch_articles_from_single_source_pythonanywhere(source):
     """PythonAnywhere uyumlu tek kaynak makale çekme"""
@@ -6068,13 +6068,13 @@ def fetch_articles_from_single_source_pythonanywhere(source):
                 })
                 
             except Exception as article_error:
-                print(f"⚠️ Makale parse hatası: {article_error}")
+                safe_print(f"⚠️ Makale parse hatası: {article_error}")
                 continue
         
         return parsed_articles
         
     except Exception as e:
-        print(f"❌ {source.get('name', 'Bilinmeyen')} kaynak hatası: {e}")
+        safe_print(f"❌ {source.get('name', 'Bilinmeyen')} kaynak hatası: {e}")
         return []
 
 def fetch_articles_with_rss_only():
@@ -6107,7 +6107,7 @@ def fetch_articles_with_rss_only():
                         recent_posted_urls.append(article.get('url', ''))
                         recent_posted_hashes.append(article.get('hash', ''))
                 except Exception as date_error:
-                    print(f"⚠️ Tarih parse hatası: {date_error}")
+                    safe_print(f"⚠️ Tarih parse hatası: {date_error}")
                     continue
         
         print(f"📊 Son 7 günde paylaşılan makale sayısı: {len(recent_posted_urls)}")
@@ -6118,7 +6118,7 @@ def fetch_articles_with_rss_only():
         enabled_rss_sources = [s for s in rss_sources if s.get("enabled", True)]
         
         if not enabled_rss_sources:
-            print("⚠️ Aktif RSS kaynağı bulunamadı")
+            safe_print(f"⚠️ Aktif RSS kaynağı bulunamadı")
             return []
         
         print(f"📰 {len(enabled_rss_sources)} RSS kaynağından makale çekiliyor...")
@@ -6127,14 +6127,14 @@ def fetch_articles_with_rss_only():
         
         for rss_source in enabled_rss_sources:
             try:
-                print(f"🔍 RSS çekiliyor: {rss_source['name']}")
+                safe_print(f"🔍 RSS çekiliyor: {rss_source['name']}")
                 
                 # RSS feed'i parse et
                 import feedparser
                 feed = feedparser.parse(rss_source['url'])
                 
                 if not feed.entries:
-                    print(f"⚠️ {rss_source['name']}: RSS feed'de entry bulunamadı")
+                    safe_print(f"⚠️ {rss_source['name']}: RSS feed'de entry bulunamadı")
                     rss_source["success_rate"] = max(0, rss_source.get("success_rate", 100) - 20)
                     continue
                 
@@ -6150,7 +6150,7 @@ def fetch_articles_with_rss_only():
                         
                         # URL kontrolü
                         if url in posted_urls or url in recent_posted_urls:
-                            print(f"✅ RSS makale zaten paylaşılmış: {title[:50]}...")
+                            safe_print(f"✅ RSS makale zaten paylaşılmış: {title[:50]}...")
                             continue
                         
                         # Tarih kontrolü
@@ -6231,29 +6231,29 @@ def fetch_articles_with_rss_only():
                             if article_hash in recent_posted_hashes:
                                 print(f"⏰ Son 7 günde paylaşılmış: {title[:50]}...")
                             else:
-                                print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
+                                safe_print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
                         
                         # En fazla 5 makale al
                         if len(source_articles) >= 5:
                             break
                         
                     except Exception as entry_error:
-                        print(f"⚠️ RSS entry hatası: {entry_error}")
+                        safe_print(f"⚠️ RSS entry hatası: {entry_error}")
                         continue
                         
                 if source_articles:
                     all_articles.extend(source_articles)
                     rss_source["article_count"] = len(source_articles)
                     rss_source["success_rate"] = min(100, rss_source.get("success_rate", 0) + 10)
-                    print(f"✅ {rss_source['name']}: {len(source_articles)} yeni makale bulundu")
+                    safe_print(f"✅ {rss_source['name']}: {len(source_articles)} yeni makale bulundu")
                 else:
                     rss_source["success_rate"] = max(0, rss_source.get("success_rate", 100) - 10)
-                    print(f"⚠️ {rss_source['name']}: Yeni makale bulunamadı")
+                    safe_print(f"⚠️ {rss_source['name']}: Yeni makale bulunamadı")
                 
                 rss_source["last_checked"] = datetime.now().isoformat()
                 
             except Exception as source_error:
-                print(f"❌ {rss_source['name']} RSS hatası: {source_error}")
+                safe_print(f"❌ {rss_source['name']} RSS hatası: {source_error}")
                 rss_source["success_rate"] = max(0, rss_source.get("success_rate", 100) - 30)
                 rss_source["last_checked"] = datetime.now().isoformat()
         
@@ -6261,14 +6261,14 @@ def fetch_articles_with_rss_only():
         try:
             save_json(NEWS_SOURCES_FILE, config)
         except Exception as save_error:
-            print(f"⚠️ RSS kaynakları kaydetme hatası: {save_error}")
+            safe_print(f"⚠️ RSS kaynakları kaydetme hatası: {save_error}")
         
         print(f"📊 RSS ile toplam {len(all_articles)} yeni makale bulundu (Son 7 gün filtreli)")
         
         # Duplikat filtreleme uygula
         if all_articles:
             all_articles = filter_duplicate_articles(all_articles)
-            print(f"🔄 Duplikat filtreleme sonrası: {len(all_articles)} benzersiz makale")
+            safe_print(f"🔄 Duplikat filtreleme sonrası: {len(all_articles)} benzersiz makale")
         
         # 7 gün içindeki makaleleri işaretle
         for article in all_articles:
@@ -6279,7 +6279,7 @@ def fetch_articles_with_rss_only():
         return all_articles
         
     except ImportError:
-        print("⚠️ feedparser modülü bulunamadı, RSS atlanıyor")
+        safe_print(f"⚠️ feedparser modülü bulunamadı, RSS atlanıyor")
         return []
     except Exception as e:
         safe_print(f"[HATA] RSS haber çekme genel hatası: {e}")
@@ -6288,7 +6288,7 @@ def fetch_articles_with_rss_only():
 def fetch_articles_hybrid_mcp_rss():
     """Hibrit sistem: MCP + RSS fallback ile haber çekme"""
     try:
-        print("🔄 Hibrit haber çekme sistemi başlatılıyor (MCP + RSS)...")
+        safe_print(f"🔄 Hibrit haber çekme sistemi başlatılıyor (MCP + RSS)...")
         
         all_articles = []
         
@@ -6299,12 +6299,12 @@ def fetch_articles_hybrid_mcp_rss():
             
             if mcp_articles:
                 all_articles.extend(mcp_articles)
-                print(f"✅ MCP ile {len(mcp_articles)} makale bulundu")
+                safe_print(f"✅ MCP ile {len(mcp_articles)} makale bulundu")
             else:
-                print("⚠️ MCP ile makale bulunamadı")
+                safe_print(f"⚠️ MCP ile makale bulunamadı")
                 
         except Exception as mcp_error:
-            print(f"❌ MCP hatası: {mcp_error}")
+            safe_print(f"❌ MCP hatası: {mcp_error}")
         
         # 2. Eğer MCP'den yeterli makale gelmezse RSS dene
         if len(all_articles) < 3:  # 3'ten az makale varsa RSS'yi de dene
@@ -6324,14 +6324,14 @@ def fetch_articles_hybrid_mcp_rss():
                             new_rss_articles.append(rss_article)
                     
                     all_articles.extend(new_rss_articles)
-                    print(f"✅ RSS ile {len(new_rss_articles)} ek makale bulundu")
+                    safe_print(f"✅ RSS ile {len(new_rss_articles)} ek makale bulundu")
                 else:
-                    print("⚠️ RSS ile de makale bulunamadı")
+                    safe_print(f"⚠️ RSS ile de makale bulunamadı")
                     
             except Exception as rss_error:
-                print(f"❌ RSS hatası: {rss_error}")
+                safe_print(f"❌ RSS hatası: {rss_error}")
         else:
-            print(f"✅ MCP'den yeterli makale var ({len(all_articles)}), RSS atlanıyor")
+            safe_print(f"✅ MCP'den yeterli makale var ({len(all_articles)}), RSS atlanıyor")
         
         # 3. Sonuçları birleştir ve filtrele
         if all_articles:
@@ -6343,7 +6343,7 @@ def fetch_articles_hybrid_mcp_rss():
                 article['hybrid_method'] = True
                 article['methods_used'] = 'MCP+RSS' if any('RSS' in a.get('source', '') for a in all_articles) else 'MCP'
             
-            print(f"🎯 Hibrit sistem sonucu: {len(all_articles)} benzersiz makale")
+            safe_print(f"🎯 Hibrit sistem sonucu: {len(all_articles)} benzersiz makale")
             
             # Kaynak dağılımını göster
             mcp_count = len([a for a in all_articles if 'MCP' in a.get('source', '')])
@@ -6353,7 +6353,7 @@ def fetch_articles_hybrid_mcp_rss():
         return all_articles
         
     except Exception as e:
-        print(f"❌ Hibrit sistem hatası: {e}")
+        safe_print(f"❌ Hibrit sistem hatası: {e}")
         return []
 
 def fetch_articles_from_rss_feeds():
@@ -6391,7 +6391,7 @@ def fetch_articles_with_simple_scraping():
         
         for target in scraping_targets:
             try:
-                print(f"🔍 Web scraping: {target['name']}")
+                safe_print(f"🔍 Web scraping: {target['name']}")
                 
                 response = requests.get(target['url'], headers=headers, timeout=15)
                 response.raise_for_status()
@@ -6438,17 +6438,17 @@ def fetch_articles_with_simple_scraping():
                         })
                         
                     except Exception as article_error:
-                        print(f"⚠️ Makale parse hatası: {article_error}")
+                        safe_print(f"⚠️ Makale parse hatası: {article_error}")
                         continue
                         
             except Exception as target_error:
-                print(f"⚠️ Scraping hatası ({target['name']}): {target_error}")
+                safe_print(f"⚠️ Scraping hatası ({target['name']}): {target_error}")
                 continue
         
         return all_articles
         
     except Exception as e:
-        print(f"❌ Web scraping genel hatası: {e}")
+        safe_print(f"❌ Web scraping genel hatası: {e}")
         return []
 
 def fetch_articles_from_hackernews():
@@ -6771,9 +6771,9 @@ def fetch_latest_ai_articles_smart():
                         article['method_icon'] = '🧠'
                         article['method_color'] = 'purple'
                     all_articles.extend(ai_keyword_articles)
-                    print(f"✅ AI Keywords'den {len(ai_keyword_articles)} makale")
+                    safe_print(f"✅ AI Keywords'den {len(ai_keyword_articles)} makale")
             except Exception as e:
-                print(f"⚠️ AI Keywords hatası: {e}")
+                safe_print(f"⚠️ AI Keywords hatası: {e}")
             
             # 1. Özel kaynakları dene
             try:
@@ -6785,9 +6785,9 @@ def fetch_latest_ai_articles_smart():
                         article['method_icon'] = '📰'
                         article['method_color'] = 'orange'
                     all_articles.extend(custom_articles)
-                    print(f"✅ Özel kaynaklardan {len(custom_articles)} makale")
+                    safe_print(f"✅ Özel kaynaklardan {len(custom_articles)} makale")
             except Exception as e:
-                print(f"⚠️ Özel kaynaklar hatası: {e}")
+                safe_print(f"⚠️ Özel kaynaklar hatası: {e}")
             
             # 2. PythonAnywhere sistemini dene
             try:
@@ -6799,9 +6799,9 @@ def fetch_latest_ai_articles_smart():
                         article['method_icon'] = '🐍'
                         article['method_color'] = 'green'
                     all_articles.extend(pa_articles)
-                    print(f"✅ PythonAnywhere sisteminden {len(pa_articles)} makale")
+                    safe_print(f"✅ PythonAnywhere sisteminden {len(pa_articles)} makale")
             except Exception as e:
-                print(f"⚠️ PythonAnywhere sistemi hatası: {e}")
+                safe_print(f"⚠️ PythonAnywhere sistemi hatası: {e}")
             
             # 3. RSS kaynaklarını dene
             try:
@@ -6813,9 +6813,9 @@ def fetch_latest_ai_articles_smart():
                         article['method_icon'] = '📡'
                         article['method_color'] = 'blue'
                     all_articles.extend(rss_articles)
-                    print(f"✅ RSS kaynaklarından {len(rss_articles)} makale")
+                    safe_print(f"✅ RSS kaynaklarından {len(rss_articles)} makale")
             except Exception as e:
-                print(f"⚠️ RSS kaynakları hatası: {e}")
+                safe_print(f"⚠️ RSS kaynakları hatası: {e}")
             
             # 3. MCP varsa onu da dene
             if mcp_enabled:
@@ -6828,9 +6828,9 @@ def fetch_latest_ai_articles_smart():
                             article['method_icon'] = '🤖'
                             article['method_color'] = 'blue'
                         all_articles.extend(mcp_articles)
-                        print(f"✅ MCP'den {len(mcp_articles)} makale")
+                        safe_print(f"✅ MCP'den {len(mcp_articles)} makale")
                 except Exception as e:
-                    print(f"⚠️ MCP hatası: {e}")
+                    safe_print(f"⚠️ MCP hatası: {e}")
             
             # 4. Son çare fallback
             if not all_articles:
@@ -6843,9 +6843,9 @@ def fetch_latest_ai_articles_smart():
                             article['method_icon'] = '⚠️'
                             article['method_color'] = 'gray'
                         all_articles.extend(fallback_articles)
-                        print(f"✅ Fallback'den {len(fallback_articles)} makale")
+                        safe_print(f"✅ Fallback'den {len(fallback_articles)} makale")
                 except Exception as e:
-                    print(f"⚠️ Fallback hatası: {e}")
+                    safe_print(f"⚠️ Fallback hatası: {e}")
             
             # Duplikat temizleme
             if all_articles:
@@ -6864,7 +6864,7 @@ def fetch_latest_ai_articles_smart():
 def fetch_articles_with_mcp_only():
     """Sadece MCP yöntemi ile haber kaynaklarından makale çekme - Son 24 saat filtreli"""
     try:
-        print("🔍 MCP yöntemi ile haber çekme başlatılıyor (Son 24 saat)...")
+        safe_print(f"🔍 MCP yöntemi ile haber çekme başlatılıyor (Son 24 saat)...")
         
         # Bugünün tarih ve saatini al
         now = datetime.now()
@@ -6892,7 +6892,7 @@ def fetch_articles_with_mcp_only():
                         recent_posted_urls.append(article.get('url', ''))
                         recent_posted_hashes.append(article.get('hash', ''))
                 except Exception as date_error:
-                    print(f"⚠️ Tarih parse hatası: {date_error}")
+                    safe_print(f"⚠️ Tarih parse hatası: {date_error}")
                     continue
         
         print(f"📊 Son 24 saatte paylaşılan makale sayısı: {len(recent_posted_urls)}")
@@ -6902,7 +6902,7 @@ def fetch_articles_with_mcp_only():
         enabled_sources = [s for s in config.get("sources", []) if s.get("enabled", True)]
         
         if not enabled_sources:
-            print("⚠️ Aktif haber kaynağı bulunamadı")
+            safe_print(f"⚠️ Aktif haber kaynağı bulunamadı")
             return []
         
         print(f"📰 {len(enabled_sources)} haber kaynağından MCP ile makale çekiliyor...")
@@ -6911,7 +6911,7 @@ def fetch_articles_with_mcp_only():
         
         for source in enabled_sources:
             try:
-                print(f"🔍 MCP ile çekiliyor: {source['name']}")
+                safe_print(f"🔍 MCP ile çekiliyor: {source['name']}")
                 
                 # Gelişmiş scraper ile ana sayfa çek (MCP fallback)
                 try:
@@ -6927,7 +6927,7 @@ def fetch_articles_with_mcp_only():
                         })
                         
                         if not scrape_result.get("success", False):
-                            print(f"⚠️ {source['name']} MCP ile çekilemedi")
+                            safe_print(f"⚠️ {source['name']} MCP ile çekilemedi")
                             source["success_rate"] = max(0, source.get("success_rate", 100) - 20)
                             continue
                         
@@ -7002,7 +7002,7 @@ def fetch_articles_with_mcp_only():
                         print(f"[MCP] Gelişmiş scraper başarılı: {len(markdown_content)} karakter (selenium)")
                         
                 except Exception as scraper_error:
-                    print(f"❌ Scraper hatası: {scraper_error}")
+                    safe_print(f"❌ Scraper hatası: {scraper_error}")
                     continue
                 
                 # Makale URL'lerini bul
@@ -7049,7 +7049,7 @@ def fetch_articles_with_mcp_only():
                 
                 # Makale sayısını artır (5 -> 15)
                 clean_urls = clean_urls[:15]
-                print(f"🔗 {source['name']}: {len(clean_urls)} makale URL'si bulundu")
+                safe_print(f"🔗 {source['name']}: {len(clean_urls)} makale URL'si bulundu")
                 
                 # Her makaleyi MCP ile çek
                 source_articles = []
@@ -7073,7 +7073,7 @@ def fetch_articles_with_mcp_only():
                                         print(f"⏰ Makale 24 saatten eski: {article_pub_date.strftime('%Y-%m-%d %H:%M')} - {title[:50]}...")
                                         continue
                                 except Exception as date_error:
-                                    print(f"⚠️ Makale tarih parse hatası: {date_error}")
+                                    safe_print(f"⚠️ Makale tarih parse hatası: {date_error}")
                             
                             # Makale hash'i oluştur
                             article_hash = hashlib.md5(title.encode()).hexdigest()
@@ -7103,27 +7103,27 @@ def fetch_articles_with_mcp_only():
                                 elif not is_article_recent:
                                     print(f"📅 24 saatten eski makale: {title[:50]}...")
                                 else:
-                                    print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
+                                    safe_print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
                         else:
-                            print(f"⚠️ İçerik yetersiz: {url}")
+                            safe_print(f"⚠️ İçerik yetersiz: {url}")
                             
                     except Exception as article_error:
-                        print(f"❌ Makale çekme hatası ({url}): {article_error}")
+                        safe_print(f"❌ Makale çekme hatası ({url}): {article_error}")
                         continue
                 
                 if source_articles:
                     all_articles.extend(source_articles)
                     source["article_count"] = len(source_articles)
                     source["success_rate"] = min(100, source.get("success_rate", 0) + 10)
-                    print(f"✅ {source['name']}: {len(source_articles)} yeni makale bulundu")
+                    safe_print(f"✅ {source['name']}: {len(source_articles)} yeni makale bulundu")
                 else:
                     source["success_rate"] = max(0, source.get("success_rate", 100) - 10)
-                    print(f"⚠️ {source['name']}: Yeni makale bulunamadı")
+                    safe_print(f"⚠️ {source['name']}: Yeni makale bulunamadı")
                 
                 source["last_checked"] = datetime.now().isoformat()
                 
             except Exception as source_error:
-                print(f"❌ {source['name']} kaynak hatası: {source_error}")
+                safe_print(f"❌ {source['name']} kaynak hatası: {source_error}")
                 source["success_rate"] = max(0, source.get("success_rate", 100) - 30)
                 source["last_checked"] = datetime.now().isoformat()
         
@@ -7131,14 +7131,14 @@ def fetch_articles_with_mcp_only():
         try:
             save_json(NEWS_SOURCES_FILE, config)
         except Exception as save_error:
-            print(f"⚠️ Haber kaynakları kaydetme hatası: {save_error}")
+            safe_print(f"⚠️ Haber kaynakları kaydetme hatası: {save_error}")
         
         print(f"📊 MCP ile toplam {len(all_articles)} yeni makale bulundu (Son 24 saat filtreli)")
         
         # Duplikat filtreleme uygula
         if all_articles:
             all_articles = filter_duplicate_articles(all_articles)
-            print(f"🔄 Duplikat filtreleme sonrası: {len(all_articles)} benzersiz makale")
+            safe_print(f"🔄 Duplikat filtreleme sonrası: {len(all_articles)} benzersiz makale")
         
         # 24 saat içindeki makaleleri işaretle
         for article in all_articles:
@@ -7148,7 +7148,7 @@ def fetch_articles_with_mcp_only():
         return all_articles
         
     except Exception as e:
-        print(f"❌ MCP haber çekme genel hatası: {e}")
+        safe_print(f"❌ MCP haber çekme genel hatası: {e}")
         return []
 
 def check_article_url_date(url, cutoff_date):
@@ -7176,7 +7176,7 @@ def check_article_url_date(url, cutoff_date):
                 return is_recent
                 
             except ValueError as date_error:
-                print(f"⚠️ Tarih parse hatası: {date_error}")
+                safe_print(f"⚠️ Tarih parse hatası: {date_error}")
                 return True  # Hata durumunda makaleyi dahil et
         
         # The Verge URL formatı: https://www.theverge.com/2025/1/9/article-name
@@ -7199,7 +7199,7 @@ def check_article_url_date(url, cutoff_date):
                 return is_recent
                 
             except ValueError as date_error:
-                print(f"⚠️ Tarih parse hatası: {date_error}")
+                safe_print(f"⚠️ Tarih parse hatası: {date_error}")
                 return True  # Hata durumunda makaleyi dahil et
         
         # Diğer siteler için - URL'de tarih bulunamazsa güncel kabul et
@@ -7207,7 +7207,7 @@ def check_article_url_date(url, cutoff_date):
         return True
         
     except Exception as e:
-        print(f"⚠️ URL tarih kontrolü hatası: {e}")
+        safe_print(f"⚠️ URL tarih kontrolü hatası: {e}")
         return True  # Hata durumunda makaleyi dahil et
 
 def extract_article_date_from_content(content):
@@ -7291,7 +7291,7 @@ def extract_article_date_from_content(content):
         return None
         
     except Exception as e:
-        print(f"⚠️ Tarih çıkarma hatası: {e}")
+        safe_print(f"⚠️ Tarih çıkarma hatası: {e}")
         return None
 
 # Wrapper fonksiyon - eski import'lar için uyumluluk
@@ -7302,7 +7302,7 @@ def fetch_article_content_mcp(url):
 def fetch_article_content_with_mcp_only(url):
     """Sadece MCP ile makale içeriği çekme"""
     try:
-        print(f"🔍 MCP ile makale çekiliyor: {url[:50]}...")
+        safe_print(f"🔍 MCP ile makale çekiliyor: {url[:50]}...")
         
         # MCP scrape fonksiyonunu kullan
         scrape_result = mcp_firecrawl_scrape({
@@ -7314,14 +7314,14 @@ def fetch_article_content_with_mcp_only(url):
         })
         
         if not scrape_result.get("success", False):
-            print(f"⚠️ MCP ile çekilemedi: {url}")
+            safe_print(f"⚠️ MCP ile çekilemedi: {url}")
             return None
         
         # Markdown içeriğini al
         markdown_content = scrape_result.get("markdown", "")
         
         if not markdown_content or len(markdown_content) < 100:
-            print(f"⚠️ MCP'den yetersiz içerik: {len(markdown_content) if markdown_content else 0} karakter")
+            safe_print(f"⚠️ MCP'den yetersiz içerik: {len(markdown_content) if markdown_content else 0} karakter")
             return None
         
         # Başlığı çıkar (genellikle ilk # ile başlar)
@@ -7349,7 +7349,7 @@ def fetch_article_content_with_mcp_only(url):
         # Makale tarihini içerikten çıkarmaya çalış
         article_publish_date = extract_article_date_from_content(markdown_content)
         
-        print(f"✅ MCP ile içerik çekildi: {len(content)} karakter")
+        safe_print(f"✅ MCP ile içerik çekildi: {len(content)} karakter")
         if article_publish_date:
             print(f"📅 Makale yayın tarihi: {article_publish_date.strftime('%Y-%m-%d %H:%M')}")
         
@@ -7361,7 +7361,7 @@ def fetch_article_content_with_mcp_only(url):
         }
         
     except Exception as e:
-        print(f"❌ MCP makale içeriği çekme hatası ({url}): {e}")
+        safe_print(f"❌ MCP makale içeriği çekme hatası ({url}): {e}")
         return None
 
 # GitHub MCP Modülü

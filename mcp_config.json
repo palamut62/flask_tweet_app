@@ -1,7 +1,7 @@
 {
-  "mcp_enabled": false,
+  "mcp_enabled": true,
   "firecrawl_mcp": {
-    "enabled": false,
+    "enabled": true,
     "server_url": "http://localhost:3000",
     "api_key": "fc-f01e73501efb451ebc166c8cee6cd4e8",
     "timeout": 30,
@@ -22,5 +22,5 @@
     "model": "qwen/qwen3-8b:free",
     "fallback_enabled": true
   },
-  "last_updated": "2024-01-01T00:00:00Z"
+  "last_updated": "2025-08-11T12:00:00Z"
 } 
