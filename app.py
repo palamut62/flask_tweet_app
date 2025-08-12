@@ -375,11 +375,18 @@ def index():
         try:
             api_check = {
                 "twitter_api_available": bool(os.environ.get('TWITTER_BEARER_TOKEN') and os.environ.get('TWITTER_API_KEY')),
-                "telegram_available": bool(os.environ.get('TELEGRAM_BOT_TOKEN'))
+                "telegram_available": bool(os.environ.get('TELEGRAM_BOT_TOKEN')),
+                "google_api_available": bool(os.environ.get('GOOGLE_API_KEY')),
+                "openrouter_api_available": bool(os.environ.get('OPENROUTER_API_KEY'))
             }
         except Exception as e:
             terminal_log(f"⚠️ API durumu kontrol edilemedi: {str(e)}", "warning")
-            api_check = {"twitter_api_available": False, "telegram_available": False}
+            api_check = {
+                "twitter_api_available": False, 
+                "telegram_available": False,
+                "google_api_available": False,
+                "openrouter_api_available": False
+            }
         
         # Ayarları yükle - hata yakalama ile
         try:
