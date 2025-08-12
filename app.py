@@ -33,7 +33,8 @@ from utils import (
     check_gmail_configuration, get_rate_limit_info, terminal_log,
     create_automatic_backup, load_ai_keywords_config, save_ai_keywords_config,
     get_all_active_keywords, fetch_ai_news_with_advanced_keywords,
-    update_ai_keyword_category, get_ai_keywords_stats, analyze_tweet_quality
+    update_ai_keyword_category, get_ai_keywords_stats, analyze_tweet_quality,
+    safe_log
 )
 
 # GitHub modülü kaldırıldı
@@ -48,6 +49,11 @@ VERSION_CHANGELOG = {
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
+
+# Favicon 404 hatasını önle
+@app.route('/favicon.ico')
+def favicon():
+    return app.send_static_file('favicon.ico')
 
 # Template context processor for global variables
 @app.context_processor
@@ -406,7 +412,6 @@ def index():
                              last_check=last_check_time)
                              
     except Exception as e:
-        from utils import safe_log
         safe_log(f"Ana sayfa hatası: {str(e)}", "ERROR")
         return render_template('index.html', 
                              articles=[],
@@ -465,7 +470,6 @@ def fetch_latest_ai_articles_with_mcp():
         posted_urls = [article.get('url', '') for article in posted_articles]
         posted_hashes = [article.get('hash', '') for article in posted_articles]
         
-        from utils import safe_log
         safe_log("Özel haber kaynaklarından makale çekiliyor...", "INFO")
         
         # Önce özel kaynaklardan makale çek
@@ -606,7 +610,6 @@ def fetch_latest_ai_articles_with_mcp():
 def check_and_post_articles():
     """Makale kontrol ve paylaşım fonksiyonu - MCP Firecrawl entegrasyonlu"""
     try:
-        from utils import safe_log
         safe_log("Yeni makaleler kontrol ediliyor...", "INFO")
         
         # Ayarları yükle
@@ -1859,7 +1862,6 @@ def confirm_manual_post():
         tweet_id = data.get('tweet_id')
         
         # Debug logging
-        from utils import safe_log
         safe_log(f"Manuel onay isteği - Tweet ID: {tweet_id}, Data: {data}", "DEBUG")
         
         if tweet_id is None or tweet_id == "":
@@ -3547,7 +3549,6 @@ def security_check():
         security_status = check_security_configuration()
         return render_template('security_check.html', security=security_status)
     except Exception as e:
-        from utils import safe_log
         safe_log(f"Güvenlik kontrol hatası: {str(e)}", "ERROR")
         return render_template('security_check.html', security={"secure": False, "issues": [f"Kontrol hatası: {str(e)}"]})
 
@@ -4611,7 +4612,6 @@ def deleted_tweets():
                     continue
         
         # Debug için log
-        from utils import safe_log
         safe_log(f"Silinmiş tweetler sayfası: {len(deleted_articles)} silinmiş tweet", "DEBUG")
         
         return render_template('deleted_tweets.html', 
@@ -4619,7 +4619,6 @@ def deleted_tweets():
                              stats=stats)
                              
     except Exception as e:
-        from utils import safe_log
         safe_log(f"Silinmiş tweetler sayfası hatası: {str(e)}", "ERROR")
         return render_template('deleted_tweets.html', 
                              deleted_articles=[],
