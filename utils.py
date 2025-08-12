@@ -345,8 +345,12 @@ def fetch_latest_ai_articles():
             return []
 
 def fetch_latest_ai_articles_fallback():
-    """Fallback haber çekme yöntemi - BeautifulSoup ile"""
+    """Fallback haber çekme yöntemi - BeautifulSoup ile - Son 24 saat filtreli"""
     try:
+        # 24 saat tarih filtresini ayarla
+        now = datetime.now()
+        twenty_four_hours_ago = now - timedelta(hours=24)
+        
         # Önce mevcut yayınlanan makaleleri yükle
         posted_articles = load_json(HISTORY_FILE)
         posted_urls = [article.get('url', '') for article in posted_articles]
@@ -363,6 +367,23 @@ def fetch_latest_ai_articles_fallback():
         for link_tag in article_links:
             title = link_tag.text.strip()
             url = link_tag['href']
+            
+            # URL'den tarih çıkarmaya çalış (TechCrunch format: /2024/08/12/)
+            article_date = None
+            import re
+            date_pattern = r'/(\d{4})/(\d{2})/(\d{2})/'
+            url_date_match = re.search(date_pattern, url)
+            if url_date_match:
+                try:
+                    year, month, day = map(int, url_date_match.groups())
+                    article_date = datetime(year, month, day)
+                    
+                    # 24 saatten eski makaleleri filtrele
+                    if article_date < twenty_four_hours_ago:
+                        safe_print(f"⏰ Fallback makale 24 saatten eski: {article_date.strftime('%Y-%m-%d')} - {title[:50]}...")
+                        continue
+                except:
+                    pass
             
             # Makale hash'i oluştur (başlık bazlı)
             article_hash = hashlib.md5(title.encode()).hexdigest()
@@ -5373,9 +5394,9 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
             new_url = new_article.get('url', '')
             url_is_duplicate = False
             
-            # Son 7 gün içindeki makaleleri kontrol et
+            # Son 24 saat içindeki makaleleri kontrol et
             from datetime import datetime, timedelta
-            seven_days_ago = datetime.now() - timedelta(days=7)
+            twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
             
             for existing in all_existing:
                 if new_url == existing.get('url', ''):
@@ -5384,7 +5405,7 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
                     if existing_date_str:
                         try:
                             existing_date = datetime.fromisoformat(existing_date_str.replace('Z', '+00:00').replace('+00:00', ''))
-                            if existing_date >= seven_days_ago:
+                            if existing_date >= twenty_four_hours_ago:
                                 url_is_duplicate = True
                                 break
                         except:
@@ -6168,9 +6189,13 @@ def fetch_articles_from_custom_sources_pythonanywhere():
         safe_print(f"❌ Özel kaynaklar genel hatası: {e}")
         return []
 def fetch_articles_from_single_source_pythonanywhere(source):
-    """PythonAnywhere uyumlu tek kaynak makale çekme"""
+    """PythonAnywhere uyumlu tek kaynak makale çekme - Son 24 saat filtreli"""
     try:
         safe_print(f"🔍 {source['name']} kaynağına bağlanılıyor: {source['url']}")
+        
+        # 24 saat tarih filtresini ayarla
+        now = datetime.now()
+        twenty_four_hours_ago = now - timedelta(hours=24)
         
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -6250,10 +6275,39 @@ def fetch_articles_from_single_source_pythonanywhere(source):
                 excerpt_elem = article.select_one(excerpt_selector)
                 excerpt = excerpt_elem.get_text().strip()[:500] if excerpt_elem else ""
                 
-                # Tarih bul
+                # Tarih bul ve kontrol et
                 date_selector = selectors.get('date', 'time, .date, .published')
                 date_elem = article.select_one(date_selector)
                 date_str = date_elem.get_text().strip() if date_elem else ""
+                
+                # Tarih kontrolü - 24 saat filtresi
+                article_date = None
+                if date_elem and date_elem.get('datetime'):
+                    try:
+                        article_date = datetime.fromisoformat(date_elem.get('datetime').replace('Z', '+00:00').replace('+00:00', ''))
+                    except:
+                        pass
+                elif date_str:
+                    # Tarih string'ini parse etmeye çalış
+                    try:
+                        from dateutil import parser
+                        article_date = parser.parse(date_str)
+                    except:
+                        # URL'den tarih çıkarmaya çalış (örn: techcrunch.com/2024/08/12/...)
+                        import re
+                        date_pattern = r'/(\d{4})/(\d{2})/(\d{2})/'
+                        url_date_match = re.search(date_pattern, link)
+                        if url_date_match:
+                            try:
+                                year, month, day = map(int, url_date_match.groups())
+                                article_date = datetime(year, month, day)
+                            except:
+                                pass
+                
+                # 24 saatten eski makaleleri filtrele
+                if article_date and article_date < twenty_four_hours_ago:
+                    safe_print(f"⏰ Makale 24 saatten eski: {article_date.strftime('%Y-%m-%d %H:%M')} - {title[:50]}...")
+                    continue
                 
                 # Hash oluştur
                 article_hash = hashlib.md5(title.encode()).hexdigest()
@@ -6283,16 +6337,16 @@ def fetch_articles_from_single_source_pythonanywhere(source):
         return []
 
 def fetch_articles_with_rss_only():
-    """Sadece RSS yöntemi ile haber kaynaklarından makale çekme - Son 7 gün filtreli"""
+    """Sadece RSS yöntemi ile haber kaynaklarından makale çekme - Son 24 saat filtreli"""
     try:
-        safe_print("[RSS] RSS yöntemi ile haber çekme başlatılıyor (Son 7 gün)...")
+        safe_print("[RSS] RSS yöntemi ile haber çekme başlatılıyor (Son 24 saat)...")
         
         # Bugünün tarih ve saatini al
         now = datetime.now()
-        seven_days_ago = now - timedelta(days=7)  # 24 saat yerine 7 gün
+        twenty_four_hours_ago = now - timedelta(hours=24)  # 24 saat filtresi
         
         print(f"📅 Bugün: {now.strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"⏰ 7 gün öncesi: {seven_days_ago.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"⏰ 24 saat öncesi: {twenty_four_hours_ago.strftime('%Y-%m-%d %H:%M:%S')}")
         
         # Önce mevcut yayınlanan makaleleri yükle
         posted_articles = load_json(HISTORY_FILE, [])
@@ -6308,14 +6362,14 @@ def fetch_articles_with_rss_only():
             if posted_date_str:
                 try:
                     posted_date = datetime.fromisoformat(posted_date_str.replace('Z', '+00:00').replace('+00:00', ''))
-                    if posted_date >= seven_days_ago:
+                    if posted_date >= twenty_four_hours_ago:
                         recent_posted_urls.append(article.get('url', ''))
                         recent_posted_hashes.append(article.get('hash', ''))
                 except Exception as date_error:
                     safe_print(f"⚠️ Tarih parse hatası: {date_error}")
                     continue
         
-        print(f"📊 Son 7 günde paylaşılan makale sayısı: {len(recent_posted_urls)}")
+        print(f"📊 Son 24 saatte paylaşılan makale sayısı: {len(recent_posted_urls)}")
         
         # RSS kaynaklarını yükle
         config = load_news_sources()
@@ -6379,10 +6433,10 @@ def fetch_articles_with_rss_only():
                             except:
                                 pass
                         
-                        # 7 gün kontrolü (daha esnek)
+                        # 24 saat kontrolü
                         if entry_date:
-                            if entry_date < seven_days_ago:
-                                print(f"⏰ RSS makale 7 günden eski: {entry_date.strftime('%Y-%m-%d %H:%M')} - {title[:50]}...")
+                            if entry_date < twenty_four_hours_ago:
+                                print(f"⏰ RSS makale 24 saatten eski: {entry_date.strftime('%Y-%m-%d %H:%M')} - {title[:50]}...")
                                 continue
                         
                         # İçerik al
