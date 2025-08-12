@@ -1769,32 +1769,139 @@ def mark_article_as_posted(article_data, tweet_result):
         
         # Manuel paylaşım kontrolü
         is_manual_post = tweet_result.get("manual_post", False)
+        is_bulk_operation = article_data.get("bulk_operation", False)
+        
+        # Tweet URL'sini düzgün al
+        tweet_url = tweet_result.get("url") or tweet_result.get("tweet_url", "")
         
         posted_article = {
             "title": article_data.get("title", ""),
             "url": article_data.get("url", ""),
+            "content": article_data.get("content", ""),
+            "source": article_data.get("source", ""),
+            "source_type": article_data.get("source_type", "news"),
             "hash": article_data.get("hash", ""),
             "posted_date": datetime.now().isoformat(),
             "tweet_id": tweet_result.get("tweet_id", ""),
-            "tweet_url": tweet_result.get("url", ""),
+            "tweet_url": tweet_url,
+            "tweet_text": article_data.get("tweet_text", ""),
             "manual_post": is_manual_post,
-            "post_method": "manuel" if is_manual_post else "api"
+            "bulk_operation": is_bulk_operation,
+            "post_method": "toplu" if is_bulk_operation else ("manuel" if is_manual_post else "otomatik"),
+            "quality_score": article_data.get("score", 0),
+            "tags": article_data.get("tags", []),
+            "category": article_data.get("category", "ai_general"),
+            "is_posted": True
         }
         
         # Manuel paylaşım için ek bilgiler
         if is_manual_post:
-            posted_article["tweet_text"] = article_data.get("tweet_text", "")
             posted_article["manual_posted_at"] = tweet_result.get("posted_at", datetime.now().isoformat())
+            posted_article["manual_approval"] = article_data.get("manual_approval", False)
+        
+        # GitHub repo ise ek bilgileri ekle
+        if article_data.get('source_type') == 'github' or article_data.get('type') == 'github_repo':
+            posted_article.update({
+                "type": "github_repo",
+                "repo_data": article_data.get('repo_data', {}),
+                "language": article_data.get('language', ''),
+                "stars": article_data.get('stars', 0),
+                "forks": article_data.get('forks', 0),
+                "owner": article_data.get('owner', ''),
+                "topics": article_data.get('topics', [])
+            })
+        
+        # Manuel tweet ise ek bilgileri ekle
+        if article_data.get('type') == 'manual_tweet':
+            posted_article.update({
+                "type": "manual_tweet",
+                "manual_tweet_id": article_data.get("manual_tweet_id", ""),
+                "theme": article_data.get("theme", "")
+            })
         
         posted_articles.append(posted_article)
         save_json(HISTORY_FILE, posted_articles)
         
-        safe_log(f"Makale kaydedildi: {article_data.get('title', '')[:50]}... (Yöntem: {posted_article['post_method']})", "INFO")
+        # İstatistikleri güncelle
+        update_statistics_after_post(posted_article)
+        
+        safe_log(f"✅ Tweet kaydedildi: {article_data.get('title', '')[:50]}... (Yöntem: {posted_article['post_method']})", "INFO")
         
         return True
     except Exception as e:
-        safe_log(f"Makale kaydetme hatası: {e}", "ERROR")
+        safe_log(f"❌ Tweet kaydetme hatası: {e}", "ERROR")
         return False
+
+def update_statistics_after_post(posted_article):
+    """Tweet paylaşım sonrası istatistikleri güncelle"""
+    try:
+        from datetime import date
+        
+        # Günlük istatistikleri güncelle
+        today = date.today().isoformat()
+        stats_file = "daily_stats.json"
+        
+        # Mevcut istatistikleri yükle
+        daily_stats = load_json(stats_file, {})
+        
+        if today not in daily_stats:
+            daily_stats[today] = {
+                "total_posts": 0,
+                "automatic_posts": 0,
+                "manual_posts": 0,
+                "bulk_posts": 0,
+                "github_posts": 0,
+                "news_posts": 0,
+                "quality_scores": [],
+                "sources": {},
+                "post_methods": {}
+            }
+        
+        today_stats = daily_stats[today]
+        
+        # Toplam paylaşım sayısını artır
+        today_stats["total_posts"] += 1
+        
+        # Paylaşım türüne göre sayaçları artır
+        post_method = posted_article.get("post_method", "otomatik")
+        if post_method == "otomatik":
+            today_stats["automatic_posts"] += 1
+        elif post_method == "manuel":
+            today_stats["manual_posts"] += 1
+        elif post_method == "toplu":
+            today_stats["bulk_posts"] += 1
+        
+        # İçerik türü istatistikleri
+        if posted_article.get("type") == "github_repo":
+            today_stats["github_posts"] += 1
+        else:
+            today_stats["news_posts"] += 1
+        
+        # Kalite skoru
+        quality_score = posted_article.get("quality_score", 0)
+        if quality_score > 0:
+            today_stats["quality_scores"].append(quality_score)
+        
+        # Kaynak istatistikleri
+        source = posted_article.get("source", "Bilinmeyen")
+        if source in today_stats["sources"]:
+            today_stats["sources"][source] += 1
+        else:
+            today_stats["sources"][source] = 1
+        
+        # Paylaşım yöntemi istatistikleri
+        if post_method in today_stats["post_methods"]:
+            today_stats["post_methods"][post_method] += 1
+        else:
+            today_stats["post_methods"][post_method] = 1
+        
+        # İstatistikleri kaydet
+        save_json(stats_file, daily_stats)
+        
+        safe_log(f"📊 İstatistikler güncellendi: {today} - Toplam: {today_stats['total_posts']}", "INFO")
+        
+    except Exception as e:
+        safe_log(f"⚠️ İstatistik güncelleme hatası: {e}", "WARNING")
 
 def check_duplicate_articles():
     """Tekrarlanan makaleleri temizle"""
@@ -1806,23 +1913,89 @@ def check_duplicate_articles():
         
         filtered_articles = []
         seen_hashes = set()
+        seen_urls = set()
+        seen_titles = set()
+        
+        stats = {
+            "original_count": len(posted_articles),
+            "hash_duplicates": 0,
+            "url_duplicates": 0,
+            "title_duplicates": 0,
+            "old_articles": 0,
+            "kept_articles": 0
+        }
         
         for article in posted_articles:
             try:
-                posted_date = datetime.fromisoformat(article.get("posted_date", ""))
-                article_hash = article.get("hash", "")
+                posted_date_str = article.get("posted_date", "")
+                if posted_date_str:
+                    posted_date = datetime.fromisoformat(posted_date_str.replace('Z', '+00:00').replace('+00:00', ''))
+                else:
+                    # Tarih yoksa eski sayalım ve temizleyelim
+                    stats["old_articles"] += 1
+                    continue
                 
-                if posted_date > cutoff_date and article_hash not in seen_hashes:
-                    filtered_articles.append(article)
+                # 30 günden eski makaleleri temizle
+                if posted_date <= cutoff_date:
+                    stats["old_articles"] += 1
+                    continue
+                
+                article_hash = article.get("hash", "")
+                article_url = article.get("url", "")
+                article_title = article.get("title", "").strip().lower()
+                
+                # Hash duplicate kontrolü
+                if article_hash and article_hash in seen_hashes:
+                    stats["hash_duplicates"] += 1
+                    safe_log(f"🔄 Hash duplikat kaldırıldı: {article.get('title', '')[:50]}", "INFO")
+                    continue
+                
+                # URL duplicate kontrolü
+                if article_url and article_url in seen_urls:
+                    stats["url_duplicates"] += 1
+                    safe_log(f"🔄 URL duplikat kaldırıldı: {article.get('title', '')[:50]}", "INFO")
+                    continue
+                
+                # Title duplicate kontrolü (aynı başlık)
+                if article_title and article_title in seen_titles:
+                    stats["title_duplicates"] += 1
+                    safe_log(f"🔄 Title duplikat kaldırıldı: {article.get('title', '')[:50]}", "INFO")
+                    continue
+                
+                # Benzersiz makale - listeye ekle
+                filtered_articles.append(article)
+                
+                if article_hash:
                     seen_hashes.add(article_hash)
-            except:
+                if article_url:
+                    seen_urls.add(article_url)
+                if article_title:
+                    seen_titles.add(article_title)
+                
+                stats["kept_articles"] += 1
+                
+            except Exception as article_error:
+                safe_log(f"⚠️ Makale işleme hatası: {article_error}", "WARNING")
                 continue
         
+        # Güncellenmiş listeyi kaydet
         save_json(HISTORY_FILE, filtered_articles)
-        return len(posted_articles) - len(filtered_articles)
+        
+        # Sonuçları logla
+        removed_count = stats["original_count"] - stats["kept_articles"]
+        safe_log(f"🧹 Duplicate temizlik tamamlandı:", "INFO")
+        safe_log(f"   - Orijinal: {stats['original_count']}", "INFO")
+        safe_log(f"   - Silinen toplam: {removed_count}", "INFO")
+        safe_log(f"     • Hash duplikat: {stats['hash_duplicates']}", "INFO")
+        safe_log(f"     • URL duplikat: {stats['url_duplicates']}", "INFO") 
+        safe_log(f"     • Title duplikat: {stats['title_duplicates']}", "INFO")
+        safe_log(f"     • Eski (30+ gün): {stats['old_articles']}", "INFO")
+        safe_log(f"   - Kalan: {stats['kept_articles']}", "INFO")
+        
+        return removed_count
         
     except Exception as e:
-        print(f"Tekrar temizleme hatası: {e}")
+        safe_log(f"❌ Duplicate temizlik hatası: {e}", "ERROR")
         return 0
 
 def generate_ai_digest(summaries_with_links, api_key):
@@ -4906,7 +5079,35 @@ def safe_log(message, level="INFO", sensitive_data=None):
     if not debug_mode and level not in ["ERROR", "WARNING", "INFO"]:
         return
     
-    print(f"[{level}] {safe_message}")
+    # Güvenli print kullan
+    try:
+        print(f"[{level}] {safe_message}")
+    except UnicodeEncodeError:
+        try:
+            # Emoji karakterlerini ASCII eşdeğerleri ile değiştir
+            emoji_map = {
+                '🔄': '[DONGU]',
+                '✅': '[BASARILI]',
+                '❌': '[HATA]',
+                '⚠️': '[UYARI]',
+                '🧹': '[TEMIZLIK]',
+                '📊': '[ISTATISTIK]',
+                '🔍': '[ARAMA]'
+            }
+            
+            safe_text = safe_message
+            for emoji, replacement in emoji_map.items():
+                safe_text = safe_text.replace(emoji, replacement)
+            
+            # Kalan emoji'leri ? ile değiştir  
+            import re
+            safe_text = re.sub(r'[^\x00-\x7F]+', '?', safe_text)
+            print(f"[{level}] {safe_text}")
+        except Exception:
+            # Son çare: sadece ASCII karakterleri bırak
+            import re
+            clean_text = re.sub(r'[^\x00-\x7F]+', '?', str(f"[{level}] {safe_message}"))
+            print(clean_text)
 
 # =============================================================================
 # GÜVENLİK KONTROL FONKSİYONLARI
@@ -5148,7 +5349,7 @@ def filter_duplicate_articles(new_articles, existing_articles=None):
         
         if existing_articles is None:
             # Mevcut paylaşılan makaleleri yükle
-            existing_articles = load_json("history.json", [])
+            existing_articles = load_json(HISTORY_FILE, [])
         
         # Bekleyen tweet'leri de kontrol et
         pending_tweets = load_json("pending_tweets.json", [])
@@ -5250,7 +5451,7 @@ def basic_duplicate_filter(new_articles, existing_articles=None):
     """Temel duplikat filtreleme - sadece URL ve hash kontrolü"""
     try:
         if existing_articles is None:
-            existing_articles = load_json("history.json", [])
+            existing_articles = load_json(HISTORY_FILE, [])
         
         # Bekleyen tweet'leri de kontrol et
         pending_tweets = load_json("pending_tweets.json", [])
@@ -5838,7 +6039,7 @@ def fetch_latest_ai_articles_pythonanywhere():
     """PythonAnywhere için optimize edilmiş haber çekme sistemi - Özel kaynaklar + API'ler"""
     try:
         # Önce mevcut yayınlanan makaleleri yükle
-        posted_articles = load_json("history.json", [])
+        posted_articles = load_json(HISTORY_FILE, [])
         posted_urls = [article.get('url', '') for article in posted_articles]
         posted_hashes = [article.get('hash', '') for article in posted_articles]
         
@@ -6094,7 +6295,7 @@ def fetch_articles_with_rss_only():
         print(f"⏰ 7 gün öncesi: {seven_days_ago.strftime('%Y-%m-%d %H:%M:%S')}")
         
         # Önce mevcut yayınlanan makaleleri yükle
-        posted_articles = load_json("history.json", [])
+        posted_articles = load_json(HISTORY_FILE, [])
         posted_urls = [article.get('url', '') for article in posted_articles]
         posted_hashes = [article.get('hash', '') for article in posted_articles]
         
@@ -6916,7 +7117,7 @@ def fetch_articles_with_mcp_only():
         print(f"⏰ 24 saat öncesi: {twenty_four_hours_ago.strftime('%Y-%m-%d %H:%M:%S')}")
         
         # Önce mevcut yayınlanan makaleleri yükle
-        posted_articles = load_json("history.json", [])
+        posted_articles = load_json(HISTORY_FILE, [])
         posted_urls = [article.get('url', '') for article in posted_articles]
         posted_hashes = [article.get('hash', '') for article in posted_articles]
         
