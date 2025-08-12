@@ -3912,17 +3912,47 @@ def detect_site_type(url, soup):
     except Exception as e:
         return {"cms": "unknown", "type": "unknown", "features": [], "error": str(e)}
 def test_manual_selectors_for_url(url, selectors):
-    """Manuel selector'ları test et"""
+    """Manuel selector'ları test et - Gelişmiş hata kontrolü ile"""
     try:
         safe_log(f"Manuel selector test ediliyor: {url}", "INFO")
         
-        # Selector'ları temizle
+        # Input doğrulama
+        if not url or not url.startswith(('http://', 'https://')):
+            return {
+                'success': False,
+                'error': 'Geçersiz URL formatı',
+                'details': {'url': url}
+            }
+        
+        if not selectors or not isinstance(selectors, dict):
+            return {
+                'success': False,
+                'error': 'Selector'lar gerekli',
+                'details': {'selectors_provided': bool(selectors)}
+            }
+        
+        # Selector'ları temizle ve doğrula
         article_container = selectors.get('article_container', '').strip()
         title_selector = selectors.get('title_selector', '').strip()
         link_selector = selectors.get('link_selector', '').strip()
         date_selector = selectors.get('date_selector', '').strip()
         summary_selector = selectors.get('summary_selector', '').strip()
         base_url = selectors.get('base_url', '').strip()
+        
+        # Zorunlu selector kontrolü
+        if not article_container:
+            return {
+                'success': False,
+                'error': 'Makale konteyner selector gerekli',
+                'details': {'missing': 'article_container'}
+            }
+        
+        if not title_selector:
+            return {
+                'success': False,
+                'error': 'Başlık selector gerekli',
+                'details': {'missing': 'title_selector'}
+            }
         
         if not base_url:
             from urllib.parse import urlparse
@@ -4494,7 +4524,8 @@ def auto_detect_selectors(soup, url):
                 "[data-testid*='headline'] a",
                 ".font-polysans a",
                 "a[href*='/2025/']",
-                "a[href*='/2024/']"
+                "a[href*='/2024/']",
+                "a[href*='/2026/']"
             ],
             'dates': [
                 ".c-byline__item time", 
