@@ -1,0 +1,22 @@
+{
+  "2025-08-12": {
+    "total_posts": 3,
+    "automatic_posts": 0,
+    "manual_posts": 2,
+    "bulk_posts": 0,
+    "github_posts": 0,
+    "news_posts": 3,
+    "quality_scores": [
+      8,
+      9
+    ],
+    "sources": {
+      "Test Source": 2,
+      "Demo Source": 1
+    },
+    "post_methods": {
+      "test": 1,
+      "manuel": 2
+    }
+  }
+}

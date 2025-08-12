@@ -2261,6 +2261,7 @@ def get_data_statistics():
     try:
         from datetime import datetime, date, timedelta
         import time
+        import os
         
         # Cache mekanizması (30 saniye cache)
         cache_file = "stats_cache.json"
