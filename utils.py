@@ -3927,7 +3927,7 @@ def test_manual_selectors_for_url(url, selectors):
         if not selectors or not isinstance(selectors, dict):
             return {
                 'success': False,
-                'error': 'Selector'lar gerekli',
+                'error': 'Selectorlar gerekli',
                 'details': {'selectors_provided': bool(selectors)}
             }
         
