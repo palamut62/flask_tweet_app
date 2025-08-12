@@ -49,19 +49,29 @@ def main():
     logging.info("🚀 AI Tweet Bot Otomatik Zamanlayıcı Başlatıldı")
     logging.info("=" * 60)
     
+    # Ayarlardan kontrol aralığını al
+    try:
+        from app import load_automation_settings
+        settings = load_automation_settings()
+        interval_hours = settings.get('check_interval_hours', 3)
+        logging.info(f"📋 Ayarlardan okunan kontrol aralığı: {interval_hours} saat")
+    except Exception as e:
+        interval_hours = 3
+        logging.warning(f"⚠️ Ayar okuma hatası, varsayılan 3 saat kullanılacak: {e}")
+    
     # Zamanlayıcı oluştur
     scheduler = BlockingScheduler()
     
-    # Her 3 saatte bir çalışacak şekilde ayarla
+    # Ayarlardan okunan aralık ile çalışacak şekilde ayarla
     scheduler.add_job(
         run_auto_check,
         'interval',
-        hours=3,
+        hours=interval_hours,
         id='auto_tweet_job',
         name='Otomatik Tweet Paylaşımı'
     )
     
-    logging.info("⏰ Zamanlayıcı ayarlandı: Her 3 saatte bir çalışacak")
+    logging.info(f"⏰ Zamanlayıcı ayarlandı: Her {interval_hours} saatte bir çalışacak")
     logging.info("🛑 Durdurmak için Ctrl+C tuşlayın")
     logging.info("=" * 60)
     

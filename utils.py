@@ -5969,6 +5969,8 @@ def fetch_articles_from_custom_sources_pythonanywhere():
 def fetch_articles_from_single_source_pythonanywhere(source):
     """PythonAnywhere uyumlu tek kaynak makale çekme"""
     try:
+        safe_print(f"🔍 {source['name']} kaynağına bağlanılıyor: {source['url']}")
+        
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
@@ -5976,6 +5978,8 @@ def fetch_articles_from_single_source_pythonanywhere(source):
         # Timeout ile güvenli istek
         response = requests.get(source['url'], headers=headers, timeout=15)
         response.raise_for_status()
+        
+        safe_print(f"✅ {source['name']}: HTTP {response.status_code} - {len(response.text)} karakter")
         
         soup = BeautifulSoup(response.text, 'html.parser')
         
@@ -6678,8 +6682,15 @@ def get_news_fetching_method():
         method = settings.get('news_fetching_method', 'auto')
         
         # MCP config'den de kontrol et
-        mcp_config = load_json(MCP_CONFIG_FILE, {})
-        mcp_enabled = mcp_config.get('mcp_enabled', False)
+        try:
+            mcp_config = load_json(MCP_CONFIG_FILE, {})
+            mcp_enabled = mcp_config.get('mcp_enabled', False)
+        except Exception as mcp_error:
+            safe_print(f"MCP config okuma hatası: {mcp_error}")
+            mcp_enabled = False
+        
+        safe_print(f"[AYAR] Haber çekme yöntemi: {method}")
+        safe_print(f"[MCP] MCP durumu: {'Aktif' if mcp_enabled else 'Pasif'}")
         
         return {
             'method': method,
@@ -6687,7 +6698,7 @@ def get_news_fetching_method():
             'available_methods': ['auto', 'ai_keywords_only', 'mcp_only', 'pythonanywhere_only', 'custom_sources_only']
         }
     except Exception as e:
-        print(f"Haber çekme yöntemi alma hatası: {e}")
+        safe_print(f"Haber çekme yöntemi alma hatası: {e}")
         return {
             'method': 'auto',
             'mcp_enabled': False,
@@ -6698,10 +6709,41 @@ def safe_print(text):
     try:
         print(text)
     except UnicodeEncodeError:
-        # Emoji'leri kaldır ve basit karakterlere çevir
-        import re
-        clean_text = re.sub(r'[^\x00-\x7F]+', '?', text)
-        print(clean_text)
+        try:
+            # Önce UTF-8 encode/decode deneyip emoji'leri düzeltmeyi dene
+            if isinstance(text, str):
+                # Emoji karakterlerini ASCII eşdeğerleri ile değiştir
+                emoji_map = {
+                    '🔍': '[ARAMA]',
+                    '✅': '[BASARILI]',
+                    '❌': '[HATA]',
+                    '⚠️': '[UYARI]',
+                    '📰': '[HABER]',
+                    '🐍': '[PYTHON]',
+                    '🤖': '[MCP]',
+                    '🧠': '[AI]',
+                    '📊': '[ISTATISTIK]',
+                    '📅': '[TARIH]',
+                    '🔄': '[DONGU]',
+                    '💻': '[BILGISAYAR]',
+                    '🚀': '[BASLATILDI]'
+                }
+                
+                safe_text = text
+                for emoji, replacement in emoji_map.items():
+                    safe_text = safe_text.replace(emoji, replacement)
+                
+                # Kalan emoji'leri ? ile değiştir  
+                import re
+                safe_text = re.sub(r'[^\x00-\x7F]+', '?', safe_text)
+                print(safe_text)
+            else:
+                print(str(text))
+        except Exception:
+            # Son çare: sadece ASCII karakterleri bırak
+            import re
+            clean_text = re.sub(r'[^\x00-\x7F]+', '?', str(text))
+            print(clean_text)
 
 def fetch_latest_ai_articles_smart():
     """Akıllı haber çekme - Ayarlara göre yöntem seçer"""
