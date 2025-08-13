@@ -637,7 +637,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewText = document.getElementById('previewText');
     const createBtn = document.getElementById('createTweetBtn');
     
-    if (tweetTextarea) {
+    if (tweetTextarea && charCount) {
         tweetTextarea.addEventListener('input', function() {
             const text = this.value;
             const length = text.length;
@@ -666,22 +666,32 @@ document.addEventListener('DOMContentLoaded', function() {
                     qualityClass = 'text-green-500';
                 }
                 
-                tweetQuality.innerHTML = `<span class="${qualityClass}">● ${quality}</span>`;
+                if (tweetQuality) {
+                    tweetQuality.innerHTML = `<span class="${qualityClass}">● ${quality}</span>`;
+                }
                 
                 // Önizlemeyi göster
-                if (length >= 10) {
+                if (length >= 10 && previewText && tweetPreview) {
                     previewText.textContent = text;
                     tweetPreview.classList.remove('hidden');
-                } else {
+                } else if (tweetPreview) {
                     tweetPreview.classList.add('hidden');
                 }
                 
                 // Butonu etkinleştir/devre dışı bırak
-                createBtn.disabled = length < 10 || length > 280;
+                if (createBtn) {
+                    createBtn.disabled = length < 10 || length > 280;
+                }
             } else {
-                tweetQuality.innerHTML = '';
-                tweetPreview.classList.add('hidden');
-                createBtn.disabled = true;
+                if (tweetQuality) {
+                    tweetQuality.innerHTML = '';
+                }
+                if (tweetPreview) {
+                    tweetPreview.classList.add('hidden');
+                }
+                if (createBtn) {
+                    createBtn.disabled = true;
+                }
             }
         });
     }
@@ -939,21 +949,33 @@ function updateManualThemePreview() {
 
 // Manuel tweet event listeners
 document.addEventListener('DOMContentLoaded', function() {
-    // Tab event listeners
-    document.getElementById('manual-tab-text').addEventListener('click', function() {
-        switchManualTab(this, document.getElementById('manual-text-content'), 'text');
-    });
+    // Tab event listeners - güvenli element kontrolü ile
+    const manualTabText = document.getElementById('manual-tab-text');
+    if (manualTabText) {
+        manualTabText.addEventListener('click', function() {
+            switchManualTab(this, document.getElementById('manual-text-content'), 'text');
+        });
+    }
 
-    document.getElementById('manual-tab-image').addEventListener('click', function() {
-        switchManualTab(this, document.getElementById('manual-image-content'), 'image');
-    });
+    const manualTabImage = document.getElementById('manual-tab-image');
+    if (manualTabImage) {
+        manualTabImage.addEventListener('click', function() {
+            switchManualTab(this, document.getElementById('manual-image-content'), 'image');
+        });
+    }
 
-    document.getElementById('manual-tab-link').addEventListener('click', function() {
-        switchManualTab(this, document.getElementById('manual-link-content'), 'link');
-    });
+    const manualTabLink = document.getElementById('manual-tab-link');
+    if (manualTabLink) {
+        manualTabLink.addEventListener('click', function() {
+            switchManualTab(this, document.getElementById('manual-link-content'), 'link');
+        });
+    }
     
     // Tema değişikliği
-    document.getElementById('manualTweetTheme').addEventListener('change', updateManualThemePreview);
+    const manualTweetTheme = document.getElementById('manualTweetTheme');
+    if (manualTweetTheme) {
+        manualTweetTheme.addEventListener('change', updateManualThemePreview);
+    }
     
     // Text area karakter sayacı
     const manualTextArea = document.getElementById('manualTweetText');
