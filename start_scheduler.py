@@ -33,8 +33,8 @@ def run_auto_check():
         
         # Ayarları kontrol et
         settings = load_automation_settings()
-        if not settings.get('auto_post_enabled', False):
-            logging.info("⏸️ Otomatik paylaşım devre dışı, atlanıyor...")
+        if not settings.get('auto_mode', False):
+            logging.info("⏸️ Otomatik mod devre dışı, atlanıyor...")
             return
         
         # Haber kontrolü yap

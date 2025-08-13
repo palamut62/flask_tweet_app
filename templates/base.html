@@ -1089,7 +1089,11 @@
                                 // Tweet'i manuel olarak işlenmiş olarak işaretle
                                 manualPostTweet(tweetId);
                                 
-                                showNotification('🚀 Twitter\'da manuel paylaşım sayfası açıldı!', 'info');
+                                // Kısa bir süre sonra sayfa yenile
+                                setTimeout(() => {
+                                    showNotification('🚀 Twitter\'da manuel paylaşım sayfası açıldı! Sayfa yenilenecek.', 'info');
+                                    setTimeout(() => window.location.reload(), 1000);
+                                }, 500);
                             } else {
                                 showNotification(`⏰ ${waitMinutes} dakika sonra tekrar deneyin.`, 'warning');
                             }

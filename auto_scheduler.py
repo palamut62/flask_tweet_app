@@ -21,7 +21,17 @@ scheduler = BlockingScheduler()
 
 # Ayarlardan okunan saat aralığı ile çalışır
 def scheduled_job():
-    safe_log('Otomatik paylaşım başlatılıyor...', "INFO")
+    safe_log('Otomatik haber kontrolü başlatılıyor...', "INFO")
+    
+    # Otomatik mod kontrolü
+    try:
+        settings = load_automation_settings()
+        if not settings.get('auto_mode', False):
+            safe_log('Otomatik mod devre dışı, atlanıyor...', "INFO")
+            return
+    except Exception as e:
+        safe_log(f'Ayar kontrolü hatası: {e}', "WARNING")
+        return
     
     # Yeni makaleleri kontrol et
     result = check_and_post_articles()

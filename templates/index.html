@@ -1410,7 +1410,11 @@ function postTweet(tweetId) {
                         // Tweet'i manuel olarak işlenmiş olarak işaretle
                         manualPostTweet(tweetId);
                         
-                        alert('🚀 Twitter\'da manuel paylaşım sayfası açıldı!');
+                        // Kısa bir süre sonra sayfa yenile - pending tweets listesi güncellensin
+                        setTimeout(() => {
+                            alert('🚀 Twitter\'da manuel paylaşım sayfası açıldı! Sayfa yenilenecek.');
+                            location.reload();
+                        }, 1000);
                     } else {
                         alert(`⏰ ${waitMinutes} dakika sonra tekrar deneyin.`);
                     }
@@ -1487,9 +1491,11 @@ function manualPostTweet(tweetId) {
                 }, 300);
             }
             
-            // Kullanıcıya bilgi ver
+            // Kullanıcıya bilgi ver ve sayfayı yenile
             setTimeout(() => {
                 alert('Tweet manuel olarak paylaşıldı ve kaydedildi!');
+                // Sayfa yenile - pending tweets listesi güncellensin
+                location.reload();
             }, 500);
         } else {
             // Hata durumunda UI'ı geri yükle

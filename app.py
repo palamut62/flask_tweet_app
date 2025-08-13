@@ -681,9 +681,9 @@ def check_and_post_articles():
                     if ai_failures >= 3:
                         terminal_log(f"🚫 AI API'lar sürekli başarısız oluyor ({ai_failures} başarısızlık). Sistem durduruluyor.", "warning")
                         
-                        # Otomatik sistemi durdur
+                        # Otomatik paylaşımı durdur ama auto_mode'u koruma (sadece haber kontrolü için)
                         settings['auto_post_enabled'] = False
-                        settings['auto_mode'] = False
+                        # settings['auto_mode'] = False  # Bunu kapatmayalım ki haber kontrolü devam etsin
                         save_automation_settings(settings)
                         
                         return {"success": False, "message": f"AI API'lar sürekli başarısız olduğu için sistem durdu. API kotalarınızı kontrol edin.", "posted_count": posted_count, "pending_count": pending_count}
@@ -739,9 +739,9 @@ def check_and_post_articles():
                             wait_minutes = tweet_result.get('wait_minutes', 15)
                             terminal_log(f"🚫 Rate limit nedeniyle otomatik sistem durduruluyor. {wait_minutes} dakika bekleyin.", "warning")
                             
-                            # Otomatik sistemi durdur
+                            # Otomatik paylaşımı durdur ama auto_mode'u koruma (sadece haber kontrolü için)
                             settings['auto_post_enabled'] = False
-                            settings['auto_mode'] = False
+                            # settings['auto_mode'] = False  # Bunu kapatmayalım ki haber kontrolü devam etsin
                             save_automation_settings(settings)
                             
                             # Bu makaleyi de pending'e ekle ve döngüyü kır
@@ -3193,7 +3193,7 @@ def background_scheduler():
             # Ayarları kontrol et
             settings = load_automation_settings()
             
-            if settings.get('auto_post_enabled', False):
+            if settings.get('auto_mode', False):
                 current_time = datetime.now()
                 check_interval_hours = settings.get('check_interval_hours', 3)
                 
