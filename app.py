@@ -3240,8 +3240,6 @@ def background_scheduler():
                         result = check_and_post_articles()
                         terminal_log(f"✅ Otomatik kontrol tamamlandı: {result.get('message', 'Sonuç yok')}", "success")
                         
-
-                        
                         last_check_time = current_time
                     except Exception as check_error:
                         terminal_log(f"❌ Otomatik kontrol hatası: {check_error}", "error")
@@ -3265,10 +3263,24 @@ def start_background_scheduler():
     global background_scheduler_running
     
     if not background_scheduler_running:
-        scheduler_thread = threading.Thread(target=background_scheduler, daemon=True)
-        scheduler_thread.start()
-        terminal_log("🚀 Arka plan zamanlayıcısı başlatıldı (Her 3 saatte bir çalışacak)", "success")
-        terminal_log("🔄 Arka plan zamanlayıcı thread'i başlatıldı", "info")
+        try:
+            scheduler_thread = threading.Thread(target=background_scheduler, daemon=True)
+            scheduler_thread.start()
+            terminal_log("🚀 Arka plan zamanlayıcısı başlatıldı (Her 30 dakikada kontrol eder)", "success")
+            terminal_log("🔄 Arka plan zamanlayıcı thread'i başlatıldı", "info")
+            
+            # Thread'in gerçekten başladığını kontrol et
+            import time
+            time.sleep(1)  # Kısa bekle
+            if scheduler_thread.is_alive():
+                terminal_log("✅ Arka plan zamanlayıcısı aktif olarak çalışıyor", "success")
+            else:
+                terminal_log("❌ Arka plan zamanlayıcısı başlatılamadı!", "error")
+                
+        except Exception as e:
+            terminal_log(f"❌ Arka plan zamanlayıcı başlatma hatası: {e}", "error")
+    else:
+        terminal_log("⚠️ Arka plan zamanlayıcısı zaten çalışıyor", "warning")
 
 # ==========================================
 # ÖZEL HABER KAYNAKLARI ROUTE'LARI
@@ -4798,6 +4810,77 @@ def session_info():
             session_data['remaining_hours'] = 'Hata'
     
     return jsonify(session_data)
+
+@app.route('/automation_debug')
+@login_required
+def automation_debug():
+    """Otomatik sistem debug bilgileri"""
+    global background_scheduler_running, last_check_time
+    
+    settings = load_automation_settings()
+    current_time = datetime.now()
+    
+    debug_info = {
+        'current_time': current_time.isoformat(),
+        'background_scheduler_running': background_scheduler_running,
+        'last_check_time': last_check_time.isoformat() if last_check_time else None,
+        'settings': settings,
+        'auto_mode': settings.get('auto_mode', False),
+        'check_interval_hours': settings.get('check_interval_hours', 3)
+    }
+    
+    # Sonraki kontrol zamanını hesapla
+    if last_check_time:
+        next_check = last_check_time + timedelta(hours=settings.get('check_interval_hours', 3))
+        remaining_seconds = (next_check - current_time).total_seconds()
+        debug_info['next_check_time'] = next_check.isoformat()
+        debug_info['remaining_hours'] = remaining_seconds / 3600
+        debug_info['should_run_now'] = remaining_seconds <= 0
+    else:
+        debug_info['next_check_time'] = 'İlk çalışma - hemen çalışmalı'
+        debug_info['remaining_hours'] = 0
+        debug_info['should_run_now'] = True
+    
+    return jsonify(debug_info)
+
+@app.route('/force_automation_run', methods=['POST'])
+@login_required
+def force_automation_run():
+    """Otomatik sistemi manuel olarak çalıştır (test için)"""
+    global last_check_time
+    
+    try:
+        settings = load_automation_settings()
+        
+        if not settings.get('auto_mode', False):
+            return jsonify({
+                'success': False, 
+                'message': 'Otomatik mod kapalı. Önce ayarlardan açın.'
+            })
+        
+        terminal_log("🔄 Manuel otomatik kontrol başlatılıyor...", "info")
+        
+        # Otomatik sistemi çalıştır
+        result = check_and_post_articles()
+        
+        # Last check time'ı güncelle
+        last_check_time = datetime.now()
+        
+        terminal_log(f"✅ Manuel otomatik kontrol tamamlandı: {result.get('message', 'Sonuç yok')}", "success")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Otomatik kontrol başarıyla çalıştırıldı',
+            'result': result,
+            'last_check_time': last_check_time.isoformat()
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Manuel otomatik kontrol hatası: {e}", "error")
+        return jsonify({
+            'success': False,
+            'message': f'Hata oluştu: {str(e)}'
+        })
 
 @app.route('/test_openrouter_api')
 @login_required
