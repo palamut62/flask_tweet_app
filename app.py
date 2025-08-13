@@ -639,6 +639,32 @@ def check_and_post_articles():
         
         for article in articles[:max_articles]:
             try:
+                # Önce makale içeriğinin kaliteli olup olmadığını kontrol et
+                from utils import is_article_content_valid
+                is_valid, reason = is_article_content_valid(article)
+                if not is_valid:
+                    terminal_log(f"❌ Kalitesiz makale atlandı: {article['title'][:50]}... - Sebep: {reason}", "warning")
+                    
+                    # Kalitesiz makaleleri ayrı dosyaya kaydet
+                    try:
+                        rejected_articles = load_json("rejected_articles.json", [])
+                        rejected_article = {
+                            "title": article.get('title', ''),
+                            "url": article.get('url', ''),
+                            "reason": reason,
+                            "rejected_at": datetime.now().isoformat(),
+                            "content_preview": article.get('content', '')[:200] + "..." if article.get('content') else ""
+                        }
+                        rejected_articles.append(rejected_article)
+                        # Son 100 rejected makaleyi tut
+                        if len(rejected_articles) > 100:
+                            rejected_articles = rejected_articles[-100:]
+                        save_json("rejected_articles.json", rejected_articles)
+                    except Exception as save_error:
+                        terminal_log(f"⚠️ Rejected article kaydetme hatası: {save_error}", "warning")
+                    
+                    continue
+                
                 # Makale zaten işlenmiş mi kontrol et
                 article_url = article.get('url', '')
                 article_hash = article.get('hash', '')
@@ -2565,13 +2591,20 @@ def create_tweet():
                     flash('URL\'den içerik çekilemedi! Lütfen geçerli bir URL girin.', 'error')
                     return redirect(url_for('create_tweet'))
                 
-                # AI ile tweet oluştur
+                # İçerik kalitesini kontrol et
                 article_data = {
                     'title': url_content.get('title', ''),
                     'content': url_content.get('content', ''),
                     'url': url_content.get('url', ''),
                     'lang': 'en'
                 }
+                
+                from utils import is_article_content_valid
+                is_valid, reason = is_article_content_valid(article_data)
+                if not is_valid:
+                    flash(f'İçerik kalitesiz: {reason}. Lütfen daha kaliteli bir URL deneyin.', 'error')
+                    terminal_log(f"❌ Manuel URL kalitesiz: {reason} - {tweet_url}", "warning")
+                    return redirect(url_for('create_tweet'))
                 tweet_data = generate_ai_tweet_with_content(article_data, api_key, selected_theme)
                 final_tweet_text = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
                 
@@ -4624,6 +4657,68 @@ def deleted_tweets():
                              deleted_articles=[],
                              stats={},
                              error=str(e))
+
+@app.route('/rejected_articles')
+@login_required
+def rejected_articles():
+    """Reddedilen/kalitesiz makaleleri görüntüle"""
+    try:
+        rejected_articles = load_json("rejected_articles.json", [])
+        
+        # Reddedilen makaleleri tarihe göre sırala (en yeni önce)
+        for article in rejected_articles:
+            if 'rejected_at' in article:
+                try:
+                    # Tarihi parse edip formatla
+                    from datetime import datetime
+                    rejected_date = datetime.fromisoformat(article['rejected_at'].replace('Z', '+00:00'))
+                    article['rejected_at_formatted'] = rejected_date.strftime('%d.%m.%Y %H:%M')
+                except:
+                    article['rejected_at_formatted'] = article.get('rejected_at', 'Bilinmiyor')
+            else:
+                article['rejected_at_formatted'] = 'Bilinmiyor'
+        
+        # En yeni reddedilen makaleler önce gelsin
+        rejected_articles.sort(key=lambda x: x.get('rejected_at', ''), reverse=True)
+        
+        # İstatistikler
+        stats = {
+            'total_rejected': len(rejected_articles),
+            'rejected_today': 0,
+            'rejected_this_week': 0,
+            'common_reasons': {}
+        }
+        
+        # Tarih bazlı ve sebep bazlı istatistikler
+        from datetime import datetime, timedelta
+        today = datetime.now().date()
+        week_ago = today - timedelta(days=7)
+        
+        for article in rejected_articles:
+            # Tarih istatistikleri
+            rejected_date_str = article.get('rejected_at', '')
+            if rejected_date_str:
+                try:
+                    rejected_date = datetime.fromisoformat(rejected_date_str.replace('Z', '+00:00')).date()
+                    if rejected_date == today:
+                        stats['rejected_today'] += 1
+                    if rejected_date >= week_ago:
+                        stats['rejected_this_week'] += 1
+                except:
+                    pass
+            
+            # Sebep istatistikleri
+            reason = article.get('reason', 'Bilinmeyen sebep')
+            stats['common_reasons'][reason] = stats['common_reasons'].get(reason, 0) + 1
+        
+        return render_template('rejected_articles.html', 
+                             rejected_articles=rejected_articles,
+                             stats=stats)
+    except Exception as e:
+        terminal_log(f"❌ Reddedilen makaleler sayfa hatası: {e}", "error")
+        return render_template('rejected_articles.html', 
+                             rejected_articles=[],
+                             stats={})
 
 @app.route('/restore_deleted_tweet', methods=['POST'])
 @login_required

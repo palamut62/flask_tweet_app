@@ -683,7 +683,7 @@
                     
                     <!-- Analiz Dropdown -->
                     <div class="relative dropdown-container">
-                        <button class="nav-item-minimal dropdown-trigger {% if request.endpoint in ['statistics', 'deleted_tweets'] %}nav-item-active-minimal{% endif %}">
+                        <button class="nav-item-minimal dropdown-trigger {% if request.endpoint in ['statistics', 'deleted_tweets', 'rejected_articles'] %}nav-item-active-minimal{% endif %}">
                             <i class="fas fa-chart-bar text-lg"></i>
                             <span class="text-xs">Analiz</span>
                             <i class="fas fa-chevron-down text-xs ml-1 transition-transform duration-200"></i>
@@ -696,6 +696,10 @@
                             <a href="{{ url_for('deleted_tweets') }}" class="dropdown-item-minimal {% if request.endpoint == 'deleted_tweets' %}bg-red-50 text-red-700{% endif %}">
                                 <i class="fas fa-trash text-sm"></i>
                                 <span>Silinmiş Tweetler</span>
+                            </a>
+                            <a href="{{ url_for('rejected_articles') }}" class="dropdown-item-minimal {% if request.endpoint == 'rejected_articles' %}bg-red-50 text-red-700{% endif %}">
+                                <i class="fas fa-ban text-sm"></i>
+                                <span>Reddedilen Makaleler</span>
                             </a>
                             <a href="{{ url_for('session_info') }}" class="dropdown-item-minimal" target="_blank">
                                 <i class="fas fa-info-circle text-sm"></i>
@@ -836,6 +840,12 @@
                             <i class="fas fa-trash text-sm"></i>
                         </div>
                         <span>Silinmiş Tweetler</span>
+                    </a>
+                    <a href="{{ url_for('rejected_articles') }}" class="mobile-nav-link {% if request.endpoint == 'rejected_articles' %}bg-red-50 text-red-700{% endif %}">
+                        <div class="w-8 h-8 bg-red-100 text-red-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-ban text-sm"></i>
+                        </div>
+                        <span>Reddedilen Makaleler</span>
                     </a>
 
                     <a href="{{ url_for('session_info') }}" class="mobile-nav-link" target="_blank">

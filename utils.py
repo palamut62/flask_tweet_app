@@ -8671,6 +8671,88 @@ def get_ai_keywords_stats():
         terminal_log(f"❌ AI keywords stats hatası: {e}", "error")
         return {}
 
+def is_article_content_valid(article_data):
+    """Makale içeriğinin kaliteli olup olmadığını kontrol et"""
+    try:
+        title = article_data.get('title', '').strip()
+        content = article_data.get('content', '').strip()
+        
+        # Başlık kontrolleri
+        if not title or len(title) < 10:
+            return False, "Başlık çok kısa veya yok"
+        
+        # İçerik kontrolleri
+        if not content or len(content) < 50:
+            return False, "İçerik çok kısa veya yok"
+        
+        # Anlamsız başlık kontrolleri
+        invalid_title_patterns = [
+            "major ai development",
+            "ai breakthrough",
+            "breaking news",
+            "ai company announces",
+            "significant advancement",
+            "generic ai news",
+            "ai industry update",
+            "latest ai news",
+            "ai development news",
+            "new ai announcement"
+        ]
+        
+        title_lower = title.lower()
+        for pattern in invalid_title_patterns:
+            if pattern in title_lower and len(title) < 80:
+                return False, f"Genel/belirsiz başlık tespit edildi: {pattern}"
+        
+        # Anlamsız içerik kontrolleri  
+        invalid_content_patterns = [
+            "no company",
+            "no specific company",
+            "unspecified company",
+            "content not accessible",
+            "unable to access content",
+            "failed to retrieve",
+            "content unavailable",
+            "error accessing",
+            "scraping failed",
+            "no content found",
+            "access denied",
+            "page not found",
+            "404 error",
+            "server error",
+            "timeout error",
+            "connection failed"
+        ]
+        
+        content_lower = content.lower()
+        for pattern in invalid_content_patterns:
+            if pattern in content_lower:
+                return False, f"Erişim/içerik hatası tespit edildi: {pattern}"
+        
+        # Çok kısa cümleler (genellikle hatalı scraping)
+        sentences = content.split('.')
+        meaningful_sentences = [s.strip() for s in sentences if len(s.strip()) > 20]
+        if len(meaningful_sentences) < 2:
+            return False, "Yeterli anlamlı cümle yok"
+        
+        # Tekrarlayan kelimeler (spam kontrol)
+        words = content_lower.split()
+        if len(words) > 10:
+            word_freq = {}
+            for word in words:
+                if len(word) > 4:  # Uzun kelimeleri say
+                    word_freq[word] = word_freq.get(word, 0) + 1
+            
+            # En sık kullanılan kelime %30'dan fazla geçiyorsa spam olabilir
+            max_freq = max(word_freq.values()) if word_freq else 0
+            if max_freq > len(words) * 0.3:
+                return False, "Tekrarlayan içerik tespit edildi (spam olabilir)"
+        
+        return True, "İçerik kaliteli"
+        
+    except Exception as e:
+        return False, f"İçerik kontrol hatası: {e}"
+
 def analyze_tweet_quality(tweet_text, article_title="", api_key=None):
     """AI ile tweet kalitesini analiz et"""
     try:
@@ -8751,7 +8833,7 @@ def analyze_tweet_quality(tweet_text, article_title="", api_key=None):
         elif quality_score <= 5:
             warnings.append("AI analizi: Tweet kalitesi orta düzeyde")
         
-        # Anlamsız içerik tespiti
+        # Anlamsız içerik tespiti - genişletilmiş liste
         meaningless_patterns = [
             "no tweet possible",
             "tweet oluşturulamaz", 
@@ -8759,7 +8841,28 @@ def analyze_tweet_quality(tweet_text, article_title="", api_key=None):
             "anlamsız",
             "hata",
             "geçersiz",
-            "tweet yapılamaz"
+            "tweet yapılamaz",
+            "major ai development",
+            "no company",
+            "no specific company",
+            "content not accessible",
+            "unable to access",
+            "error accessing",
+            "failed to retrieve",
+            "content unavailable",
+            "no content found",
+            "generic ai news",
+            "general ai announcement",
+            "ai breakthrough announced",
+            "major development in ai",
+            "significant ai advancement",
+            "ai company announces",
+            "breaking news in ai",
+            "ai industry update",
+            "unspecified ai company",
+            "unnamed ai firm",
+            "various ai companies",
+            "multiple ai companies"
         ]
         
         for pattern in meaningless_patterns:
