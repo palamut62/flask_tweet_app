@@ -614,10 +614,11 @@ def check_and_post_articles():
         
         # Ayarları yükle
         settings = load_automation_settings()
-        api_key = os.environ.get('GOOGLE_API_KEY')
-        
-        if not api_key:
-            return {"success": False, "message": "Google API anahtarı bulunamadı"}
+        # AI API anahtarı opsiyonel olmalı: Google yoksa OpenRouter'a, o da yoksa yerel fallback'e düş
+        api_key = os.environ.get('GOOGLE_API_KEY') or os.environ.get('OPENROUTER_API_KEY') or ""
+        if not os.environ.get('GOOGLE_API_KEY') and not os.environ.get('OPENROUTER_API_KEY'):
+            # Uyarı ver, fakat işlemi durdurma (yerel fallback tweet üretimi mevcut)
+            terminal_log("⚠️ Hiçbir AI API anahtarı bulunamadı – fallback tweet oluşturma kullanılacak", "warning")
         
         # Yeni makaleleri çek (akıllı sistem ile)
         from utils import fetch_latest_ai_articles_smart
@@ -5605,3 +5606,18 @@ if __name__ == '__main__':
     
     terminal_log(f"Flask uygulaması başlatılıyor - Port: {port}, Debug: {debug}", "info")
     app.run(host='0.0.0.0', port=port, debug=debug)
+
+# WSGI altında (ör. PythonAnywhere) ilk istek geldiğinde zamanlayıcıyı başlat (opsiyonel)
+try:
+    @app.before_first_request
+    def _ensure_background_scheduler_started():
+        """WSGI ortamında ilk istekte arka plan zamanlayıcısını başlat.
+        ENABLE_BACKGROUND_SCHEDULER=false ise devre dışı bırakılır."""
+        enable = os.environ.get('ENABLE_BACKGROUND_SCHEDULER', 'true').lower() == 'true'
+        if enable:
+            start_background_scheduler()
+        else:
+            terminal_log("⏸️ ENABLE_BACKGROUND_SCHEDULER=false – arka plan zamanlayıcısı başlatılmadı", "info")
+except Exception:
+    # Eski Flask sürümlerinde before_first_request bulunamazsa sessizce geç
+    pass

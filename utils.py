@@ -706,6 +706,11 @@ def openrouter_call(prompt, api_key, max_tokens=100, model="openrouter/horizon-b
 def gemini_call(prompt, api_key, max_tokens=100):
     """Google Gemini API çağrısı - OpenRouter yedek sistemi ile"""
     if not api_key:
+        # Google anahtarı yoksa, OpenRouter varsa direkt ona düş
+        openrouter_key = os.environ.get('OPENROUTER_API_KEY')
+        if openrouter_key:
+            safe_log("[FALLBACK] Google API anahtarı yok, OpenRouter kullanılacak", "INFO")
+            return try_openrouter_fallback(prompt, max_tokens)
         safe_log("Gemini API anahtarı bulunamadı", "WARNING")
         return "API anahtarı eksik"
     
@@ -1217,8 +1222,9 @@ General Requirements:
 Tweet text:"""
         
         tweet_text = gemini_call(tweet_prompt, api_key, max_tokens=80)
-        
-        if tweet_text == "API hatası" or not tweet_text.strip():
+
+        # API yok/hata veya anlamsız kısa çıktı durumunda fallback
+        if (not tweet_text) or (len(tweet_text.strip()) < 20) or ("api" in tweet_text.lower()):
             # İyileştirilmiş fallback tweet metni - tema göre
             if analysis['companies'] and analysis['innovation']:
                 company = analysis['companies'][0]
@@ -1476,6 +1482,10 @@ Examples of good style:
 Tweet text (max {MAX_CONTENT_LENGTH} chars):"""
 
     try:
+        # Eğer hem Google hem OpenRouter anahtarı yoksa, doğrudan basit fallback kullan
+        if not os.environ.get('GOOGLE_API_KEY') and not os.environ.get('OPENROUTER_API_KEY'):
+            return create_fallback_tweet(title, content, url)
+
         tweet_text = gemini_call(prompt, api_key, max_tokens=150)
         
         if tweet_text and len(tweet_text.strip()) > 10:
