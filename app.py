@@ -5618,11 +5618,12 @@ def create_tweet_homepage():
 @app.route('/api/convert_rejected_to_tweet', methods=['POST'])
 @login_required
 def convert_rejected_to_tweet():
-    """Reddedilen makaleyi tweet'e dönüştür"""
+    """Reddedilen makaleyi tweet'e dönüştür - Önizleme modu"""
     try:
         data = request.get_json()
         article_url = data.get('article_url')
         article_title = data.get('article_title')
+        confirm = data.get('confirm', False)  # Onay parametresi
         
         if not article_url:
             return jsonify({"success": False, "error": "Makale URL'si gerekli"})
@@ -5653,18 +5654,42 @@ def convert_rejected_to_tweet():
                 'source_type': 'news'
             }
             
+            # API key'i al
+            api_key = os.environ.get('GOOGLE_API_KEY')
+            if not api_key:
+                api_key = os.environ.get('OPENROUTER_API_KEY')
+            
+            if not api_key:
+                return jsonify({"success": False, "error": "API anahtarı bulunamadı. Google API Key veya OpenRouter API Key gerekli."})
+            
             # Tweet oluştur
-            tweet_result = generate_ai_tweet_with_content(article_data)
+            tweet_result = generate_ai_tweet_with_content(article_data, api_key)
             
             if tweet_result and tweet_result.get('success'):
-                # Pending tweets'e ekle
+                tweet_text = tweet_result.get('tweet_text', '') or tweet_result.get('tweet', '')
+                
+                # Eğer confirm=False ise sadece önizleme döndür
+                if not confirm:
+                    return jsonify({
+                        "success": True, 
+                        "preview": True,
+                        "tweet_text": tweet_text,
+                        "article_title": article_data['title'],
+                        "article_url": article_data['url'],
+                        "quality_score": tweet_result.get('quality_score', 7),
+                        "impact_score": tweet_result.get('impact_score', 6),
+                        "character_count": len(tweet_text),
+                        "message": "Tweet önizlemesi oluşturuldu"
+                    })
+                
+                # Onay verilmişse pending tweets'e ekle
                 pending_tweets = load_json("pending_tweets.json", [])
                 
                 new_tweet = {
                     'id': len(pending_tweets) + 1,
                     'title': article_data['title'],
                     'url': article_data['url'],
-                    'content': tweet_result.get('tweet_text', ''),
+                    'content': tweet_text,
                     'source': 'Recovered from Rejected',
                     'source_type': 'news',
                     'created_at': datetime.now().isoformat(),
@@ -5684,7 +5709,8 @@ def convert_rejected_to_tweet():
                 
                 return jsonify({
                     "success": True, 
-                    "message": "Makale başarıyla tweet'e dönüştürüldü",
+                    "confirmed": True,
+                    "message": "Tweet başarıyla oluşturuldu ve bekleyen listesine eklendi",
                     "tweet_id": new_tweet['id']
                 })
             else:
