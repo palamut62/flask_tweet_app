@@ -303,6 +303,87 @@
 
 
         <!-- Ana İçerik - Tweet'ler -->
+        
+        <!-- Reddedilen Makaleler -->
+        {% if rejected_articles %}
+        <div class="card-modern">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-ban text-white"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">Reddedilen Makaleler</h3>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
+                            {{ rejected_articles|length }} makale
+                        </span>
+                        <a href="{{ url_for('rejected_articles') }}" class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">
+                            Tümünü Gör
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    {% for article in rejected_articles %}
+                    <div class="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl p-4 hover:shadow-lg transition-all duration-300" 
+                         data-article-url="{{ article.url }}" 
+                         data-article-title="{{ article.title }}">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-base font-medium text-gray-900 line-clamp-2 mb-2">{{ article.title or 'Başlık bulunamadı' }}</h4>
+                                
+                                <!-- Reddetme sebebi -->
+                                <div class="flex items-center space-x-2 text-red-600 text-sm mb-3">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span class="font-medium">Sebep:</span>
+                                    <span>{{ article.reason or 'Belirtilmemiş' }}</span>
+                                </div>
+                                
+                                <!-- İçerik önizlemesi -->
+                                {% if article.content_preview %}
+                                <div class="bg-white/80 backdrop-blur-sm rounded-lg p-3 mb-3 border border-gray-200">
+                                    <p class="text-gray-700 text-sm leading-relaxed">{{ article.content_preview }}</p>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Tarih bilgisi -->
+                                <div class="flex items-center space-x-2 text-gray-500 text-xs">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Reddedilme: {{ article.rejected_at_formatted if article.rejected_at_formatted else 'Bilinmiyor' }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col space-y-2 ml-4 flex-shrink-0">
+                                <button onclick="convertRejectedToTweet('{{ article.url }}', '{{ article.title|replace("'", "\\'") }}')" 
+                                        class="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 text-sm font-medium flex items-center space-x-1">
+                                    <i class="fas fa-recycle text-xs"></i>
+                                    <span>Tweet Yap</span>
+                                </button>
+                                
+                                {% if article.url %}
+                                <a href="{{ article.url }}" target="_blank" 
+                                   class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm font-medium flex items-center space-x-1">
+                                    <i class="fas fa-external-link-alt text-xs"></i>
+                                    <span>Oku</span>
+                                </a>
+                                {% endif %}
+                                
+                                <button onclick="removeFromRejected('{{ article.url }}')" 
+                                        class="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all duration-200 text-sm font-medium flex items-center space-x-1">
+                                    <i class="fas fa-trash text-xs"></i>
+                                    <span>Kaldır</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
         <!-- Bekleyen Tweet'ler -->
         {% if pending_tweets %}
         <div class="card-modern">
@@ -1974,6 +2055,154 @@ function showKeyboardShortcuts() {
           `Ctrl+A: Tüm tweet'leri seç\n` +
           `Esc: Seçimi temizle\n\n` +
           `💡 İpucu: Bu kısayollar sayfa üzerinde her zaman aktiftir.`);
+}
+
+// Reddedilen makaleyi tweet'e dönüştür
+function convertRejectedToTweet(articleUrl, articleTitle) {
+    if (!articleUrl) {
+        alert('❌ Makale URL\'si bulunamadı!');
+        return;
+    }
+    
+    if (confirm(`"${articleTitle}" başlıklı makaleyi tweet olarak oluşturmak istediğinizden emin misiniz?`)) {
+        const button = event.target.closest('button');
+        const originalContent = button.innerHTML;
+        
+        // Loading state
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Oluşturuluyor...</span>';
+        button.disabled = true;
+        
+        fetch('/api/convert_rejected_to_tweet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                article_url: articleUrl,
+                article_title: articleTitle
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`✅ Tweet başarıyla oluşturuldu! Bekleyen tweet'ler listesinde görünecek.`);
+                
+                // Makaleyi reddedilen listesinden kaldır
+                const articleElement = button.closest('[data-article-url]');
+                if (articleElement) {
+                    articleElement.style.transition = 'all 0.3s ease';
+                    articleElement.style.transform = 'translateX(-100%)';
+                    articleElement.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        articleElement.remove();
+                        
+                        // Reddedilen makale sayısını güncelle
+                        const countBadge = document.querySelector('.bg-red-100.text-red-800');
+                        if (countBadge) {
+                            const currentCount = parseInt(countBadge.textContent.match(/\\d+/)[0]);
+                            const newCount = Math.max(0, currentCount - 1);
+                            countBadge.textContent = `${newCount} makale`;
+                            
+                            // Eğer hiç makale kalmadıysa bölümü gizle
+                            if (newCount === 0) {
+                                const rejectedSection = document.querySelector('.card-modern');
+                                if (rejectedSection && rejectedSection.querySelector('.fas.fa-ban')) {
+                                    rejectedSection.style.display = 'none';
+                                }
+                            }
+                        }
+                    }, 300);
+                }
+                
+                // 2 saniye sonra sayfayı yenile (yeni tweet'i göstermek için)
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                alert(`❌ Hata: ${data.error}`);
+                button.innerHTML = originalContent;
+                button.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Convert rejected to tweet error:', error);
+            alert('❌ Tweet oluşturulurken hata oluştu!');
+            button.innerHTML = originalContent;
+            button.disabled = false;
+        });
+    }
+}
+
+// Makaleyi reddedilen listesinden kaldır
+function removeFromRejected(articleUrl) {
+    if (!articleUrl) {
+        alert('❌ Makale URL\'si bulunamadı!');
+        return;
+    }
+    
+    if (confirm('Bu makaleyi reddedilen listesinden kalıcı olarak kaldırmak istediğinizden emin misiniz?')) {
+        const button = event.target.closest('button');
+        const originalContent = button.innerHTML;
+        
+        // Loading state
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        button.disabled = true;
+        
+        fetch('/api/remove_from_rejected', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                article_url: articleUrl
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Makaleyi UI'dan kaldır
+                const articleElement = button.closest('[data-article-url]');
+                if (articleElement) {
+                    articleElement.style.transition = 'all 0.3s ease';
+                    articleElement.style.transform = 'translateX(-100%)';
+                    articleElement.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        articleElement.remove();
+                        
+                        // Reddedilen makale sayısını güncelle
+                        const countBadge = document.querySelector('.bg-red-100.text-red-800');
+                        if (countBadge) {
+                            const currentCount = parseInt(countBadge.textContent.match(/\\d+/)[0]);
+                            const newCount = Math.max(0, currentCount - 1);
+                            countBadge.textContent = `${newCount} makale`;
+                            
+                            // Eğer hiç makale kalmadıysa bölümü gizle
+                            if (newCount === 0) {
+                                const rejectedSection = document.querySelector('.card-modern');
+                                if (rejectedSection && rejectedSection.querySelector('.fas.fa-ban')) {
+                                    rejectedSection.style.display = 'none';
+                                }
+                            }
+                        }
+                    }, 300);
+                }
+                
+                alert('✅ Makale reddedilen listesinden kaldırıldı!');
+            } else {
+                alert(`❌ Hata: ${data.error}`);
+                button.innerHTML = originalContent;
+                button.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Remove from rejected error:', error);
+            alert('❌ Makale kaldırılırken hata oluştu!');
+            button.innerHTML = originalContent;
+            button.disabled = false;
+        });
+    }
 }
 </script>
 

@@ -343,6 +343,19 @@ def index():
         # Temel verileri yükle - performans için limit kullan
         all_articles = load_json("posted_articles.json", limit=100)  # Son 100 makale
         pending_tweets = load_json("pending_tweets.json", limit=50)  # Son 50 pending tweet
+        rejected_articles = load_json("rejected_articles.json", [])  # Reddedilen makaleler
+        
+        # Reddedilen makalelerin tarih formatını düzelt
+        for article in rejected_articles:
+            if 'rejected_at' in article:
+                try:
+                    from datetime import datetime
+                    rejected_date = datetime.fromisoformat(article['rejected_at'].replace('Z', '+00:00'))
+                    article['rejected_at_formatted'] = rejected_date.strftime('%d.%m.%Y %H:%M')
+                except:
+                    article['rejected_at_formatted'] = article.get('rejected_at', 'Bilinmiyor')
+            else:
+                article['rejected_at_formatted'] = 'Bilinmiyor'
         
         # Aktif makaleleri filtrele
         articles = [article for article in all_articles if not article.get('deleted', False)]
@@ -404,6 +417,7 @@ def index():
         return render_template('index.html', 
                              articles=articles[-5:],  # Daha az makale göster
                              pending_tweets=pending_tweets[:20],  # Maksimum 20 pending tweet
+                             rejected_articles=rejected_articles[:10],  # Son 10 reddedilen makale
                              stats=stats,
                              automation_status=automation_status,
                              api_check=api_check,
@@ -416,6 +430,7 @@ def index():
         return render_template('index.html', 
                              articles=[],
                              pending_tweets=[],
+                             rejected_articles=[],
                              stats={},
                              automation_status={},
                              api_check={},
@@ -738,7 +753,10 @@ def check_and_post_articles():
                     continue
                 
                 # Otomatik paylaşım kontrolü
-                if auto_post and not settings.get('manual_approval_required', True):
+                manual_approval = settings.get('manual_approval_required', False)
+                terminal_log(f"🔍 Otomatik paylaşım ayarları - auto_post: {auto_post}, manual_approval: {manual_approval}", "info")
+                
+                if auto_post and not manual_approval:
                     # Direkt paylaş
                     tweet_result = post_tweet(tweet_data['tweet'], article['title'])
                     
@@ -842,6 +860,7 @@ def check_and_post_articles():
                             terminal_log(f"🔄 Duplikat tweet pending listesine eklenmedi", "info")
                 else:
                     # Manuel onay gerekli - pending listesine ekle
+                    terminal_log(f"📝 Manuel onay gerekli veya auto_post devre dışı - pending listesine ekleniyor", "info")
                     pending_tweets = load_json("pending_tweets.json")
                     
                     # Duplikat kontrolü yap
@@ -5595,6 +5614,125 @@ def create_tweet_homepage():
     except Exception as e:
         terminal_log(f"❌ Ana sayfa tweet oluşturma hatası: {e}", "error")
         return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/convert_rejected_to_tweet', methods=['POST'])
+@login_required
+def convert_rejected_to_tweet():
+    """Reddedilen makaleyi tweet'e dönüştür"""
+    try:
+        data = request.get_json()
+        article_url = data.get('article_url')
+        article_title = data.get('article_title')
+        
+        if not article_url:
+            return jsonify({"success": False, "error": "Makale URL'si gerekli"})
+        
+        # Reddedilen makaleleri yükle
+        rejected_articles = load_json("rejected_articles.json", [])
+        
+        # İlgili makaleyi bul
+        target_article = None
+        for article in rejected_articles:
+            if article.get('url') == article_url:
+                target_article = article
+                break
+        
+        if not target_article:
+            return jsonify({"success": False, "error": "Makale bulunamadı"})
+        
+        # Makale içeriğini yeniden çek ve tweet oluştur
+        try:
+            from utils import fetch_latest_ai_articles, generate_ai_tweet_with_content
+            
+            # Makale bilgilerini hazırla
+            article_data = {
+                'title': target_article.get('title', ''),
+                'url': target_article.get('url', ''),
+                'content': target_article.get('content_preview', ''),
+                'source': 'Rejected Article Recovery',
+                'source_type': 'news'
+            }
+            
+            # Tweet oluştur
+            tweet_result = generate_ai_tweet_with_content(article_data)
+            
+            if tweet_result and tweet_result.get('success'):
+                # Pending tweets'e ekle
+                pending_tweets = load_json("pending_tweets.json", [])
+                
+                new_tweet = {
+                    'id': len(pending_tweets) + 1,
+                    'title': article_data['title'],
+                    'url': article_data['url'],
+                    'content': tweet_result.get('tweet_text', ''),
+                    'source': 'Recovered from Rejected',
+                    'source_type': 'news',
+                    'created_at': datetime.now().isoformat(),
+                    'tweet_data': tweet_result,
+                    'article': article_data,
+                    'recovered_from_rejected': True
+                }
+                
+                pending_tweets.append(new_tweet)
+                save_json("pending_tweets.json", pending_tweets)
+                
+                # Makaleyi reddedilen listesinden kaldır
+                rejected_articles = [a for a in rejected_articles if a.get('url') != article_url]
+                save_json("rejected_articles.json", rejected_articles)
+                
+                terminal_log(f"✅ Reddedilen makale tweet'e dönüştürüldü: {article_data['title'][:50]}...", "success")
+                
+                return jsonify({
+                    "success": True, 
+                    "message": "Makale başarıyla tweet'e dönüştürüldü",
+                    "tweet_id": new_tweet['id']
+                })
+            else:
+                return jsonify({"success": False, "error": "Tweet oluşturulamadı"})
+                
+        except Exception as e:
+            terminal_log(f"❌ Tweet oluşturma hatası: {e}", "error")
+            return jsonify({"success": False, "error": f"Tweet oluşturma hatası: {str(e)}"})
+    
+    except Exception as e:
+        terminal_log(f"❌ Reddedilen makale dönüştürme hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/remove_from_rejected', methods=['POST'])
+@login_required
+def remove_from_rejected():
+    """Makaleyi reddedilen listesinden kaldır"""
+    try:
+        data = request.get_json()
+        article_url = data.get('article_url')
+        
+        if not article_url:
+            return jsonify({"success": False, "error": "Makale URL'si gerekli"})
+        
+        # Reddedilen makaleleri yükle
+        rejected_articles = load_json("rejected_articles.json", [])
+        
+        # İlgili makaleyi bul ve kaldır
+        original_count = len(rejected_articles)
+        rejected_articles = [a for a in rejected_articles if a.get('url') != article_url]
+        
+        if len(rejected_articles) == original_count:
+            return jsonify({"success": False, "error": "Makale bulunamadı"})
+        
+        # Güncellenmiş listeyi kaydet
+        save_json("rejected_articles.json", rejected_articles)
+        
+        terminal_log(f"🗑️ Makale reddedilen listesinden kaldırıldı: {article_url}", "info")
+        
+        return jsonify({
+            "success": True, 
+            "message": "Makale başarıyla kaldırıldı",
+            "remaining_count": len(rejected_articles)
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Reddedilen makale kaldırma hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
 
 if __name__ == '__main__':
     # Arka plan zamanlayıcısını başlat

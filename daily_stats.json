@@ -18,5 +18,20 @@
       "test": 1,
       "manuel": 2
     }
+  },
+  "2025-08-16": {
+    "total_posts": 4,
+    "automatic_posts": 4,
+    "manual_posts": 0,
+    "bulk_posts": 0,
+    "github_posts": 0,
+    "news_posts": 4,
+    "quality_scores": [],
+    "sources": {
+      "TechCrunch AI": 4
+    },
+    "post_methods": {
+      "otomatik": 4
+    }
   }
 }
