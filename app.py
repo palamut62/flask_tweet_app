@@ -1387,8 +1387,29 @@ def bulk_tweet_action():
                     try:
                         from utils import post_tweet, mark_article_as_posted
                         
+                        # Tweet metnini bul - farklı alan isimleri dene
+                        tweet_text = ''
+                        if isinstance(tweet_to_process, dict):
+                            # Önce content alanına bak
+                            tweet_text = tweet_to_process.get('content', '')
+                            
+                            # Content boşsa tweet_data.tweet alanına bak
+                            if not tweet_text and 'tweet_data' in tweet_to_process:
+                                tweet_data = tweet_to_process['tweet_data']
+                                if isinstance(tweet_data, dict):
+                                    tweet_text = tweet_data.get('tweet', '')
+                            
+                            # Hala boşsa direk tweet alanına bak
+                            if not tweet_text:
+                                tweet_text = tweet_to_process.get('tweet', '')
+                        
+                        # Tweet metni hala boşsa hata ver
+                        if not tweet_text or not tweet_text.strip():
+                            errors.append(f"Tweet ID {tweet_id}: Tweet metni boş olamaz")
+                            continue
+                        
                         # Twitter API ile paylaş
-                        tweet_result = post_tweet(tweet_to_process.get('content', ''))
+                        tweet_result = post_tweet(tweet_text)
                         
                         if tweet_result.get('success'):
                             # Hash yoksa oluştur
@@ -1411,7 +1432,7 @@ def bulk_tweet_action():
                                 'tags': tweet_to_process.get('tags', []),
                                 'score': tweet_to_process.get('score', 0),
                                 'posted_date': datetime.now().isoformat(),
-                                'tweet_text': tweet_to_process.get('content', ''),
+                                'tweet_text': tweet_text,  # Bulunan tweet metnini kullan
                                 'manual_approval': True,
                                 'bulk_operation': True
                             }, tweet_result)
@@ -1445,6 +1466,17 @@ def bulk_tweet_action():
                 elif action == 'reject':
                     # Tweet'i sil ve posted_articles.json'a deleted:true ile kaydet
                     try:
+                        # Tweet metnini bul - approve ile aynı mantık
+                        tweet_text = ''
+                        if isinstance(tweet_to_process, dict):
+                            tweet_text = tweet_to_process.get('content', '')
+                            if not tweet_text and 'tweet_data' in tweet_to_process:
+                                tweet_data = tweet_to_process['tweet_data']
+                                if isinstance(tweet_data, dict):
+                                    tweet_text = tweet_data.get('tweet', '')
+                            if not tweet_text:
+                                tweet_text = tweet_to_process.get('tweet', '')
+                        
                         # Hash yoksa oluştur
                         hash_value = tweet_to_process.get('hash', '')
                         if not hash_value:
@@ -1465,7 +1497,7 @@ def bulk_tweet_action():
                             "source_type": tweet_to_process.get('source_type', 'news'),
                             "published_date": tweet_to_process.get('created_at', datetime.now().isoformat()),
                             "posted_date": datetime.now().isoformat(),
-                            "tweet_text": tweet_to_process.get('content', ''),
+                            "tweet_text": tweet_text,  # Bulunan tweet metnini kullan
                             "deleted": True,
                             "deleted_date": datetime.now().isoformat(),
                             "deletion_reason": 'Bulk rejection',
