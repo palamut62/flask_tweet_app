@@ -67,6 +67,29 @@
     </div>
     {% endif %}
 
+    <!-- Toplu İşlemler Paneli -->
+    {% if rejected_articles %}
+    <div class="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <input type="checkbox" id="select-all-rejected" onchange="toggleAllRejected()" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                <label for="select-all-rejected" class="text-sm font-medium text-gray-700">
+                    <i class="fas fa-tasks text-red-500"></i> Toplu İşlemler
+                </label>
+                <span id="selected-rejected-count" class="text-xs text-gray-500">(0 seçili)</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="bulkDeleteRejected()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 flex items-center gap-2 text-sm disabled:opacity-50" id="bulk-delete-btn" disabled>
+                    <i class="fas fa-trash"></i> Toplu Sil
+                </button>
+                <button onclick="bulkClearRejected()" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all duration-200 flex items-center gap-2 text-sm disabled:opacity-50" id="bulk-clear-btn" disabled>
+                    <i class="fas fa-broom"></i> Toplu Temizle
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Reddedilen Makaleler Listesi -->
     <div class="bg-white shadow rounded-lg">
         <div class="px-6 py-4 border-b border-gray-200">
@@ -76,8 +99,14 @@
         {% if rejected_articles %}
         <div class="divide-y divide-gray-200">
             {% for article in rejected_articles %}
-            <div class="p-6 hover:bg-gray-50">
+            <div class="p-6 hover:bg-gray-50" data-article-id="{{ loop.index0 }}">
                 <div class="flex items-start justify-between">
+                    <!-- Toplu İşlem Checkbox -->
+                    <div class="flex items-center mt-1 mr-3">
+                        <input type="checkbox" class="rejected-checkbox rounded border-gray-300 text-red-600 focus:ring-red-500" 
+                               value="{{ loop.index0 }}" onchange="updateRejectedBulkButtons()">
+                    </div>
+                    
                     <div class="flex-1 min-w-0">
                         <h3 class="text-lg font-medium text-gray-900 truncate">
                             {{ article.title or 'Başlık yok' }}
@@ -157,4 +186,206 @@
         </div>
     </div>
 </div>
+
+<!-- Toast Notification Container -->
+<div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2 max-w-sm w-full"></div>
+
+<script>
+// Toast Notification System
+function showToast(message, type = 'info', duration = 5000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    
+    const toastTypes = {
+        'success': {
+            bgColor: 'bg-green-500',
+            textColor: 'text-white',
+            icon: 'fas fa-check-circle',
+            borderColor: 'border-green-600'
+        },
+        'error': {
+            bgColor: 'bg-red-500',
+            textColor: 'text-white',
+            icon: 'fas fa-exclamation-circle',
+            borderColor: 'border-red-600'
+        },
+        'warning': {
+            bgColor: 'bg-yellow-500',
+            textColor: 'text-white',
+            icon: 'fas fa-exclamation-triangle',
+            borderColor: 'border-yellow-600'
+        },
+        'info': {
+            bgColor: 'bg-blue-500',
+            textColor: 'text-white',
+            icon: 'fas fa-info-circle',
+            borderColor: 'border-blue-600'
+        }
+    };
+    
+    const toastConfig = toastTypes[type] || toastTypes['info'];
+    const toastId = 'toast-' + Date.now();
+    
+    const toastHtml = `
+        <div id="${toastId}" class="transform translate-x-full transition-all duration-300 ease-out opacity-0">
+            <div class="${toastConfig.bgColor} ${toastConfig.textColor} ${toastConfig.borderColor} border-l-4 rounded-lg shadow-lg p-4 flex items-center space-x-3 min-w-0">
+                <div class="flex-shrink-0">
+                    <i class="${toastConfig.icon}"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium leading-5 break-words">${message}</p>
+                </div>
+                <button onclick="removeToast('${toastId}')" class="flex-shrink-0 text-white hover:text-gray-200 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', toastHtml);
+    
+    const toastElement = document.getElementById(toastId);
+    
+    setTimeout(() => {
+        toastElement.classList.remove('translate-x-full', 'opacity-0');
+        toastElement.classList.add('translate-x-0', 'opacity-100');
+    }, 10);
+    
+    if (duration > 0) {
+        setTimeout(() => {
+            removeToast(toastId);
+        }, duration);
+    }
+    
+    return toastId;
+}
+
+function removeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.add('translate-x-full', 'opacity-0');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }
+}
+
+// Reddedilen makaleler için toplu işlem fonksiyonları
+function toggleAllRejected() {
+    const selectAllCheckbox = document.getElementById('select-all-rejected');
+    const checkboxes = document.querySelectorAll('.rejected-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+    
+    updateRejectedBulkButtons();
+}
+
+function updateRejectedBulkButtons() {
+    const checkboxes = document.querySelectorAll('.rejected-checkbox:checked');
+    const selectedCount = checkboxes.length;
+    const selectAllCheckbox = document.getElementById('select-all-rejected');
+    const allCheckboxes = document.querySelectorAll('.rejected-checkbox');
+    
+    // Seçili sayısını güncelle
+    document.getElementById('selected-rejected-count').textContent = `(${selectedCount} seçili)`;
+    
+    // Butonları güncelle
+    document.getElementById('bulk-delete-btn').disabled = selectedCount === 0;
+    document.getElementById('bulk-clear-btn').disabled = selectedCount === 0;
+    
+    // "Tümünü seç" checkbox'ını güncelle
+    if (selectedCount === 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+    } else if (selectedCount === allCheckboxes.length) {
+        selectAllCheckbox.checked = true;
+        selectAllCheckbox.indeterminate = false;
+    } else {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = true;
+    }
+}
+
+function bulkDeleteRejected() {
+    const checkboxes = document.querySelectorAll('.rejected-checkbox:checked');
+    const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (selectedIds.length === 0) {
+        showToast('Lütfen silinecek makaleleri seçin', 'warning');
+        return;
+    }
+    
+    if (!confirm(`${selectedIds.length} reddedilen makaleyi kalıcı olarak silmek istediğinizden emin misiniz?`)) {
+        return;
+    }
+    
+    showToast('Makaleler siliniyor...', 'info');
+    
+    fetch('/bulk_delete_rejected', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            article_ids: selectedIds
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(`${data.deleted_count} makale başarıyla silindi`, 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showToast(`Hata: ${data.error}`, 'error');
+        }
+    })
+    .catch(error => {
+        showToast(`İşlem hatası: ${error}`, 'error');
+    });
+}
+
+function bulkClearRejected() {
+    const checkboxes = document.querySelectorAll('.rejected-checkbox:checked');
+    const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (selectedIds.length === 0) {
+        showToast('Lütfen temizlenecek makaleleri seçin', 'warning');
+        return;
+    }
+    
+    if (!confirm(`${selectedIds.length} reddedilen makaleyi temizlemek istediğinizden emin misiniz?`)) {
+        return;
+    }
+    
+    showToast('Makaleler temizleniyor...', 'info');
+    
+    fetch('/bulk_clear_rejected', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            article_ids: selectedIds
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(`${data.cleared_count} makale başarıyla temizlendi`, 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showToast(`Hata: ${data.error}`, 'error');
+        }
+    })
+    .catch(error => {
+        showToast(`İşlem hatası: ${error}`, 'error');
+    });
+}
+</script>
 {% endblock %}

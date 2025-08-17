@@ -126,10 +126,12 @@
                     </div>
                 </div>
 
-                <!-- Haber Çekme Yöntemi -->
+                <!-- Haber Çekme Yöntemi Ayarları -->
                 <div class="border-t border-gray-200 pt-8">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Haber Çekme Yöntemi</h3>
-                    <div class="space-y-2">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Haber Çekme Yöntemi Ayarları</h3>
+                    
+                    <!-- Ana Yöntem Seçimi -->
+                    <div class="space-y-2 mb-6">
                         <label for="news_fetching_method" class="block text-sm font-medium text-gray-700">
                             Haber Çekme Yöntemi
                         </label>
@@ -152,6 +154,108 @@
                             </option>
                         </select>
                         <p class="text-sm text-gray-600">Hangi yöntemle haber çekileceğini seçin</p>
+                    </div>
+                    
+                    <!-- Yöntem Bazlı Ayarlar -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- AI Keywords Ayarları -->
+                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                            <h4 class="font-semibold text-blue-900 mb-3 flex items-center">
+                                <i class="fas fa-brain text-blue-600 mr-2"></i>
+                                AI Keywords Ayarları
+                            </h4>
+                            <div class="space-y-3">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" name="ai_keywords_auto_post" 
+                                           {{ 'checked' if settings.ai_keywords_auto_post else '' }}
+                                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    <span class="text-sm text-blue-800">Otomatik API ile paylaşım</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" name="ai_keywords_duplicate_check" 
+                                           {{ 'checked' if settings.ai_keywords_duplicate_check != False else '' }}
+                                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    <span class="text-sm text-blue-800">Duplicate kontrolü</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Custom Sources Ayarları -->
+                        <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                            <h4 class="font-semibold text-green-900 mb-3 flex items-center">
+                                <i class="fas fa-newspaper text-green-600 mr-2"></i>
+                                Özel Kaynak Ayarları
+                            </h4>
+                            <div class="space-y-3">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" name="custom_sources_auto_post" 
+                                           {{ 'checked' if settings.custom_sources_auto_post else '' }}
+                                           class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                    <span class="text-sm text-green-800">Otomatik API ile paylaşım</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" name="custom_sources_duplicate_check" 
+                                           {{ 'checked' if settings.custom_sources_duplicate_check != False else '' }}
+                                           class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                    <span class="text-sm text-green-800">Duplicate kontrolü</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- MCP Ayarları -->
+                        <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                            <h4 class="font-semibold text-purple-900 mb-3 flex items-center">
+                                <i class="fas fa-cogs text-purple-600 mr-2"></i>
+                                MCP Ayarları
+                            </h4>
+                            <div class="space-y-3">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" name="mcp_auto_post" 
+                                           {{ 'checked' if settings.mcp_auto_post else '' }}
+                                           class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                    <span class="text-sm text-purple-800">Otomatik API ile paylaşım</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" name="mcp_duplicate_check" 
+                                           {{ 'checked' if settings.mcp_duplicate_check != False else '' }}
+                                           class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                    <span class="text-sm text-purple-800">Duplicate kontrolü</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- PythonAnywhere Ayarları -->
+                        <div class="bg-orange-50 rounded-lg p-4 border border-orange-200">
+                            <h4 class="font-semibold text-orange-900 mb-3 flex items-center">
+                                <i class="fab fa-python text-orange-600 mr-2"></i>
+                                PythonAnywhere Ayarları
+                            </h4>
+                            <div class="space-y-3">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" name="pythonanywhere_auto_post" 
+                                           {{ 'checked' if settings.pythonanywhere_auto_post else '' }}
+                                           class="rounded border-gray-300 text-orange-600 focus:ring-orange-500">
+                                    <span class="text-sm text-orange-800">Otomatik API ile paylaşım</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" name="pythonanywhere_duplicate_check" 
+                                           {{ 'checked' if settings.pythonanywhere_duplicate_check != False else '' }}
+                                           class="rounded border-gray-300 text-orange-600 focus:ring-orange-500">
+                                    <span class="text-sm text-orange-800">Duplicate kontrolü</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Duplicate Kontrol Açıklaması -->
+                    <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-yellow-600 mt-0.5 mr-2"></i>
+                            <div class="text-sm text-yellow-800">
+                                <strong>Duplicate Kontrolü:</strong> Farklı kaynaklardan gelen aynı haberin tekrar paylaşılmasını engeller. 
+                                Bu özellik aktif olduğunda, benzer içerikli makaleler otomatik olarak filtrelenir.
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -217,64 +321,152 @@
         </div>
     </div>
 
-    <!-- Duplikat Kontrol Ayarları Kartı -->
-    <div class="card-modern">
-        <div class="p-8">
-            <div class="flex items-center space-x-3 mb-8">
-                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-copy text-white text-lg"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-900">Duplikat Kontrol Ayarları</h2>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div class="space-y-2">
-                    <label for="title_similarity_threshold" class="block text-sm font-medium text-gray-700">
-                        Başlık Benzerlik Eşiği (%)
-                    </label>
-                    <input type="number" id="title_similarity_threshold" name="title_similarity_threshold" 
-                           value="{{ (settings.title_similarity_threshold * 100) if settings.title_similarity_threshold else 80 }}" 
-                           min="50" max="100" step="5"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
-                    <p class="text-sm text-gray-600">Bu oranın üzerinde benzer başlıklar duplikat sayılır</p>
-                </div>
-                
-                <div class="space-y-2">
-                    <label for="content_similarity_threshold" class="block text-sm font-medium text-gray-700">
-                        İçerik Benzerlik Eşiği (%)
-                    </label>
-                    <input type="number" id="content_similarity_threshold" name="content_similarity_threshold" 
-                           value="{{ (settings.content_similarity_threshold * 100) if settings.content_similarity_threshold else 60 }}" 
-                           min="30" max="90" step="5"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
-                    <p class="text-sm text-gray-600">Bu oranın üzerinde benzer içerikler duplikat sayılır</p>
-                </div>
-            </div>
-            
-            <div class="space-y-4">
-                <label class="flex items-center space-x-3 cursor-pointer group">
-                    <div class="relative">
-                        <input type="checkbox" id="enable_duplicate_detection" name="enable_duplicate_detection" 
-                               {{ 'checked' if settings.enable_duplicate_detection != False else '' }}
-                               class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                    <!-- Red Koşulları Ayarları Kartı -->
+                <div class="card-modern">
+                    <div class="p-8">
+                        <div class="flex items-center space-x-3 mb-8">
+                            <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-shield-alt text-white text-lg"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-900">Red Koşulları Ayarları</h2>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                    <div class="relative">
+                                        <input type="checkbox" id="flexible_rejection_rules" name="flexible_rejection_rules" 
+                                               {{ 'checked' if settings.flexible_rejection_rules else '' }}
+                                               class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                    </div>
+                                    <div>
+                                        <span class="text-lg font-semibold text-gray-900">Esnek Red Koşulları</span>
+                                        <p class="text-sm text-gray-600">Daha toleranslı ve esnek kalite kontrol kuralları uygula</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="space-y-2">
+                                <label for="min_title_length" class="block text-sm font-medium text-gray-700">
+                                    Minimum Başlık Uzunluğu
+                                </label>
+                                <input type="number" id="min_title_length" name="min_title_length" 
+                                       value="{{ settings.min_title_length or 5 }}" 
+                                       min="3" max="20" step="1"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200">
+                                <p class="text-sm text-gray-600">Bu uzunluğun altındaki başlıklar reddedilir</p>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label for="min_content_length" class="block text-sm font-medium text-gray-700">
+                                    Minimum İçerik Uzunluğu
+                                </label>
+                                <input type="number" id="min_content_length" name="min_content_length" 
+                                       value="{{ settings.min_content_length or 30 }}" 
+                                       min="10" max="100" step="5"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200">
+                                <p class="text-sm text-gray-600">Bu uzunluğun altındaki içerikler reddedilir</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="space-y-2">
+                                <label for="min_sentence_length" class="block text-sm font-medium text-gray-700">
+                                    Minimum Cümle Uzunluğu
+                                </label>
+                                <input type="number" id="min_sentence_length" name="min_sentence_length" 
+                                       value="{{ settings.min_sentence_length or 15 }}" 
+                                       min="5" max="30" step="1"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200">
+                                <p class="text-sm text-gray-600">Bu uzunluğun altındaki cümleler anlamsız sayılır</p>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label for="spam_threshold" class="block text-sm font-medium text-gray-700">
+                                    Spam Eşiği (%)
+                                </label>
+                                <input type="number" id="spam_threshold" name="spam_threshold" 
+                                       value="{{ (settings.spam_threshold * 100) if settings.spam_threshold else 40 }}" 
+                                       min="20" max="80" step="5"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200">
+                                <p class="text-sm text-gray-600">Bu oranın üzerinde tekrarlayan kelimeler spam sayılır</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Red Koşulları Açıklaması -->
+                        <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-red-600 mt-0.5 mr-2"></i>
+                                <div class="text-sm text-red-800">
+                                    <strong>Esnek Red Koşulları:</strong> Bu ayarlar aktif olduğunda, kalite kontrol sistemi daha toleranslı davranır. 
+                                    Kısa başlıklar ve içerikler daha kolay kabul edilir, genel başlıklar sadece çok kısa olduğunda reddedilir.
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <span class="text-lg font-semibold text-gray-900">Gelişmiş Duplikat Tespiti</span>
-                        <p class="text-sm text-gray-600">Farklı sitelerden gelen aynı haberleri tespit et ve filtrele</p>
-                    </div>
-                </label>
-                
-                <div class="flex space-x-3">
-                    <a href="{{ url_for('test_duplicate_detection') }}" 
-                       class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-200 font-medium flex items-center space-x-2">
-                        <i class="fas fa-vial"></i>
-                        <span>Duplikat Tespitini Test Et</span>
-                    </a>
                 </div>
-            </div>
-        </div>
-    </div>
+
+                <!-- Duplikat Kontrol Ayarları Kartı -->
+                <div class="card-modern">
+                    <div class="p-8">
+                        <div class="flex items-center space-x-3 mb-8">
+                            <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-copy text-white text-lg"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-900">Duplikat Kontrol Ayarları</h2>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="space-y-2">
+                                <label for="title_similarity_threshold" class="block text-sm font-medium text-gray-700">
+                                    Başlık Benzerlik Eşiği (%)
+                                </label>
+                                <input type="number" id="title_similarity_threshold" name="title_similarity_threshold" 
+                                       value="{{ (settings.title_similarity_threshold * 100) if settings.title_similarity_threshold else 80 }}" 
+                                       min="50" max="100" step="5"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
+                                <p class="text-sm text-gray-600">Bu oranın üzerinde benzer başlıklar duplikat sayılır</p>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label for="content_similarity_threshold" class="block text-sm font-medium text-gray-700">
+                                    İçerik Benzerlik Eşiği (%)
+                                </label>
+                                <input type="number" id="content_similarity_threshold" name="content_similarity_threshold" 
+                                       value="{{ (settings.content_similarity_threshold * 100) if settings.content_similarity_threshold else 60 }}" 
+                                       min="30" max="90" step="5"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
+                                <p class="text-sm text-gray-600">Bu oranın üzerinde benzer içerikler duplikat sayılır</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <label class="flex items-center space-x-3 cursor-pointer group">
+                                <div class="relative">
+                                    <input type="checkbox" id="enable_duplicate_detection" name="enable_duplicate_detection" 
+                                           {{ 'checked' if settings.enable_duplicate_detection != False else '' }}
+                                           class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                </div>
+                                <div>
+                                    <span class="text-lg font-semibold text-gray-900">Gelişmiş Duplikat Tespiti</span>
+                                    <p class="text-sm text-gray-600">Farklı sitelerden gelen aynı haberleri tespit et ve filtrele</p>
+                                </div>
+                            </label>
+                            
+                            <div class="flex space-x-3">
+                                <a href="{{ url_for('test_duplicate_detection') }}" 
+                                   class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-200 font-medium flex items-center space-x-2">
+                                    <i class="fas fa-vial"></i>
+                                    <span>Duplikat Tespitini Test Et</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
     <!-- Gmail E-posta Bildirimleri Kartı -->
     <div class="card-modern">

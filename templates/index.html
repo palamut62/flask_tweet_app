@@ -356,10 +356,10 @@
                             </div>
                             
                             <div class="flex flex-col space-y-2 ml-4 flex-shrink-0">
-                                <button onclick="convertRejectedToTweet('{{ article.url }}', '{{ article.title|replace("'", "\\'") }}')" 
+                                <button data-action="convertRejectedToTweet" data-url="{{ article.url }}" data-title="{{ article.title }}"
                                         class="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 text-sm font-medium flex items-center space-x-1">
-                                    <i class="fas fa-recycle text-xs"></i>
-                                    <span>Tweet Yap</span>
+                                    <i class="fas fa-magic text-xs"></i>
+                                    <span>Tweet Oluştur</span>
                                 </button>
                                 
                                 {% if article.url %}
@@ -370,7 +370,7 @@
                                 </a>
                                 {% endif %}
                                 
-                                <button onclick="removeFromRejected('{{ article.url }}')" 
+                                <button data-action="removeFromRejected" data-url="{{ article.url }}"
                                         class="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all duration-200 text-sm font-medium flex items-center space-x-1">
                                     <i class="fas fa-trash text-xs"></i>
                                     <span>Kaldır</span>
@@ -504,8 +504,70 @@
                             </div>
                         </div>
                         
+                        <!-- Tweet Önizleme Kartı -->
                         <div class="bg-white/80 backdrop-blur-sm rounded-lg p-4 mb-4 border border-gray-200">
-                            <p class="text-gray-800 leading-relaxed">{{ tweet.content if tweet.content else 'Tweet metni bulunamadı' }}</p>
+                            <!-- Tweet İçeriği -->
+                            <div class="mb-4">
+                                <p class="text-gray-800 leading-relaxed text-lg">{{ tweet.content if tweet.content else 'Tweet metni bulunamadı' }}</p>
+                            </div>
+                            
+                            <!-- Tweet Karakter Sayısı -->
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                                <span class="flex items-center space-x-2">
+                                    <i class="fas fa-text-width"></i>
+                                    <span>{{ (tweet.content or '')|length }}/280 karakter</span>
+                                </span>
+                                {% if (tweet.content or '')|length > 280 %}
+                                <span class="text-red-500 font-medium">
+                                    <i class="fas fa-exclamation-triangle"></i> Çok uzun!
+                                </span>
+                                {% elif (tweet.content or '')|length > 250 %}
+                                <span class="text-yellow-500 font-medium">
+                                    <i class="fas fa-exclamation-circle"></i> Dikkatli ol
+                                </span>
+                                {% else %}
+                                <span class="text-green-500 font-medium">
+                                    <i class="fas fa-check-circle"></i> Uygun
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Tweet Önizleme Simülasyonu -->
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-robot text-white text-sm"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center space-x-2 mb-1">
+                                            <span class="font-semibold text-gray-900">AI Tweet Bot</span>
+                                            <span class="text-gray-500">@ai_tweet_bot</span>
+                                            <span class="text-gray-400">•</span>
+                                            <span class="text-gray-500 text-sm">şimdi</span>
+                                        </div>
+                                        <p class="text-gray-900 leading-relaxed">{{ tweet.content if tweet.content else 'Tweet metni bulunamadı' }}</p>
+                                        
+                                        <!-- Tweet Etkileşim Simülasyonu -->
+                                        <div class="flex items-center space-x-6 mt-3 text-gray-500 text-sm">
+                                            <span class="flex items-center space-x-1 hover:text-blue-500 cursor-pointer">
+                                                <i class="far fa-comment"></i>
+                                                <span>0</span>
+                                            </span>
+                                            <span class="flex items-center space-x-1 hover:text-green-500 cursor-pointer">
+                                                <i class="fas fa-retweet"></i>
+                                                <span>0</span>
+                                            </span>
+                                            <span class="flex items-center space-x-1 hover:text-red-500 cursor-pointer">
+                                                <i class="far fa-heart"></i>
+                                                <span>0</span>
+                                            </span>
+                                            <span class="flex items-center space-x-1 hover:text-blue-500 cursor-pointer">
+                                                <i class="far fa-share-square"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             
                             <!-- Resimli Tweet için Resim Gösterimi -->
                             {% if tweet.tweet_data and tweet.tweet_data.source_data and tweet.tweet_data.source_data.type == 'image' %}
@@ -669,17 +731,17 @@
                             </div>
                             {% else %}
                             <!-- Normal tweet'ler için aktif butonlar -->
-                            <button onclick="postTweet('{{ tweet.id }}')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-medium flex items-center space-x-2">
+                            <button data-action="postTweet" data-tweet-id="{{ tweet.id }}" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-medium flex items-center space-x-2">
                                 <i class="fas fa-robot"></i>
                                 <span>API ile Paylaş</span>
                             </button>
-                            <button onclick="manualPostTweet('{{ tweet.id }}')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium flex items-center space-x-2">
+                            <button data-action="manualPostTweet" data-tweet-id="{{ tweet.id }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium flex items-center space-x-2">
                                 <i class="fab fa-twitter"></i>
                                 <span>X'te Manuel Paylaş</span>
                             </button>
                             {% endif %}
 
-                            <button onclick="deleteTweet('{{ tweet.id }}')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 font-medium flex items-center space-x-2">
+                            <button data-action="deleteTweet" data-tweet-id="{{ tweet.id }}" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 font-medium flex items-center space-x-2">
                                 <i class="fas fa-trash"></i>
                                 <span>Sil</span>
                             </button>
@@ -695,6 +757,123 @@
         </div>
         {% endif %}
 
+        <!-- Reddedilen Tweetler Bölümü -->
+        {% if rejected_articles %}
+        <div class="card-modern">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-ban text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Reddedilen Tweetler</h3>
+                            <p class="text-sm text-gray-500">Kalite kontrolü tarafından reddedilen tweetler</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
+                            {{ rejected_articles|length }} reddedilen
+                        </span>
+                        <a href="{{ url_for('rejected_articles') }}" class="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors flex items-center gap-2 text-sm">
+                            <i class="fas fa-external-link-alt"></i>
+                            Tümünü Gör
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    {% for article in rejected_articles[:5] %}
+                    <div class="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl p-4 hover:shadow-lg transition-all duration-300">
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <h4 class="text-lg font-medium text-gray-900 line-clamp-2 text-red-700">
+                                            {{ article.title if article.title else 'Başlık bulunamadı' }}
+                                        </h4>
+                                        
+                                        <!-- Red Sebebi -->
+                                        <div class="mt-2 flex items-center space-x-2 text-red-600 text-sm">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            <span class="font-medium">Red Sebebi:</span>
+                                            <span>{{ article.reason }}</span>
+                                        </div>
+                                        
+                                        <!-- Red Tarihi -->
+                                        <div class="mt-1 flex items-center space-x-2 text-sm text-gray-500">
+                                            <i class="fas fa-clock"></i>
+                                            <span>{{ article.rejected_at_formatted }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2 ml-4 flex-shrink-0">
+                                        <span class="px-3 py-1 bg-red-500 text-white rounded-full text-sm font-medium">
+                                            Reddedildi
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- İçerik Önizlemesi -->
+                        {% if article.content_preview %}
+                        <div class="mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200">
+                            <div class="mb-2">
+                                <p class="text-gray-800 leading-relaxed text-sm">{{ article.content_preview[:200] }}{% if article.content_preview|length > 200 %}...{% endif %}</p>
+                            </div>
+                            
+                            <!-- Karakter Sayısı -->
+                            <div class="flex items-center justify-between text-xs text-gray-500">
+                                <span class="flex items-center space-x-2">
+                                    <i class="fas fa-text-width"></i>
+                                    <span>{{ article.content_preview|length }}/280 karakter</span>
+                                </span>
+                                {% if article.content_preview|length > 280 %}
+                                <span class="text-red-500 font-medium">
+                                    <i class="fas fa-exclamation-triangle"></i> Çok uzun!
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- URL Bilgisi -->
+                        {% if article.url %}
+                        <div class="mt-3">
+                            <a href="{{ article.url }}" target="_blank" 
+                               class="text-blue-600 hover:text-blue-800 text-sm flex items-center">
+                                <i class="fas fa-external-link-alt mr-1"></i>
+                                {{ article.url[:60] }}{% if article.url|length > 60 %}...{% endif %}
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Aksiyon Butonları -->
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <button data-action="retryRejectedArticle" data-index="{{ loop.index0 }}" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium flex items-center space-x-2 text-sm">
+                                <i class="fas fa-redo"></i>
+                                <span>Tekrar Dene</span>
+                            </button>
+                            <button data-action="deleteRejectedArticle" data-index="{{ loop.index0 }}" class="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 font-medium flex items-center space-x-2 text-sm">
+                                <i class="fas fa-trash"></i>
+                                <span>Kalıcı Sil</span>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if rejected_articles|length > 5 %}
+                <div class="mt-6 text-center">
+                    <a href="{{ url_for('rejected_articles') }}" class="px-6 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all duration-200 font-medium flex items-center space-x-2 mx-auto w-fit">
+                        <i class="fas fa-list"></i>
+                        <span>Tüm Reddedilen Tweetleri Gör ({{ rejected_articles|length }})</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
 
     </div>
 </div>
@@ -1193,18 +1372,32 @@ function validateManualUrl(input) {
 
 // Manuel tweet tema önizlemesi
 function updateManualThemePreview() {
-    const theme = document.getElementById('manualTweetTheme').value;
+    const themeElement = document.getElementById('manualTweetTheme');
+    if (!themeElement) {
+        // Element bulunamazsa sessizce çık
+        return;
+    }
+    
+    const theme = themeElement.value;
     const themeInfo = manualThemeData[theme];
     
     if (themeInfo) {
-        document.getElementById('manual-theme-emoji').textContent = themeInfo.emoji;
-        document.getElementById('manual-theme-name').textContent = themeInfo.name;
-        document.getElementById('manual-theme-description').textContent = themeInfo.description;
-        document.getElementById('manual-theme-hashtags').textContent = themeInfo.hashtags;
+        const emojiElement = document.getElementById('manual-theme-emoji');
+        const nameElement = document.getElementById('manual-theme-name');
+        const descElement = document.getElementById('manual-theme-description');
+        const hashtagsElement = document.getElementById('manual-theme-hashtags');
+        
+        if (emojiElement) emojiElement.textContent = themeInfo.emoji;
+        if (nameElement) nameElement.textContent = themeInfo.name;
+        if (descElement) descElement.textContent = themeInfo.description;
+        if (hashtagsElement) hashtagsElement.textContent = themeInfo.hashtags;
     }
     
     // Hidden input'u güncelle
-    document.getElementById('manualTweetThemeHidden').value = theme;
+    const hiddenElement = document.getElementById('manualTweetThemeHidden');
+    if (hiddenElement) {
+        hiddenElement.value = theme;
+    }
 }
 
 // Manuel tweet event listeners
@@ -1577,16 +1770,35 @@ function showNextMessage() {
 function performActualCheck() {
     const text = document.getElementById('check-text');
     text.textContent = "🚀 Sunucuya istek gönderiliyor...";
-    
-    // Gerçek API çağrısını yap
+
     fetch('{{ url_for("check_articles") }}', {
         method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
-    .then(response => response.json())
-    .then(data => {
+    .then(async (response) => {
+        const contentType = response.headers.get('content-type') || '';
+
+        // Kimlik doğrulama gerekli ise login'e yönlendir
+        if (response.status === 401) {
+            try {
+                const data = await response.json();
+                const loginUrl = (data && data.login_url) ? data.login_url : '/login';
+                window.location.href = `${loginUrl}?next=${encodeURIComponent(window.location.pathname)}`;
+            } catch (_) {
+                window.location.href = '/login';
+            }
+            throw new Error('auth_required');
+        }
+
+        // JSON değilse muhtemelen login sayfası döndü
+        if (!contentType.includes('application/json')) {
+            window.location.href = '/login';
+            throw new Error('non_json_response');
+        }
+
+        return response.json();
+    })
+    .then((data) => {
         if (data.success) {
             if (data.new_articles > 0) {
                 let detailText = '';
@@ -1597,16 +1809,10 @@ function performActualCheck() {
                 } else if (data.pending_count > 0) {
                     detailText = `${data.pending_count} tweet onay bekliyor`;
                 }
-                
+
                 text.textContent = `✅ ${data.new_articles} yeni haber bulundu! (${detailText}) Sayfa yenileniyor...`;
-                
-                // Yeni haber bildirimi göster
                 showNewArticlesNotification(data.new_articles, detailText);
-                
-                // Otomatik yenileme
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
+                setTimeout(() => { window.location.reload(); }, 1500);
             } else {
                 text.textContent = "✅ Kontrol tamamlandı! Yeni haber bulunamadı.";
                 resetButton();
@@ -1615,7 +1821,10 @@ function performActualCheck() {
             throw new Error(data.error || 'Bilinmeyen hata');
         }
     })
-    .catch(error => {
+    .catch((error) => {
+        if (String(error && error.message).includes('auth_required') || String(error && error.message).includes('non_json_response')) {
+            return; // yönlendirme yapıldı
+        }
         console.error('Hata:', error);
         text.textContent = "❌ Hata oluştu! Tekrar deneyin.";
         resetButton();
@@ -1637,10 +1846,77 @@ function resetButton() {
     }, 3000);
 }
 
+// global alana aktar (inline onclick için gerekli)
+try { window.startArticleCheck = startArticleCheck; } catch (e) {}
+
+// Data attribute'lar için event delegation
+document.addEventListener('click', function(e) {
+    const button = e.target.closest('button[data-action]');
+    if (!button) return;
+    
+    const action = button.dataset.action;
+    
+    switch(action) {
+        case 'postTweet':
+            const tweetId = button.dataset.tweetId;
+            if (tweetId) postTweet(tweetId);
+            break;
+            
+        case 'manualPostTweet':
+            const manualTweetId = button.dataset.tweetId;
+            if (manualTweetId) manualPostTweet(manualTweetId);
+            break;
+            
+        case 'deleteTweet':
+            const deleteTweetId = button.dataset.tweetId;
+            if (deleteTweetId) deleteTweet(deleteTweetId);
+            break;
+            
+        case 'convertRejectedToTweet':
+            const url = button.dataset.url;
+            const title = button.dataset.title;
+            if (url && title) convertRejectedToTweet(url, title);
+            break;
+            
+        case 'removeFromRejected':
+            const removeUrl = button.dataset.url;
+            if (removeUrl) removeFromRejected(removeUrl);
+            break;
+            
+        case 'retryRejectedArticle':
+            const retryIndex = button.dataset.index;
+            if (retryIndex !== undefined) retryRejectedArticle(retryIndex);
+            break;
+            
+        case 'deleteRejectedArticle':
+            const deleteIndex = button.dataset.index;
+            if (deleteIndex !== undefined) deleteRejectedArticle(deleteIndex);
+            break;
+    }
+});
+
 // Sayfa yüklendiğinde rate limit durumunu kontrol et
 document.addEventListener('DOMContentLoaded', function() {
-    fetch('/rate_limit_status')
-        .then(response => response.json())
+    fetch('/rate_limit_status', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(async (response) => {
+            const contentType = response.headers.get('content-type') || '';
+            if (response.status === 401) {
+                try {
+                    const data = await response.json();
+                    const loginUrl = (data && data.login_url) ? data.login_url : '/login';
+                    window.location.href = `${loginUrl}?next=${encodeURIComponent(window.location.pathname)}`;
+                } catch (_) {
+                    window.location.href = '/login';
+                }
+                throw new Error('auth_required');
+            }
+            if (!contentType.includes('application/json')) {
+                // muhtemelen login sayfası
+                window.location.href = '/login';
+                throw new Error('non_json_response');
+            }
+            return response.json();
+        })
         .then(data => {
             const statusElement = document.getElementById('rate-limit-status');
             if (data.success && data.rate_limits) {
@@ -1654,6 +1930,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
+            if (String(error && error.message).includes('auth_required') || String(error && error.message).includes('non_json_response')) {
+                return;
+            }
             console.error('Rate limit kontrolü başarısız:', error);
             document.getElementById('rate-limit-status').textContent = 'Hata';
         });
@@ -2228,7 +2507,7 @@ function showKeyboardShortcuts() {
     showInfoToast(`⌨️ Klavye Kısayolları:\n\nCtrl+Shift+R: Hızlı yenileme\nCtrl+N: Yeni tweet oluştur\nCtrl+A: Tüm tweet'leri seç\nEsc: Seçimi temizle\n\n💡 İpucu: Bu kısayollar sayfa üzerinde her zaman aktiftir.`, 8000);
 }
 
-// Reddedilen makaleyi tweet'e dönüştür - Önizleme modu
+// Reddedilen makaleyi tweet'e dönüştür - Direk göster
 function convertRejectedToTweet(articleUrl, articleTitle) {
     if (!articleUrl) {
         showErrorToast('Makale URL\'si bulunamadı!');
@@ -2239,10 +2518,10 @@ function convertRejectedToTweet(articleUrl, articleTitle) {
     const originalContent = button.innerHTML;
     
     // Loading state
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Önizleme...</span>';
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Tweet Oluşturuluyor...</span>';
     button.disabled = true;
     
-    // Önce önizleme modunda tweet oluştur
+    // Direk tweet oluştur
     fetch('/api/convert_rejected_to_tweet', {
         method: 'POST',
         headers: {
@@ -2250,8 +2529,7 @@ function convertRejectedToTweet(articleUrl, articleTitle) {
         },
         body: JSON.stringify({
             article_url: articleUrl,
-            article_title: articleTitle,
-            confirm: false  // Önizleme modu
+            article_title: articleTitle
         })
     })
     .then(response => response.json())
@@ -2259,9 +2537,9 @@ function convertRejectedToTweet(articleUrl, articleTitle) {
         button.innerHTML = originalContent;
         button.disabled = false;
         
-        if (data.success && data.preview) {
-            // Tweet önizlemesini göster
-            showRejectedTweetPreview(data, articleUrl, articleTitle);
+        if (data.success) {
+            // Tweet'i direk göster
+            showRejectedTweet(data, articleUrl, articleTitle);
         } else {
             showErrorToast(`Hata: ${data.error}`);
         }
@@ -2274,22 +2552,22 @@ function convertRejectedToTweet(articleUrl, articleTitle) {
     });
 }
 
-// Reddedilen tweet önizlemesini göster
-function showRejectedTweetPreview(previewData, articleUrl, articleTitle) {
+// Reddedilen tweet'i göster
+function showRejectedTweet(tweetData, articleUrl, articleTitle) {
     // Modal HTML'i oluştur
     const modalHtml = `
-        <div id="rejectedTweetPreviewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div id="rejectedTweetModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
             <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <div class="p-6">
                     <!-- Header -->
                     <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-recycle text-white"></i>
+                                <i class="fas fa-twitter text-white"></i>
                             </div>
-                            <h3 class="text-xl font-bold text-gray-900">Tweet Önizlemesi</h3>
+                            <h3 class="text-xl font-bold text-gray-900">Oluşturulan Tweet</h3>
                         </div>
-                        <button onclick="closeRejectedTweetPreview()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <button onclick="closeRejectedTweetModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
                             <i class="fas fa-times text-xl"></i>
                         </button>
                     </div>
@@ -2300,55 +2578,64 @@ function showRejectedTweetPreview(previewData, articleUrl, articleTitle) {
                             <i class="fas fa-newspaper"></i>
                             <span>Kaynak Makale</span>
                         </div>
-                        <h4 class="font-medium text-gray-900 mb-2">${previewData.article_title}</h4>
-                        <a href="${previewData.article_url}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
+                        <h4 class="font-medium text-gray-900 mb-2">${tweetData.article_title}</h4>
+                        <a href="${tweetData.article_url}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
                             <i class="fas fa-external-link-alt"></i> Makaleyi Oku
                         </a>
                     </div>
                     
-                    <!-- Tweet Önizlemesi -->
-                    <div class="border-2 border-blue-200 rounded-xl p-4 mb-6 bg-blue-50">
-                        <div class="flex items-center space-x-2 text-blue-600 text-sm mb-3">
+                    <!-- Tweet İçeriği -->
+                    <div class="border-2 border-green-200 rounded-xl p-4 mb-6 bg-green-50">
+                        <div class="flex items-center space-x-2 text-green-600 text-sm mb-3">
                             <i class="fab fa-twitter"></i>
-                            <span class="font-medium">Oluşturulan Tweet</span>
+                            <span class="font-medium">Tweet İçeriği</span>
                         </div>
                         <div class="bg-white rounded-lg p-4 border border-gray-200">
-                            <p class="text-gray-800 leading-relaxed whitespace-pre-wrap">${previewData.tweet_text}</p>
+                            <p class="text-gray-800 leading-relaxed whitespace-pre-wrap">${tweetData.tweet_text}</p>
                         </div>
                     </div>
                     
                     <!-- İstatistikler -->
                     <div class="grid grid-cols-3 gap-4 mb-6">
                         <div class="bg-green-50 rounded-lg p-3 text-center">
-                            <div class="text-2xl font-bold text-green-600">${previewData.character_count}</div>
+                            <div class="text-2xl font-bold text-green-600">${tweetData.character_count}</div>
                             <div class="text-xs text-green-600">Karakter</div>
                         </div>
                         <div class="bg-blue-50 rounded-lg p-3 text-center">
-                            <div class="text-2xl font-bold text-blue-600">${previewData.quality_score}/10</div>
+                            <div class="text-2xl font-bold text-blue-600">${tweetData.quality_score}/10</div>
                             <div class="text-xs text-blue-600">Kalite</div>
                         </div>
                         <div class="bg-purple-50 rounded-lg p-3 text-center">
-                            <div class="text-2xl font-bold text-purple-600">${previewData.impact_score}/10</div>
+                            <div class="text-2xl font-bold text-purple-600">${tweetData.impact_score}/10</div>
                             <div class="text-xs text-purple-600">Etki</div>
                         </div>
                     </div>
                     
+                    <!-- Karar Verme Alanı -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <div class="flex items-center space-x-2 text-yellow-700 mb-2">
+                            <i class="fas fa-question-circle"></i>
+                            <span class="font-medium">Bu tweeti ne yapmak istiyorsunuz?</span>
+                        </div>
+                        <p class="text-sm text-yellow-600">Bu tweet reddedilen bir makaleden oluşturuldu. Paylaşmak isterseniz bekleyen tweet listesine eklenecek, istemezseniz silinecek.</p>
+                    </div>
+                    
                     <!-- Aksiyon Butonları -->
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <button onclick="confirmRejectedTweetConversion('${articleUrl}', '${articleTitle.replace(/'/g, "\\'")}')" 
+                        <button onclick="shareRejectedTweet('${articleUrl}', '${articleTitle.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', \`${tweetData.tweet_text.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)" 
                                 class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-medium flex items-center justify-center space-x-2">
-                            <i class="fas fa-check"></i>
-                            <span>Onayla ve Bekleyen Listesine Ekle</span>
+                            <i class="fas fa-share"></i>
+                            <span>Paylaş (Bekleyen Listesine Ekle)</span>
                         </button>
                         <button onclick="generateNewRejectedTweet('${articleUrl}', '${articleTitle.replace(/'/g, "\\'")}')" 
                                 class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium flex items-center justify-center space-x-2">
                             <i class="fas fa-sync-alt"></i>
-                            <span>Yeni Varyasyon</span>
+                            <span>Yeniden Oluştur</span>
                         </button>
-                        <button onclick="closeRejectedTweetPreview()" 
-                                class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium flex items-center justify-center space-x-2">
-                            <i class="fas fa-times"></i>
-                            <span>İptal</span>
+                        <button onclick="closeRejectedTweetModal()" 
+                                class="px-6 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all duration-200 font-medium flex items-center justify-center space-x-2">
+                            <i class="fas fa-trash"></i>
+                            <span>Sil</span>
                         </button>
                     </div>
                 </div>
@@ -2362,30 +2649,103 @@ function showRejectedTweetPreview(previewData, articleUrl, articleTitle) {
     // ESC tuşu ile kapatma
     document.addEventListener('keydown', function escHandler(e) {
         if (e.key === 'Escape') {
+            closeRejectedTweetModal();
+            document.removeEventListener('keydown', escHandler);
+        }
+    });
+}
+
+// Reddedilen tweetler için fonksiyonlar
+function retryRejectedArticle(articleIndex) {
+    if (!confirm('Bu reddedilen makaleyi tekrar denemek istediğinizden emin misiniz?')) {
+        return;
+    }
+    
+    showToast('Makale tekrar deneniyor...', 'loading');
+    
+    fetch('/retry_rejected_article', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            article_index: articleIndex
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Makale başarıyla tekrar denendi', 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showToast(`Hata: ${data.error}`, 'error');
+        }
+    })
+    .catch(error => {
+        showToast(`İşlem hatası: ${error}`, 'error');
+    });
+}
+
+function deleteRejectedArticle(articleIndex) {
+    if (!confirm('Bu reddedilen makaleyi kalıcı olarak silmek istediğinizden emin misiniz?')) {
+        return;
+    }
+    
+    showToast('Makale siliniyor...', 'loading');
+    
+    fetch('/delete_rejected_article', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            article_index: articleIndex
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Makale başarıyla silindi', 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showToast(`Hata: ${data.error}`, 'error');
+        }
+    })
+    .catch(error => {
+        showToast(`İşlem hatası: ${error}`, 'error');
+    });
+    
+    // ESC tuşu ile kapatma
+    document.addEventListener('keydown', function escHandler(e) {
+        if (e.key === 'Escape') {
             closeRejectedTweetPreview();
             document.removeEventListener('keydown', escHandler);
         }
     });
 }
 
-// Tweet önizleme modal'ını kapat
-function closeRejectedTweetPreview() {
-    const modal = document.getElementById('rejectedTweetPreviewModal');
+// Tweet modal'ını kapat
+function closeRejectedTweetModal() {
+    const modal = document.getElementById('rejectedTweetModal');
     if (modal) {
         modal.remove();
     }
 }
 
-// Reddedilen tweet dönüştürmeyi onayla
-function confirmRejectedTweetConversion(articleUrl, articleTitle) {
+// Reddedilen tweeti paylaş
+function shareRejectedTweet(articleUrl, articleTitle, tweetText) {
     const button = event.target;
     const originalContent = button.innerHTML;
     
     // Loading state
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Onaylanıyor...';
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Paylaşılıyor...';
     button.disabled = true;
     
-    fetch('/api/convert_rejected_to_tweet', {
+    fetch('/api/share_rejected_tweet', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -2393,14 +2753,14 @@ function confirmRejectedTweetConversion(articleUrl, articleTitle) {
         body: JSON.stringify({
             article_url: articleUrl,
             article_title: articleTitle,
-            confirm: true  // Onay modu
+            tweet_text: tweetText
         })
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success && data.confirmed) {
-            closeRejectedTweetPreview();
-            showSuccessToast('Tweet başarıyla oluşturuldu ve bekleyen listesine eklendi!');
+        if (data.success) {
+            closeRejectedTweetModal();
+            showSuccessToast('Tweet başarıyla bekleyen listesine eklendi!');
             
             // Makaleyi reddedilen listesinden UI'dan kaldır
             const articleElement = document.querySelector(`[data-article-url="${articleUrl}"]`);
@@ -2426,8 +2786,8 @@ function confirmRejectedTweetConversion(articleUrl, articleTitle) {
         }
     })
     .catch(error => {
-        console.error('Confirm rejected tweet error:', error);
-        showErrorToast('Tweet onaylanırken hata oluştu!');
+        console.error('Share rejected tweet error:', error);
+        showErrorToast('Tweet paylaşılırken hata oluştu!');
         button.innerHTML = originalContent;
         button.disabled = false;
     });
@@ -2435,9 +2795,9 @@ function confirmRejectedTweetConversion(articleUrl, articleTitle) {
 
 // Yeni tweet varyasyonu oluştur
 function generateNewRejectedTweet(articleUrl, articleTitle) {
-    closeRejectedTweetPreview();
+    closeRejectedTweetModal();
     
-    // Kısa bir gecikme sonra yeni önizleme oluştur
+    // Kısa bir gecikme sonra yeni tweet oluştur
     setTimeout(() => {
         convertRejectedToTweet(articleUrl, articleTitle);
     }, 300);

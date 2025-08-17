@@ -7045,6 +7045,10 @@ def safe_print(text):
 def fetch_latest_ai_articles_smart():
     """Akıllı haber çekme - Ayarlara göre yöntem seçer"""
     try:
+        import time
+        start_time = time.time()
+        MAX_EXECUTION_TIME = 45  # 45 saniye maksimum çalışma süresi (daha hızlı)
+        
         # Otomasyon ayarlarını yükle
         settings = load_automation_settings()
         max_articles = settings.get('max_articles_per_run', 5)  # Varsayılan 5 makale
@@ -7055,6 +7059,7 @@ def fetch_latest_ai_articles_smart():
         
         safe_print(f"[HEDEF] Haber çekme yöntemi: {method} (MCP: {'Aktif' if mcp_enabled else 'Pasif'})")
         safe_print(f"[BILGI] Maksimum makale limiti: {max_articles}")
+        safe_print(f"[TIMEOUT] Maksimum çalışma süresi: {MAX_EXECUTION_TIME}s")
         
         if method == 'ai_keywords_only':
             # Sadece AI Keywords kullan
@@ -7097,102 +7102,137 @@ def fetch_latest_ai_articles_smart():
             return articles[:max_articles]
             
         else:  # method == 'auto'
-            # Otomatik seçim - Öncelik sırasına göre dene
+            # Otomatik seçim - Öncelik sırasına göre dene (hızlıdan yavaşa)
             all_articles = []
             
-            # 0. AI Keywords sistemi (yeni özellik) - En yüksek öncelik
+            # 0. RSS kaynakları (en hızlı) - İlk önce dene
             try:
-                ai_keyword_articles = fetch_ai_news_with_advanced_keywords()
-                if ai_keyword_articles:
-                    # Yöntem bilgisini ekle
-                    for article in ai_keyword_articles:
-                        article['fetch_method'] = 'AI Keywords'
-                        article['method_icon'] = '🧠'
-                        article['method_color'] = 'purple'
-                    all_articles.extend(ai_keyword_articles)
-                    safe_print(f"✅ AI Keywords'den {len(ai_keyword_articles)} makale")
-            except Exception as e:
-                safe_print(f"⚠️ AI Keywords hatası: {e}")
-            
-            # 1. Özel kaynakları dene
-            try:
-                custom_articles = fetch_articles_from_custom_sources()
-                if custom_articles:
-                    # Yöntem bilgisini ekle
-                    for article in custom_articles:
-                        article['fetch_method'] = 'Özel Kaynaklar'
-                        article['method_icon'] = '📰'
-                        article['method_color'] = 'orange'
-                    all_articles.extend(custom_articles)
-                    safe_print(f"✅ Özel kaynaklardan {len(custom_articles)} makale")
-            except Exception as e:
-                safe_print(f"⚠️ Özel kaynaklar hatası: {e}")
-            
-            # 2. PythonAnywhere sistemini dene
-            try:
-                pa_articles = fetch_latest_ai_articles_pythonanywhere()
-                if pa_articles:
-                    # Yöntem bilgisini ekle
-                    for article in pa_articles:
-                        article['fetch_method'] = 'PythonAnywhere'
-                        article['method_icon'] = '🐍'
-                        article['method_color'] = 'green'
-                    all_articles.extend(pa_articles)
-                    safe_print(f"✅ PythonAnywhere sisteminden {len(pa_articles)} makale")
-            except Exception as e:
-                safe_print(f"⚠️ PythonAnywhere sistemi hatası: {e}")
-            
-            # 3. RSS kaynaklarını dene
-            try:
-                rss_articles = fetch_articles_with_rss_only()
-                if rss_articles:
-                    # Yöntem bilgisini ekle
-                    for article in rss_articles:
-                        article['fetch_method'] = 'RSS Feeds'
-                        article['method_icon'] = '📡'
-                        article['method_color'] = 'blue'
-                    all_articles.extend(rss_articles)
-                    safe_print(f"✅ RSS kaynaklarından {len(rss_articles)} makale")
+                elapsed_time = time.time() - start_time
+                if elapsed_time < MAX_EXECUTION_TIME:
+                    rss_articles = fetch_articles_with_rss_only()
+                    if rss_articles:
+                        # Yöntem bilgisini ekle
+                        for article in rss_articles:
+                            article['fetch_method'] = 'RSS Feeds'
+                            article['method_icon'] = '📡'
+                            article['method_color'] = 'blue'
+                        all_articles.extend(rss_articles)
+                        safe_print(f"✅ RSS kaynaklarından {len(rss_articles)} makale ({elapsed_time:.1f}s)")
+                        
+                        # Eğer yeterli makale bulunduysa diğer yöntemleri atla
+                        if len(all_articles) >= max_articles:
+                            safe_print(f"🎯 Yeterli makale bulundu ({len(all_articles)}), diğer yöntemler atlanıyor")
+                            return all_articles[:max_articles]
             except Exception as e:
                 safe_print(f"⚠️ RSS kaynakları hatası: {e}")
             
-            # 3. MCP varsa onu da dene
+            # 1. Özel kaynakları dene (hızlı)
+            try:
+                elapsed_time = time.time() - start_time
+                if elapsed_time < MAX_EXECUTION_TIME:
+                    custom_articles = fetch_articles_from_custom_sources()
+                    if custom_articles:
+                        # Yöntem bilgisini ekle
+                        for article in custom_articles:
+                            article['fetch_method'] = 'Özel Kaynaklar'
+                            article['method_icon'] = '📰'
+                            article['method_color'] = 'orange'
+                        all_articles.extend(custom_articles)
+                        safe_print(f"✅ Özel kaynaklardan {len(custom_articles)} makale ({elapsed_time:.1f}s)")
+                        
+                        # Eğer yeterli makale bulunduysa diğer yöntemleri atla
+                        if len(all_articles) >= max_articles:
+                            safe_print(f"🎯 Yeterli makale bulundu ({len(all_articles)}), diğer yöntemler atlanıyor")
+                            return all_articles[:max_articles]
+            except Exception as e:
+                safe_print(f"⚠️ Özel kaynaklar hatası: {e}")
+            
+            # 2. PythonAnywhere sistemini dene (orta hız)
+            try:
+                elapsed_time = time.time() - start_time
+                if elapsed_time < MAX_EXECUTION_TIME:
+                    pa_articles = fetch_latest_ai_articles_pythonanywhere()
+                    if pa_articles:
+                        # Yöntem bilgisini ekle
+                        for article in pa_articles:
+                            article['fetch_method'] = 'PythonAnywhere'
+                            article['method_icon'] = '🐍'
+                            article['method_color'] = 'green'
+                        all_articles.extend(pa_articles)
+                        safe_print(f"✅ PythonAnywhere sisteminden {len(pa_articles)} makale ({elapsed_time:.1f}s)")
+                        
+                        # Eğer yeterli makale bulunduysa diğer yöntemleri atla
+                        if len(all_articles) >= max_articles:
+                            safe_print(f"🎯 Yeterli makale bulundu ({len(all_articles)}), diğer yöntemler atlanıyor")
+                            return all_articles[:max_articles]
+            except Exception as e:
+                safe_print(f"⚠️ PythonAnywhere sistemi hatası: {e}")
+            
+            # 3. AI Keywords sistemi (yavaş ama kaliteli)
+            try:
+                elapsed_time = time.time() - start_time
+                if elapsed_time < MAX_EXECUTION_TIME:
+                    ai_keyword_articles = fetch_ai_news_with_advanced_keywords()
+                    if ai_keyword_articles:
+                        # Yöntem bilgisini ekle
+                        for article in ai_keyword_articles:
+                            article['fetch_method'] = 'AI Keywords'
+                            article['method_icon'] = '🧠'
+                            article['method_color'] = 'purple'
+                        all_articles.extend(ai_keyword_articles)
+                        safe_print(f"✅ AI Keywords'den {len(ai_keyword_articles)} makale ({elapsed_time:.1f}s)")
+                        
+                        # Eğer yeterli makale bulunduysa diğer yöntemleri atla
+                        if len(all_articles) >= max_articles:
+                            safe_print(f"🎯 Yeterli makale bulundu ({len(all_articles)}), diğer yöntemler atlanıyor")
+                            return all_articles[:max_articles]
+            except Exception as e:
+                safe_print(f"⚠️ AI Keywords hatası: {e}")
+            
+            # 4. MCP varsa onu da dene (en yavaş)
             if mcp_enabled:
                 try:
-                    mcp_articles = fetch_latest_ai_articles_with_firecrawl()
-                    if mcp_articles:
-                        # Yöntem bilgisini ekle
-                        for article in mcp_articles:
-                            article['fetch_method'] = 'MCP Firecrawl'
-                            article['method_icon'] = '🤖'
-                            article['method_color'] = 'blue'
-                        all_articles.extend(mcp_articles)
-                        safe_print(f"✅ MCP'den {len(mcp_articles)} makale")
+                    elapsed_time = time.time() - start_time
+                    if elapsed_time < MAX_EXECUTION_TIME:
+                        mcp_articles = fetch_latest_ai_articles_with_firecrawl()
+                        if mcp_articles:
+                            # Yöntem bilgisini ekle
+                            for article in mcp_articles:
+                                article['fetch_method'] = 'MCP Firecrawl'
+                                article['method_icon'] = '🤖'
+                                article['method_color'] = 'blue'
+                            all_articles.extend(mcp_articles)
+                            safe_print(f"✅ MCP'den {len(mcp_articles)} makale ({elapsed_time:.1f}s)")
                 except Exception as e:
                     safe_print(f"⚠️ MCP hatası: {e}")
             
-            # 4. Son çare fallback
+            # 5. Son çare fallback
             if not all_articles:
                 try:
-                    fallback_articles = fetch_latest_ai_articles_fallback()
-                    if fallback_articles:
-                        # Yöntem bilgisini ekle
-                        for article in fallback_articles:
-                            article['fetch_method'] = 'Fallback'
-                            article['method_icon'] = '⚠️'
-                            article['method_color'] = 'gray'
-                        all_articles.extend(fallback_articles)
-                        safe_print(f"✅ Fallback'den {len(fallback_articles)} makale")
+                    elapsed_time = time.time() - start_time
+                    if elapsed_time < MAX_EXECUTION_TIME:
+                        fallback_articles = fetch_latest_ai_articles_fallback()
+                        if fallback_articles:
+                            # Yöntem bilgisini ekle
+                            for article in fallback_articles:
+                                article['fetch_method'] = 'Fallback'
+                                article['method_icon'] = '⚠️'
+                                article['method_color'] = 'gray'
+                            all_articles.extend(fallback_articles)
+                            safe_print(f"✅ Fallback'den {len(fallback_articles)} makale ({elapsed_time:.1f}s)")
                 except Exception as e:
                     safe_print(f"⚠️ Fallback hatası: {e}")
             
             # Duplikat temizleme
             if all_articles:
                 unique_articles = filter_duplicate_articles(all_articles)
-                print(f"📊 Toplam {len(unique_articles)} benzersiz makale bulundu")
+                total_time = time.time() - start_time
+                print(f"📊 Toplam {len(unique_articles)} benzersiz makale bulundu ({total_time:.1f}s)")
                 print(f"🔢 Kullanıcı ayarına göre {max_articles} makale döndürülüyor")
                 return unique_articles[:max_articles]
             
+            total_time = time.time() - start_time
+            safe_print(f"[HATA] Hiç makale bulunamadı ({total_time:.1f}s)")
             return []
         
     except Exception as e:
@@ -8218,7 +8258,7 @@ def fetch_ai_news_with_advanced_keywords():
     try:
         import time
         start_time = time.time()
-        MAX_EXECUTION_TIME = 90  # 90 saniye maksimum çalışma süresi
+        MAX_EXECUTION_TIME = 30  # 30 saniye maksimum çalışma süresi (daha hızlı)
         
         terminal_log("🔍 Gelişmiş AI keyword araması başlatılıyor...", "info")
         
@@ -8682,23 +8722,39 @@ def get_ai_keywords_stats():
         return {}
 
 def is_article_content_valid(article_data):
-    """Makale içeriğinin kaliteli olup olmadığını kontrol et"""
+    """Makale içeriğinin kaliteli olup olmadığını kontrol et - Esnek versiyon"""
     try:
         title = article_data.get('title', '').strip()
         content = article_data.get('content', '').strip()
         
-        # Başlık kontrolleri
-        if not title or len(title) < 10:
+        # Başlık kontrolleri - daha esnek
+        if not title or len(title) < 5:  # 10'dan 5'e düşürüldü
             return False, "Başlık çok kısa veya yok"
         
-        # İçerik kontrolleri
-        if not content or len(content) < 50:
+        # İçerik kontrolleri - daha esnek
+        if not content or len(content) < 30:  # 50'den 30'a düşürüldü
             return False, "İçerik çok kısa veya yok"
         
-        # Anlamsız başlık kontrolleri
+        # Anlamsız başlık kontrolleri - daha toleranslı
         invalid_title_patterns = [
+            "no title",
+            "untitled",
+            "error",
+            "404",
+            "not found",
+            "access denied",
+            "server error"
+        ]
+        
+        title_lower = title.lower()
+        for pattern in invalid_title_patterns:
+            if pattern in title_lower:
+                return False, f"Geçersiz başlık tespit edildi: {pattern}"
+        
+        # Genel başlık kontrolü - sadece çok kısa olanları reddet
+        generic_patterns = [
             "major ai development",
-            "ai breakthrough",
+            "ai breakthrough", 
             "breaking news",
             "ai company announces",
             "significant advancement",
@@ -8709,15 +8765,15 @@ def is_article_content_valid(article_data):
             "new ai announcement"
         ]
         
-        title_lower = title.lower()
-        for pattern in invalid_title_patterns:
-            if pattern in title_lower and len(title) < 80:
-                return False, f"Genel/belirsiz başlık tespit edildi: {pattern}"
+        # Sadece çok kısa genel başlıkları reddet (60 karakterden kısa)
+        for pattern in generic_patterns:
+            if pattern in title_lower and len(title) < 60:  # 80'den 60'a düşürüldü
+                return False, f"Çok kısa genel başlık: {pattern}"
         
-        # Anlamsız içerik kontrolleri  
+        # Anlamsız içerik kontrolleri - daha toleranslı
         invalid_content_patterns = [
             "no company",
-            "no specific company",
+            "no specific company", 
             "unspecified company",
             "content not accessible",
             "unable to access content",
@@ -8739,24 +8795,39 @@ def is_article_content_valid(article_data):
             if pattern in content_lower:
                 return False, f"Erişim/içerik hatası tespit edildi: {pattern}"
         
-        # Çok kısa cümleler (genellikle hatalı scraping)
+        # Cümle kontrolü - daha esnek
         sentences = content.split('.')
-        meaningful_sentences = [s.strip() for s in sentences if len(s.strip()) > 20]
-        if len(meaningful_sentences) < 2:
+        meaningful_sentences = [s.strip() for s in sentences if len(s.strip()) > 15]  # 20'den 15'e düşürüldü
+        if len(meaningful_sentences) < 1:  # 2'den 1'e düşürüldü
             return False, "Yeterli anlamlı cümle yok"
         
-        # Tekrarlayan kelimeler (spam kontrol)
+        # Tekrarlayan kelimeler kontrolü - daha toleranslı
         words = content_lower.split()
-        if len(words) > 10:
+        if len(words) > 15:  # 10'dan 15'e çıkarıldı
             word_freq = {}
             for word in words:
-                if len(word) > 4:  # Uzun kelimeleri say
+                if len(word) > 3:  # 4'ten 3'e düşürüldü
                     word_freq[word] = word_freq.get(word, 0) + 1
             
-            # En sık kullanılan kelime %30'dan fazla geçiyorsa spam olabilir
+            # Spam eşiği %40'a çıkarıldı (daha toleranslı)
             max_freq = max(word_freq.values()) if word_freq else 0
-            if max_freq > len(words) * 0.3:
-                return False, "Tekrarlayan içerik tespit edildi (spam olabilir)"
+            if max_freq > len(words) * 0.4:  # 0.3'ten 0.4'e çıkarıldı
+                return False, "Aşırı tekrarlayan içerik tespit edildi (spam olabilir)"
+        
+        # Yeni: URL kontrolü - geçerli URL varsa daha toleranslı ol
+        url = article_data.get('url', '')
+        if url and ('http' in url or 'www' in url):
+            # URL varsa daha esnek kurallar uygula
+            if len(title) < 8:  # Başlık minimum uzunluğu
+                return False, "Başlık çok kısa"
+            if len(content) < 25:  # İçerik minimum uzunluğu
+                return False, "İçerik çok kısa"
+        else:
+            # URL yoksa daha sıkı kurallar
+            if len(title) < 10:
+                return False, "Başlık çok kısa (URL yok)"
+            if len(content) < 40:
+                return False, "İçerik çok kısa (URL yok)"
         
         return True, "İçerik kaliteli"
         
