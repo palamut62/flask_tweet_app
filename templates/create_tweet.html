@@ -709,9 +709,14 @@ function postManualTweet(tweetId) {
         window.open(data.tweet_url, '_blank');
       }
       
-      // Sayfayı yenile
+      // Dinamik güncelleme - sayfa yenilemesi yok
       setTimeout(() => {
-        location.reload();
+        // Tweet listesini güncelle
+        if (typeof refreshPendingTweets === 'function') {
+          refreshPendingTweets();
+        }
+        // Sayfa ana sayfaya yönlendir
+        window.location.href = '/';
       }, 1000);
       
     } else {

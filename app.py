@@ -34,7 +34,7 @@ from utils import (
     create_automatic_backup, load_ai_keywords_config, save_ai_keywords_config,
     get_all_active_keywords, fetch_ai_news_with_advanced_keywords,
     update_ai_keyword_category, get_ai_keywords_stats, analyze_tweet_quality,
-    safe_log
+    safe_log, get_trending_ai_hashtags, remove_emojis_from_text, enhance_hashtags_with_trending
 )
 
 # GitHub modülü kaldırıldı
@@ -657,9 +657,9 @@ def check_and_post_articles():
         
         # Ayarları yükle
         settings = load_automation_settings()
-        # AI API anahtarı opsiyonel olmalı: Google yoksa OpenRouter'a, o da yoksa yerel fallback'e düş
-        api_key = os.environ.get('GOOGLE_API_KEY') or os.environ.get('OPENROUTER_API_KEY') or ""
-        if not os.environ.get('GOOGLE_API_KEY') and not os.environ.get('OPENROUTER_API_KEY'):
+        # AI API anahtarı opsiyonel olmalı: OpenRouter öncelikli, Google yedek, yoksa yerel fallback
+        api_key = os.environ.get('OPENROUTER_API_KEY') or os.environ.get('GOOGLE_API_KEY') or ""
+        if not os.environ.get('OPENROUTER_API_KEY') and not os.environ.get('GOOGLE_API_KEY'):
             # Uyarı ver, fakat işlemi durdurma (yerel fallback tweet üretimi mevcut)
             terminal_log("⚠️ Hiçbir AI API anahtarı bulunamadı – fallback tweet oluşturma kullanılacak", "warning")
         
@@ -1711,7 +1711,7 @@ def retry_rejected_article():
         # Makaleyi tekrar işle
         try:
             # Tweet oluştur
-            api_key = os.environ.get('GOOGLE_API_KEY') or os.environ.get('OPENROUTER_API_KEY') or ""
+            api_key = os.environ.get('OPENROUTER_API_KEY') or os.environ.get('GOOGLE_API_KEY') or ""
             settings = load_automation_settings()
             theme = settings.get('tweet_theme', 'bilgilendirici')
             
@@ -3603,48 +3603,69 @@ def ocr_image():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 def background_scheduler():
-    """Arka plan zamanlayıcısı - Her 3 saatte bir çalışır"""
+    """Arka plan zamanlayıcısı - Akıllı otomatik sistem"""
     global background_scheduler_running, last_check_time
     
-    print("🚀 Arka plan zamanlayıcısı başlatıldı (Her 3 saatte bir çalışacak)")
+    terminal_log("🚀 Akıllı otomatik zamanlayıcı başlatıldı", "success")
     background_scheduler_running = True
+    
+    # İlk çalıştırmayı hemen yap
+    terminal_log("🔄 İlk otomatik kontrol başlatılıyor...", "info")
+    try:
+        settings = load_automation_settings()
+        if settings.get('auto_mode', False):
+            result = check_and_post_articles()
+            terminal_log(f"✅ İlk kontrol tamamlandı: {result.get('message', 'Sonuç yok')}", "success")
+            last_check_time = datetime.now()
+        else:
+            terminal_log("⏸️ Otomatik mod devre dışı, bekleme modunda", "warning")
+    except Exception as e:
+        terminal_log(f"❌ İlk kontrol hatası: {e}", "error")
     
     while background_scheduler_running:
         try:
-            # Ayarları kontrol et
+            # Ayarları her döngüde yeniden yükle
             settings = load_automation_settings()
             
             if settings.get('auto_mode', False):
                 current_time = datetime.now()
                 check_interval_hours = settings.get('check_interval_hours', 3)
                 
-                # İlk çalışma veya belirlenen süre geçtiyse kontrol et
-                if (last_check_time is None or 
-                    current_time - last_check_time >= timedelta(hours=check_interval_hours)):
+                # Son kontrolden beri geçen süreyi hesapla
+                if last_check_time:
+                    time_passed = current_time - last_check_time
+                    time_passed_hours = time_passed.total_seconds() / 3600
                     
-                    terminal_log(f"🔄 Otomatik haber kontrolü başlatılıyor... (Son kontrol: {last_check_time})", "info")
-                    
+                    if time_passed_hours >= check_interval_hours:
+                        terminal_log(f"🔄 Otomatik kontrol zamanı geldi ({time_passed_hours:.1f} saat geçti)", "info")
+                        
+                        try:
+                            result = check_and_post_articles()
+                            terminal_log(f"✅ Otomatik kontrol tamamlandı: {result.get('message', 'Sonuç yok')}", "success")
+                            last_check_time = current_time
+                        except Exception as check_error:
+                            terminal_log(f"❌ Otomatik kontrol hatası: {check_error}", "error")
+                    else:
+                        remaining_hours = check_interval_hours - time_passed_hours
+                        terminal_log(f"⏰ Sonraki kontrol: {remaining_hours:.1f} saat sonra", "info")
+                else:
+                    # İlk çalıştırma
+                    terminal_log("🔄 İlk otomatik kontrol başlatılıyor...", "info")
                     try:
                         result = check_and_post_articles()
-                        terminal_log(f"✅ Otomatik kontrol tamamlandı: {result.get('message', 'Sonuç yok')}", "success")
-                        
+                        terminal_log(f"✅ İlk kontrol tamamlandı: {result.get('message', 'Sonuç yok')}", "success")
                         last_check_time = current_time
                     except Exception as check_error:
-                        terminal_log(f"❌ Otomatik kontrol hatası: {check_error}", "error")
-                        
-                else:
-                    next_check = last_check_time + timedelta(hours=check_interval_hours)
-                    remaining = next_check - current_time
-                    terminal_log(f"⏰ Sonraki kontrol: {remaining.total_seconds()/3600:.1f} saat sonra", "info")
+                        terminal_log(f"❌ İlk kontrol hatası: {check_error}", "error")
             else:
-                terminal_log("⏸️ Otomatik paylaşım devre dışı", "warning")
+                terminal_log("⏸️ Otomatik mod devre dışı", "info")
             
-            # 30 dakika bekle (kontrol sıklığı)
-            time.sleep(1800)  # 30 dakika = 1800 saniye
+            # Daha sık kontrol et (5 dakika)
+            time.sleep(300)  # 5 dakika = 300 saniye
             
         except Exception as e:
             terminal_log(f"❌ Arka plan zamanlayıcı hatası: {e}", "error")
-            time.sleep(1800)  # Hata durumunda da 30 dakika bekle
+            time.sleep(300)  # Hata durumunda da 5 dakika bekle
 
 def start_background_scheduler():
     """Arka plan zamanlayıcısını thread olarak başlat"""
@@ -3654,7 +3675,7 @@ def start_background_scheduler():
         try:
             scheduler_thread = threading.Thread(target=background_scheduler, daemon=True)
             scheduler_thread.start()
-            terminal_log("🚀 Arka plan zamanlayıcısı başlatıldı (Her 30 dakikada kontrol eder)", "success")
+            terminal_log("🚀 Arka plan zamanlayıcısı başlatıldı (Her 5 dakikada kontrol eder)", "success")
             terminal_log("🔄 Arka plan zamanlayıcı thread'i başlatıldı", "info")
             
             # Thread'in gerçekten başladığını kontrol et
@@ -6115,6 +6136,87 @@ def remove_from_rejected():
         
     except Exception as e:
         terminal_log(f"❌ Reddedilen makale kaldırma hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/get_pending_tweets', methods=['GET'])
+@login_required
+def get_pending_tweets_api():
+    """Pending tweets'leri AJAX ile döndür"""
+    try:
+        pending_tweets = load_json("pending_tweets.json")
+        
+        # HTML render et
+        from flask import render_template_string
+        
+        # Basit pending tweets HTML template'i
+        html_template = '''
+        {% for tweet in pending_tweets %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4" data-tweet-id="{{ tweet.id }}">
+            <div class="flex justify-between items-start mb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                        {{ tweet.get('source_type', 'news') }}
+                    </span>
+                    <span class="text-gray-500 text-xs">
+                        {{ tweet.get('created_at', 'Bilinmiyor') }}
+                    </span>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="postTweet({{ tweet.id }})" 
+                            class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded">
+                        <i class="fas fa-paper-plane mr-1"></i> Paylaş
+                    </button>
+                    <button onclick="deleteTweet({{ tweet.id }})" 
+                            class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded">
+                        <i class="fas fa-trash mr-1"></i> Sil
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-gray-800 mb-3">
+                {{ tweet.get('tweet', 'Tweet metni bulunamadı') }}
+            </div>
+            
+            {% if tweet.get('article_title') %}
+            <div class="text-sm text-gray-600 border-t pt-2">
+                <strong>Kaynak:</strong> {{ tweet.article_title }}
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="text-center text-gray-500 py-8">
+            <i class="fas fa-inbox text-4xl mb-4"></i>
+            <p>Henüz bekleyen tweet yok</p>
+        </div>
+        {% endfor %}
+        '''
+        
+        html_content = render_template_string(html_template, pending_tweets=pending_tweets)
+        
+        return jsonify({
+            "success": True,
+            "html": html_content,
+            "count": len(pending_tweets)
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Pending tweets API hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/rate_limit_status', methods=['GET'])
+@login_required
+def get_rate_limit_status_api():
+    """Rate limit durumunu AJAX ile döndür"""
+    try:
+        rate_limit_info = get_rate_limit_info()
+        
+        return jsonify({
+            "success": True,
+            "rate_limit": rate_limit_info
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Rate limit API hatası: {e}", "error")
         return jsonify({"success": False, "error": str(e)})
 
 if __name__ == '__main__':

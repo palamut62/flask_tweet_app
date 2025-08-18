@@ -1081,7 +1081,14 @@
                     if (data.success) {
                         showNotification('Tweet başarıyla paylaşıldı!', 'success');
                         updateRateLimitStatus(); // Rate limit durumunu güncelle
-                        setTimeout(() => window.location.reload(), 1000);
+                        // Pending tweets'leri dinamik güncelle
+                        if (typeof refreshPendingTweets === 'function') {
+                            refreshPendingTweets();
+                        }
+                        // Tweet sayılarını güncelle
+                        if (typeof updateTweetCounts === 'function') {
+                            updateTweetCounts();
+                        }
                     } else {
                         if (data.rate_limited && data.manual_share_url) {
                             // Rate limit durumunda manuel paylaşım seçeneği sun
@@ -1101,8 +1108,14 @@
                                 
                                 // Kısa bir süre sonra sayfa yenile
                                 setTimeout(() => {
-                                    showNotification('🚀 Twitter\'da manuel paylaşım sayfası açıldı! Sayfa yenilenecek.', 'info');
-                                    setTimeout(() => window.location.reload(), 1000);
+                                    showNotification('🚀 Twitter\'da manuel paylaşım sayfası açıldı!', 'info');
+                                    // Dinamik güncelleme
+                                    if (typeof refreshPendingTweets === 'function') {
+                                        refreshPendingTweets();
+                                    }
+                                    if (typeof updateTweetCounts === 'function') {
+                                        updateTweetCounts();
+                                    }
                                 }, 500);
                             } else {
                                 showNotification(`⏰ ${waitMinutes} dakika sonra tekrar deneyin.`, 'warning');

@@ -4444,5 +4444,43 @@
     "tags": [],
     "category": "ai_general",
     "is_posted": true
+  },
+  {
+    "title": "GPT-5 is supposed to be nicer now",
+    "url": "https://techcrunch.com/2025/08/17/gpt-5-is-supposed-to-be-nicer-now/",
+    "content": "OpenAI announced late Friday that it’s updating its latest model to be “warmer and friendlier.”",
+    "source": "RSS - TechCrunch RSS",
+    "source_type": "news",
+    "hash": "ef6e03044b3f0a13ff1622efe963fdc6",
+    "posted_date": "2025-08-18T12:54:52.760277",
+    "tweet_id": "1957380655550964137",
+    "tweet_url": "https://x.com/i/status/1957380655550964137",
+    "tweet_text": "",
+    "manual_post": false,
+    "bulk_operation": false,
+    "post_method": "otomatik",
+    "quality_score": 0,
+    "tags": [],
+    "category": "ai_general",
+    "is_posted": true
+  },
+  {
+    "title": "‘Stranger Things’ creators may be leaving Netflix",
+    "url": "https://techcrunch.com/2025/08/17/stranger-things-creators-may-be-leaving-netflix/",
+    "content": "Netflix could soon lose the creative team behind one of its biggest hits, with the Duffer Brothers reportedly signing an exclusive deal with Paramount.",
+    "source": "RSS - TechCrunch RSS",
+    "source_type": "news",
+    "hash": "07a78187f58b3772f922d0e66e612c0e",
+    "posted_date": "2025-08-18T12:55:08.995039",
+    "tweet_id": "1957380725805645981",
+    "tweet_url": "https://x.com/i/status/1957380725805645981",
+    "tweet_text": "",
+    "manual_post": false,
+    "bulk_operation": false,
+    "post_method": "otomatik",
+    "quality_score": 0,
+    "tags": [],
+    "category": "ai_general",
+    "is_posted": true
   }
 ]

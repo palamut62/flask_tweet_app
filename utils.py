@@ -14,6 +14,7 @@ from email.mime.multipart import MIMEMultipart
 import time
 import re
 from difflib import SequenceMatcher
+# emoji kütüphanesi yerine regex kullanacağız
 
 # .env dosyasını yükle
 load_dotenv()
@@ -704,26 +705,38 @@ def openrouter_call(prompt, api_key, max_tokens=100, model="openrouter/horizon-b
         return None
 
 def gemini_call(prompt, api_key, max_tokens=100):
-    """Google Gemini API çağrısı - OpenRouter yedek sistemi ile"""
-    if not api_key:
-        # Google anahtarı yoksa, OpenRouter varsa direkt ona düş
-        openrouter_key = os.environ.get('OPENROUTER_API_KEY')
-        if openrouter_key:
-            safe_log("[FALLBACK] Google API anahtarı yok, OpenRouter kullanılacak", "INFO")
-            return try_openrouter_fallback(prompt, max_tokens)
-        safe_log("Gemini API anahtarı bulunamadı", "WARNING")
+    """AI API çağrısı - OpenRouter öncelikli, Gemini yedek sistemi ile"""
+    
+    # OpenRouter'ı önce dene
+    openrouter_key = os.environ.get('OPENROUTER_API_KEY')
+    if openrouter_key:
+        safe_log("[PRIMARY] OpenRouter API kullanılacak", "INFO")
+        try:
+            result = openrouter_call(prompt, openrouter_key, max_tokens)
+            if result and result != "API hatası" and len(result.strip()) > 5:
+                safe_log(f"✅ OpenRouter başarılı: {len(result)} karakter", "SUCCESS")
+                return result
+            else:
+                safe_log("⚠️ OpenRouter yanıtı yetersiz, Gemini'ye geçiliyor", "WARNING")
+        except Exception as e:
+            safe_log(f"❌ OpenRouter hatası: {e}, Gemini'ye geçiliyor", "ERROR")
+    
+    # OpenRouter başarısızsa veya yoksa Gemini'yi dene
+    google_key = api_key or os.environ.get('GOOGLE_API_KEY')
+    if not google_key:
+        safe_log("❌ Hiçbir API anahtarı bulunamadı", "ERROR")
         return "API anahtarı eksik"
     
     try:
         import google.generativeai as genai
         
         # API anahtarını yapılandır
-        genai.configure(api_key=api_key)
+        genai.configure(api_key=google_key)
         
         # Modeli oluştur
         model = genai.GenerativeModel('gemini-2.0-flash')
         
-        safe_log("Gemini API çağrısı yapılıyor... Model: gemini-2.0-flash", "DEBUG")
+        safe_log("[FALLBACK] Gemini API çağrısı yapılıyor... Model: gemini-2.0-flash", "INFO")
         
         # Generation config
         generation_config = genai.types.GenerationConfig(
@@ -737,21 +750,17 @@ def gemini_call(prompt, api_key, max_tokens=100):
             generation_config=generation_config
         )
         
-        safe_log("Gemini API Yanıtı alındı", "DEBUG")
-        
         if response.text:
             content = response.text.strip()
-            safe_log(f"İçerik alındı: {len(content)} karakter", "DEBUG")
+            safe_log(f"✅ Gemini başarılı: {len(content)} karakter", "SUCCESS")
             return content
         else:
-            safe_log("Gemini API yanıtında metin bulunamadı", "DEBUG")
-            # OpenRouter yedek sistemi dene
-            return try_openrouter_fallback(prompt, max_tokens)
+            safe_log("❌ Gemini API yanıtında metin bulunamadı", "ERROR")
+            return "API yanıt hatası"
             
     except Exception as e:
-        safe_log(f"Gemini API çağrı hatası: {str(e)}", "ERROR")
-        # OpenRouter yedek sistemi dene
-        return try_openrouter_fallback(prompt, max_tokens)
+        safe_log(f"❌ Gemini API çağrı hatası: {str(e)}", "ERROR")
+        return "API hatası"
 
 def try_openrouter_fallback(prompt, max_tokens=100):
     """OpenRouter yedek sistemini dene"""
@@ -1140,49 +1149,43 @@ def generate_ai_tweet_with_mcp_analysis(article_data, api_key, theme="bilgilendi
     
     print(f"🤖 AI ile tweet oluşturuluyor (kaynak: {source}, tema: {theme})...")
     
-    # Tweet temaları ve özellikleri
+    # Tweet temaları ve özellikleri - emoji'siz versiyon
     tweet_themes = {
         "bilgilendirici": {
             "style": "informative and professional",
             "tone": "clear, factual, and educational",
-            "emojis": ["📊", "💡", "🔍", "📈", "⚡", "🎯"],
             "hashtags": ["#AI", "#Tech", "#Innovation", "#Technology"],
             "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
         },
         "eğlenceli": {
             "style": "fun and engaging",
             "tone": "playful, exciting, and enthusiastic",
-            "emojis": ["🚀", "🎉", "🔥", "✨", "🎊", "🌟", "💫", "🎈"],
             "hashtags": ["#TechFun", "#Innovation", "#Cool", "#Amazing"],
-            "example": "🚀 Mind-blown! This AI can now read your thoughts (almost)! 🧠✨"
+            "example": "Mind-blown! This AI can now read your thoughts (almost)!"
         },
         "mizahi": {
             "style": "humorous and witty",
             "tone": "funny, clever, and entertaining",
-            "emojis": ["😂", "🤖", "😄", "🙃", "😎", "🤯", "🎭", "😅"],
             "hashtags": ["#TechHumor", "#AILife", "#TechJokes", "#FunnyTech"],
-            "example": "Robots are getting smarter... Should we be worried or impressed? 🤖😅"
+            "example": "Robots are getting smarter... Should we be worried or impressed?"
         },
         "resmi": {
             "style": "formal and authoritative",
             "tone": "professional, serious, and official",
-            "emojis": ["📢", "🏢", "📋", "⚖️", "🔒", "📊"],
             "hashtags": ["#TechNews", "#Industry", "#Business", "#Enterprise"],
             "example": "Major technological advancement announced in artificial intelligence sector"
         },
         "heyecanlı": {
             "style": "exciting and energetic",
             "tone": "enthusiastic, dynamic, and inspiring",
-            "emojis": ["🔥", "⚡", "🚀", "💥", "🌟", "✨", "🎯", "💪"],
             "hashtags": ["#Breakthrough", "#GameChanger", "#Revolutionary", "#NextLevel"],
-            "example": "🔥 BREAKTHROUGH ALERT! This changes everything we know about AI! ⚡"
+            "example": "BREAKTHROUGH ALERT! This changes everything we know about AI!"
         },
         "meraklı": {
             "style": "curious and questioning",
             "tone": "inquisitive, thoughtful, and exploratory",
-            "emojis": ["🤔", "❓", "🔍", "🧐", "💭", "🔬", "🎓"],
             "hashtags": ["#TechCuriosity", "#WhatIf", "#Explore", "#Discover"],
-            "example": "🤔 What if AI could predict the future? This new research suggests it might... 🔮"
+            "example": "What if AI could predict the future? This new research suggests it might..."
         }
     }
     
@@ -1218,6 +1221,7 @@ General Requirements:
 - Sound exciting but credible
 - Do NOT include hashtags, emojis, URLs, or impact levels (added separately)
 - Do NOT mention impact, effect level, or rating in the tweet
+- IMPORTANT: Do NOT use any emojis in the tweet text - keep it clean and professional
 
 Tweet text:"""
         
@@ -1271,27 +1275,31 @@ Tweet text:"""
         # Fazla boşlukları temizle
         tweet_text = re.sub(r'\s+', ' ', tweet_text).strip()
         
-        # Tema göre hashtag ve emoji seç
-        import random
+        # Tweet metninden emojileri kaldır
+        tweet_text = remove_emojis_from_text(tweet_text)
         
-        # Tema emojilerini kullan
-        theme_emojis = theme_info['emojis']
-        selected_emojis = random.sample(theme_emojis, min(2, len(theme_emojis)))
-        emoji_text = "".join(selected_emojis)
+        # Trending AI hashtag'leri çek
+        trending_hashtags = get_trending_ai_hashtags()
         
         # Tema hashtag'lerini kullan ve mevcut analiz hashtag'leri ile birleştir
         theme_hashtags = theme_info['hashtags']
         analysis_hashtags = analysis.get('hashtags', [])
         
-        # Tema hashtag'lerini öncelikle al, sonra analiz hashtag'lerini ekle
-        combined_hashtags = theme_hashtags[:2]  # İlk 2 tema hashtag'i
+        # Hashtag'leri birleştir: tema hashtag'leri + analiz hashtag'leri + trending hashtag'ler
+        base_hashtags = theme_hashtags[:2]  # İlk 2 tema hashtag'i
         for hashtag in analysis_hashtags:
-            if hashtag not in combined_hashtags and len(combined_hashtags) < 4:
-                combined_hashtags.append(hashtag)
+            if hashtag not in base_hashtags and len(base_hashtags) < 3:
+                base_hashtags.append(hashtag)
         
-        hashtag_text = " ".join(combined_hashtags[:4])  # Maksimum 4 hashtag
+        # Trending hashtag'lerle zenginleştir
+        combined_hashtags = enhance_hashtags_with_trending(base_hashtags, trending_hashtags, max_count=5)
         
-        url_part = f"\n\n🔗 {url}"
+        hashtag_text = " ".join(combined_hashtags)  # Maksimum 5 hashtag
+        
+        # Emoji'leri kaldır - artık emoji kullanmıyoruz
+        emoji_text = ""
+        
+        url_part = f"\n\n{url}"
         
         # Sabit kısımların uzunluğu
         fixed_parts_length = len(emoji_text) + len(hashtag_text) + len(url_part) + 2  # 2 boşluk için
@@ -1305,13 +1313,8 @@ Tweet text:"""
             # "..." için 3 karakter ayır
             tweet_text = tweet_text[:available_chars-3] + "..."
         
-        # Final tweet oluştur - boşlukları optimize et
-        if emoji_text and tweet_text:
-            # Emoji varsa emoji ile tweet arasında tek boşluk
-            main_content = f"{emoji_text} {tweet_text}"
-        else:
-            # Emoji yoksa direkt tweet
-            main_content = tweet_text
+        # Final tweet oluştur - emoji'siz versiyon
+        main_content = tweet_text
         
         if hashtag_text:
             # Hashtag varsa tek boşluk ile ekle
@@ -1334,11 +1337,8 @@ Tweet text:"""
                 available_chars = TWITTER_LIMIT - fixed_parts_length
                 tweet_text = tweet_text[:available_chars-3] + "..."
             
-            # Yeniden oluştur
-            if emoji_text and tweet_text:
-                main_content = f"{emoji_text} {tweet_text}"
-            else:
-                main_content = tweet_text
+            # Yeniden oluştur - emoji'siz versiyon
+            main_content = tweet_text
             
             if hashtag_text:
                 final_tweet = f"{main_content} {hashtag_text}{url_part}"
@@ -1348,11 +1348,11 @@ Tweet text:"""
         safe_print(f"✅ AI analizi ile tweet oluşturuldu: {len(final_tweet)} karakter")
         print(f"🎨 Tweet teması: {theme}")
         safe_print(f"📝 Tweet metni: {len(tweet_text)} karakter")
-        safe_print(f"🏷️ Tema Hashtag'ler: {hashtag_text} ({len(hashtag_text)} karakter)")
-        print(f"😊 Tema Emojiler: {emoji_text} ({len(emoji_text)} karakter)")
+        safe_print(f"🏷️ Hashtag'ler: {hashtag_text} ({len(hashtag_text)} karakter)")
         safe_print(f"🔗 URL kısmı: {len(url_part)} karakter")
         safe_print(f"🎯 Hedef Kitle: {analysis['audience']}")
         print(f"📊 Impact Score: 8 (varsayılan)")
+        safe_print(f"🔥 Trending hashtag'ler dahil edildi: {len(trending_hashtags)} adet")
         
         # Dictionary formatında döndür
         return {
@@ -8970,3 +8970,125 @@ def analyze_tweet_quality(tweet_text, article_title="", api_key=None):
             "issues": [],
             "warnings": [f"Analiz hatası: {str(e)}"]
         }
+
+def get_trending_ai_hashtags():
+    """AI konulu popüler hashtag'leri döndür - Statik liste + dinamik rotasyon"""
+    try:
+        # Popüler AI hashtag'leri kategorilere göre
+        ai_hashtag_categories = {
+            "core_ai": ["#AI", "#ArtificialIntelligence", "#MachineLearning", "#DeepLearning"],
+            "companies": ["#OpenAI", "#ChatGPT", "#Claude", "#Gemini", "#Microsoft", "#Google"],
+            "technologies": ["#LLM", "#NLP", "#ComputerVision", "#NeuralNetworks", "#Transformer"],
+            "applications": ["#AITools", "#Automation", "#AIAssistant", "#GenerativeAI"],
+            "trends": ["#Tech", "#Innovation", "#Future", "#TechNews", "#AIRevolution", "#NextGen"],
+            "development": ["#AIResearch", "#MLOps", "#AIEthics", "#DataScience", "#Programming"]
+        }
+        
+        # Günün saatine göre farklı kombinasyonlar kullan (pseudo-random)
+        import datetime
+        current_hour = datetime.datetime.now().hour
+        
+        # Saat bazlı rotasyon için kategoriler seç
+        if current_hour < 6:  # Gece: Araştırma odaklı
+            selected_categories = ["core_ai", "technologies", "development"]
+        elif current_hour < 12:  # Sabah: Şirket ve teknoloji odaklı
+            selected_categories = ["companies", "technologies", "trends"]
+        elif current_hour < 18:  # Öğleden sonra: Uygulama ve trend odaklı
+            selected_categories = ["applications", "trends", "core_ai"]
+        else:  # Akşam: Genel ve popüler odaklı
+            selected_categories = ["core_ai", "companies", "trends"]
+        
+        # Her kategoriden hashtag seç
+        trending_hashtags = []
+        for category in selected_categories:
+            category_hashtags = ai_hashtag_categories.get(category, [])
+            # Her kategoriden 2-3 hashtag al
+            import random
+            selected_from_category = random.sample(category_hashtags, min(2, len(category_hashtags)))
+            trending_hashtags.extend(selected_from_category)
+        
+        # Duplikasyonları kaldır ve karıştır
+        unique_hashtags = list(set(trending_hashtags))
+        random.shuffle(unique_hashtags)
+        
+        # En fazla 6 hashtag döndür
+        result_hashtags = unique_hashtags[:6]
+        
+        terminal_log(f"✅ {len(result_hashtags)} dinamik AI hashtag oluşturuldu (saat: {current_hour})", "success")
+        terminal_log(f"📋 Seçilen hashtag'ler: {', '.join(result_hashtags)}", "info")
+        
+        return result_hashtags
+        
+    except Exception as e:
+        terminal_log(f"❌ Hashtag oluşturma hatası: {e}", "error")
+        # Hata durumunda temel hashtag'leri döndür
+        return ["#AI", "#Tech", "#Innovation", "#ArtificialIntelligence", "#MachineLearning"]
+
+def remove_emojis_from_text(text):
+    """Metinden emojileri kaldır - Regex tabanlı"""
+    try:
+        # Kapsamlı emoji regex pattern'i
+        emoji_pattern = re.compile("["
+                                  u"\U0001F600-\U0001F64F"  # emoticons
+                                  u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+                                  u"\U0001F680-\U0001F6FF"  # transport & map symbols
+                                  u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                                  u"\U00002500-\U00002BEF"  # chinese char
+                                  u"\U00002702-\U000027B0"  # dingbats
+                                  u"\U000024C2-\U0001F251"  # enclosed characters
+                                  u"\U0001f926-\U0001f937"  # additional emoticons
+                                  u"\U00010000-\U0010ffff"  # supplementary characters
+                                  u"\u2640-\u2642"          # gender symbols
+                                  u"\u2600-\u2B55"          # misc symbols
+                                  u"\u200d"                # zero width joiner
+                                  u"\u23cf"                # eject symbol
+                                  u"\u23e9"                # fast forward
+                                  u"\u231a"                # watch
+                                  u"\ufe0f"                # variation selector
+                                  u"\u3030"                # wavy dash
+                                  u"\U0001F900-\U0001F9FF"  # supplemental symbols
+                                  u"\U0001FA70-\U0001FAFF"  # symbols and pictographs extended-a
+                                  "]+", flags=re.UNICODE)
+        
+        # Emoji'leri kaldır
+        clean_text = emoji_pattern.sub(r'', text)
+        
+        # Yaygın emoji karakterlerini de ayrıca kaldır
+        common_emojis = ['🚀', '🔥', '⚡', '💡', '🎯', '📊', '✨', '🌟', '💫', '🎉', '🎊', '🎈', 
+                        '😂', '🤖', '😄', '🙃', '😎', '🤯', '🎭', '😅', '📢', '🏢', '📋', '⚖️', 
+                        '🔒', '💥', '💪', '🤔', '❓', '🔍', '🧐', '💭', '🔬', '🎓', '🔗']
+        
+        for emoji_char in common_emojis:
+            clean_text = clean_text.replace(emoji_char, '')
+        
+        # Fazla boşlukları temizle
+        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+        
+        return clean_text
+        
+    except Exception as e:
+        terminal_log(f"❌ Emoji kaldırma hatası: {e}", "error")
+        # Hata durumunda orijinal metni döndür
+        return text
+
+def enhance_hashtags_with_trending(base_hashtags, trending_hashtags, max_count=5):
+    """Mevcut hashtag'leri trending hashtag'lerle zenginleştir"""
+    try:
+        enhanced_hashtags = []
+        
+        # Önce mevcut hashtag'leri ekle
+        for hashtag in base_hashtags:
+            if hashtag not in enhanced_hashtags:
+                enhanced_hashtags.append(hashtag)
+        
+        # Sonra trending hashtag'leri ekle (tekrar etmeyecek şekilde)
+        for hashtag in trending_hashtags:
+            if hashtag not in enhanced_hashtags and len(enhanced_hashtags) < max_count:
+                enhanced_hashtags.append(hashtag)
+        
+        # En fazla max_count kadar hashtag döndür
+        return enhanced_hashtags[:max_count]
+        
+    except Exception as e:
+        terminal_log(f"❌ Hashtag zenginleştirme hatası: {e}", "error")
+        return base_hashtags[:max_count]

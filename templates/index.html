@@ -2049,11 +2049,13 @@ function manualPostTweet(tweetId) {
                 }, 300);
             }
             
-            // Kullanıcıya bilgi ver ve sayfayı yenile
+            // Kullanıcıya bilgi ver - sayfa yenilemesi yok
             setTimeout(() => {
                 showSuccessToast('Tweet manuel olarak paylaşıldı ve kaydedildi!');
-                // Sayfa yenile - pending tweets listesi güncellensin
-                location.reload();
+                // Tweet sayılarını güncelle
+                updateTweetCounts();
+                // Pending tweets bölümünü güncelle
+                refreshPendingTweets();
             }, 500);
         } else {
             // Hata durumunda UI'ı geri yükle
@@ -2775,10 +2777,11 @@ function shareRejectedTweet(articleUrl, articleTitle, tweetText) {
                 }, 300);
             }
             
-            // 2 saniye sonra sayfayı yenile
+            // Dinamik güncelleme - sayfa yenilemesi yok
             setTimeout(() => {
-                location.reload();
-            }, 2000);
+                refreshPendingTweets();
+                updateTweetCounts();
+            }, 1000);
         } else {
             showErrorToast(`Hata: ${data.error}`);
             button.innerHTML = originalContent;
@@ -2891,6 +2894,73 @@ function removeFromRejected(articleUrl) {
         });
     });
 }
+
+// Pending tweets bölümünü dinamik olarak yenile
+function refreshPendingTweets() {
+    fetch('/api/get_pending_tweets')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const pendingContainer = document.querySelector('#pending-tweets-container');
+                if (pendingContainer && data.html) {
+                    pendingContainer.innerHTML = data.html;
+                    // Tweet sayılarını güncelle
+                    updateTweetCounts();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Pending tweets yenileme hatası:', error);
+        });
+}
+
+// Rate limit durumunu güncelle
+function updateRateLimitStatus() {
+    fetch('/api/rate_limit_status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.rate_limit) {
+                const statusElement = document.querySelector('#rate-limit-status');
+                if (statusElement) {
+                    const remaining = data.rate_limit.remaining_posts;
+                    const resetTime = data.rate_limit.reset_time;
+                    statusElement.innerHTML = `
+                        <span class="text-sm ${remaining > 0 ? 'text-green-600' : 'text-red-600'}">
+                            Kalan: ${remaining} tweet | Reset: ${resetTime}
+                        </span>
+                    `;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Rate limit güncelleme hatası:', error);
+        });
+}
+
+// Reddedilen makale sayısını güncelle
+function updateRejectedArticleCount() {
+    const rejectedArticles = document.querySelectorAll('[data-article-url]');
+    const countElement = document.getElementById('rejected-count');
+    if (countElement) {
+        countElement.textContent = rejectedArticles.length;
+    }
+}
+
+// Sayfa yüklendiğinde refresh parametresi kontrolü
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('refresh') === 'true') {
+        // URL'den refresh parametresini kaldır
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        // Pending tweets'leri güncelle
+        setTimeout(() => {
+            refreshPendingTweets();
+            updateTweetCounts();
+            updateRateLimitStatus();
+        }, 500);
+    }
+});
 </script>
 
     </div>

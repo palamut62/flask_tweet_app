@@ -33,5 +33,20 @@
     "post_methods": {
       "otomatik": 4
     }
+  },
+  "2025-08-18": {
+    "total_posts": 2,
+    "automatic_posts": 2,
+    "manual_posts": 0,
+    "bulk_posts": 0,
+    "github_posts": 0,
+    "news_posts": 2,
+    "quality_scores": [],
+    "sources": {
+      "RSS - TechCrunch RSS": 2
+    },
+    "post_methods": {
+      "otomatik": 2
+    }
   }
 }

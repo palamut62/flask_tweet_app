@@ -297,5 +297,30 @@
             "clickbait.com"
         ],
         "required_quality_score": 6.0
+    },
+    "hashtag_settings": {
+        "enable_trending_hashtags": true,
+        "max_hashtags_per_tweet": 5,
+        "trending_hashtag_sources": [
+            "twitter_trends",
+            "ai_keywords"
+        ],
+        "default_ai_hashtags": [
+            "#AI",
+            "#Tech",
+            "#Innovation",
+            "#ArtificialIntelligence",
+            "#MachineLearning",
+            "#DeepLearning",
+            "#TechNews",
+            "#Future"
+        ],
+        "trending_update_interval_hours": 6,
+        "last_trending_update": null
+    },
+    "emoji_settings": {
+        "remove_emojis_from_tweets": true,
+        "clean_emoji_patterns": true,
+        "preserve_text_emoticons": false
     }
 }
