@@ -712,22 +712,22 @@ def ai_call(prompt, api_key=None, max_tokens=100):
     
     if not openrouter_key:
         safe_log("❌ OpenRouter API anahtarı bulunamadı", "ERROR")
-        return "API anahtarı eksik"
+        return None  # None döndür, hata mesajı değil
     
     safe_log("[OpenRouter] API çağrısı yapılıyor...", "INFO")
     
     try:
         result = openrouter_call(prompt, openrouter_key, max_tokens)
-        if result and result != "API hatası" and len(result.strip()) > 5:
+        if result and result != "API hatası" and len(result.strip()) > 10:  # Minimum 10 karakter kontrolü
             safe_log(f"✅ OpenRouter başarılı: {len(result)} karakter", "SUCCESS")
             return result
         else:
             safe_log("⚠️ OpenRouter yanıtı yetersiz", "WARNING")
-            return "API yanıt yetersiz"
+            return None  # None döndür, hata mesajı değil
             
     except Exception as e:
         safe_log(f"❌ OpenRouter API hatası: {str(e)}", "ERROR")
-        return "API hatası"
+        return None  # None döndür, hata mesajı değil
 
 # Geriye uyumluluk için gemini_call fonksiyonunu ai_call'a yönlendir
 def gemini_call(prompt, api_key, max_tokens=100):
@@ -741,7 +741,7 @@ def try_openrouter_fallback(prompt, max_tokens=100):
         openrouter_key = os.environ.get('OPENROUTER_API_KEY')
         if not openrouter_key:
             safe_log("[UYARI] OpenRouter API anahtarı bulunamadı, yedek sistem kullanılamıyor", "WARNING")
-            return "API hatası"
+            return None
         
         safe_log("[FALLBACK] Gemini başarısız, OpenRouter yedek sistemi deneniyor...", "INFO")
         
@@ -774,11 +774,11 @@ def try_openrouter_fallback(prompt, max_tokens=100):
         
         # Hiçbir model çalışmazsa
         safe_log("[HATA] Tüm OpenRouter modelleri başarısız", "ERROR")
-        return "API hatası"
+        return None
         
     except Exception as e:
         safe_log(f"[HATA] OpenRouter yedek sistem hatası: {e}", "ERROR")
-        return "API hatası"
+        return None
 def generate_smart_hashtags(title, content):
     """Makale içeriğine göre akıllı hashtag oluşturma - 5 popüler hashtag"""
     combined_text = f"{title.lower()} {content.lower()}"
@@ -1286,7 +1286,8 @@ Tweet text:"""
         tweet_text = gemini_call(tweet_prompt, api_key, max_tokens=80)
 
         # API yok/hata veya anlamsız kısa çıktı durumunda fallback
-        if (not tweet_text) or (len(tweet_text.strip()) < 20) or ("api" in tweet_text.lower()):
+        # None kontrolü ve hata mesajı kontrolü eklendi
+        if (not tweet_text) or (not isinstance(tweet_text, str)) or (len(tweet_text.strip()) < 20) or any(keyword in tweet_text.lower() for keyword in ['api yanıt yetersiz', 'api hatası', 'api anahtarı eksik']):
             # İyileştirilmiş fallback tweet metni - tema göre
             if analysis['companies'] and analysis['innovation']:
                 company = analysis['companies'][0]
@@ -1560,13 +1561,21 @@ Tweet text (max {MAX_CONTENT_LENGTH} chars):"""
 
         tweet_text = gemini_call(prompt, api_key, max_tokens=150)
         
-        if tweet_text and len(tweet_text.strip()) > 10:
+        # API çağrısının başarılı olup olmadığını kontrol et
+        if tweet_text and isinstance(tweet_text, str) and len(tweet_text.strip()) > 20:
             # Tweet metnini temizle
             import re
             # Impact/etki bilgilerini temizle
             tweet_text = re.sub(r'\b(impact|etki|effect)\s*:\s*\w+\b', '', tweet_text, flags=re.IGNORECASE)
             tweet_text = re.sub(r'[\(\[\{]\s*(impact|etki|effect)\s*:\s*\w+\s*[\)\]\}]', '', tweet_text, flags=re.IGNORECASE)
             tweet_text = re.sub(r'\s+', ' ', tweet_text).strip()
+            
+            # Hata mesajı içerip içermediğini kontrol et
+            error_keywords = ['api yanıt yetersiz', 'api hatası', 'api anahtarı eksik', 'error', 'failed']
+            tweet_lower = tweet_text.lower()
+            if any(keyword in tweet_lower for keyword in error_keywords):
+                print("[FALLBACK] API yanıtında hata mesajı tespit edildi, basit fallback kullanılıyor...")
+                return create_fallback_tweet(title, content, url)
             
             # Karakter limiti kontrolü
             if len(tweet_text.strip()) > MAX_CONTENT_LENGTH:
