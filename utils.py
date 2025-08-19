@@ -634,7 +634,7 @@ Seçenekler: Developer, Investor, General
 Cevap:"""
     return gemini_call(prompt, api_key, max_tokens=10).strip()
 
-def openrouter_call(prompt, api_key, max_tokens=100, model="openrouter/horizon-beta"):
+def openrouter_call(prompt, api_key, max_tokens=100, model="moonshotai/kimi-k2:free"):
     """OpenRouter API çağrısı - Ücretsiz model ile yedek sistem"""
     if not api_key:
         safe_log("OpenRouter API anahtarı bulunamadı", "WARNING")
@@ -704,63 +704,35 @@ def openrouter_call(prompt, api_key, max_tokens=100, model="openrouter/horizon-b
         safe_log(f"OpenRouter API çağrı hatası: {str(e)}", "ERROR")
         return None
 
-def gemini_call(prompt, api_key, max_tokens=100):
-    """AI API çağrısı - OpenRouter öncelikli, Gemini yedek sistemi ile"""
+def ai_call(prompt, api_key=None, max_tokens=100):
+    """AI API çağrısı - Sadece OpenRouter kullanılır"""
     
-    # OpenRouter'ı önce dene
-    openrouter_key = os.environ.get('OPENROUTER_API_KEY')
-    if openrouter_key:
-        safe_log("[PRIMARY] OpenRouter API kullanılacak", "INFO")
-        try:
-            result = openrouter_call(prompt, openrouter_key, max_tokens)
-            if result and result != "API hatası" and len(result.strip()) > 5:
-                safe_log(f"✅ OpenRouter başarılı: {len(result)} karakter", "SUCCESS")
-                return result
-            else:
-                safe_log("⚠️ OpenRouter yanıtı yetersiz, Gemini'ye geçiliyor", "WARNING")
-        except Exception as e:
-            safe_log(f"❌ OpenRouter hatası: {e}, Gemini'ye geçiliyor", "ERROR")
+    # OpenRouter API anahtarını al
+    openrouter_key = api_key or os.environ.get('OPENROUTER_API_KEY')
     
-    # OpenRouter başarısızsa veya yoksa Gemini'yi dene
-    google_key = api_key or os.environ.get('GOOGLE_API_KEY')
-    if not google_key:
-        safe_log("❌ Hiçbir API anahtarı bulunamadı", "ERROR")
+    if not openrouter_key:
+        safe_log("❌ OpenRouter API anahtarı bulunamadı", "ERROR")
         return "API anahtarı eksik"
     
+    safe_log("[OpenRouter] API çağrısı yapılıyor...", "INFO")
+    
     try:
-        import google.generativeai as genai
-        
-        # API anahtarını yapılandır
-        genai.configure(api_key=google_key)
-        
-        # Modeli oluştur
-        model = genai.GenerativeModel('gemini-2.0-flash')
-        
-        safe_log("[FALLBACK] Gemini API çağrısı yapılıyor... Model: gemini-2.0-flash", "INFO")
-        
-        # Generation config
-        generation_config = genai.types.GenerationConfig(
-            max_output_tokens=max_tokens,
-            temperature=0.7,
-        )
-        
-        # API çağrısı
-        response = model.generate_content(
-            prompt,
-            generation_config=generation_config
-        )
-        
-        if response.text:
-            content = response.text.strip()
-            safe_log(f"✅ Gemini başarılı: {len(content)} karakter", "SUCCESS")
-            return content
+        result = openrouter_call(prompt, openrouter_key, max_tokens)
+        if result and result != "API hatası" and len(result.strip()) > 5:
+            safe_log(f"✅ OpenRouter başarılı: {len(result)} karakter", "SUCCESS")
+            return result
         else:
-            safe_log("❌ Gemini API yanıtında metin bulunamadı", "ERROR")
-            return "API yanıt hatası"
+            safe_log("⚠️ OpenRouter yanıtı yetersiz", "WARNING")
+            return "API yanıt yetersiz"
             
     except Exception as e:
-        safe_log(f"❌ Gemini API çağrı hatası: {str(e)}", "ERROR")
+        safe_log(f"❌ OpenRouter API hatası: {str(e)}", "ERROR")
         return "API hatası"
+
+# Geriye uyumluluk için gemini_call fonksiyonunu ai_call'a yönlendir
+def gemini_call(prompt, api_key, max_tokens=100):
+    """Geriye uyumluluk için - artık OpenRouter kullanır"""
+    return ai_call(prompt, api_key, max_tokens)
 
 def try_openrouter_fallback(prompt, max_tokens=100):
     """OpenRouter yedek sistemini dene"""
@@ -775,14 +747,12 @@ def try_openrouter_fallback(prompt, max_tokens=100):
         
         # Güncel ücretsiz modeller listesi (2025 - kullanıcı tarafından belirtilen modeller öncelikli)
         free_models = [
-            "openrouter/horizon-beta",                      # Kullanıcı tercihi 1 - Horizon Beta
-            "z-ai/glm-4.5-air:free",                       # Kullanıcı tercihi 2 - GLM 4.5 Air
-            "moonshotai/kimi-k2:free",                      # Kullanıcı tercihi 3 - Kimi K2
-            "qwen/qwen3-30b-a3b:free",                      # Kullanıcı tercihi 4 - Qwen3 30B A3B
-            "qwen/qwen3-8b:free",                           # Yedek - Qwen3 8B
-            "deepseek/deepseek-chat-v3-0324:free",         # Yedek - DeepSeek Chat
-            "deepseek/deepseek-r1-zero:free",              # Yedek - DeepSeek R1
-            "nousresearch/deephermes-3-llama-3-8b-preview:free"  # Son yedek - DeepHermes 3
+            "moonshotai/kimi-k2:free",                     # Test edildi - Çalışıyor
+            "openrouter/auto",                             # Test edildi - Çalışıyor (otomatik model seçimi)
+            "mistralai/mistral-7b-instruct:free",          # Test edildi - Çalışıyor
+            # Yedek modeller (gerektiğinde test edilecek)
+            "qwen/qwen3-coder:free",                       # Geçici rate limited
+            "google/gemma-3n-e2b-it:free"                 # Geçici rate limited
         ]
         
         # Her modeli sırayla dene
@@ -950,9 +920,20 @@ def generate_comprehensive_analysis(article_data, api_key):
     }
     
     try:
-        # 1. Main innovation/insight analysis (ENGLISH)
-        innovation_prompt = f"""Briefly explain the main innovation or breakthrough in this AI/tech news (max 50 words, in English):\n\nTitle: {title}\nContent: {content[:800]}\n\nMain innovation:"""
-        innovation = gemini_call(innovation_prompt, api_key, max_tokens=80)
+        # 1. Main innovation/insight analysis (ENGLISH) - İyileştirilmiş prompt
+        innovation_prompt = f"""Analyze this AI/tech news and extract the key innovation. Be specific and include important details like numbers, capabilities, or improvements (max 60 words, in English):
+
+Title: {title}
+Content: {content[:1000]}
+
+Focus on:
+- What exactly is new or different?
+- Any specific numbers, percentages, or metrics?
+- Key capabilities or features?
+- Who is involved (companies/researchers)?
+
+Main innovation:"""
+        innovation = gemini_call(innovation_prompt, api_key, max_tokens=100)
         
         # İyileştirilmiş fallback sistemi
         if innovation == "API hatası" or not innovation or len(innovation.strip()) < 10:
@@ -1011,35 +992,102 @@ def generate_comprehensive_analysis(article_data, api_key):
                     detected_tech = tech
                     break
             
-            # Akıllı innovation metni oluştur
+            # Sayısal bilgileri ve önemli detayları çıkar
+            import re
+            numbers = re.findall(r'\$?(\d+(?:\.\d+)?)\s*(billion|million|%|percent|times|fold)', title_lower + " " + content_lower[:500], re.IGNORECASE)
+            key_features = re.findall(r'\b(accuracy|speed|efficiency|performance|capability|model|version|update|feature)\b', title_lower + " " + content_lower[:300], re.IGNORECASE)
+            
+            # Önemli anahtar kelimeleri çıkar
+            important_keywords = []
+            tech_keywords = ['breakthrough', 'innovation', 'advancement', 'solution', 'platform', 'system', 'tool', 'service', 'product', 'feature']
+            for keyword in tech_keywords:
+                if keyword in title_lower or keyword in content_lower[:300]:
+                    important_keywords.append(keyword)
+            
+            # Akıllı innovation metni oluştur - daha detaylı ve spesifik
             if companies_found and detected_action and detected_tech:
                 company = companies_found[0]
+                
+                # Sayısal veri varsa ekle
+                number_info = ""
+                if numbers:
+                    number, unit = numbers[0]
+                    number_info = f" with {number}{unit} improvement" if unit in ['%', 'percent', 'times', 'fold'] else f" worth ${number} {unit}" if unit in ['billion', 'million'] else f" featuring {number}{unit}"
+                
+                # Özellik bilgisi varsa ekle
+                feature_info = ""
+                if key_features:
+                    feature_info = f" in {key_features[0]}"
+                
                 if detected_action == 'launch':
-                    analysis_result["innovation"] = f"{company} launches new {detected_tech} solution"
+                    analysis_result["innovation"] = f"{company} launches new {detected_tech} solution{number_info}{feature_info}"
                 elif detected_action == 'announce':
-                    analysis_result["innovation"] = f"{company} announces {detected_tech} breakthrough"
+                    analysis_result["innovation"] = f"{company} announces {detected_tech} breakthrough{number_info}{feature_info}"
                 elif detected_action == 'develop':
-                    analysis_result["innovation"] = f"{company} develops advanced {detected_tech} technology"
+                    analysis_result["innovation"] = f"{company} develops advanced {detected_tech} technology{number_info}{feature_info}"
                 elif detected_action == 'acquire':
-                    analysis_result["innovation"] = f"{company} acquires {detected_tech} company"
+                    analysis_result["innovation"] = f"{company} acquires {detected_tech} company{number_info}"
                 elif detected_action == 'invest':
-                    analysis_result["innovation"] = f"{company} invests in {detected_tech} innovation"
+                    analysis_result["innovation"] = f"{company} invests{number_info} in {detected_tech} innovation"
                 else:
-                    analysis_result["innovation"] = f"{company} advances {detected_tech} capabilities"
+                    analysis_result["innovation"] = f"{company} advances {detected_tech} capabilities{number_info}{feature_info}"
             elif companies_found and detected_tech:
-                analysis_result["innovation"] = f"{companies_found[0]} makes {detected_tech} breakthrough"
+                # Sayısal veri ve özellik bilgisi ekle
+                extra_info = ""
+                if numbers:
+                    number, unit = numbers[0]
+                    extra_info = f" achieving {number}{unit} improvement" if unit in ['%', 'percent'] else f" with ${number} {unit}" if unit in ['billion', 'million'] else f" featuring {number}{unit}"
+                elif key_features:
+                    extra_info = f" enhancing {key_features[0]}"
+                
+                analysis_result["innovation"] = f"{companies_found[0]} makes {detected_tech} breakthrough{extra_info}"
             elif detected_action and detected_tech:
-                analysis_result["innovation"] = f"New {detected_tech} {detected_action} announced"
+                # Daha spesifik açıklama
+                extra_detail = ""
+                if numbers:
+                    number, unit = numbers[0]
+                    extra_detail = f" with {number}{unit} impact"
+                elif important_keywords:
+                    extra_detail = f" featuring {important_keywords[0]}"
+                
+                analysis_result["innovation"] = f"New {detected_tech} {detected_action} announced{extra_detail}"
             elif detected_tech:
-                analysis_result["innovation"] = f"Major {detected_tech} development unveiled"
+                # Başlıktan daha fazla bilgi çıkar
+                title_words = title.split()[:8]  # İlk 8 kelime
+                meaningful_title = " ".join([word for word in title_words if len(word) > 2 and word.lower() not in ['the', 'and', 'for', 'with', 'new', 'latest']])
+                
+                if meaningful_title and len(meaningful_title) > 10:
+                    analysis_result["innovation"] = meaningful_title[:80] + ("..." if len(meaningful_title) > 80 else "")
+                else:
+                    # Sayısal veri varsa kullan
+                    if numbers:
+                        number, unit = numbers[0]
+                        analysis_result["innovation"] = f"{detected_tech.upper()} breakthrough achieves {number}{unit} improvement"
+                    else:
+                        analysis_result["innovation"] = f"Significant {detected_tech} advancement unveiled"
             elif companies_found:
-                analysis_result["innovation"] = f"{companies_found[0]} announces new technology"
+                # Şirket varsa başlıktan daha fazla bilgi al
+                title_clean = re.sub(r'\b(announces|launches|releases|unveils|introduces)\b', '', title, flags=re.IGNORECASE).strip()
+                if len(title_clean) > 20:
+                    analysis_result["innovation"] = f"{companies_found[0]}: {title_clean[:70]}" + ("..." if len(title_clean) > 70 else "")
+                else:
+                    analysis_result["innovation"] = f"{companies_found[0]} announces new technology breakthrough"
             else:
-                # Son çare: başlığı kısalt ve temizle
-                clean_title = re.sub(r'[^\w\s-]', '', title).strip()
-                if len(clean_title) > 60:
-                    clean_title = clean_title[:60] + "..."
-                analysis_result["innovation"] = clean_title if clean_title else "Technology breakthrough announced"
+                # Son çare: başlığı akıllıca kısalt ve temizle
+                # Gereksiz kelimeleri çıkar
+                clean_title = re.sub(r'\b(the|a|an|and|or|but|in|on|at|to|for|of|with|by)\b', '', title, flags=re.IGNORECASE)
+                clean_title = re.sub(r'[^\w\s-]', '', clean_title).strip()
+                clean_title = re.sub(r'\s+', ' ', clean_title)  # Çoklu boşlukları tek yap
+                
+                if len(clean_title) > 15:
+                    # İlk 10 kelimeyi al
+                    words = clean_title.split()[:10]
+                    clean_title = " ".join(words)
+                    if len(clean_title) > 80:
+                        clean_title = clean_title[:80] + "..."
+                    analysis_result["innovation"] = clean_title
+                else:
+                    analysis_result["innovation"] = "Technology breakthrough announced"
         else:
             analysis_result["innovation"] = innovation.strip()
         
@@ -1201,8 +1249,8 @@ def generate_ai_tweet_with_mcp_analysis(article_data, api_key, theme="bilgilendi
         
         tweet_prompt = f"""Create a compelling English tweet about this AI/tech breakthrough with specific style:
 
-Title: {title[:120]}
-Key Innovation: {analysis['innovation'][:120]}
+Title: {title[:150]}
+Key Innovation: {analysis['innovation'][:150]}
 Companies: {companies_text}
 
 THEME REQUIREMENTS:
@@ -1210,18 +1258,28 @@ THEME REQUIREMENTS:
 - Tone: {theme_info['tone']}
 - Example style: "{theme_info['example']}"
 
-General Requirements:
+CONTENT REQUIREMENTS:
 - Write in perfect English only
 - Maximum 200 characters
-- Make it clear, engaging and newsworthy
-- Focus on WHAT changed and WHY it matters
+- Include SPECIFIC details from the innovation (numbers, percentages, capabilities, features)
+- Mention the company name if available
+- Focus on CONCRETE benefits or changes, not vague statements
 - Use active voice and strong action verbs
-- Include specific details when possible (numbers, capabilities)
-- Make it accessible to general audience
-- Sound exciting but credible
-- Do NOT include hashtags, emojis, URLs, or impact levels (added separately)
-- Do NOT mention impact, effect level, or rating in the tweet
-- IMPORTANT: Do NOT use any emojis in the tweet text - keep it clean and professional
+- Make it newsworthy and factual
+- Avoid generic terms like "breakthrough", "major development", "unveiled"
+- Instead use specific actions: "achieves", "launches", "introduces", "improves"
+
+AVOID:
+- Generic phrases like "major development", "breakthrough announced"
+- Vague statements without specifics
+- Hashtags, emojis, URLs, or impact levels (added separately)
+- Mentioning impact, effect level, or rating
+- Using emojis in the tweet text
+
+EXAMPLES OF GOOD SPECIFICITY:
+- "OpenAI's GPT-4 achieves 95% accuracy in medical diagnosis"
+- "Tesla's FSD reduces accidents by 40% in latest update"
+- "Google's Bard now processes 10x more languages"
 
 Tweet text:"""
         
@@ -1454,36 +1512,50 @@ def generate_ai_tweet_with_content_fallback(article_data, api_key, theme="bilgil
     hashtag_emoji_length = len(hashtag_text) + len(emoji_text) + 2  # 2 boşluk için
     MAX_CONTENT_LENGTH = TWITTER_LIMIT - URL_LENGTH - hashtag_emoji_length
     
-    # İngilizce tweet için gelişmiş prompt
+    # İngilizce tweet için gelişmiş prompt - Daha spesifik
     prompt = f"""Create a compelling English tweet about this AI/tech breakthrough:
 
 Article Title: {title}
-Article Content: {content[:1000]}
+Article Content: {content[:1200]}
 
-Requirements:
+CRITICAL REQUIREMENTS:
 - Write in perfect English only
 - Maximum {MAX_CONTENT_LENGTH} characters
-- Make it clear, engaging and newsworthy
-- Focus on WHAT changed and WHY it matters
+- MUST include specific details: numbers, percentages, company names, product names
+- Focus on CONCRETE facts, not vague statements
 - Use active voice and strong action verbs
-- Include specific details when possible (numbers, capabilities, improvements)
-- Make it accessible to general audience
-- Sound exciting but credible
-- Avoid jargon and technical terms
-- Do NOT include hashtags, emojis, URLs, or impact levels (added separately)
-- Do NOT mention impact, effect level, or rating in the tweet
+- Mention WHO (company/organization) and WHAT exactly they achieved
+- Include quantifiable improvements when available
+- Make it factual and newsworthy
 
-Examples of good style:
-- "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-- "Tesla's robot now performs complex assembly tasks autonomously"
-- "Google's AI reduces data center energy consumption by 40%"
-- "Meta's VR headset delivers 4K resolution at half the price"
+AVOID AT ALL COSTS:
+- Generic phrases: "major development", "breakthrough announced", "unveiled"
+- Vague statements without specifics
+- Jargon and complex technical terms
+- Hashtags, emojis, URLs, or impact ratings
+- Mentioning "impact", "effect level", or numerical ratings
+
+PREFERRED ACTION WORDS:
+- "achieves", "launches", "introduces", "improves", "reduces", "increases"
+- "develops", "creates", "builds", "enables", "delivers"
+
+GOOD EXAMPLES:
+- "OpenAI's GPT-4 achieves 95% accuracy in medical diagnosis"
+- "Tesla's FSD reduces accidents by 40% in latest update"
+- "Google's Bard now processes 10x more languages"
+- "Microsoft's Copilot increases coding speed by 35%"
+
+EXTRACT AND USE:
+- Company names from title/content
+- Specific numbers, percentages, metrics
+- Product/service names
+- Clear benefits or capabilities
 
 Tweet text (max {MAX_CONTENT_LENGTH} chars):"""
 
     try:
-        # Eğer hem Google hem OpenRouter anahtarı yoksa, doğrudan basit fallback kullan
-        if not os.environ.get('GOOGLE_API_KEY') and not os.environ.get('OPENROUTER_API_KEY'):
+        # Eğer OpenRouter anahtarı yoksa, doğrudan basit fallback kullan
+        if not os.environ.get('OPENROUTER_API_KEY'):
             return create_fallback_tweet(title, content, url)
 
         tweet_text = gemini_call(prompt, api_key, max_tokens=150)
@@ -1569,9 +1641,30 @@ def create_fallback_tweet(title, content, url=""):
         title_lower = title.lower()
         combined_text = f"{title_lower} {content_lower}"
         
-        # Sayısal bilgileri çıkar
+        # Sayısal bilgileri ve önemli metrikleri çıkar - daha kapsamlı
         import re
-        numbers = re.findall(r'\$?(\d+(?:\.\d+)?)\s*(billion|million|%|percent)', combined_text, re.IGNORECASE)
+        numbers = re.findall(r'\$?(\d+(?:\.\d+)?)\s*(billion|million|%|percent|times|fold|x)', combined_text, re.IGNORECASE)
+        
+        # Önemli teknoloji terimlerini çıkar
+        tech_terms = re.findall(r'\b(accuracy|speed|efficiency|performance|model|version|update|feature|capability|algorithm|neural|gpt|llm|transformer|dataset)\b', combined_text, re.IGNORECASE)
+        
+        # Ürün/servis adlarını çıkar
+        product_names = re.findall(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]*)*)\s+(?:model|version|system|platform|service|tool|app)\b', title + " " + content[:300])
+        
+        # Eylem kelimelerini tespit et
+        actions = []
+        action_patterns = {
+            'launch': r'\b(launch|launches|launched|releasing|released|unveil|unveils|unveiled)\b',
+            'improve': r'\b(improve|improves|improved|enhance|enhances|enhanced|boost|boosts|boosted)\b',
+            'achieve': r'\b(achieve|achieves|achieved|reach|reaches|reached|attain|attains|attained)\b',
+            'create': r'\b(create|creates|created|develop|develops|developed|build|builds|built)\b',
+            'announce': r'\b(announce|announces|announced|reveal|reveals|revealed)\b'
+        }
+        
+        for action_type, pattern in action_patterns.items():
+            if re.search(pattern, combined_text, re.IGNORECASE):
+                actions.append(action_type)
+                break
         
         # Şirket isimlerini tespit et
         companies = []
@@ -1580,56 +1673,116 @@ def create_fallback_tweet(title, content, url=""):
             if company.lower() in combined_text:
                 companies.append(company)
         
-        # Ana tweet metni oluştur - daha anlamlı İngilizce
+        # Akıllı tweet metni oluştur - spesifik detaylarla
         tweet_parts = []
         
-        # Şirket ve eylem bazlı tweet oluştur
-        if companies:
+        # Şirket, eylem ve detaylar bazlı tweet oluştur
+        if companies and actions:
             main_company = companies[0]
+            main_action = actions[0]
             
-            # Eyleme göre anlamlı cümle oluştur
-            if "acquisition" in combined_text or "acquire" in combined_text:
-                if "billion" in combined_text:
-                    tweet_parts.append(f"{main_company} completes major acquisition")
+            # Sayısal veri varsa kullan
+            number_detail = ""
+            if numbers:
+                largest_num = max(numbers, key=lambda x: float(x[0]))
+                num_val, num_unit = largest_num[0], largest_num[1].lower()
+                
+                if num_unit in ['%', 'percent']:
+                    number_detail = f" achieving {num_val}% improvement"
+                elif num_unit in ['billion', 'million']:
+                    number_detail = f" worth ${num_val}{num_unit[0].upper()}"
+                elif num_unit in ['times', 'fold', 'x']:
+                    number_detail = f" with {num_val}x performance boost"
+            
+            # Teknoloji terimi varsa ekle
+            tech_detail = ""
+            if tech_terms:
+                tech_detail = f" in {tech_terms[0]}"
+            
+            # Ürün adı varsa ekle
+            product_detail = ""
+            if product_names:
+                product_detail = f" for {product_names[0][0]} platform"
+            
+            # Eylem bazlı tweet oluştur
+            if main_action == 'launch':
+                if "ai" in combined_text:
+                    tweet_parts.append(f"{main_company} launches new AI system{number_detail}{tech_detail}")
+                elif tech_terms:
+                    tweet_parts.append(f"{main_company} launches {tech_terms[0]} solution{number_detail}")
                 else:
-                    tweet_parts.append(f"{main_company} acquires strategic company")
-            elif "funding" in combined_text or "investment" in combined_text:
-                if numbers:
-                    largest_num = max(numbers, key=lambda x: float(x[0]))
-                    if largest_num[1].lower() == 'billion':
-                        tweet_parts.append(f"{main_company} raises ${largest_num[0]}B in funding")
-                    elif largest_num[1].lower() == 'million':
-                        tweet_parts.append(f"{main_company} secures ${largest_num[0]}M investment")
-                    else:
-                        tweet_parts.append(f"{main_company} secures major funding")
+                    tweet_parts.append(f"{main_company} launches innovative platform{number_detail}")
+                    
+            elif main_action == 'improve':
+                if tech_terms and numbers:
+                    tweet_parts.append(f"{main_company} improves {tech_terms[0]}{number_detail}")
+                elif numbers:
+                    tweet_parts.append(f"{main_company} boosts performance{number_detail}")
                 else:
-                    tweet_parts.append(f"{main_company} secures new funding round")
-            elif "launch" in combined_text or "release" in combined_text:
-                if "ai" in combined_text or "artificial intelligence" in combined_text:
-                    tweet_parts.append(f"{main_company} launches new AI technology")
-                elif "robot" in combined_text:
-                    tweet_parts.append(f"{main_company} unveils advanced robotics")
+                    tweet_parts.append(f"{main_company} enhances technology capabilities")
+                    
+            elif main_action == 'achieve':
+                if numbers and tech_terms:
+                    tweet_parts.append(f"{main_company} achieves {largest_num[0]}{largest_num[1]} in {tech_terms[0]}")
+                elif numbers:
+                    tweet_parts.append(f"{main_company} reaches {largest_num[0]}{largest_num[1]} milestone")
                 else:
-                    tweet_parts.append(f"{main_company} releases breakthrough innovation")
-            elif "partnership" in combined_text or "partner" in combined_text:
-                tweet_parts.append(f"{main_company} forms strategic partnership")
-            elif "breakthrough" in combined_text or "innovation" in combined_text:
-                tweet_parts.append(f"{main_company} achieves major breakthrough")
+                    tweet_parts.append(f"{main_company} achieves breakthrough results")
+                    
+            elif main_action == 'create':
+                if tech_terms:
+                    tweet_parts.append(f"{main_company} creates advanced {tech_terms[0]} system{number_detail}")
+                else:
+                    tweet_parts.append(f"{main_company} develops new technology{number_detail}")
+                    
+            elif main_action == 'announce':
+                if product_names and numbers:
+                    tweet_parts.append(f"{main_company} announces {product_names[0][0]}{number_detail}")
+                elif tech_terms:
+                    tweet_parts.append(f"{main_company} reveals {tech_terms[0]} innovation{number_detail}")
+                else:
+                    tweet_parts.append(f"{main_company} announces major update{number_detail}")
+            
+        elif companies:
+            # Şirket var ama eylem yok - başlıktan bilgi çıkar
+            main_company = companies[0]
+            clean_title_short = clean_title.replace(main_company, "").strip()
+            
+            # Başlıktaki önemli kelimeleri koru
+            important_words = []
+            for word in clean_title_short.split():
+                if len(word) > 3 and word.lower() not in ['with', 'from', 'that', 'this', 'they', 'have', 'will', 'been']:
+                    important_words.append(word)
+            
+            if important_words and numbers:
+                tweet_parts.append(f"{main_company}: {' '.join(important_words[:6])} - {numbers[0][0]}{numbers[0][1]} impact")
+            elif important_words:
+                tweet_parts.append(f"{main_company}: {' '.join(important_words[:8])}")
+            elif numbers:
+                tweet_parts.append(f"{main_company} reports {numbers[0][0]}{numbers[0][1]} breakthrough")
             else:
-                # Başlığı kullan ama şirket adını öne çıkar
-                clean_title_short = clean_title.replace(main_company, "").strip()
-                if clean_title_short:
-                    tweet_parts.append(f"{main_company}: {clean_title_short[:80]}")
-                else:
-                    tweet_parts.append(f"{main_company} makes major announcement")
+                tweet_parts.append(f"{main_company} makes significant advancement")
+                
         else:
-            # Şirket yoksa başlığı kullan
-            if "ai" in combined_text or "artificial intelligence" in combined_text:
-                tweet_parts.append(f"AI breakthrough: {clean_title[:100]}")
-            elif "robot" in combined_text:
-                tweet_parts.append(f"Robotics advance: {clean_title[:100]}")
+            # Şirket yok - konuya göre tweet oluştur
+            if numbers and tech_terms:
+                tweet_parts.append(f"New {tech_terms[0]} breakthrough achieves {numbers[0][0]}{numbers[0][1]} improvement")
+            elif numbers:
+                tweet_parts.append(f"Technology advancement shows {numbers[0][0]}{numbers[0][1]} improvement")
+            elif tech_terms:
+                tweet_parts.append(f"Breakthrough in {tech_terms[0]} technology announced")
+            elif "ai" in combined_text:
+                # Başlığı temizle ve AI odaklı yap
+                clean_title_ai = re.sub(r'\b(ai|artificial intelligence)\b', 'AI', clean_title, flags=re.IGNORECASE)
+                tweet_parts.append(f"AI innovation: {clean_title_ai[:100]}")
             else:
-                tweet_parts.append(f"Tech news: {clean_title[:120]}")
+                # Son çare - başlığı akıllıca kısalt
+                words = clean_title.split()
+                meaningful_words = [w for w in words if len(w) > 3 and w.lower() not in ['the', 'and', 'for', 'with']]
+                if meaningful_words:
+                    tweet_parts.append(" ".join(meaningful_words[:12]))
+                else:
+                    tweet_parts.append("Technology breakthrough announced")
         
         # Sayısal bilgi ekle (eğer henüz eklenmemişse)
         if numbers and not any("$" in part for part in tweet_parts):
@@ -3188,19 +3341,45 @@ def test_mcp_connection():
         }
 
 def gemini_ocr_image(image_path):
-    import google.generativeai as genai
+    """Sadece OCR için Gemini kullanır"""
     import os
     from PIL import Image
+    
+    try:
+        import google.generativeai as genai
+        
+        api_key = os.environ.get('GOOGLE_API_KEY')
+        if not api_key:
+            safe_log("❌ Google API anahtarı bulunamadı (OCR için gerekli)", "ERROR")
+            return "Google API anahtarı eksik - OCR çalışmıyor"
+        
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-2.0-flash')
 
-    api_key = os.environ.get('GOOGLE_API_KEY')
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-2.0-flash')
+        # Resmi PIL ile aç
+        image = Image.open(image_path)
+        prompt = "Bu görseldeki tüm metni OCR ile çıkar ve sadece metni döndür. Açıklama ekleme, sadece metni ver."
+        
+        safe_log(f"🔍 Gemini OCR işlemi başlatılıyor: {image_path}", "INFO")
+        response = model.generate_content([prompt, image])
+        
+        if response.text:
+            ocr_text = response.text.strip()
+            safe_log(f"✅ OCR başarılı: {len(ocr_text)} karakter çıkarıldı", "SUCCESS")
+            return ocr_text
+        else:
+            safe_log("❌ OCR yanıtında metin bulunamadı", "ERROR")
+            return "OCR işlemi başarısız"
+            
+    except Exception as e:
+        safe_log(f"❌ Gemini OCR hatası: {str(e)}", "ERROR")
+        return f"OCR hatası: {str(e)}"
 
-    # Resmi PIL ile aç
-    image = Image.open(image_path)
-    prompt = "Bu görseldeki tüm metni OCR ile çıkar ve sadece metni döndür."
-    response = model.generate_content([prompt, image])
-    return response.text.strip()
+# OpenRouter OCR alternatifi (şimdilik desteklenmiyor)
+def openrouter_ocr_image(image_path):
+    """OpenRouter ile görsel OCR - şimdilik desteklenmiyor"""
+    safe_log("⚠️ OpenRouter ile görsel OCR henüz desteklenmiyor, Gemini kullanın", "WARNING")
+    return gemini_ocr_image(image_path)
 
 def setup_twitter_v2_client():
     """Tweepy v2 API Client ile kimlik doğrulama (sadece metinli tweet için)"""
@@ -5216,12 +5395,17 @@ def check_security_configuration():
     
     # 4. API anahtarları kontrolü
     api_keys = [
-        'GOOGLE_API_KEY',
+        'OPENROUTER_API_KEY',
         'TWITTER_API_KEY',
         'TWITTER_API_SECRET',
         'TWITTER_ACCESS_TOKEN',
         'TWITTER_ACCESS_TOKEN_SECRET',
         'TWITTER_BEARER_TOKEN'
+    ]
+    
+    # OCR için opsiyonel
+    optional_keys = [
+        'GOOGLE_API_KEY'  # Sadece OCR için gerekli
     ]
     
     for key in api_keys:
@@ -5265,7 +5449,7 @@ def sanitize_log_message(message):
     
     # API anahtarı pattern'leri
     patterns = [
-        r'AIza[0-9A-Za-z-_]{35}',  # Google API Key
+        r'sk-or-v1-[a-f0-9]{64}',  # OpenRouter API Key
         r'sk-[a-zA-Z0-9]{48}',     # OpenAI API Key
         r'[0-9]{10}:[A-Za-z0-9_-]{35}',  # Telegram Bot Token
         r'[A-Za-z0-9]{25}',        # Twitter Bearer Token
@@ -8838,7 +9022,7 @@ def analyze_tweet_quality(tweet_text, article_title="", api_key=None):
     """AI ile tweet kalitesini analiz et"""
     try:
         if not api_key:
-            api_key = os.environ.get('GOOGLE_API_KEY')
+            api_key = os.environ.get('OPENROUTER_API_KEY')
             
         if not api_key:
             return {

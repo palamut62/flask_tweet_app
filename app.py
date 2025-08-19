@@ -423,8 +423,8 @@ def index():
             api_check = {
                 "twitter_api_available": bool(os.environ.get('TWITTER_BEARER_TOKEN') and os.environ.get('TWITTER_API_KEY')),
                 "telegram_available": bool(os.environ.get('TELEGRAM_BOT_TOKEN')),
-                "google_api_available": bool(os.environ.get('GOOGLE_API_KEY')),
-                "openrouter_api_available": bool(os.environ.get('OPENROUTER_API_KEY'))
+                "openrouter_api_available": bool(os.environ.get('OPENROUTER_API_KEY')),
+                "google_api_available": bool(os.environ.get('GOOGLE_API_KEY'))
             }
         except Exception as e:
             terminal_log(f"⚠️ API durumu kontrol edilemedi: {str(e)}", "warning")
@@ -658,8 +658,8 @@ def check_and_post_articles():
         # Ayarları yükle
         settings = load_automation_settings()
         # AI API anahtarı opsiyonel olmalı: OpenRouter öncelikli, Google yedek, yoksa yerel fallback
-        api_key = os.environ.get('OPENROUTER_API_KEY') or os.environ.get('GOOGLE_API_KEY') or ""
-        if not os.environ.get('OPENROUTER_API_KEY') and not os.environ.get('GOOGLE_API_KEY'):
+        api_key = os.environ.get('OPENROUTER_API_KEY') or ""
+        if not os.environ.get('OPENROUTER_API_KEY'):
             # Uyarı ver, fakat işlemi durdurma (yerel fallback tweet üretimi mevcut)
             terminal_log("⚠️ Hiçbir AI API anahtarı bulunamadı – fallback tweet oluşturma kullanılacak", "warning")
         
@@ -1711,7 +1711,7 @@ def retry_rejected_article():
         # Makaleyi tekrar işle
         try:
             # Tweet oluştur
-            api_key = os.environ.get('OPENROUTER_API_KEY') or os.environ.get('GOOGLE_API_KEY') or ""
+            api_key = os.environ.get('OPENROUTER_API_KEY') or ""
             settings = load_automation_settings()
             theme = settings.get('tweet_theme', 'bilgilendirici')
             
@@ -1814,7 +1814,7 @@ def test_news_system():
         test_results = {
             "news_sources_config": True,
             "feedparser_installed": False,
-            "google_api_available": bool(os.environ.get('GOOGLE_API_KEY')),
+            "openrouter_api_available": bool(os.environ.get('OPENROUTER_API_KEY')),
             "news_fetch_working": False,
             "article_count": 0,
             "errors": [],
@@ -1851,10 +1851,10 @@ def test_news_system():
         except Exception as news_error:
             test_results["errors"].append(f"Haber çekme hatası: {news_error}")
         
-        # AI Tweet sistemi testi (Gemini + OpenRouter fallback)
+        # AI Tweet sistemi testi (OpenRouter)
         test_results["openrouter_api_available"] = bool(os.environ.get('OPENROUTER_API_KEY'))
         
-        if test_results["google_api_available"] or test_results["openrouter_api_available"]:
+        if test_results["openrouter_api_available"]:
             try:
                 from utils import generate_ai_tweet_with_content
                 
@@ -1865,7 +1865,7 @@ def test_news_system():
                     "source": "test"
                 }
                 
-                api_key = os.environ.get('GOOGLE_API_KEY')
+                api_key = os.environ.get('OPENROUTER_API_KEY')
                 tweet_data = generate_ai_tweet_with_content(test_article, api_key)
                 
                 if tweet_data and tweet_data.get('tweet'):
@@ -1892,7 +1892,7 @@ def test_news_system():
         
         # Model listesini ekle
         test_results["available_models"] = {
-            "primary": ["openrouter/horizon-beta", "z-ai/glm-4.5-air:free", "moonshotai/kimi-k2:free", "qwen/qwen3-30b-a3b:free"],
+            "primary": ["moonshotai/kimi-k2:free", "openrouter/auto", "mistralai/mistral-7b-instruct:free"],
             "fallback": ["qwen/qwen3-8b:free", "deepseek/deepseek-chat-v3-0324:free"]
         }
         
@@ -1922,10 +1922,9 @@ def test_openrouter_models():
         
         # Test edilecek modeller (kullanıcının istediği modeller)
         test_models = [
-            "openrouter/horizon-beta",
-            "z-ai/glm-4.5-air:free", 
             "moonshotai/kimi-k2:free",
-            "qwen/qwen3-30b-a3b:free"
+            "openrouter/auto", 
+            "mistralai/mistral-7b-instruct:free"
         ]
         
         test_prompt = "Create a short tweet about AI technology advancements. Keep it under 200 characters."
@@ -2007,19 +2006,13 @@ def system_status():
                     "configured": bool(os.environ.get('TWITTER_BEARER_TOKEN')),
                     "status": "unknown"
                 },
-                "google_gemini": {
-                    "configured": bool(os.environ.get('GOOGLE_API_KEY')),
-                    "status": "quota_exceeded",
-                    "note": "200 request limit reached"
-                },
                 "openrouter": {
                     "configured": bool(os.environ.get('OPENROUTER_API_KEY')),
                     "status": "ready",
                     "primary_models": [
-                        "openrouter/horizon-beta", 
-                        "z-ai/glm-4.5-air:free", 
                         "moonshotai/kimi-k2:free", 
-                        "qwen/qwen3-30b-a3b:free"
+                        "openrouter/auto", 
+                        "mistralai/mistral-7b-instruct:free"
                     ]
                 },
                 "news_sources": {
@@ -2029,7 +2022,7 @@ def system_status():
                     "status": "working"
                 },
                 "ai_tweet_generation": {
-                    "primary": "Google Gemini (quota exceeded)",
+                    "primary": "OpenRouter (ready)",
                     "fallback": "OpenRouter Multi-Model",
                     "status": "fallback_ready"
                 }
@@ -2040,7 +2033,7 @@ def system_status():
                 "twitter_posting": "API configured"
             },
             "recommendations": [
-                "Gemini API quota reset bekleyin (24 saat)",
+                "OpenRouter API kullanımda",
                 "OpenRouter modelleri aktif ve çalışır durumda",
                 "Manuel tweet paylaşımı mevcut durumda kullanılabilir"
             ]
@@ -2438,7 +2431,6 @@ def settings():
         
         # API durumunu kontrol et
         api_status = {
-            "google_api": os.environ.get('GOOGLE_API_KEY') is not None,
             "openrouter_api": os.environ.get('OPENROUTER_API_KEY') is not None,
             "twitter_bearer": os.environ.get('TWITTER_BEARER_TOKEN') is not None,
             "twitter_api_key": os.environ.get('TWITTER_API_KEY') is not None,
@@ -2457,7 +2449,6 @@ def settings():
         mcp_status = get_news_fetching_method()
         
         # API testlerini sadece anahtarların varlığına göre yap (hızlı kontrol)
-        api_status["google_api_working"] = bool(os.environ.get('GOOGLE_API_KEY'))
         api_status["openrouter_api_working"] = bool(os.environ.get('OPENROUTER_API_KEY'))
         
         return render_template('settings.html', 
@@ -2482,7 +2473,7 @@ def update_env_variables():
         
         # Güvenlik kontrolü - sadece belirli anahtarların güncellenmesine izin ver
         allowed_keys = {
-            'GOOGLE_API_KEY', 'OPENROUTER_API_KEY', 'TWITTER_BEARER_TOKEN',
+            'OPENROUTER_API_KEY', 'TWITTER_BEARER_TOKEN', 'GOOGLE_API_KEY',
             'TWITTER_API_KEY', 'TWITTER_API_SECRET', 'TWITTER_ACCESS_TOKEN',
             'TWITTER_ACCESS_TOKEN_SECRET', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID',
             'GMAIL_EMAIL', 'GMAIL_APP_PASSWORD', 'GITHUB_TOKEN'
@@ -2541,7 +2532,7 @@ def get_env_variables():
     try:
         # Güvenlik kontrolü - sadece belirli anahtarların okunmasına izin ver
         allowed_keys = {
-            'GOOGLE_API_KEY', 'OPENROUTER_API_KEY', 'TWITTER_BEARER_TOKEN',
+            'OPENROUTER_API_KEY', 'TWITTER_BEARER_TOKEN', 'GOOGLE_API_KEY',
             'TWITTER_API_KEY', 'TWITTER_API_SECRET', 'TWITTER_ACCESS_TOKEN',
             'TWITTER_ACCESS_TOKEN_SECRET', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID',
             'GMAIL_EMAIL', 'GMAIL_APP_PASSWORD', 'GITHUB_TOKEN'
@@ -2620,35 +2611,22 @@ def test_api_connections():
     try:
         results = {}
         
-        # Gemini API test
+        # OpenRouter API test
         try:
-            from utils import gemini_call
-            api_key = os.environ.get('GOOGLE_API_KEY')
+            from utils import ai_call
+            api_key = os.environ.get('OPENROUTER_API_KEY')
             if api_key:
-                test_result = gemini_call("Test", api_key)
-                results["google_api"] = {
-                    "working": bool(test_result and test_result != "API hatası"),
-                    "message": "✅ Çalışıyor" if test_result else "❌ Yanıt alınamadı"
-                }
-            else:
-                results["google_api"] = {"working": False, "message": "❌ API anahtarı yok"}
-        except Exception as e:
-            results["google_api"] = {"working": False, "message": f"❌ Hata: {str(e)[:50]}"}
-        
-        # OpenRouter API test  
-        try:
-            from utils import openrouter_call
-            openrouter_key = os.environ.get('OPENROUTER_API_KEY')
-            if openrouter_key:
-                test_result = openrouter_call("Test", openrouter_key, max_tokens=5)
+                test_result = ai_call("Test", api_key)
                 results["openrouter_api"] = {
-                    "working": bool(test_result),
+                    "working": bool(test_result and test_result != "API hatası"),
                     "message": "✅ Çalışıyor" if test_result else "❌ Yanıt alınamadı"
                 }
             else:
                 results["openrouter_api"] = {"working": False, "message": "❌ API anahtarı yok"}
         except Exception as e:
             results["openrouter_api"] = {"working": False, "message": f"❌ Hata: {str(e)[:50]}"}
+        
+
             
         return jsonify({"success": True, "results": results})
         
@@ -2748,29 +2726,19 @@ def api_status():
     try:
         status = get_safe_env_status()
         
-        # Gemini API test
-        try:
-            from utils import gemini_call
-            api_key = os.environ.get('GOOGLE_API_KEY')
-            if api_key:
-                test_result = gemini_call("Test message", api_key)
-                status["google_api_test"] = "ÇALIŞIYOR" if (test_result and test_result != "API hatası") else "HATA"
-            else:
-                status["google_api_test"] = "API ANAHTARI EKSİK"
-        except Exception as e:
-            status["google_api_test"] = f"HATA: {str(e)}"
-        
         # OpenRouter API test
         try:
-            from utils import openrouter_call
-            openrouter_key = os.environ.get('OPENROUTER_API_KEY')
-            if openrouter_key:
-                test_result = openrouter_call("Test message", openrouter_key, max_tokens=10)
-                status["openrouter_api_test"] = "ÇALIŞIYOR" if test_result else "HATA"
+            from utils import ai_call
+            api_key = os.environ.get('OPENROUTER_API_KEY')
+            if api_key:
+                test_result = ai_call("Test message", api_key)
+                status["openrouter_api_test"] = "ÇALIŞIYOR" if (test_result and test_result != "API hatası") else "HATA"
             else:
                 status["openrouter_api_test"] = "API ANAHTARI EKSİK"
         except Exception as e:
             status["openrouter_api_test"] = f"HATA: {str(e)}"
+        
+
         
 
         
@@ -2910,7 +2878,7 @@ def create_tweet():
         action = request.form.get('action', 'preview')  # 'preview' veya 'direct_post'
         
         image_path = None
-        api_key = os.environ.get('GOOGLE_API_KEY')
+        api_key = os.environ.get('OPENROUTER_API_KEY')
         
         terminal_log(f"🎨 Tweet oluşturma başlatıldı - Mod: {tweet_mode}, Tema: {selected_theme}, Taslak: {save_as_draft}", "info")
 
@@ -3566,14 +3534,14 @@ def ocr_image():
         terminal_log(f"📷 AJAX OCR başlatıldı - Dosya: {filename}, Tema: {selected_theme}", "info")
 
         try:
-            from utils import gemini_ocr_image, generate_ai_tweet_with_content
-            ocr_text = gemini_ocr_image(image_path)
+            from utils import openrouter_ocr_image, generate_ai_tweet_with_content
+            ocr_text = openrouter_ocr_image(image_path)
             
             if not ocr_text or len(ocr_text.strip()) < 10:
                 return jsonify({'success': False, 'error': 'Resimden yeterli metin çıkarılamadı.'}), 400
             
             # AI ile konuya uygun tweet üret - seçilen tema ile
-            api_key = os.environ.get('GOOGLE_API_KEY')
+            api_key = os.environ.get('OPENROUTER_API_KEY')
             
             article_data = {
                 'title': ocr_text[:100],
@@ -3981,8 +3949,8 @@ def mask_sensitive_data(data):
 def get_safe_env_status():
     """Environment variable'ların durumunu güvenli şekilde döndür"""
     return {
-        "google_api": "MEVCUT" if os.environ.get('GOOGLE_API_KEY') else "EKSİK",
         "openrouter_api": "MEVCUT" if os.environ.get('OPENROUTER_API_KEY') else "EKSİK",
+        "google_api_ocr": "MEVCUT" if os.environ.get('GOOGLE_API_KEY') else "EKSİK (OCR için)",
         "twitter_bearer": "MEVCUT" if os.environ.get('TWITTER_BEARER_TOKEN') else "EKSİK",
         "twitter_api_key": "MEVCUT" if os.environ.get('TWITTER_API_KEY') else "EKSİK",
         "twitter_api_secret": "MEVCUT" if os.environ.get('TWITTER_API_SECRET') else "EKSİK",
@@ -4766,7 +4734,7 @@ def analyze_page_source():
         
         terminal_log(f"🔍 Sayfa kaynağı analiz ediliyor: {url}", "info")
         
-        from utils import advanced_web_scraper, gemini_call
+        from utils import advanced_web_scraper, ai_call
         
         # Sayfa kaynağını çek
         scrape_result = advanced_web_scraper(url, wait_time=3, use_js=True, return_html=True)
@@ -4800,7 +4768,7 @@ def analyze_page_source():
             clean_html = str(soup)[:15000]
         
         # AI ile analiz et
-        api_key = os.environ.get('GOOGLE_API_KEY')
+        api_key = os.environ.get('OPENROUTER_API_KEY')
         if not api_key:
             return jsonify({
                 'success': False,
@@ -4833,7 +4801,7 @@ Sadece JSON döndür, başka açıklama ekleme.
 """
         
         terminal_log("🤖 AI analizi başlatılıyor...", "info")
-        ai_response = gemini_call(analysis_prompt, api_key)
+        ai_response = ai_call(analysis_prompt, api_key)
         
         if not ai_response:
             return jsonify({
@@ -5395,7 +5363,7 @@ def test_tweet_generation():
             }
         ]
         
-        api_key = os.environ.get('GOOGLE_API_KEY')
+        api_key = os.environ.get('OPENROUTER_API_KEY')
         test_results = []
         
         for scenario in test_scenarios:
@@ -5821,7 +5789,7 @@ def create_tweet_homepage():
             
             # AI ile optimize et
             from utils import generate_ai_tweet_with_content
-            api_key = os.environ.get('GOOGLE_API_KEY')
+            api_key = os.environ.get('OPENROUTER_API_KEY')
             
             article_data = {
                 'title': tweet_text[:100],
@@ -5852,14 +5820,14 @@ def create_tweet_homepage():
             image_file.save(image_path)
             
             # OCR ile resimden metin çıkar
-            from utils import gemini_ocr_image, generate_ai_tweet_with_content
-            ocr_text = gemini_ocr_image(image_path)
+            from utils import openrouter_ocr_image, generate_ai_tweet_with_content
+            ocr_text = openrouter_ocr_image(image_path)
             
             if not ocr_text or len(ocr_text.strip()) < 10:
                 return jsonify({'success': False, 'error': 'Resimden yeterli metin çıkarılamadı.'})
             
             # AI ile tweet oluştur
-            api_key = os.environ.get('GOOGLE_API_KEY')
+            api_key = os.environ.get('OPENROUTER_API_KEY')
             article_data = {
                 'title': ocr_text[:100],
                 'content': ocr_text,
@@ -5889,7 +5857,7 @@ def create_tweet_homepage():
                 return jsonify({'success': False, 'error': 'URL içeriği çekilemedi.'})
             
             # AI ile tweet oluştur
-            api_key = os.environ.get('GOOGLE_API_KEY')
+            api_key = os.environ.get('OPENROUTER_API_KEY')
             tweet_data = generate_ai_tweet_with_content(article_data, api_key, tweet_theme)
             tweet_content = tweet_data['tweet'] if isinstance(tweet_data, dict) else tweet_data
             
@@ -5983,7 +5951,7 @@ def convert_rejected_to_tweet():
             }
             
             # API key'i al
-            api_key = os.environ.get('GOOGLE_API_KEY')
+            api_key = os.environ.get('OPENROUTER_API_KEY')
             if not api_key:
                 api_key = os.environ.get('OPENROUTER_API_KEY')
             

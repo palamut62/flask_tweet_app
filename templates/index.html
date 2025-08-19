@@ -198,12 +198,22 @@
                     <div class="space-y-4">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center space-x-2">
-                                <i class="fab fa-google text-blue-500"></i>
-                                <span class="text-gray-600">Gemini AI:</span>
+                                <i class="fas fa-robot text-purple-500"></i>
+                                <span class="text-gray-600">OpenRouter AI:</span>
                             </div>
-                            <span class="flex items-center space-x-1 {{ 'text-green-600' if api_check.google_api_available else 'text-red-600' }}">
-                                <i class="fas fa-{{ 'check-circle' if api_check.google_api_available else 'times-circle' }}"></i>
-                                <span class="text-sm font-medium">{{ 'Mevcut' if api_check.google_api_available else 'Eksik' }}</span>
+                            <span class="flex items-center space-x-1 {{ 'text-green-600' if api_check.openrouter_api_available else 'text-red-600' }}">
+                                <i class="fas fa-{{ 'check-circle' if api_check.openrouter_api_available else 'times-circle' }}"></i>
+                                <span class="text-sm font-medium">{{ 'Mevcut' if api_check.openrouter_api_available else 'Eksik' }}</span>
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-2">
+                                <i class="fab fa-google text-blue-500"></i>
+                                <span class="text-gray-600">Google OCR:</span>
+                            </div>
+                            <span class="flex items-center space-x-1 {{ 'text-green-600' if api_check.google_api_available else 'text-orange-500' }}">
+                                <i class="fas fa-{{ 'check-circle' if api_check.google_api_available else 'exclamation-triangle' }}"></i>
+                                <span class="text-sm font-medium">{{ 'Mevcut' if api_check.google_api_available else 'Opsiyonel' }}</span>
                             </span>
                         </div>
                         <div class="flex justify-between items-center">
