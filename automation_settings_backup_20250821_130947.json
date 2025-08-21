@@ -7,10 +7,10 @@
   "manual_approval_required": false,
   "telegram_notifications": false,
   "email_notifications": true,
-  "enable_duplicate_detection": true,
-  "title_similarity_threshold": 0.85,
-  "content_similarity_threshold": 0.75,
+  "enable_duplicate_detection": false,
+  "title_similarity_threshold": 0.8,
+  "content_similarity_threshold": 0.6,
   "news_fetching_method": "auto",
   "tweet_theme": "bilgilendirici",
-  "last_updated": "2025-08-21T13:09:47.450993"
+  "last_updated": "2025-08-18T14:08:30.849519"
 }

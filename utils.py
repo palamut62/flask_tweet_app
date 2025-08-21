@@ -3492,7 +3492,7 @@ def post_text_tweet_v2(tweet_text):
             if "tweets" not in status:
                 status["tweets"] = {}
             status["tweets"]["requests"] = TWITTER_RATE_LIMITS["tweets"]["limit"]  # Limit dolu
-            status["tweets"]["reset_time"] = current_time + 3600  # 1 saat sonra reset (Free plan için güvenli)
+            status["tweets"]["reset_time"] = current_time + 900  # 15 dakika sonra reset (Free plan için)
             save_rate_limit_status(status)
         except:
             pass
@@ -5850,9 +5850,9 @@ def clean_duplicate_pending_tweets():
 # Rate limit yönetimi için global değişkenler
 RATE_LIMIT_FILE = "rate_limit_status.json"
 TWITTER_RATE_LIMITS = {
-    "tweets": {"limit": 20, "window": 3600},  # Saatte 20 tweet (Free plan 25, güvenli margin)
-    "user_lookup": {"limit": 90, "window": 900},  # 15 dakikada 90 kullanıcı sorgusu (Free plan 100)
-    "timeline": {"limit": 25, "window": 900}  # 15 dakikada 25 timeline sorgusu (Free plan 30)
+    "tweets": {"limit": 25, "window": 900},  # 15 dakikada 25 tweet (Free plan)
+    "user_lookup": {"limit": 100, "window": 900},  # 15 dakikada 100 kullanıcı sorgusu (Free plan)
+    "timeline": {"limit": 30, "window": 900}  # 15 dakikada 30 timeline sorgusu (Free plan)
 }
 
 def load_rate_limit_status():
@@ -5860,7 +5860,17 @@ def load_rate_limit_status():
     try:
         if os.path.exists(RATE_LIMIT_FILE):
             with open(RATE_LIMIT_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                data = json.load(f)
+                # Eski format kontrolü ve düzeltme
+                for endpoint in data:
+                    if isinstance(data[endpoint], dict):
+                        if 'reset_time' in data[endpoint]:
+                            # Reset time'ı kontrol et, geçmişse sıfırla
+                            current_time = time.time()
+                            if current_time >= data[endpoint]['reset_time']:
+                                data[endpoint]['requests'] = 0
+                                data[endpoint]['reset_time'] = current_time + TWITTER_RATE_LIMITS.get(endpoint, {}).get('window', 900)
+                return data
         return {}
     except Exception as e:
         print(f"Rate limit durumu yüklenirken hata: {e}")
@@ -5893,6 +5903,7 @@ def check_rate_limit(endpoint="tweets"):
         if current_time >= endpoint_status["reset_time"]:
             endpoint_status["requests"] = 0
             endpoint_status["reset_time"] = current_time + TWITTER_RATE_LIMITS[endpoint]["window"]
+            save_rate_limit_status(status)
         
         # Limit kontrolü
         if endpoint_status["requests"] >= TWITTER_RATE_LIMITS[endpoint]["limit"]:
@@ -5943,6 +5954,27 @@ def update_rate_limit_usage(endpoint="tweets"):
         
     except Exception as e:
         print(f"Rate limit güncelleme hatası: {e}")
+
+def reset_rate_limit_status():
+    """Rate limit durumunu sıfırla - manuel reset için"""
+    try:
+        current_time = time.time()
+        status = {}
+        
+        for endpoint in TWITTER_RATE_LIMITS:
+            status[endpoint] = {
+                "requests": 0,
+                "reset_time": current_time + TWITTER_RATE_LIMITS[endpoint]["window"],
+                "last_request": current_time
+            }
+        
+        save_rate_limit_status(status)
+        print("Rate limit durumu sıfırlandı")
+        return True
+        
+    except Exception as e:
+        print(f"Rate limit sıfırlama hatası: {e}")
+        return False
 
 def get_rate_limit_info():
     """Rate limit bilgilerini al"""

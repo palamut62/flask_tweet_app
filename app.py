@@ -34,7 +34,8 @@ from utils import (
     create_automatic_backup, load_ai_keywords_config, save_ai_keywords_config,
     get_all_active_keywords, fetch_ai_news_with_advanced_keywords,
     update_ai_keyword_category, get_ai_keywords_stats, analyze_tweet_quality,
-    safe_log, get_trending_ai_hashtags, remove_emojis_from_text, enhance_hashtags_with_trending
+    safe_log, get_trending_ai_hashtags, remove_emojis_from_text, enhance_hashtags_with_trending,
+    reset_rate_limit_status
 )
 
 # GitHub modülü kaldırıldı
@@ -711,13 +712,34 @@ def check_and_post_articles():
                 
                 # Makale zaten işlenmiş mi kontrol et
                 article_url = article.get('url', '')
+                article_title = article.get('title', '')
                 article_hash = article.get('hash', '')
+                
+                # Hash yoksa oluştur
+                if not article_hash and article_title:
+                    import hashlib
+                    article_hash = hashlib.md5(article_title.encode()).hexdigest()
+                    article['hash'] = article_hash
+                    terminal_log(f"🔧 Hash oluşturuldu: {article_title[:50]}...", "info")
+                
+                # Boş başlık kontrolü
+                if not article_title or not article_title.strip():
+                    terminal_log(f"⚠️ Boş başlık, atlanıyor: {article_url[:50]}...", "warning")
+                    continue
                 
                 # Posted articles kontrolü
                 already_posted = False
                 for posted in posted_articles:
-                    if (article_url and article_url == posted.get('url', '')) or \
-                       (article_hash and article_hash == posted.get('hash', '')):
+                    posted_url = posted.get('url', '')
+                    posted_hash = posted.get('hash', '')
+                    
+                    # URL kontrolü
+                    if article_url and article_url == posted_url:
+                        already_posted = True
+                        break
+                    
+                    # Hash kontrolü
+                    if article_hash and article_hash == posted_hash:
                         already_posted = True
                         break
                 
@@ -725,8 +747,16 @@ def check_and_post_articles():
                 already_pending = False
                 for pending in pending_tweets:
                     pending_article = pending.get('article', {})
-                    if (article_url and article_url == pending_article.get('url', '')) or \
-                       (article_hash and article_hash == pending_article.get('hash', '')):
+                    pending_url = pending_article.get('url', '')
+                    pending_hash = pending_article.get('hash', '')
+                    
+                    # URL kontrolü
+                    if article_url and article_url == pending_url:
+                        already_pending = True
+                        break
+                    
+                    # Hash kontrolü
+                    if article_hash and article_hash == pending_hash:
                         already_pending = True
                         break
                 
@@ -870,13 +900,29 @@ def check_and_post_articles():
                         article_url = article.get('url', '')
                         article_hash = article.get('hash', '')
                         
+                        # Hash yoksa oluştur
+                        if not article_hash and article.get('title'):
+                            import hashlib
+                            article_hash = hashlib.md5(article.get('title').encode()).hexdigest()
+                            article['hash'] = article_hash
+                            new_tweet['article'] = article
+                        
                         is_duplicate = False
                         for existing_tweet in pending_tweets:
                             existing_article = existing_tweet.get('article', {})
-                            if (article_url and article_url == existing_article.get('url', '')) or \
-                               (article_hash and article_hash == existing_article.get('hash', '')):
+                            existing_url = existing_article.get('url', '')
+                            existing_hash = existing_article.get('hash', '')
+                            
+                            # URL kontrolü
+                            if article_url and article_url == existing_url:
                                 is_duplicate = True
-                                terminal_log(f"⚠️ Duplikat tweet atlandı: {article['title'][:50]}...", "warning")
+                                terminal_log(f"⚠️ Duplikat URL atlandı: {article['title'][:50]}...", "warning")
+                                break
+                            
+                            # Hash kontrolü
+                            if article_hash and article_hash == existing_hash:
+                                is_duplicate = True
+                                terminal_log(f"⚠️ Duplikat hash atlandı: {article['title'][:50]}...", "warning")
                                 break
                         
                         if not is_duplicate:
@@ -904,13 +950,29 @@ def check_and_post_articles():
                     article_url = article.get('url', '')
                     article_hash = article.get('hash', '')
                     
+                    # Hash yoksa oluştur
+                    if not article_hash and article.get('title'):
+                        import hashlib
+                        article_hash = hashlib.md5(article.get('title').encode()).hexdigest()
+                        article['hash'] = article_hash
+                        new_tweet['article'] = article
+                    
                     is_duplicate = False
                     for existing_tweet in pending_tweets:
                         existing_article = existing_tweet.get('article', {})
-                        if (article_url and article_url == existing_article.get('url', '')) or \
-                           (article_hash and article_hash == existing_article.get('hash', '')):
+                        existing_url = existing_article.get('url', '')
+                        existing_hash = existing_article.get('hash', '')
+                        
+                        # URL kontrolü
+                        if article_url and article_url == existing_url:
                             is_duplicate = True
-                            terminal_log(f"⚠️ Duplikat tweet atlandı: {article['title'][:50]}...", "warning")
+                            terminal_log(f"⚠️ Duplikat URL atlandı: {article['title'][:50]}...", "warning")
+                            break
+                        
+                        # Hash kontrolü
+                        if article_hash and article_hash == existing_hash:
+                            is_duplicate = True
+                            terminal_log(f"⚠️ Duplikat hash atlandı: {article['title'][:50]}...", "warning")
                             break
                     
                     if not is_duplicate:
@@ -4249,6 +4311,21 @@ def rate_limit_status():
             "success": False,
             "error": str(e)
         })
+
+@app.route('/reset_rate_limit', methods=['POST'])
+@login_required
+def reset_rate_limit():
+    """Rate limit durumunu manuel olarak sıfırla"""
+    try:
+        success = reset_rate_limit_status()
+        if success:
+            terminal_log("✅ Rate limit durumu manuel olarak sıfırlandı", "success")
+            return jsonify({"success": True, "message": "Rate limit durumu sıfırlandı"})
+        else:
+            return jsonify({"success": False, "error": "Rate limit sıfırlama başarısız"})
+    except Exception as e:
+        terminal_log(f"❌ Rate limit sıfırlama hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
 
 @app.route('/retry_rate_limited_tweets')
 @login_required

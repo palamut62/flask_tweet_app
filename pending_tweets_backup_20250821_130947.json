@@ -1,0 +1,638 @@
+[
+  {
+    "article": {
+      "title": "Judge says FTC investigation into Media Matters ‘should alarm all Americans’",
+      "url": "https://techcrunch.com/2025/08/16/judge-says-ftc-investigation-into-media-matters-should-alarm-all-americans/",
+      "content": "A federal judge has blocked the FTC's investigation into Media Matters research around advertising and antisemitic content on X.",
+      "hash": "22f49ffbd94a224edc7a9d0fb5a49039",
+      "fetch_date": "2025-08-17T10:04:35.059571",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-16T20:32:36",
+      "is_within_7d": true,
+      "rss_published": "Sat, 16 Aug 2025 20:32:36 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-17T10:04:37.283530",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "🎯📈 Judge halts FTC probe into Media Matters after X lawsuit. Ruling raises concerns about government overreach & chills free speech. #AI #Tech #FreeSpeech #FTC\n\n🔗 https://techcrunch.com/2025/08/16/judge-says-ftc-investigation-into-media-matters-should-alarm-all-americans/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "This news doesn't describe an AI/tech innovation. It concerns a legal decision blocking the FTC's investigation into Media Matters, a media watchdog group, based on First Amendment concerns.",
+        "companies": [
+          "Media Matters",
+          "X",
+          "FTC"
+        ],
+        "impact_level": 4,
+        "audience": "General",
+        "hashtags": [
+          "#FreeSpeech",
+          "#FTC",
+          "#MediaMatters"
+        ],
+        "emojis": [
+          "👨",
+          "⚖",
+          "🔬"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "emojis": [
+          "📊",
+          "💡",
+          "🔍",
+          "📈",
+          "⚡",
+          "🎯"
+        ],
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 272,
+        "hashtag_count": 4
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-17T10:04:48.061199",
+    "created_at": "2025-08-17T10:04:48.061199",
+    "status": "pending",
+    "id": 1
+  },
+  {
+    "article": {
+      "title": "AI-powered stuffed animals are coming for your kids",
+      "url": "https://techcrunch.com/2025/08/16/ai-powered-stuffed-animals-are-coming-for-your-kids/",
+      "content": "Do A.I. chatbots packaged inside cute-looking plushies offer a viable alternative to screen time for kids? Maybe not.",
+      "hash": "cc39a4253b7a46b52a3e297428475bde",
+      "fetch_date": "2025-08-17T10:04:35.059571",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-16T19:39:40",
+      "is_within_7d": true,
+      "rss_published": "Sat, 16 Aug 2025 19:39:40 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-17T10:04:37.283530",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "⚡📈 AI-powered stuffed animals offer screen-free interaction. Chatbot integration provides companionship, reimagining playtime for kids. #AI #Tech #AItoys #KidsTech\n\n🔗 https://techcrunch.com/2025/08/16/ai-powered-stuffed-animals-are-coming-for-your-kids/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "The innovation is integrating AI chatbots into stuffed animals, aiming to provide screen-free interaction and companionship for children.",
+        "companies": [
+          "The article does not mention any specific companies."
+        ],
+        "impact_level": 3,
+        "audience": "General",
+        "hashtags": [
+          "#AItoys",
+          "#KidsTech",
+          "#Parenting"
+        ],
+        "emojis": [
+          "😬",
+          "🤖",
+          "🧠"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "emojis": [
+          "📊",
+          "💡",
+          "🔍",
+          "📈",
+          "⚡",
+          "🎯"
+        ],
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 8,
+        "issues": [],
+        "warnings": [],
+        "character_count": 253,
+        "hashtag_count": 4
+      },
+      "is_valid": true,
+      "quality_score": 8
+    },
+    "created_date": "2025-08-17T10:04:57.060564",
+    "created_at": "2025-08-17T10:04:57.060564",
+    "status": "pending",
+    "id": 2
+  },
+  {
+    "article": {
+      "title": "Anthropic says some Claude models can now end ‘harmful or abusive’ conversations",
+      "url": "https://techcrunch.com/2025/08/16/anthropic-says-some-claude-models-can-now-end-harmful-or-abusive-conversations/",
+      "content": "Anthropic says new capabilities allow its latest AI models to protect themselves by ending abusive conversations.",
+      "hash": "a6f3ea6fd1a05f58f1550137e6de98ae",
+      "fetch_date": "2025-08-17T10:05:41.225009",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-16T15:50:05",
+      "is_within_7d": true,
+      "rss_published": "Sat, 16 Aug 2025 15:50:05 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-17T10:05:42.399596",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "⚡💡 Anthropic's Claude now proactively ends harmful conversations, protecting users from abusive AI interactions. This new ability ... #AI #Tech #AIethics #AIsafety\n\n🔗 https://techcrunch.com/2025/08/16/anthropic-says-some-claude-models-can-now-end-harmful-or-abusive-conversations/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Anthropic's Claude models can now proactively terminate conversations deemed harmful or abusive, allowing the AI to protect itself from negative interactions.",
+        "companies": [
+          "Anthropic"
+        ],
+        "impact_level": 6,
+        "audience": "Developer",
+        "hashtags": [
+          "#AIethics",
+          "#AIsafety",
+          "#Claude"
+        ],
+        "emojis": [
+          "🛡",
+          "️",
+          "🤖"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "emojis": [
+          "📊",
+          "💡",
+          "🔍",
+          "📈",
+          "⚡",
+          "🎯"
+        ],
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 8,
+        "issues": [],
+        "warnings": [],
+        "character_count": 280,
+        "hashtag_count": 4
+      },
+      "is_valid": true,
+      "quality_score": 8
+    },
+    "created_date": "2025-08-17T10:05:51.954636",
+    "created_at": "2025-08-17T10:05:51.954636",
+    "status": "pending",
+    "id": 3
+  },
+  {
+    "article": {
+      "title": "The Pixel 9 Pro Fold is $600 off ahead of the new model’s debut",
+      "url": "https://www.theverge.com/tech/760131/google-pixel-9-pro-fold-lenovo-legion-go-s-deal-sale",
+      "content": "Some people like to stay on the cutting edge of technology. If that’s you, you already know that Google is going to officially unveil its Pixel 10 phones (including a new Fold) during its August 20th event. But if you’re someone who prefers to use these opportunities to save on last-gen tech, you’ve been rewarded […]",
+      "hash": "dfb7eb0c3a8a882ba23806d2c40916cc",
+      "fetch_date": "2025-08-17T10:05:41.803971",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-16T14:23:27",
+      "is_within_7d": true,
+      "rss_published": "2025-08-16T10:23:27-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-17T10:05:42.399596",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "📈⚡ Google's Pixel 9 Pro Fold sees a $600 price drop! Get yours now before the next generation arrives. #AI #Tech #Pixel9ProFold #GooglePixel\n\n🔗 https://www.theverge.com/tech/760131/google-pixel-9-pro-fold-lenovo-legion-go-s-deal-sale",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "This news doesn't describe a technological innovation. It focuses on a price drop for the existing Pixel 9 Pro Fold ahead of the new Pixel 10 Fold's release. The \"innovation\" is the *upcoming* Pixel 10 Fold.",
+        "companies": [
+          "Google"
+        ],
+        "impact_level": 2,
+        "audience": "General",
+        "hashtags": [
+          "#Pixel9ProFold",
+          "#GooglePixel",
+          "#TechDeals"
+        ],
+        "emojis": [
+          "💰",
+          "📉",
+          "🚀"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "emojis": [
+          "📊",
+          "💡",
+          "🔍",
+          "📈",
+          "⚡",
+          "🎯"
+        ],
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 233,
+        "hashtag_count": 4
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-17T10:06:01.276281",
+    "created_at": "2025-08-17T10:06:01.282221",
+    "status": "pending",
+    "id": 4
+  },
+  {
+    "article": {
+      "title": "Dead Take’s best scares come from real-life performances",
+      "url": "https://www.theverge.com/games/760213/dead-take-review-fmv-horror-game-ben-starr",
+      "content": "Dead Take, the second game from Tales of Kenzera: Zau developer Surgent Studios, is a quiet horror game where the monster is ambition and the lengths a person will go for stardom. Like a lot of horror games, Dead Take relies on jumpscares to get the heart pumping. But playing this game, my deepest, most […]",
+      "hash": "cafa1ceaf4cbce411cde5921f825567e",
+      "fetch_date": "2025-08-17T10:05:41.804345",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-16T13:00:00",
+      "is_within_7d": true,
+      "rss_published": "2025-08-16T09:00:00-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-17T10:05:42.399596",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "⚡🔍 Surgent Studios' Dead Take uses live-motion-captured actors, not CGI, for its monsters. Real human performances drive the horror, making ambition the true ter... #AI #Tech #DeadTake #HorrorGame\n\n🔗 https://www.theverge.com/games/760213/dead-take-review-fmv-horror-game-ben-starr",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Real actors’ live-motion-captured performances replace CGI monsters, turning human ambition—not supernatural horror—into the game’s chilling antagonist.",
+        "companies": [
+          "Surgent Studios"
+        ],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#DeadTake",
+          "#HorrorGame",
+          "#IndieGame"
+        ],
+        "emojis": [
+          "🎭",
+          "🎬",
+          "🎮"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "emojis": [
+          "📊",
+          "💡",
+          "🔍",
+          "📈",
+          "⚡",
+          "🎯"
+        ],
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 8,
+        "issues": [],
+        "warnings": [],
+        "character_count": 280,
+        "hashtag_count": 4
+      },
+      "is_valid": true,
+      "quality_score": 8
+    },
+    "created_date": "2025-08-17T10:06:45.717146",
+    "created_at": "2025-08-17T10:06:45.717146",
+    "status": "pending",
+    "id": 5
+  },
+  {
+    "article": {
+      "title": "A brazen attack on air safety is underway — here’s what’s at stake",
+      "url": "https://www.theverge.com/planes/758913/air-safety-regulation-faa-trump-bedford-sully",
+      "content": "At the end of July, the National Transportation Safety Board (NTSB) convened a three-day public hearing to investigate January's mid-air collision over Washington, DC that killed 67 people. After the hearing, two conclusions were inescapable. First, the disaster should have been prevented by existing safety rules. And second, the government regulators responsible for air safety […]",
+      "hash": "e7cee7849b126f9b672cd4450bdab50e",
+      "fetch_date": "2025-08-17T10:05:41.804345",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-16T12:00:00",
+      "is_within_7d": true,
+      "rss_published": "2025-08-16T08:00:00-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-17T10:05:42.399596",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "📈🎯 Air safety gaps exposed! Existing regulations fail to prevent potential threats. Understanding vulnerabilities is crucial for proactive solutions. #AI #Tech #AirSafety #AviationAccident\n\n🔗 https://www.theverge.com/planes/758913/air-safety-regulation-faa-trump-bedford-sully",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "This article doesn't describe an AI/tech innovation. It discusses failures in existing air safety regulations that contributed to a preventable mid-air collision. There is no breakthrough to explain.",
+        "companies": [
+          "There are no companies mentioned in this news."
+        ],
+        "impact_level": 7,
+        "audience": "General",
+        "hashtags": [
+          "#AirSafety",
+          "#AviationAccident",
+          "#NTSB"
+        ],
+        "emojis": [
+          "🚨",
+          "✈",
+          "🤖"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "emojis": [
+          "📊",
+          "💡",
+          "🔍",
+          "📈",
+          "⚡",
+          "🎯"
+        ],
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 276,
+        "hashtag_count": 4
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-17T10:06:55.343276",
+    "created_at": "2025-08-17T10:06:55.343276",
+    "status": "pending",
+    "id": 6
+  },
+  {
+    "article": {
+      "title": "Teaching the model: Designing LLM feedback loops that get smarter over time",
+      "url": "https://venturebeat.com/ai/teaching-the-model-designing-llm-feedback-loops-that-get-smarter-over-time/",
+      "content": "How to close the loop between user behavior and LLM performance, and why human-in-the-loop systems are still essential in the age of gen AI.",
+      "hash": "2db7cbcdfaac496a37ad16d387ba0fae",
+      "fetch_date": "2025-08-17T12:17:49.981931",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - VentureBeat AI RSS",
+      "source_id": "venturebeat_rss",
+      "article_date": "2025-08-16T20:15:00",
+      "is_within_7d": true,
+      "rss_published": "Sat, 16 Aug 2025 20:15:00 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-17T12:17:50.003024",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "📊🔍 LLMs learn faster! New feedback loops use user behavior to boost performance over time, creating smarter, more responsive AI. #AI #Tech #LLMs #AIfeedback\n\n🔗 https://venturebeat.com/ai/teaching-the-model-designing-llm-feedback-loops-that-get-smarter-over-time/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "The article focuses on creating feedback loops that improve LLM performance over time by incorporating user behavior. This involves using human input to refine and correct the LLM's responses, making the system smarter and more aligned with user needs.",
+        "companies": [
+          "None"
+        ],
+        "impact_level": 7,
+        "audience": "General",
+        "hashtags": [
+          "#LLMs",
+          "#AIfeedback",
+          "#HumanInTheLoop"
+        ],
+        "emojis": [
+          "💻",
+          "🤖",
+          "🧠"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "emojis": [
+          "📊",
+          "💡",
+          "🔍",
+          "📈",
+          "⚡",
+          "🎯"
+        ],
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 262,
+        "hashtag_count": 4
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-17T12:19:14.598557",
+    "created_at": "2025-08-17T12:19:14.598557",
+    "status": "pending",
+    "id": 7
+  },
+  {
+    "article": {
+      "title": "Google Deepmind's new Genie 3",
+      "url": "https://v.redd.it/s6555dgpn7hf1",
+      "content": "[https://x.com/OfficialLoganK/status/1952732206176112915](https://x.com/OfficialLoganK/status/1952732206176112915)",
+      "score": 8501,
+      "hash": "87d9841c321cec6d451ac4cc9246de8d",
+      "source": "Reddit - r/singularity",
+      "fetch_date": "2025-08-17T12:18:49.776166",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "PythonAnywhere",
+      "method_icon": "🐍",
+      "method_color": "green"
+    },
+    "tweet_data": {
+      "tweet": "📈⚡ Google Deepmind introduces Genie 3 is a new generative AI model from Google DeepMind that can create interactive and playable 2 #AI #Tech #Genie3 #DeepMind\n\n🔗 https://v.redd.it/s6555dgpn7hf1",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Genie 3 is a new generative AI model from Google DeepMind that can create interactive and playable 2D games from text prompts, images, or even other games. This allows for easier and faster game creation, democratizing game development.",
+        "companies": [
+          "Google Deepmind"
+        ],
+        "impact_level": 7,
+        "audience": "General",
+        "hashtags": [
+          "#Genie3",
+          "#DeepMind",
+          "#AI"
+        ],
+        "emojis": [
+          "✨",
+          "🚀",
+          "💻"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "emojis": [
+          "📊",
+          "💡",
+          "🔍",
+          "📈",
+          "⚡",
+          "🎯"
+        ],
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 6,
+        "issues": [],
+        "warnings": [],
+        "character_count": 193,
+        "hashtag_count": 4
+      },
+      "is_valid": true,
+      "quality_score": 6
+    },
+    "created_date": "2025-08-17T12:19:23.412853",
+    "created_at": "2025-08-17T12:19:23.412853",
+    "status": "pending",
+    "id": 8
+  }
+]
