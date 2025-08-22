@@ -143,5 +143,285 @@
     "status": "pending",
     "error_reason": "Twitter API rate limit aşıldı: 429 Too Many Requests\nToo Many Requests\n15 dakika sonra tekrar deneyin.",
     "retry_count": 0
+  },
+  {
+    "article": {
+      "title": "OpenAI lawyers question Meta’s role in Elon Musk’s $97B takeover bid",
+      "url": "https://techcrunch.com/2025/08/21/openai-lawyers-question-metas-role-in-elon-musks-97b-takeover-bid/",
+      "content": "OpenAI says that Elon Musk met with Meta CEO Mark Zuckerberg to discuss a $97 billion takeover bid of the ChatGPT-maker.",
+      "hash": "4abda062c7778676b54899eddf4f6faa",
+      "fetch_date": "2025-08-22T10:58:56.112951",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-22T00:31:38",
+      "is_within_7d": true,
+      "rss_published": "Fri, 22 Aug 2025 00:31:38 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-22T10:59:01.457190",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "OpenAI legal team questions Meta's role in Musk's $97B takeover bid, citing potential antitrust conflicts #AI #Tech #ArtificialIntelligence #TechNews #AIRevolution\n\nhttps://techcrunch.com/2025/08/21/openai-lawyers-question-metas-role-in-elon-musks-97b-takeover-bid/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "OpenAI lawyers question Metas role in Elon Musks 97B takeover bid",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 265,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-22T10:59:18.177330",
+    "created_at": "2025-08-22T10:59:18.177330",
+    "status": "pending",
+    "id": 3
+  },
+  {
+    "article": {
+      "title": "Anduril, Blue Origin to study how to transport cargo from orbit to Earth for the Pentagon",
+      "url": "https://techcrunch.com/2025/08/21/anduril-blue-origin-to-study-how-to-transport-cargo-from-orbit-to-earth-for-the-pentagon/",
+      "content": "Blue Origin and Anduril notched small contracts that could revolutionize how the Pentagon transports cargo.",
+      "hash": "cb0be10d19b08e25158853d5c2478c51",
+      "fetch_date": "2025-08-22T10:58:56.112951",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-21T22:11:37",
+      "is_within_7d": true,
+      "rss_published": "Thu, 21 Aug 2025 22:11:37 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-22T10:59:01.457190",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Anduril and Blue Origin study orbital cargo return for Pentagon, developing heat-shielded capsules to deliver 5-ton pay... #AI #Tech #AR #TechNews #Gemini\n\nhttps://techcrunch.com/2025/08/21/anduril-blue-origin-to-study-how-to-transport-cargo-from-orbit-to-earth-for-the-pentagon/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Anduril Blue Origin to study how to transport cargo from orbit to Earth for the ...",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#AR",
+          "#VR",
+          "#Metaverse"
+        ],
+        "emojis": [
+          "🚀",
+          "💻",
+          "🌟"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-22T10:59:34.457807",
+    "created_at": "2025-08-22T10:59:34.457807",
+    "status": "pending",
+    "id": 4
+  },
+  {
+    "article": {
+      "title": "As India bans real-money games, Dream Sports, MPL start pulling the plug",
+      "url": "https://techcrunch.com/2025/08/21/as-india-bans-real-money-games-dream-sports-mpl-start-pulling-the-plug/",
+      "content": "Several Indian startups, including Dream Sports, MPL, and Zupee, are shutting down their real-money games after parliament passed a bill banning such games.",
+      "hash": "2a46b4f5c3eb469127d04af2b57d5e3a",
+      "fetch_date": "2025-08-22T10:58:56.112951",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-21T20:56:57",
+      "is_within_7d": true,
+      "rss_published": "Thu, 21 Aug 2025 20:56:57 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-22T10:59:01.457190",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Dream Sports and MPL remove 40+ real-money games from Indian app stores after Karnataka ban, affecting 100M+ users #AI #Tech #Startup #ComputerVision #Google\n\nhttps://techcrunch.com/2025/08/21/as-india-bans-real-money-games-dream-sports-mpl-start-pulling-the-plug/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "As India bans real-money games Dream Sports MPL start pulling the plug",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Startup",
+          "#Investment",
+          "#VentureCapital"
+        ],
+        "emojis": [
+          "💰",
+          "💸",
+          "📈"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 264,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-22T10:59:48.801859",
+    "created_at": "2025-08-22T10:59:48.801859",
+    "status": "pending",
+    "id": 5
+  },
+  {
+    "article": {
+      "title": "Ecosia has offered to take ‘stewardship’ of Chrome. And it’s not a bad idea.",
+      "url": "https://techcrunch.com/2025/08/21/ecosia-has-offered-to-take-stewardship-of-chrome-and-its-not-a-bad-idea/",
+      "content": "Berlin-based nonprofit search engine Ecosia has asked a U.S. judge to turn Chrome into a foundation it controls, funding billions in climate projects.",
+      "hash": "a07131887d97b47391a8fe6bed5e847f",
+      "fetch_date": "2025-08-22T11:02:49.786822",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-21T20:02:47",
+      "is_within_7d": true,
+      "rss_published": "Thu, 21 Aug 2025 20:02:47 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-22T11:02:55.235197",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Ecosia proposes taking stewardship of Chrome, pledging 100% privacy-first browsing and planting 1 tree per 50 searches while maintain... #AI #Tech #Startup #Google #Claude\n\nhttps://techcrunch.com/2025/08/21/ecosia-has-offered-to-take-stewardship-of-chrome-and-its-not-a-bad-idea/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Ecosia has offered to take stewardship of Chrome And its not a bad idea",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Startup",
+          "#Investment",
+          "#VentureCapital"
+        ],
+        "emojis": [
+          "💰",
+          "💸",
+          "📈"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-22T11:03:18.729457",
+    "created_at": "2025-08-22T11:03:18.729457",
+    "status": "pending",
+    "id": 6
   }
 ]

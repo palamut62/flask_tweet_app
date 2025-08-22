@@ -678,6 +678,11 @@
                                 <i class="fas fa-shield-alt text-sm"></i>
                                 <span>Güvenlik</span>
                             </a>
+                            <div class="border-t border-gray-100 my-2"></div>
+                            <a href="{{ url_for('changelog') }}" class="dropdown-item-minimal {% if request.endpoint == 'changelog' %}bg-green-50 text-green-700{% endif %}">
+                                <i class="fas fa-history text-sm"></i>
+                                <span>Changelog</span>
+                            </a>
                         </div>
                     </div>
                     

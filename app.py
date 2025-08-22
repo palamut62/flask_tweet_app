@@ -41,8 +41,10 @@ from utils import (
 # GitHub modülü kaldırıldı
 
 # Version Information
-APP_VERSION = "1.3.0"
+APP_VERSION = "1.4.0"
+APP_RELEASE_DATE = "2025-02-03"
 VERSION_CHANGELOG = {
+    "1.4.0": "OpenRouter OCR entegrasyonu, Çok katmanlı fallback sistemi, Gelişmiş hata yönetimi",
     "1.3.0": "GitHub kaldırıldı, Footer düzeltildi, Navbar yenilendi",
     "1.2.0": "UI iyileştirmeleri ve performans optimizasyonları", 
     "1.1.0": "Otomatik tweet sistemi ve AI entegrasyonu"
@@ -50,6 +52,42 @@ VERSION_CHANGELOG = {
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
+
+# Markdown filter for Jinja2 templates
+import re
+def markdown_filter(text):
+    """Basit markdown to HTML converter"""
+    if not text:
+        return ""
+    
+    # Headers
+    text = re.sub(r'^# (.*$)', r'<h1>\1</h1>', text, flags=re.MULTILINE)
+    text = re.sub(r'^## (.*$)', r'<h2>\1</h2>', text, flags=re.MULTILINE)
+    text = re.sub(r'^### (.*$)', r'<h3>\1</h3>', text, flags=re.MULTILINE)
+    
+    # Bold
+    text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
+    
+    # Italic
+    text = re.sub(r'\*(.*?)\*', r'<em>\1</em>', text)
+    
+    # Code blocks
+    text = re.sub(r'```(.*?)```', r'<pre><code>\1</code></pre>', text, flags=re.DOTALL)
+    
+    # Inline code
+    text = re.sub(r'`(.*?)`', r'<code>\1</code>', text)
+    
+    # Lists
+    text = re.sub(r'^- (.*$)', r'<li>\1</li>', text, flags=re.MULTILINE)
+    text = re.sub(r'(<li>.*</li>)', r'<ul>\1</ul>', text, flags=re.DOTALL)
+    
+    # Line breaks
+    text = text.replace('\n\n', '<br><br>')
+    text = text.replace('\n', '<br>')
+    
+    return text
+
+app.jinja_env.filters['markdown'] = markdown_filter
 
 # Favicon 404 hatasını önle
 @app.route('/favicon.ico')
@@ -452,7 +490,10 @@ def index():
                              api_check=api_check,
                              settings=settings,
                              news_count=news_count,
-                             last_check=last_check_time)
+                             last_check=last_check_time,
+                             app_version=APP_VERSION,
+                             app_release_date=APP_RELEASE_DATE,
+                             version_changelog=VERSION_CHANGELOG)
                              
     except Exception as e:
         safe_log(f"Ana sayfa hatası: {str(e)}", "ERROR")
@@ -5320,6 +5361,31 @@ def test_openrouter_ocr():
             "success": False,
             "error": f"OCR test hatası: {e}"
         })
+
+@app.route('/changelog')
+@login_required
+def changelog():
+    """Changelog sayfası"""
+    try:
+        # CHANGELOG.md dosyasını oku
+        changelog_content = ""
+        try:
+            with open('CHANGELOG.md', 'r', encoding='utf-8') as f:
+                changelog_content = f.read()
+        except FileNotFoundError:
+            changelog_content = "# Changelog\n\nChangelog dosyası bulunamadı."
+        
+        return render_template('changelog.html', 
+                             changelog_content=changelog_content,
+                             app_version=APP_VERSION,
+                             app_release_date=APP_RELEASE_DATE,
+                             version_changelog=VERSION_CHANGELOG)
+    except Exception as e:
+        return render_template('changelog.html', 
+                             changelog_content=f"Hata: {str(e)}",
+                             app_version=APP_VERSION,
+                             app_release_date=APP_RELEASE_DATE,
+                             version_changelog=VERSION_CHANGELOG)
 
 @app.route('/test_openrouter_api')
 @login_required

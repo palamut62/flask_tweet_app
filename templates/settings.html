@@ -891,54 +891,7 @@
         </div>
     </div>
 
-    <!-- Sürüm Notları Kartı -->
-    <div class="card-modern">
-        <div class="p-8">
-            <div class="flex items-center space-x-3 mb-8">
-                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-info-circle text-white text-lg"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-900">Sürüm Notları</h2>
-            </div>
-            
-            <div class="space-y-6">
-                <p class="text-gray-600">AI Tweet Bot'un güncelleme geçmişi ve yeni özellikler.</p>
-                
-                <div class="space-y-4">
-                    {% for version, description in version_changelog.items() %}
-                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
-                                    v{{ version }}
-                                </span>
-                                <span class="text-gray-900">{{ description }}</span>
-                            </div>
-                            {% if version == app_version %}
-                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                                Mevcut Sürüm
-                            </span>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                
-                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div class="flex items-start space-x-3">
-                        <i class="fas fa-lightbulb text-blue-500 mt-1"></i>
-                        <div>
-                            <h4 class="font-medium text-blue-900">Güncelleme Bilgisi</h4>
-                            <p class="text-sm text-blue-700 mt-1">
-                                Yeni sürümler otomatik olarak kontrol edilir. Güncellemeler hakkında daha fazla bilgi için 
-                                <a href="#" class="underline hover:text-blue-900">dokümantasyonu</a> inceleyebilirsiniz.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 </div>
 
 <script>
