@@ -72,5 +72,76 @@
     "created_at": "2025-08-17T12:19:23.412853",
     "status": "pending",
     "id": 8
+  },
+  {
+    "article": {
+      "title": "OpenAI announces New Delhi office as it expands footprint in India",
+      "url": "https://techcrunch.com/2025/08/21/openai-announces-new-delhi-office-as-it-expands-footprint-in-india/",
+      "content": "OpenAI has started hiring in India as it looks to expand its presence in the fast-growing South Asian tech market.",
+      "hash": "bf0935dea14988249a3185986a525aba",
+      "fetch_date": "2025-08-22T10:39:21.466296",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-22T06:06:18",
+      "is_within_7d": true,
+      "rss_published": "Fri, 22 Aug 2025 06:06:18 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-22T10:39:25.942692",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "OpenAI opens New Delhi office, establishing its first India hub to serve 1.4B users with localized AI support #AI #Tech #ArtificialIntelligence #Transformer #ComputerVision\n\nhttps://techcrunch.com/2025/08/21/openai-announces-new-delhi-office-as-it-expands-footprint-in-india/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "OpenAI announces New Delhi office as it expands footprint in India",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 275,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-22T10:39:39.333904",
+    "created_at": "2025-08-22T10:39:39.333904",
+    "status": "pending",
+    "error_reason": "Twitter API rate limit aşıldı: 429 Too Many Requests\nToo Many Requests\n15 dakika sonra tekrar deneyin.",
+    "retry_count": 0
   }
 ]

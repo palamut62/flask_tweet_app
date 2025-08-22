@@ -3386,9 +3386,135 @@ def gemini_ocr_image(image_path):
 
 # OpenRouter OCR alternatifi (şimdilik desteklenmiyor)
 def openrouter_ocr_image(image_path):
-    """OpenRouter ile görsel OCR - şimdilik desteklenmiyor"""
-    safe_log("⚠️ OpenRouter ile görsel OCR henüz desteklenmiyor, Gemini kullanın", "WARNING")
-    return gemini_ocr_image(image_path)
+    """OpenRouter vision model ile gelişmiş OCR işlemi"""
+    try:
+        import base64
+        import requests
+        import os
+        
+        # OpenRouter API anahtarını kontrol et
+        api_key = os.environ.get('OPENROUTER_API_KEY')
+        if not api_key:
+            safe_log("❌ OpenRouter API anahtarı bulunamadı, Gemini OCR'ye yönlendiriliyor", "WARNING")
+            return gemini_ocr_image(image_path)
+        
+        safe_log(f"🔍 OpenRouter vision model ile OCR başlatılıyor: {image_path}", "INFO")
+        
+        # Resmi base64'e çevir
+        with open(image_path, "rb") as image_file:
+            encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+        
+        # OpenRouter vision modelleri (ücretsiz)
+        vision_models = [
+            "qwen/qwen2-vl-7b:free",                    # En güvenilir
+            "qwen/qwen2-vl-2b:free",                    # Daha hızlı
+            "microsoft/phi-3-vision-128k-instruct:free", # Microsoft Phi-3
+            "llava/llava-v1.6-vicuna-7b:free"           # LLaVA
+        ]
+        
+        # Her modeli sırayla dene
+        for model in vision_models:
+            try:
+                safe_log(f"🧪 Vision model deneniyor: {model}", "DEBUG")
+                
+                headers = {
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://ai-tweet-bot.pythonanywhere.com",
+                    "X-Title": "AI Tweet Bot"
+                }
+                
+                data = {
+                    "model": model,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/jpeg;base64,{encoded_image}"
+                                    }
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "Bu görseldeki tüm metni çıkar ve sadece metni döndür. Açıklama ekleme, sadece metni ver. Eğer görselde metin yoksa 'Metin bulunamadı' yaz."
+                                }
+                            ]
+                        }
+                    ],
+                    "max_tokens": 1000,
+                    "temperature": 0.1
+                }
+                
+                response = requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers=headers,
+                    json=data,
+                    timeout=60
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    if result.get("choices") and len(result["choices"]) > 0:
+                        ocr_text = result["choices"][0]["message"]["content"].strip()
+                        
+                        # Metin kontrolü
+                        if ocr_text and len(ocr_text.strip()) > 5 and "metin bulunamadı" not in ocr_text.lower():
+                            safe_log(f"✅ OpenRouter OCR başarılı! Model: {model}, {len(ocr_text)} karakter", "SUCCESS")
+                            return ocr_text
+                        else:
+                            safe_log(f"⚠️ Model yanıt verdi ama metin yetersiz: {model}", "WARNING")
+                            continue
+                    else:
+                        safe_log(f"⚠️ Model yanıtında choices bulunamadı: {model}", "WARNING")
+                        continue
+                elif response.status_code == 429:
+                    safe_log(f"⚠️ Model rate limited: {model}, diğer model deneniyor", "WARNING")
+                    continue
+                else:
+                    safe_log(f"❌ Model hatası ({model}): {response.status_code}", "ERROR")
+                    continue
+                    
+            except Exception as model_error:
+                safe_log(f"❌ Model hatası ({model}): {model_error}", "ERROR")
+                continue
+        
+        # Hiçbir model çalışmazsa Gemini'ye yönlendir
+        safe_log("⚠️ Tüm OpenRouter vision modelleri başarısız, Gemini OCR'ye yönlendiriliyor", "WARNING")
+        return gemini_ocr_image(image_path)
+        
+    except Exception as e:
+        safe_log(f"❌ OpenRouter OCR genel hatası: {str(e)}", "ERROR")
+        # Fallback: Gemini OCR
+        return gemini_ocr_image(image_path)
+
+def openrouter_ocr_image_enhanced(image_path):
+    """OpenRouter vision model ile gelişmiş OCR - Gelişmiş hata yönetimi"""
+    try:
+        # Dosya varlığını kontrol et
+        if not os.path.exists(image_path):
+            safe_log(f"❌ Resim dosyası bulunamadı: {image_path}", "ERROR")
+            return "Resim dosyası bulunamadı"
+        
+        # Dosya boyutunu kontrol et (max 10MB)
+        file_size = os.path.getsize(image_path)
+        if file_size > 10 * 1024 * 1024:  # 10MB
+            safe_log(f"⚠️ Resim dosyası çok büyük: {file_size} bytes", "WARNING")
+            return "Resim dosyası çok büyük (max 10MB)"
+        
+        # OpenRouter OCR'yi dene
+        ocr_result = openrouter_ocr_image(image_path)
+        
+        if ocr_result and len(ocr_result.strip()) > 5:
+            return ocr_result
+        else:
+            safe_log("⚠️ OpenRouter OCR yetersiz sonuç, Gemini'ye yönlendiriliyor", "WARNING")
+            return gemini_ocr_image(image_path)
+            
+    except Exception as e:
+        safe_log(f"❌ Gelişmiş OCR hatası: {str(e)}", "ERROR")
+        return gemini_ocr_image(image_path)
 
 def setup_twitter_v2_client():
     """Tweepy v2 API Client ile kimlik doğrulama (sadece metinli tweet için)"""

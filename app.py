@@ -2956,9 +2956,9 @@ def create_tweet():
                 os.makedirs(os.path.dirname(image_path), exist_ok=True)
                 image_file.save(image_path)
                 try:
-                    from utils import gemini_ocr_image, generate_ai_tweet_with_content
+                    from utils import openrouter_ocr_image_enhanced, generate_ai_tweet_with_content
                     terminal_log(f"📷 Resimden OCR çıkarılıyor: {filename}", "info")
-                    ocr_text = gemini_ocr_image(image_path)
+                    ocr_text = openrouter_ocr_image_enhanced(image_path)
                     
                     if not ocr_text or len(ocr_text.strip()) < 10:
                         flash('Resimden yeterli metin çıkarılamadı!', 'error')
@@ -3596,8 +3596,8 @@ def ocr_image():
         terminal_log(f"📷 AJAX OCR başlatıldı - Dosya: {filename}, Tema: {selected_theme}", "info")
 
         try:
-            from utils import openrouter_ocr_image, generate_ai_tweet_with_content
-            ocr_text = openrouter_ocr_image(image_path)
+            from utils import openrouter_ocr_image_enhanced, generate_ai_tweet_with_content
+            ocr_text = openrouter_ocr_image_enhanced(image_path)
             
             if not ocr_text or len(ocr_text.strip()) < 10:
                 return jsonify({'success': False, 'error': 'Resimden yeterli metin çıkarılamadı.'}), 400
@@ -3621,7 +3621,9 @@ def ocr_image():
                 'text': tweet_text,
                 'theme': selected_theme,
                 'char_count': len(tweet_text),
-                'ocr_text': ocr_text[:200] + "..." if len(ocr_text) > 200 else ocr_text
+                'ocr_text': ocr_text[:200] + "..." if len(ocr_text) > 200 else ocr_text,
+                'ocr_method': 'openrouter_vision_enhanced',
+                'ocr_char_count': len(ocr_text)
             })
             
         except Exception as e:
@@ -5276,6 +5278,49 @@ def force_automation_run():
             'message': f'Hata oluştu: {str(e)}'
         })
 
+@app.route('/test_openrouter_ocr')
+@login_required
+def test_openrouter_ocr():
+    """OpenRouter OCR sistemini test et"""
+    try:
+        from utils import openrouter_ocr_image_enhanced
+        import os
+        
+        # Test resmi oluştur (basit bir metin içeren resim)
+        test_image_path = "static/uploads/test_ocr.png"
+        
+        # Eğer test resmi yoksa basit bir test yap
+        if not os.path.exists(test_image_path):
+            return jsonify({
+                "success": False,
+                "error": "Test resmi bulunamadı",
+                "message": "Lütfen bir resim yükleyip OCR testini deneyin"
+            })
+        
+        # OCR testi yap
+        ocr_result = openrouter_ocr_image_enhanced(test_image_path)
+        
+        if ocr_result and len(ocr_result.strip()) > 5:
+            return jsonify({
+                "success": True,
+                "ocr_text": ocr_result,
+                "char_count": len(ocr_result),
+                "message": "OpenRouter OCR sistemi çalışıyor"
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "OCR sonucu yetersiz",
+                "ocr_text": ocr_result,
+                "message": "OCR işlemi başarısız oldu"
+            })
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"OCR test hatası: {e}"
+        })
+
 @app.route('/test_openrouter_api')
 @login_required
 def test_openrouter_api():
@@ -5897,8 +5942,8 @@ def create_tweet_homepage():
             image_file.save(image_path)
             
             # OCR ile resimden metin çıkar
-            from utils import openrouter_ocr_image, generate_ai_tweet_with_content
-            ocr_text = openrouter_ocr_image(image_path)
+            from utils import openrouter_ocr_image_enhanced, generate_ai_tweet_with_content
+            ocr_text = openrouter_ocr_image_enhanced(image_path)
             
             if not ocr_text or len(ocr_text.strip()) < 10:
                 return jsonify({'success': False, 'error': 'Resimden yeterli metin çıkarılamadı.'})

@@ -3,7 +3,7 @@
   "check_interval_hours": 5,
   "max_articles_per_run": 5,
   "min_score_threshold": 5,
-  "auto_post_enabled": true,
+  "auto_post_enabled": false,
   "manual_approval_required": false,
   "telegram_notifications": false,
   "email_notifications": true,
@@ -12,9 +12,15 @@
   "content_similarity_threshold": 0.75,
   "news_fetching_method": "auto",
   "tweet_theme": "bilgilendirici",
-  "last_updated": "2025-08-21T13:09:47.450993",
+  "last_updated": "2025-08-22T10:39:39.313297",
   "hash_based_detection": true,
   "url_based_detection": true,
   "title_based_detection": true,
-  "cross_check_enabled": true
+  "cross_check_enabled": true,
+  "min_score": 5,
+  "require_manual_approval": true,
+  "working_hours_only": false,
+  "working_hours_start": "09:00",
+  "working_hours_end": "18:00",
+  "weekend_enabled": true
 }
