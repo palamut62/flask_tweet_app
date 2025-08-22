@@ -1,0 +1,32 @@
+[
+  {
+    "timestamp": "2025-08-22T11:59:43.024478",
+    "reason": "Günlük limit aşıldı",
+    "previous_usage": {
+      "tweets": {
+        "requests": 25,
+        "limit": 25
+      }
+    }
+  },
+  {
+    "timestamp": "2025-08-22T12:59:43.024478",
+    "reason": "Manuel sıfırlama",
+    "previous_usage": {
+      "tweets": {
+        "requests": 15,
+        "limit": 25
+      }
+    }
+  },
+  {
+    "timestamp": "2025-08-22T13:59:43.094264",
+    "reason": "Otomatik sıfırlama",
+    "previous_usage": {
+      "tweets": {
+        "requests": 0,
+        "limit": 25
+      }
+    }
+  }
+]

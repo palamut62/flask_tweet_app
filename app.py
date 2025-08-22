@@ -12,7 +12,7 @@ import smtplib
 import random
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup 
 import hashlib
 import uuid
 
@@ -1088,6 +1088,32 @@ def post_tweet_route():
         if not tweet_to_post:
             return jsonify({"success": False, "error": "Tweet bulunamadı"})
         
+        # Hash kontrolü - tekrar paylaşımı önle
+        hash_value = tweet_to_post.get('hash', '')
+        if not hash_value and 'article' in tweet_to_post:
+            hash_value = tweet_to_post['article'].get('hash', '')
+        
+        if not hash_value:
+            import hashlib
+            title = tweet_to_post.get('title', '')
+            if 'article' in tweet_to_post:
+                title = tweet_to_post['article'].get('title', '')
+            if title:
+                hash_value = hashlib.md5(title.encode()).hexdigest()
+        
+        # Posted articles kontrolü - hash ile tekrar paylaşımı önle
+        posted_articles = load_json("posted_articles.json")
+        already_posted = False
+        for posted in posted_articles:
+            posted_hash = posted.get('hash', '')
+            if hash_value and hash_value == posted_hash:
+                already_posted = True
+                terminal_log(f"⚠️ Tweet zaten paylaşılmış (hash kontrolü): {tweet_to_post.get('title', '')[:50]}...", "warning")
+                break
+        
+        if already_posted:
+            return jsonify({"success": False, "error": "Bu tweet zaten paylaşılmış"})
+        
         # Tweet metnini doğru yerden al
         tweet_text = ""
         title = ""
@@ -1230,6 +1256,32 @@ def delete_tweet_route():
                     break
         
         if deleted_tweet:
+            # Hash kontrolü - tekrar silmeyi önle
+            hash_value = deleted_tweet.get('hash', '')
+            if not hash_value and 'article' in deleted_tweet:
+                hash_value = deleted_tweet['article'].get('hash', '')
+            
+            if not hash_value:
+                import hashlib
+                title = deleted_tweet.get('title', '')
+                if 'article' in deleted_tweet:
+                    title = deleted_tweet['article'].get('title', '')
+                if title:
+                    hash_value = hashlib.md5(title.encode()).hexdigest()
+            
+            # Posted articles kontrolü - hash ile tekrar silmeyi önle
+            posted_articles = load_json("posted_articles.json")
+            already_deleted = False
+            for posted in posted_articles:
+                posted_hash = posted.get('hash', '')
+                if hash_value and hash_value == posted_hash and posted.get('deleted', False):
+                    already_deleted = True
+                    terminal_log(f"⚠️ Tweet zaten silinmiş (hash kontrolü): {deleted_tweet.get('title', '')[:50]}...", "warning")
+                    break
+            
+            if already_deleted:
+                return jsonify({"success": False, "error": "Bu tweet zaten silinmiş"})
+            
             # Makaleyi "silindi" olarak işaretle
             article_data = {
                 "title": deleted_tweet.get('title', ''),
@@ -1239,7 +1291,7 @@ def delete_tweet_route():
                 "source_type": deleted_tweet.get('source_type', 'news'),
                 "published_date": deleted_tweet.get('created_at', datetime.now().isoformat()),
                 "posted_date": datetime.now().isoformat(),
-                "hash": deleted_tweet.get('hash', ''),
+                "hash": hash_value,
                 "deleted": True,
                 "deleted_date": datetime.now().isoformat(),
                 "tweet_text": deleted_tweet.get('content', ''),
@@ -1317,6 +1369,32 @@ def manual_post_tweet_route():
         
         if not tweet_to_post:
             return jsonify({"success": False, "error": "Tweet bulunamadı"})
+        
+        # Hash kontrolü - tekrar paylaşımı önle
+        hash_value = tweet_to_post.get('hash', '')
+        if not hash_value and 'article' in tweet_to_post:
+            hash_value = tweet_to_post['article'].get('hash', '')
+        
+        if not hash_value:
+            import hashlib
+            title = tweet_to_post.get('title', '')
+            if 'article' in tweet_to_post:
+                title = tweet_to_post['article'].get('title', '')
+            if title:
+                hash_value = hashlib.md5(title.encode()).hexdigest()
+        
+        # Posted articles kontrolü - hash ile tekrar paylaşımı önle
+        posted_articles = load_json("posted_articles.json")
+        already_posted = False
+        for posted in posted_articles:
+            posted_hash = posted.get('hash', '')
+            if hash_value and hash_value == posted_hash:
+                already_posted = True
+                terminal_log(f"⚠️ Tweet zaten paylaşılmış (manuel hash kontrolü): {tweet_to_post.get('title', '')[:50]}...", "warning")
+                break
+        
+        if already_posted:
+            return jsonify({"success": False, "error": "Bu tweet zaten paylaşılmış"})
         
         # Tweet metnini hazırla
         tweet_text = ""
@@ -1490,6 +1568,28 @@ def bulk_tweet_action():
                     try:
                         from utils import post_tweet, mark_article_as_posted
                         
+                        # Hash kontrolü - tekrar paylaşımı önle
+                        hash_value = tweet_to_process.get('hash', '')
+                        if not hash_value:
+                            import hashlib
+                            title = tweet_to_process.get('title', '')
+                            if title:
+                                hash_value = hashlib.md5(title.encode()).hexdigest()
+                        
+                        # Posted articles kontrolü - hash ile tekrar paylaşımı önle
+                        posted_articles = load_json("posted_articles.json")
+                        already_posted = False
+                        for posted in posted_articles:
+                            posted_hash = posted.get('hash', '')
+                            if hash_value and hash_value == posted_hash:
+                                already_posted = True
+                                terminal_log(f"⚠️ Tweet zaten paylaşılmış (hash kontrolü): {tweet_to_process.get('title', '')[:50]}...", "warning")
+                                break
+                        
+                        if already_posted:
+                            errors.append(f"Tweet ID {tweet_id}: Bu tweet zaten paylaşılmış")
+                            continue
+                        
                         # Tweet metnini bul - farklı alan isimleri dene
                         tweet_text = ''
                         if isinstance(tweet_to_process, dict):
@@ -1569,6 +1669,28 @@ def bulk_tweet_action():
                 elif action == 'reject':
                     # Tweet'i sil ve posted_articles.json'a deleted:true ile kaydet
                     try:
+                        # Hash kontrolü - tekrar reddetmeyi önle
+                        hash_value = tweet_to_process.get('hash', '')
+                        if not hash_value:
+                            import hashlib
+                            title = tweet_to_process.get('title', '')
+                            if title:
+                                hash_value = hashlib.md5(title.encode()).hexdigest()
+                        
+                        # Posted articles kontrolü - hash ile tekrar reddetmeyi önle
+                        posted_articles = load_json("posted_articles.json")
+                        already_rejected = False
+                        for posted in posted_articles:
+                            posted_hash = posted.get('hash', '')
+                            if hash_value and hash_value == posted_hash and posted.get('deleted', False):
+                                already_rejected = True
+                                terminal_log(f"⚠️ Tweet zaten reddedilmiş (hash kontrolü): {tweet_to_process.get('title', '')[:50]}...", "warning")
+                                break
+                        
+                        if already_rejected:
+                            errors.append(f"Tweet ID {tweet_id}: Bu tweet zaten reddedilmiş")
+                            continue
+                        
                         # Tweet metnini bul - approve ile aynı mantık
                         tweet_text = ''
                         if isinstance(tweet_to_process, dict):
@@ -1580,16 +1702,7 @@ def bulk_tweet_action():
                             if not tweet_text:
                                 tweet_text = tweet_to_process.get('tweet', '')
                         
-                        # Hash yoksa oluştur
-                        hash_value = tweet_to_process.get('hash', '')
-                        if not hash_value:
-                            import hashlib
-                            title = tweet_to_process.get('title', '')
-                            if title:
-                                hash_value = hashlib.md5(title.encode()).hexdigest()
-                        
                         # Posted articles'a "silindi" olarak ekle
-                        posted_articles = load_json("posted_articles.json")
                         
                         deleted_article = {
                             "title": tweet_to_process.get('title', ''),

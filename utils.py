@@ -1960,6 +1960,16 @@ def mark_article_as_posted(article_data, tweet_result):
     try:
         posted_articles = load_json(HISTORY_FILE)
         
+        # Hash kontrolü - tekrar paylaşımı önle
+        hash_value = article_data.get("hash", "")
+        if hash_value:
+            # Aynı hash'e sahip makale zaten paylaşılmış mı kontrol et
+            for posted in posted_articles:
+                posted_hash = posted.get("hash", "")
+                if hash_value == posted_hash:
+                    safe_log(f"⚠️ Tweet zaten paylaşılmış (hash kontrolü): {article_data.get('title', '')[:50]}...", "WARNING")
+                    return False  # Tekrar paylaşımı engelle
+        
         # Manuel paylaşım kontrolü
         is_manual_post = tweet_result.get("manual_post", False)
         is_bulk_operation = article_data.get("bulk_operation", False)
@@ -1973,7 +1983,7 @@ def mark_article_as_posted(article_data, tweet_result):
             "content": article_data.get("content", ""),
             "source": article_data.get("source", ""),
             "source_type": article_data.get("source_type", "news"),
-            "hash": article_data.get("hash", ""),
+            "hash": hash_value,
             "posted_date": datetime.now().isoformat(),
             "tweet_id": tweet_result.get("tweet_id", ""),
             "tweet_url": tweet_url,
@@ -3597,6 +3607,9 @@ def post_text_tweet_v2(tweet_text):
         
         # Rate limit kullanımını güncelle
         update_rate_limit_usage("tweets")
+        
+        # Günlük kullanımı güncelle
+        update_daily_usage()
         
         if hasattr(response, 'data') and response.data and 'id' in response.data:
             tweet_id = response.data['id']
@@ -6078,8 +6091,48 @@ def update_rate_limit_usage(endpoint="tweets"):
         
         print(f"Rate limit güncellendi - {endpoint}: {status[endpoint]['requests']}/{TWITTER_RATE_LIMITS[endpoint]['limit']}")
         
+        # Günlük kullanımı güncelle (sadece tweet endpoint'i için)
+        if endpoint == "tweets":
+            update_daily_usage()
+        
     except Exception as e:
         print(f"Rate limit güncelleme hatası: {e}")
+
+def update_daily_usage(tweet_count=1):
+    """Günlük tweet kullanımını güncelle"""
+    try:
+        from datetime import datetime
+        current_date = datetime.now().date()
+        daily_usage_file = f"daily_usage_{current_date}.json"
+        
+        # Mevcut günlük kullanımı yükle
+        daily_usage = load_json(daily_usage_file, {"tweets": 0, "date": current_date.isoformat()})
+        daily_usage["tweets"] += tweet_count
+        
+        # Günlük kullanımı kaydet
+        save_json(daily_usage_file, daily_usage)
+        
+        print(f"Günlük kullanım güncellendi: {daily_usage['tweets']}/25")
+        
+        # Günlük limit kontrolü
+        if daily_usage["tweets"] >= 25:
+            print("🎯 Günlük 25 tweet limiti aşıldı!")
+            
+            # Rate limit'i sıfırla
+            try:
+                status = load_rate_limit_status()
+                current_time = time.time()
+                
+                if "tweets" in status:
+                    status["tweets"]["requests"] = 0
+                    status["tweets"]["reset_time"] = current_time + 900  # 15 dakika sonra
+                    save_rate_limit_status(status)
+                    print("✅ Rate limit günlük limit nedeniyle sıfırlandı")
+            except Exception as reset_error:
+                print(f"Rate limit sıfırlama hatası: {reset_error}")
+        
+    except Exception as e:
+        print(f"Günlük kullanım güncelleme hatası: {e}")
 
 def reset_rate_limit_status():
     """Rate limit durumunu sıfırla - manuel reset için"""
