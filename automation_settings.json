@@ -12,5 +12,9 @@
   "content_similarity_threshold": 0.75,
   "news_fetching_method": "auto",
   "tweet_theme": "bilgilendirici",
-  "last_updated": "2025-08-21T13:09:47.450993"
+  "last_updated": "2025-08-21T13:09:47.450993",
+  "hash_based_detection": true,
+  "url_based_detection": true,
+  "title_based_detection": true,
+  "cross_check_enabled": true
 }

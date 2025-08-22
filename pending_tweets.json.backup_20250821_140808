@@ -1,0 +1,76 @@
+[
+  {
+    "article": {
+      "title": "Google Deepmind's new Genie 3",
+      "url": "https://v.redd.it/s6555dgpn7hf1",
+      "content": "[https://x.com/OfficialLoganK/status/1952732206176112915](https://x.com/OfficialLoganK/status/1952732206176112915)",
+      "score": 8501,
+      "hash": "87d9841c321cec6d451ac4cc9246de8d",
+      "source": "Reddit - r/singularity",
+      "fetch_date": "2025-08-17T12:18:49.776166",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "PythonAnywhere",
+      "method_icon": "🐍",
+      "method_color": "green"
+    },
+    "tweet_data": {
+      "tweet": "📈⚡ Google Deepmind introduces Genie 3 is a new generative AI model from Google DeepMind that can create interactive and playable 2 #AI #Tech #Genie3 #DeepMind\n\n🔗 https://v.redd.it/s6555dgpn7hf1",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Genie 3 is a new generative AI model from Google DeepMind that can create interactive and playable 2D games from text prompts, images, or even other games. This allows for easier and faster game creation, democratizing game development.",
+        "companies": [
+          "Google Deepmind"
+        ],
+        "impact_level": 7,
+        "audience": "General",
+        "hashtags": [
+          "#Genie3",
+          "#DeepMind",
+          "#AI"
+        ],
+        "emojis": [
+          "✨",
+          "🚀",
+          "💻"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "emojis": [
+          "📊",
+          "💡",
+          "🔍",
+          "📈",
+          "⚡",
+          "🎯"
+        ],
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 6,
+        "issues": [],
+        "warnings": [],
+        "character_count": 193,
+        "hashtag_count": 4
+      },
+      "is_valid": true,
+      "quality_score": 6
+    },
+    "created_date": "2025-08-17T12:19:23.412853",
+    "created_at": "2025-08-17T12:19:23.412853",
+    "status": "pending",
+    "id": 8
+  }
+]
