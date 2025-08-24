@@ -211,3 +211,15 @@ static/css/*.map
 # Minified files (generated)
 *.min.js
 *.min.css
+
+# =============================================================================
+# TEMPORARY TAILWIND FILES (artık kullanılmıyor)
+# =============================================================================
+
+# Tailwind build files - artık kullanılmıyor, silebilirsiniz
+package.json
+package-lock.json
+tailwind.config.js
+build.py
+static/src/
+static/css/tailwind.css

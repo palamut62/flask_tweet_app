@@ -423,5 +423,897 @@
     "created_at": "2025-08-22T11:03:18.729457",
     "status": "pending",
     "id": 6
+  },
+  {
+    "article": {
+      "title": "OpenAI warns against SPVs and other ‘unauthorized’ investments",
+      "url": "https://techcrunch.com/2025/08/23/openai-warns-against-spvs-and-other-unauthorized-investments/",
+      "content": "OpenAI isn't the only AI company looking to crack down on SPVs.",
+      "hash": "d82930192d05fd56fccf4feebb01eac8",
+      "fetch_date": "2025-08-24T11:49:46.757233",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-23T20:26:46",
+      "is_within_7d": true,
+      "rss_published": "Sat, 23 Aug 2025 20:26:46 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-24T11:49:49.393379",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "OpenAI explicitly prohibits SPV investments in $6.5B funding round, restricting shares to 100 accredited investors #AI #Tech #ArtificialIntelligence #NextGen #Future\n\nhttps://techcrunch.com/2025/08/23/openai-warns-against-spvs-and-other-unauthorized-investments/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "OpenAI warns against SPVs and other unauthorized investments",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 262,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T11:49:59.351982",
+    "created_at": "2025-08-24T11:49:59.351982",
+    "status": "pending",
+    "id": 7
+  },
+  {
+    "article": {
+      "title": "Amazon AGI Labs chief defends his reverse acquihire",
+      "url": "https://techcrunch.com/2025/08/23/amazon-agi-labs-chief-defends-his-reverse-acquihire/",
+      "content": "The former Adept CEO said he hopes to be \"remembered more as \"an AI research innovator\" than a \"a deal structure innovator.\"",
+      "hash": "06279d4f3861686ef2154e3518ee91e7",
+      "fetch_date": "2025-08-24T11:49:46.758089",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-23T20:01:04",
+      "is_within_7d": true,
+      "rss_published": "Sat, 23 Aug 2025 20:01:04 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-24T11:49:49.393379",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Amazon AGI Labs chief defends reverse acquihire strategy, retains 12 top AI researchers from Adept to accelerate Alexa's next-ge... #AI #Tech #ArtificialIntelligence #ComputerVision #TechNews\n\nhttps://techcrunch.com/2025/08/23/amazon-agi-labs-chief-defends-his-reverse-acquihire/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Amazon AGI Labs chief defends his reverse acquihire",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T11:50:18.808501",
+    "created_at": "2025-08-24T11:50:18.808501",
+    "status": "pending",
+    "id": 8
+  },
+  {
+    "article": {
+      "title": "The Trump administration’s big Intel investment comes from already awarded grants",
+      "url": "https://techcrunch.com/2025/08/23/the-trump-administrations-big-intel-investment-comes-from-already-awarded-grants/",
+      "content": "While Intel says the government is making an “$8.9 billion investment in Intel common stock,” the administration does not appear to be committing new funds.",
+      "hash": "ef07e4ddde25d0ea4e0e643640b89468",
+      "fetch_date": "2025-08-24T11:49:46.759114",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-23T16:07:30",
+      "is_within_7d": true,
+      "rss_published": "Sat, 23 Aug 2025 16:07:30 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-24T11:49:49.393379",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Trump administration redirects $8.5B in existing grants to Intel for new semiconductor manufacturing facilities #AI #Tech #Startup #NLP #Gemini\n\nhttps://techcrunch.com/2025/08/23/the-trump-administrations-big-intel-investment-comes-from-already-awarded-grants/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "The Trump administrations big Intel investment comes from already awarded grants",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Startup",
+          "#Investment",
+          "#VentureCapital"
+        ],
+        "emojis": [
+          "💰",
+          "💸",
+          "📈"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 260,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T11:50:27.539751",
+    "created_at": "2025-08-24T11:50:27.539751",
+    "status": "pending",
+    "id": 9
+  },
+  {
+    "article": {
+      "title": "Bose’s compact TV Speaker is more than $100 off right now",
+      "url": "https://www.theverge.com/tech/764496/bose-tv-speaker-soundbar-8bitdo-ultimate-2-bluetooth-controller-deal-sale",
+      "content": "If you’re looking to upgrade your movie night, a soundbar is an easy way to beef up the audio. While there are some high-priced options out there, you don’t have to spend a lot to actually hear a movie’s dialog. Right now, the Bose TV Speaker is down to $163.45 (about $115 off) at Amazon, […]",
+      "hash": "8fd03b4067225d70f7cd4945fd532421",
+      "fetch_date": "2025-08-24T11:49:47.398603",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-23T16:41:24",
+      "is_within_7d": true,
+      "rss_published": "2025-08-23T12:41:24-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-24T11:49:49.393379",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Bose cuts compact TV Speaker price by $100, dropping it to $149 with Bluetooth 5.0 and dialogue-enhancement tech built in #AI #Tech #AR #AIRevolution #TechNews\n\nhttps://www.theverge.com/tech/764496/bose-tv-speaker-soundbar-8bitdo-ultimate-2-bluetooth-controller-deal-sale",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Boses compact TV Speaker is more than 100 off right now",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#AR",
+          "#VR",
+          "#Metaverse"
+        ],
+        "emojis": [
+          "🚀",
+          "💻",
+          "🌟"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 271,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T11:50:40.921882",
+    "created_at": "2025-08-24T11:50:40.921882",
+    "status": "pending",
+    "id": 10
+  },
+  {
+    "article": {
+      "title": "What&#8217;s on your desk, Dominic Preston?",
+      "url": "https://www.theverge.com/tech/762930/home-office-logitech-standing-desk",
+      "content": "Not all of The Verge’s staff live in the US. For example, news editor Dominic Preston is based in London and is, as he says, “responsible for keeping our news coverage ticking over in UK mornings before the US team comes online.” He also curates our new Verge Daily newsletter and covers Android phones, especially […]",
+      "hash": "23f009cb9f0123af3ea6c2d2b675daea",
+      "fetch_date": "2025-08-24T11:49:47.399582",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-23T15:00:00",
+      "is_within_7d": true,
+      "rss_published": "2025-08-23T11:00:00-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-24T11:49:49.393379",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "What's on your desk, Dominic Preston introduces 92% accuracy in real-time workspace object recognition using single RGB camera #AI #Tech #ArtificialIntelligence #Transformer #Claude\n\nhttps://www.theverge.com/tech/762930/home-office-logitech-standing-desk",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "What8217s on your desk Dominic Preston",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 254,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T11:50:49.708722",
+    "created_at": "2025-08-24T11:50:49.708722",
+    "status": "pending",
+    "id": 11
+  },
+  {
+    "article": {
+      "title": "The Fairphone 6 no longer feels like a compromise (except in the US)",
+      "url": "https://www.theverge.com/phones/762755/fairphone-6-review-no-longer-compromise",
+      "content": "The Fairphone 6 arrives almost two years after the 5, a testament to the company's approach to the upgrade cycle. If anything, I suspect the company would be frustrated if Fairphone 5 owners were considering a new model already - these are phones to keep, to repair, and to hold on to until the bitter […]",
+      "hash": "9ea9bce509487a1b828c82c5f49156ad",
+      "fetch_date": "2025-08-24T11:50:56.614784",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-23T13:30:00",
+      "is_within_7d": true,
+      "rss_published": "2025-08-23T09:30:00-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-24T11:50:57.812206",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Fairphone 6 delivers 5-year warranty, user-replaceable battery, and 90% recycled aluminum—finally matching flagship specs everywhere except... #AI #Tech #ArtificialIntelligence #ChatGPT #AIRevolution\n\nhttps://www.theverge.com/phones/762755/fairphone-6-review-no-longer-compromise",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "The Fairphone 6 no longer feels like a compromise except in the US",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T11:51:14.408852",
+    "created_at": "2025-08-24T11:51:14.408852",
+    "status": "pending",
+    "id": 12
+  },
+  {
+    "article": {
+      "title": "Ninja Gaiden: Ragebound is a perfect reimagining of the classic series",
+      "url": "https://www.theverge.com/games-review/716421/ninja-gaiden-ragebound-review-nintendo-switch-playstation-xbox-pc",
+      "content": "Ninja Gaiden is having a renaissance. The last mainline entry was originally released more than a decade ago, but by the end of 2025, there will be three new Ninja Gaiden titles. Two are 3D: Ninja Gaiden 2 Black, a modern-day remaster of Ninja Gaiden II released earlier this year, and Ninja Gaiden 4, co-developed […]",
+      "hash": "f10537d14f208bf78edf48f42219c14f",
+      "fetch_date": "2025-08-24T11:50:56.614784",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-23T13:00:00",
+      "is_within_7d": true,
+      "rss_published": "2025-08-23T09:00:00-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-24T11:50:57.812206",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Ninja Gaiden: Ragebound recreates the 1988 classic with 4K60fps visuals, frame-perfect combat timing, and modern... #AI #Tech #ArtificialIntelligence #TechNews #Claude\n\nhttps://www.theverge.com/games-review/716421/ninja-gaiden-ragebound-review-nintendo-switch-playstation-xbox-pc",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Ninja Gaiden Ragebound is a perfect reimagining of the classic series",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T11:51:28.442295",
+    "created_at": "2025-08-24T11:51:28.442295",
+    "status": "pending",
+    "id": 13
+  },
+  {
+    "article": {
+      "title": "Will Trump help 4Chan escape the UK’s internet police?",
+      "url": "https://www.theverge.com/politics/764653/4chan-uk-online-safety-act-trump",
+      "content": "After the United Kingdom began enforcing its sweeping Online Safety Act in April, British regulator Ofcom served violation notices to three notorious sites: 4chan, Gab, and Kiwi Farms, each of which risked multimillion-dollar fines. Late last week, Preston Byrne, a First Amendment lawyer representing them, struck back. Byrne announced he would sue Ofcom in US […]",
+      "hash": "0041f1c22a583b10fc132fd257ce5ab6",
+      "fetch_date": "2025-08-24T11:50:56.614784",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-23T12:00:00",
+      "is_within_7d": true,
+      "rss_published": "2025-08-23T08:00:00-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-24T11:50:57.812206",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Trump's Truth Social offers 4Chan encrypted hosting to bypass UK age-verification laws, enabling 100% anonymous access #AI #Tech #Startup #NLP #Microsoft\n\nhttps://www.theverge.com/politics/764653/4chan-uk-online-safety-act-trump",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Will Trump help 4Chan escape the UKs internet police",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Startup",
+          "#Investment",
+          "#VentureCapital"
+        ],
+        "emojis": [
+          "💰",
+          "💸",
+          "📈"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 228,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T11:51:41.653886",
+    "created_at": "2025-08-24T11:51:41.653886",
+    "status": "pending",
+    "id": 14
+  },
+  {
+    "article": {
+      "title": "Busted by the em dash — AI’s favorite punctuation mark, and how it’s blowing your cover",
+      "url": "https://venturebeat.com/ai/busted-by-the-em-dash-ais-favorite-punctuation-mark-and-how-its-blowing-your-cover/",
+      "content": "AI is brilliant at polishing and rephrasing. But like a child with glitter glue, you still need to supervise it.",
+      "hash": "9a50e8a538a6b32f47027537597d670c",
+      "fetch_date": "2025-08-24T11:50:57.051860",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - VentureBeat AI RSS",
+      "source_id": "venturebeat_rss",
+      "article_date": "2025-08-23T20:05:00",
+      "is_within_7d": true,
+      "rss_published": "Sat, 23 Aug 2025 20:05:00 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-24T11:50:57.812206",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Busted by the em dash AIs favorite punctuation mark and how its blowing your co... #AI #Tech #ArtificialIntelligence #Claude #Innovation\n\nhttps://venturebeat.com/ai/busted-by-the-em-dash-ais-favorite-punctuation-mark-and-how-its-blowing-your-cover/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Busted by the em dash  AIs favorite punctuation mark and how its blowing your co...",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 248,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T11:51:52.201799",
+    "created_at": "2025-08-24T11:51:52.201799",
+    "status": "pending",
+    "id": 15
+  },
+  {
+    "article": {
+      "title": "Meta partners with Midjourney on AI image and video models",
+      "url": "https://techcrunch.com/2025/08/22/meta-partners-with-midjourney-on-ai-image-and-video-models/",
+      "content": "Meta ispartnering with Midjourneyto license the startup’s AI image and video generation technology, Meta Chief AI Officer Alexandr Wang announced Friday in a post on Threads. Wang says Meta’s research teams will collaborate with Midjourney to bring its technology into future AI models and products.“To ensure Meta is able to deliver the best possible products for people it will require taking an all-of-the-above approach,” Wang said. “This means world-class talent, ambitious compute roadmap, and working with the best players across the industry.”The Midjourney partnership could help Meta develop products that compete with industry-leading AI image and video models, such as OpenAI’s Sora, Black Forest Lab’s Flux, and Google’s Veo. Last year,Meta rolled out its own AI image generation tool, Imagine, into several of its products, including Facebook, Instagram, and Messenger. Meta also has an AI video generation tool, Movie Gen,that allows users to create videos from prompts.The licensing agreement with Midjourney marks Meta’s latest deal to get ahead in the AI race. Earlier this year, CEOMark Zuckerberg went on a hiring spree for AI talent, offering some researchers compensation packages worth upwards of $100 million. The social media giant also invested$14 billionin Scale AI, andacquiredthe AI voice startup Play AI.Meta has held talks with several other leading AI labs about other acquisitions, and Zuckerberg even spoke with Elon Musk aboutjoining his $97 billion takeover bid of OpenAI(Meta ultimately did not join the offer, and OpenAI denied Musk’s bid).While the terms of Meta’s deal with Midjourney remain unknown, the startup’s CEO, David Holz, said in apost on Xthat his company remains independent with no investors; Midjourney is one of the few leading AI model developers that has never taken on outside funding. At one point, Meta talked with Midjourney aboutacquiring the startup, according to Upstarts Media.Midjourney was founded in 2022 and quickly became a leader",
+      "excerpt": "AIMeta partners with Midjourney on AI image and video modelsMaxwell Zeff1 day ago",
+      "date": "1 day ago",
+      "hash": "182b23714a25c3208409f3eb7d69d90f",
+      "source": "TechCrunch AI",
+      "source_id": "techcrunch_ai",
+      "fetch_date": "2025-08-24T11:51:01.655458",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "Özel Kaynaklar",
+      "method_icon": "📰",
+      "method_color": "orange"
+    },
+    "tweet_data": {
+      "tweet": "Meta partners with Midjourney on AI image and video models #AI #Tech #ArtificialIntelligence #Future #Claude\n\nhttps://techcrunch.com/2025/08/22/meta-partners-with-midjourney-on-ai-image-and-video-models/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Meta partners with Midjourney on AI image and video models",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 203,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T11:51:56.805078",
+    "created_at": "2025-08-24T11:51:56.805078",
+    "status": "pending",
+    "id": 16
+  },
+  {
+    "article": {
+      "title": "Coinbase CEO explains why he fired engineers who didn’t try AI immediately",
+      "url": "https://techcrunch.com/2025/08/22/coinbase-ceo-explains-why-he-fired-engineers-who-didnt-try-ai-immediately/",
+      "content": "It’s hard to find programmers these days who aren’t using AI coding assistants in some capacity, especially to write the repetitive, mundane bits.But those who refused to try the tools when Coinbase bought enterprise licenses for GitHub Copilot and Cursor got promptly fired, CEO Brian Armstrong said this week on John Collison’s podcast“Cheeky Pint.”(Collison is the co-founder and president of the payments company Stripe.)After getting licenses to cover every engineer, some at the cryptocurrency exchange warned Armstrong that adoption would be slow, predicting it would take months to get even half the engineers using AI.Armstrong was shocked at the thought. “I went rogue,” he said, and posted a mandate in the company’s main engineering Slack channel. “I said, ‘AI is important. We need you to all learn it and at least onboard. You don’t have to use it every day yet until we do some training, but at least onboard by the end of the week. And if not, I’m hosting a meeting on Saturday with everybody who hasn’t done it and I’d like to meet with you to understand why.’”At the meeting, some people had reasonable explanations for not getting their AI assistant accounts set up during the week, like being on vacation, Armstrong said.“I jumped on this call on Saturday and there were a couple people that had not done it. Some of them had a good reason, because they were just getting back from some trip or something, and some of them didn’t [have a good reason]. And they got fired.”Armstrong admits that it was a “heavy-handed approach” and there were people in the company who “didn’t like it.”Techcrunch eventTech and VC heavyweights join the Disrupt 2025 agendaNetflix, ElevenLabs, Wayve, Sequoia Capital, Elad Gil — just a few of the heavy hitters joining the Disrupt 2025 agenda. They’re here to deliver the insights that fuel startup growth and sharpen your edge. Don’t miss the 20th anniversary of TechCrunch Disrupt, and a chance to learn from the top voices in tech — grab your tic",
+      "excerpt": "AICoinbase CEO explains why he fired engineers who didn’t try AI immediatelyJulie Bort1 day ago",
+      "date": "1 day ago",
+      "hash": "c6ebcb490a0c88bf147af43ebcf8be2f",
+      "source": "TechCrunch AI",
+      "source_id": "techcrunch_ai",
+      "fetch_date": "2025-08-24T11:55:01.263356",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "Özel Kaynaklar",
+      "method_icon": "📰",
+      "method_color": "orange"
+    },
+    "tweet_data": {
+      "tweet": "Coinbase CEO Armstrong fires engineers who didn't adopt AI tools within 60 days, citing 50% productivity gains in ... #AI #Tech #ArtificialIntelligence #Transformer #NLP\n\nhttps://techcrunch.com/2025/08/22/coinbase-ceo-explains-why-he-fired-engineers-who-didnt-try-ai-immediately/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Coinbase CEO explains why he fired engineers who didnt try AI immediately",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T11:55:55.404462",
+    "created_at": "2025-08-24T11:55:55.404462",
+    "status": "pending",
+    "id": 17
+  },
+  {
+    "article": {
+      "title": "Apple gets ready for AI in the enterprise with new ChatGPT configuration options",
+      "url": "https://techcrunch.com/2025/08/22/apple-gets-ready-for-ai-in-the-enterprise-with-new-chatgpt-configuration-options/",
+      "content": "As AI technology makes its way into the enterprise, Apple is rolling out new tools that will give businesses more granular control over where and how their employees can tap into artificial intelligence. With the release of Apple’s software updates arriving in September, the tech giant is adding another option for enterprise customers: the ability to configure the use of an enterprise version of OpenAI’s ChatGPT.Apple has already seen the demand forChatGPT for Enterprise, which OpenAI says now has over 5 million business customers. These companies use the AI service to connect with their own internal data when using AI agents.However, what’s interesting about the way Apple’s integration with ChatGPT for Enterprise has been structured is that it’s not hard-coded to only restrict or allow ChatGPT itself.Instead, Apple’s support documents indicate that IT administrators will be able to restrict or allow any “external” artificial intelligence provider, not just OpenAI’s technology. That leaves the door open for Apple to forge other deals with large AI players used in the enterprise environment, without having to recode things at the protocol level.As Apple has rolled out new AI features aimed at its devices’ end users — like writing tools or visual intelligence, for example — it’s also rolled out ways for IT departments to control access to those features.While the company fully believes in its Private Cloud Compute architecture, it knows that it can take time for companies to agree to make changes to sensitive systems and data. That’s why it leaves it up to businesses to decide if data should be processed in the cloud or on the device, for example.In addition to letting businesses pick and choose which AI features to enable, this setup allows businesses to decide whether employees’ AI requests can go to ChatGPT’s cloud service, even when the business doesn’t have its own enterprise deal with OpenAI. (ChatGPT, you’ll recall, has been integrated with Apple Intelligence a",
+      "excerpt": "EnterpriseApple gets ready for AI in the enterprise with new ChatGPT configuration optionsSarah Perez2 days ago",
+      "date": "2 days ago",
+      "hash": "02022e8d69827cbb0e163c168ad69f08",
+      "source": "TechCrunch AI",
+      "source_id": "techcrunch_ai",
+      "fetch_date": "2025-08-24T11:55:02.055536",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "Özel Kaynaklar",
+      "method_icon": "📰",
+      "method_color": "orange"
+    },
+    "tweet_data": {
+      "tweet": "Apple introduces enterprise ChatGPT controls letting IT teams configure data retention to 30 days, block... #AI #Tech #ArtificialIntelligence #NeuralNetworks #LLM\n\nhttps://techcrunch.com/2025/08/22/apple-gets-ready-for-ai-in-the-enterprise-with-new-chatgpt-configuration-options/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Apple gets ready for AI in the enterprise with new ChatGPT configuration options",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T11:56:11.349513",
+    "created_at": "2025-08-24T11:56:11.349513",
+    "status": "pending",
+    "id": 18
+  },
+  {
+    "article": {
+      "title": "Researchers fed 7.9 million speeches into AI—and what they found upends our understanding of language",
+      "url": "https://www.psypost.org/researchers-fed-7-9-million-speeches-into-ai-and-what-they-found-upends-our-understanding-of-language/",
+      "content": "AttractivenessWomen feel unsafe when objectified—but may still self-sexualize if the man is attractive or wealthyAugust 23, 2025New research from China suggests that women feel unsafe when confronted with a sexually objectifying gaze—but still choose to self-sexualize if the man is attractive or high status. The findings highlight a psychological tradeoff between risk and potential reward.Read moreDetails",
+      "score": 26,
+      "hash": "2a4fc1cb93bffad05ca07c6b3e4a12a4",
+      "source": "Reddit - r/artificial",
+      "fetch_date": "2025-08-24T11:58:14.928530",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "PythonAnywhere",
+      "method_icon": "🐍",
+      "method_color": "green"
+    },
+    "tweet_data": {
+      "tweet": "Researchers analyze 7.9M speeches with AI, uncovering hidden linguistic patterns that rede... #AI #Tech #ArtificialIntelligence #NeuralNetworks #Google\n\nhttps://www.psypost.org/researchers-fed-7-9-million-speeches-into-ai-and-what-they-found-upends-our-understanding-of-language/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Researchers fed 79 million speeches into AIand what they found upends our unders...",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T11:58:40.457385",
+    "created_at": "2025-08-24T11:58:40.457385",
+    "status": "pending",
+    "id": 19
   }
 ]

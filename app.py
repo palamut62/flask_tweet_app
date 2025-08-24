@@ -20,7 +20,7 @@ import uuid
 load_dotenv()
 
 # Debug mode kontrolü
-DEBUG_MODE = os.environ.get('DEBUG', 'False').lower() == 'true'
+DEBUG_MODE = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 from utils import (
     fetch_latest_ai_articles, generate_ai_tweet_with_mcp_analysis,
@@ -89,6 +89,11 @@ def markdown_filter(text):
     return text
 
 app.jinja_env.filters['markdown'] = markdown_filter
+
+# Test route'u
+@app.route('/test')
+def test():
+    return render_template('test.html')
 
 # Favicon 404 hatasını önle
 @app.route('/favicon.ico')
@@ -482,26 +487,17 @@ def index():
             terminal_log(f"⚠️ Otomasyon ayarları yüklenemedi: {str(e)}", "warning")
             settings = {}
         
-        return render_template('index.html', 
-                             articles=articles[-5:],  # Daha az makale göster
+        return render_template('index_simple.html', 
                              pending_tweets=pending_tweets[:20],  # Maksimum 20 pending tweet
-                             rejected_articles=rejected_articles[:10],  # Son 10 reddedilen makale
-                             stats=stats,
-                             automation_status=automation_status,
-                             api_check=api_check,
-                             settings=settings,
-                             news_count=news_count,
-                             last_check=last_check_time,
-                             app_version=APP_VERSION,
-                             app_release_date=APP_RELEASE_DATE,
-                             version_changelog=VERSION_CHANGELOG)
+                             posted_count=len(articles),
+                             rejected_count=len(rejected_articles))
                              
     except Exception as e:
         safe_log(f"Ana sayfa hatası: {str(e)}", "ERROR")
-        return render_template('index.html', 
-                             articles=[],
+        return render_template('index_simple.html', 
                              pending_tweets=[],
-                             rejected_articles=[],
+                             posted_count=0,
+                             rejected_count=0,
                              stats={},
                              automation_status={},
                              api_check={},

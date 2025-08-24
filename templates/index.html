@@ -81,171 +81,189 @@
 {% endmacro %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <!-- Ana İçerik - Ortalanmış -->
-    <div class="space-y-6">
-        <!-- Otomasyon Durumu -->
-        <div class="card-modern">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-robot text-white"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Otomasyon Durumu</h3>
-                            <div class="flex items-center space-x-2 mt-1">
-                                <span id="auto-refresh-status" class="text-xs text-gray-500">Auto-refresh: Aktif</span>
-                                <span id="last-update" class="text-xs text-gray-400">• Son güncelleme: --</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="toggleAutoRefresh()" class="px-3 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-2">
-                        <i class="fas fa-sync" id="refresh-icon"></i>
-                        <span id="refresh-text">Auto</span>
-                    </button>
+<!-- Twitter Style Content -->
+<div class="p-4">
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center">
+            <div class="twitter-nav-icon me-3">
+                <i class="fas fa-home"></i>
+            </div>
+            <h1 class="twitter-card-title mb-0">Ana Sayfa</h1>
+        </div>
+        <div class="d-flex align-items-center">
+            <button onclick="toggleAutoRefresh()" class="twitter-btn-secondary me-2">
+                <i class="fas fa-sync me-1" id="refresh-icon"></i>
+                <span id="refresh-text">Auto</span>
+            </button>
+            <button onclick="location.reload()" class="twitter-btn">
+                <i class="fas fa-sync-alt me-1"></i>
+                Yenile
+            </button>
+        </div>
+    </div>
+    <!-- Otomasyon Durumu -->
+    <div class="twitter-card mb-4">
+        <div class="twitter-card-header">
+            <div class="d-flex align-items-center">
+                <div class="twitter-nav-icon me-3">
+                    <i class="fas fa-robot"></i>
                 </div>
+                <div class="twitter-card-title">Otomasyon Durumu</div>
+            </div>
+        </div>
+        
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <div class="d-flex align-items-center">
+                <span id="auto-refresh-status" class="text-secondary small me-2">Auto-refresh: Aktif</span>
+                <span id="last-update" class="text-secondary small">• Son güncelleme: --</span>
+            </div>
+        </div>
                 
                 {% if automation_status %}
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Otomatik Mod:</span>
-                            <span class="px-3 py-1 rounded-full text-sm font-medium {{ 'bg-green-100 text-green-800' if automation_status.auto_mode else 'bg-red-100 text-red-800' }}">
-                                {{ 'AÇIK' if automation_status.auto_mode else 'KAPALI' }}
-                            </span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Kontrol Aralığı:</span>
-                            <span class="font-medium text-gray-900">{{ automation_status.check_interval_hours }} saat</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Minimum Skor:</span>
-                            <span class="font-medium text-gray-900">{{ automation_status.min_score_threshold }}/10</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Makale Limiti:</span>
-                            <span class="font-medium text-gray-900">{{ automation_status.max_articles_per_run or 5 }} makale</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Son Kontrol:</span>
-                            <span class="text-gray-500 text-sm">
-                                {% if last_check %}
-                                    {{ last_check.strftime('%H:%M') }}
+                    <div class="stats-grid mb-3">
+                        <div class="stats-card">
+                            <div class="stats-number">
+                                {% if automation_status.auto_mode %}
+                                    <span class="status-indicator status-online">AÇIK</span>
                                 {% else %}
-                                    Henüz yok
+                                    <span class="status-indicator status-offline">KAPALI</span>
                                 {% endif %}
-                            </span>
+                            </div>
+                            <div class="stats-label">Otomatik Mod</div>
                         </div>
-                        
-                        <!-- Manuel Kontrol Butonu -->
-                        <div class="pt-4 border-t border-gray-200">
-                            <button id="check-articles-btn" onclick="startArticleCheck()" class="btn-primary flex items-center space-x-2 text-left">
-                                <i class="fas fa-sync-alt" id="check-icon"></i>
-                                <span id="check-text">Şimdi Kontrol Et</span>
-                            </button>
+                        <div class="stats-card">
+                            <div class="stats-number">{{ automation_status.check_interval_hours }}h</div>
+                            <div class="stats-label">Kontrol Aralığı</div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="stats-number">{{ automation_status.min_score_threshold }}/10</div>
+                            <div class="stats-label">Minimum Skor</div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="stats-number">{{ automation_status.max_articles_per_run or 5 }}</div>
+                            <div class="stats-label">Makale Limiti</div>
                         </div>
                     </div>
-                {% else %}
-                    <p class="text-gray-500">Otomasyon ayarları yüklenemedi</p>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Hızlı İstatistikler -->
-        <div class="card-modern gradient-bg text-white">
-            <div class="p-6 text-center">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">Bugünkü Analizler</h3>
-                    <button onclick="location.reload()" class="text-white/80 hover:text-white transition-colors">
-                        <i class="fas fa-sync-alt text-sm"></i>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-secondary">Son Kontrol:</span>
+                        <span class="text-secondary small">
+                            {% if last_check %}
+                                {{ last_check.strftime('%H:%M') }}
+                            {% else %}
+                                Henüz yok
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <!-- Manuel Kontrol Butonu -->
+                    <button id="check-articles-btn" onclick="startArticleCheck()" class="twitter-btn w-100 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-sync-alt me-2" id="check-icon"></i>
+                        <span id="check-text">Şimdi Kontrol Et</span>
                     </button>
-                </div>
-                {% if stats %}
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div class="bg-white/20 rounded-lg p-4">
-                            <div class="text-2xl font-bold" data-stat="today_articles">{{ stats.today_articles or 0 }}</div>
-                            <div class="text-sm opacity-90">Bugün Paylaşılan</div>
-                        </div>
-                        <div class="bg-white/20 rounded-lg p-4">
-                            <div class="text-2xl font-bold">{{ stats.today_pending or 0 }}</div>
-                            <div class="text-sm opacity-90">Bugün Bekleyen</div>
-                        </div>
-                    </div>
-                    <div class="bg-white/10 rounded-lg p-3">
-                        <div class="text-lg font-bold">{{ stats.today_total_activity or 0 }}</div>
-                        <div class="text-xs opacity-80">Toplam Bugünkü Aktivite</div>
-                    </div>
                 {% else %}
-                    <div class="bg-white/20 rounded-lg p-4">
-                        <div class="text-2xl font-bold">0</div>
-                        <div class="text-sm opacity-90">Veri Yüklenemedi</div>
-                    </div>
+                    <p class="text-secondary">Otomasyon ayarları yüklenemedi</p>
                 {% endif %}
             </div>
-        </div>
 
-        <!-- API Durumu -->
-        <div class="card-modern">
-            <div class="p-6">
-                <div class="flex items-center space-x-3 mb-6">
-                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-key text-white"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900">API Durumu</h3>
+    <!-- Hızlı İstatistikler -->
+    <div class="twitter-card mb-4">
+        <div class="twitter-card-header">
+            <div class="d-flex align-items-center">
+                <div class="twitter-nav-icon me-3">
+                    <i class="fas fa-chart-bar"></i>
                 </div>
-                
-                {% if api_check %}
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-robot text-purple-500"></i>
-                                <span class="text-gray-600">OpenRouter AI:</span>
+                <div class="twitter-card-title">Bugünkü Analizler</div>
+            </div>
+        </div>
+        
+        {% if stats %}
+            <div class="stats-grid">
+                <div class="stats-card">
+                    <div class="stats-number" data-stat="today_articles">{{ stats.today_articles or 0 }}</div>
+                    <div class="stats-label">Bugün Paylaşılan</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-number">{{ stats.today_pending or 0 }}</div>
+                    <div class="stats-label">Bugün Bekleyen</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-number">{{ stats.today_total_activity or 0 }}</div>
+                    <div class="stats-label">Toplam Aktivite</div>
+                </div>
+            </div>
+        {% else %}
+            <div class="stats-card">
+                <div class="stats-number">0</div>
+                <div class="stats-label">Veri Yüklenemedi</div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- API Durumu -->
+    <div class="twitter-card mb-4">
+        <div class="twitter-card-header">
+            <div class="d-flex align-items-center">
+                <div class="twitter-nav-icon me-3">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="twitter-card-title">API Durumu</div>
+            </div>
+        </div>
+                    
+                    {% if api_check %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-robot text-primary me-2"></i>
+                                    <span class="text-muted">OpenRouter AI:</span>
+                                </div>
+                                <span class="d-flex align-items-center {{ 'text-success' if api_check.openrouter_api_available else 'text-danger' }}">
+                                    <i class="fas fa-{{ 'check-circle' if api_check.openrouter_api_available else 'times-circle' }} me-1"></i>
+                                    <small class="fw-medium">{{ 'Mevcut' if api_check.openrouter_api_available else 'Eksik' }}</small>
+                                </span>
                             </div>
-                            <span class="flex items-center space-x-1 {{ 'text-green-600' if api_check.openrouter_api_available else 'text-red-600' }}">
-                                <i class="fas fa-{{ 'check-circle' if api_check.openrouter_api_available else 'times-circle' }}"></i>
-                                <span class="text-sm font-medium">{{ 'Mevcut' if api_check.openrouter_api_available else 'Eksik' }}</span>
-                            </span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center space-x-2">
-                                <i class="fab fa-google text-blue-500"></i>
-                                <span class="text-gray-600">Google OCR:</span>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fab fa-google text-info me-2"></i>
+                                    <span class="text-muted">Google OCR:</span>
+                                </div>
+                                <span class="d-flex align-items-center {{ 'text-success' if api_check.google_api_available else 'text-warning' }}">
+                                    <i class="fas fa-{{ 'check-circle' if api_check.google_api_available else 'exclamation-triangle' }} me-1"></i>
+                                    <small class="fw-medium">{{ 'Mevcut' if api_check.google_api_available else 'Opsiyonel' }}</small>
+                                </span>
                             </div>
-                            <span class="flex items-center space-x-1 {{ 'text-green-600' if api_check.google_api_available else 'text-orange-500' }}">
-                                <i class="fas fa-{{ 'check-circle' if api_check.google_api_available else 'exclamation-triangle' }}"></i>
-                                <span class="text-sm font-medium">{{ 'Mevcut' if api_check.google_api_available else 'Opsiyonel' }}</span>
-                            </span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center space-x-2">
-                                <i class="fab fa-twitter text-twitter"></i>
-                                <span class="text-gray-600">Twitter API:</span>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fab fa-twitter text-primary me-2"></i>
+                                    <span class="text-muted">Twitter API:</span>
+                                </div>
+                                <span class="d-flex align-items-center {{ 'text-success' if api_check.twitter_api_available else 'text-danger' }}">
+                                    <i class="fas fa-{{ 'check-circle' if api_check.twitter_api_available else 'times-circle' }} me-1"></i>
+                                    <small class="fw-medium">{{ 'Mevcut' if api_check.twitter_api_available else 'Eksik' }}</small>
+                                </span>
                             </div>
-                            <span class="flex items-center space-x-1 {{ 'text-green-600' if api_check.twitter_api_available else 'text-red-600' }}">
-                                <i class="fas fa-{{ 'check-circle' if api_check.twitter_api_available else 'times-circle' }}"></i>
-                                <span class="text-sm font-medium">{{ 'Mevcut' if api_check.twitter_api_available else 'Eksik' }}</span>
-                            </span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center space-x-2">
-                                <i class="fab fa-telegram text-blue-400"></i>
-                                <span class="text-gray-600">Telegram:</span>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fab fa-telegram text-info me-2"></i>
+                                    <span class="text-muted">Telegram:</span>
+                                </div>
+                                <span class="d-flex align-items-center {{ 'text-success' if api_check.telegram_available else 'text-warning' }}">
+                                    <i class="fas fa-{{ 'check-circle' if api_check.telegram_available else 'exclamation-circle' }} me-1"></i>
+                                    <small class="fw-medium">{{ 'Mevcut' if api_check.telegram_available else 'Opsiyonel' }}</small>
+                                </span>
                             </div>
-                            <span class="flex items-center space-x-1 {{ 'text-green-600' if api_check.telegram_available else 'text-yellow-600' }}">
-                                <i class="fas fa-{{ 'check-circle' if api_check.telegram_available else 'exclamation-circle' }}"></i>
-                                <span class="text-sm font-medium">{{ 'Mevcut' if api_check.telegram_available else 'Opsiyonel' }}</span>
-                            </span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-route text-purple-500"></i>
-                                <span class="text-gray-600">OpenRouter:</span>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-route text-primary me-2"></i>
+                                    <span class="text-muted">OpenRouter:</span>
+                                </div>
+                                <span class="d-flex align-items-center {{ 'text-success' if api_check.openrouter_api_available else 'text-muted' }}">
+                                    <i class="fas fa-{{ 'check-circle' if api_check.openrouter_api_available else 'shield-alt' }} me-1"></i>
+                                    <small class="fw-medium">{{ 'Yedek Hazır' if api_check.openrouter_api_available else 'Yedek Sistem' }}</small>
+                                </span>
                             </div>
-                            <span class="flex items-center space-x-1 {{ 'text-green-600' if api_check.openrouter_api_available else 'text-gray-500' }}">
-                                <i class="fas fa-{{ 'check-circle' if api_check.openrouter_api_available else 'shield-alt' }}"></i>
-                                <span class="text-sm font-medium">{{ 'Yedek Hazır' if api_check.openrouter_api_available else 'Yedek Sistem' }}</span>
-                            </span>
-                        </div>
                         <div class="flex justify-between items-center">
 
                         </div>
@@ -435,190 +453,185 @@
         </div>
         {% endif %}
         
-        <!-- Bekleyen Tweet'ler -->
-        {% if pending_tweets %}
-        <div class="card-modern">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-clock text-white"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900">Onay Bekleyen Tweet'ler</h3>
+    <!-- Bekleyen Tweet'ler -->
+    {% if pending_tweets %}
+    <div class="twitter-card mb-4">
+        <div class="twitter-card-header">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <div class="twitter-nav-icon me-3">
+                        <i class="fas fa-clock"></i>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium" data-stat="pending_tweets">
-                            {{ pending_tweets|length }} toplam
-                        </span>
-                        {% if news_count > 0 %}
-                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium" id="news-count">
-                            {{ news_count }} haber
-                        </span>
-                        {% endif %}
-
-                    </div>
+                    <div class="twitter-card-title">Onay Bekleyen Tweet'ler</div>
                 </div>
-                
-                <!-- Toplu İşlemler Paneli -->
-                {% if pending_tweets|length > 1 %}
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <input type="checkbox" id="select-all-tweets" onchange="toggleAllTweets()" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                            <label for="select-all-tweets" class="text-sm font-medium text-gray-700">
-                                <i class="fas fa-tasks text-blue-500"></i> Toplu İşlemler
-                            </label>
-                            <span id="selected-count" class="text-xs text-gray-500">(0 seçili)</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="bulkApproveTweets()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 flex items-center gap-2 text-sm disabled:opacity-50" id="bulk-approve-btn" disabled>
-                                <i class="fas fa-check-double"></i> Toplu Onayla
-                            </button>
-                            <button onclick="bulkRejectTweets()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 flex items-center gap-2 text-sm disabled:opacity-50" id="bulk-reject-btn" disabled>
-                                <i class="fas fa-times-circle"></i> Toplu Reddet
-                            </button>
-                        </div>
-                    </div>
+                <div class="d-flex align-items-center">
+                    <span class="status-indicator status-warning me-2" data-stat="pending_tweets">
+                        {{ pending_tweets|length }} toplam
+                    </span>
+                    {% if news_count > 0 %}
+                    <span class="status-indicator status-online" id="news-count">
+                        {{ news_count }} haber
+                    </span>
+                    {% endif %}
                 </div>
-                {% endif %}
+            </div>
+        </div>
                 
-                <div class="space-y-4">
-                    {% for tweet in pending_tweets %}
-                    <!-- Tweet kalite kontrolü -->
-                    {% set is_invalid_tweet = tweet.tweet_data and (tweet.tweet_data.get('is_valid') == false or (tweet.tweet_data.get('quality_score', 7) | int) <= 4) %}
-                    <div class="bg-gradient-to-r {% if is_invalid_tweet %}from-red-50 to-red-100 border border-red-300{% else %}from-yellow-50 to-orange-50 border border-yellow-200{% endif %} rounded-xl p-6 hover:shadow-lg transition-all duration-300 {{ 'invalid-tweet' if is_invalid_tweet }}" 
-                         data-tweet-id="{{ tweet.id }}" 
-                         data-source-type="{{ tweet.source_type or 'news' }}"
-                         data-tweet-valid="{{ 'false' if is_invalid_tweet else 'true' }}"
-                         data-quality-score="{{ tweet.tweet_data.get('quality_score', 7) if tweet.tweet_data else 7 }}"
-                         {% if is_invalid_tweet %}title="Bu tweet kalite kontrolünden geçemedi ve paylaşılmayacak"{% endif %}>
-                        <div class="flex items-start space-x-4 mb-4">
-                            <!-- Toplu İşlem Checkbox -->
-                            {% if pending_tweets|length > 1 %}
-                            <div class="flex items-center mt-1">
-                                <input type="checkbox" class="tweet-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                                       value="{{ tweet.id }}" onchange="updateBulkButtons()">
-                            </div>
-                            {% endif %}
-                            
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-start">
-                                    <div class="flex-1">
-                                        <h4 class="text-lg font-medium text-gray-900 line-clamp-2 {% if is_invalid_tweet %}text-red-700{% endif %}">{{ tweet.title if tweet.title else tweet.content[:100] + '...' if tweet.content else 'Başlık bulunamadı' }}</h4>
-                                        
-                                        <!-- Kalite Kontrol Göstergesi -->
-                                        {% if tweet.tweet_data and tweet.tweet_data.quality_analysis %}
-                                            <div class="mt-2">
-                                                {% if is_invalid_tweet %}
-                                                <div class="flex items-center space-x-2 text-red-600 text-sm">
-                                                    <i class="fas fa-exclamation-triangle"></i>
-                                                    <span class="font-medium">Kalite Problemi Tespit Edildi</span>
-                                                    <span class="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs font-medium">
-                                                        Puan: {{ tweet.tweet_data.get('quality_score', 7) }}/10
-                                                    </span>
-                                                </div>
-                                                <!-- Sorun listesi -->
-                                                {% if tweet.tweet_data.quality_analysis.issues %}
-                                                <div class="mt-1 text-xs text-red-600">
-                                                    <i class="fas fa-times-circle"></i> 
-                                                    {% for issue in tweet.tweet_data.quality_analysis.issues %}
-                                                        {{ issue }}{% if not loop.last %}, {% endif %}
-                                                    {% endfor %}
-                                                </div>
-                                                {% endif %}
-                                                {% elif tweet.tweet_data.quality_analysis.warnings %}
-                                                <div class="flex items-center space-x-2 text-yellow-600 text-sm">
-                                                    <i class="fas fa-exclamation-circle"></i>
-                                                    <span>Uyarı: {{ tweet.tweet_data.quality_analysis.warnings[0] }}</span>
-                                                    <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-xs font-medium">
-                                                        Puan: {{ tweet.tweet_data.get('quality_score', 7) }}/10
-                                                    </span>
-                                                </div>
-                                                {% else %}
-                                                <div class="flex items-center space-x-2 text-green-600 text-sm">
-                                                    <i class="fas fa-check-circle"></i>
-                                                    <span>Kalite: Yüksek</span>
-                                                    <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs font-medium">
-                                                        Puan: {{ tweet.tweet_data.get('quality_score', 7) }}/10
-                                                    </span>
-                                                </div>
-                                                {% endif %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                    <div class="flex items-center space-x-2 ml-4 flex-shrink-0">
-                                <span class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-medium">
-                                    Haber
-                                </span>
-                                    </div>
-                                </div>
-                            </div>
+        <!-- Toplu İşlemler Paneli -->
+        {% if pending_tweets|length > 1 %}
+        <div class="twitter-card mb-4" style="background-color: var(--twitter-secondary-bg);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <input type="checkbox" id="select-all-tweets" onchange="toggleAllTweets()" class="me-3">
+                    <label for="select-all-tweets" class="text-secondary">
+                        <i class="fas fa-tasks text-primary me-1"></i> Toplu İşlemler
+                    </label>
+                    <span id="selected-count" class="text-secondary small ms-2">(0 seçili)</span>
+                </div>
+                <div class="d-flex">
+                    <button onclick="bulkApproveTweets()" class="twitter-btn twitter-btn-success me-2" id="bulk-approve-btn" disabled>
+                        <i class="fas fa-check-double me-1"></i> Toplu Onayla
+                    </button>
+                    <button onclick="bulkRejectTweets()" class="twitter-btn twitter-btn-danger" id="bulk-reject-btn" disabled>
+                        <i class="fas fa-times-circle me-1"></i> Toplu Reddet
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+                
+        <div class="tweet-list">
+            {% for tweet in pending_tweets %}
+            <!-- Tweet kalite kontrolü -->
+            {% set is_invalid_tweet = tweet.tweet_data and (tweet.tweet_data.get('is_valid') == false or (tweet.tweet_data.get('quality_score', 7) | int) <= 4) %}
+            <div class="tweet-card {{ 'invalid-tweet' if is_invalid_tweet }}" 
+                 data-tweet-id="{{ tweet.id }}" 
+                 data-source-type="{{ tweet.source_type or 'news' }}"
+                 data-tweet-valid="{{ 'false' if is_invalid_tweet else 'true' }}"
+                 data-quality-score="{{ tweet.tweet_data.get('quality_score', 7) if tweet.tweet_data else 7 }}"
+                 {% if is_invalid_tweet %}title="Bu tweet kalite kontrolünden geçemedi ve paylaşılmayacak"{% endif %}>
+                
+                <!-- Tweet Header -->
+                <div class="tweet-header">
+                    <!-- Toplu İşlem Checkbox -->
+                    {% if pending_tweets|length > 1 %}
+                    <div class="me-3">
+                        <input type="checkbox" class="tweet-checkbox" 
+                               value="{{ tweet.id }}" onchange="updateBulkButtons()">
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Avatar -->
+                    <div class="tweet-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    
+                    <!-- User Info -->
+                    <div class="tweet-user-info">
+                        <div class="d-flex align-items-center">
+                            <span class="tweet-username">AI Tweet Bot</span>
+                            <span class="tweet-handle">@ai_tweet_bot</span>
+                            <span class="tweet-time">• {{ tweet.created_at[:10] if tweet.created_at else 'Yeni' }}</span>
                         </div>
                         
-                        <!-- Tweet Önizleme Kartı -->
-                        <div class="bg-white/80 backdrop-blur-sm rounded-lg p-4 mb-4 border border-gray-200">
-                            <!-- Tweet İçeriği -->
-                            <div class="mb-4">
-                                <p class="text-gray-800 leading-relaxed text-lg">{{ tweet.content if tweet.content else 'Tweet metni bulunamadı' }}</p>
-                            </div>
-                            
-                            <!-- Tweet Karakter Sayısı -->
-                            <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
-                                <span class="flex items-center space-x-2">
-                                    <i class="fas fa-text-width"></i>
-                                    <span>{{ (tweet.content or '')|length }}/280 karakter</span>
-                                </span>
-                                {% if (tweet.content or '')|length > 280 %}
-                                <span class="text-red-500 font-medium">
-                                    <i class="fas fa-exclamation-triangle"></i> Çok uzun!
-                                </span>
-                                {% elif (tweet.content or '')|length > 250 %}
-                                <span class="text-yellow-500 font-medium">
-                                    <i class="fas fa-exclamation-circle"></i> Dikkatli ol
-                                </span>
+                        <!-- Kalite Kontrol Göstergesi -->
+                        {% if tweet.tweet_data and tweet.tweet_data.quality_analysis %}
+                            <div class="mt-1">
+                                {% if is_invalid_tweet %}
+                                <div class="d-flex align-items-center text-danger small">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    <span class="fw-medium">Kalite Problemi</span>
+                                    <span class="status-indicator status-offline ms-2">
+                                        {{ tweet.tweet_data.get('quality_score', 7) }}/10
+                                    </span>
+                                </div>
+                                {% elif tweet.tweet_data.quality_analysis.warnings %}
+                                <div class="d-flex align-items-center text-warning small">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    <span>Uyarı: {{ tweet.tweet_data.quality_analysis.warnings[0] }}</span>
+                                    <span class="status-indicator status-warning ms-2">
+                                        {{ tweet.tweet_data.get('quality_score', 7) }}/10
+                                    </span>
+                                </div>
                                 {% else %}
-                                <span class="text-green-500 font-medium">
-                                    <i class="fas fa-check-circle"></i> Uygun
-                                </span>
+                                <div class="d-flex align-items-center text-success small">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    <span>Kalite: Yüksek</span>
+                                    <span class="status-indicator status-online ms-2">
+                                        {{ tweet.tweet_data.get('quality_score', 7) }}/10
+                                    </span>
+                                </div>
                                 {% endif %}
                             </div>
+                        {% endif %}
+                    </div>
+                </div>
+                        
+                <!-- Tweet Content -->
+                <div class="tweet-content">
+                    <p>{{ tweet.content if tweet.content else 'Tweet metni bulunamadı' }}</p>
+                </div>
+                
+                <!-- Tweet Actions -->
+                <div class="tweet-actions">
+                    <!-- Character Count -->
+                    <div class="tweet-action">
+                        <i class="fas fa-text-width tweet-action-icon"></i>
+                        <span>{{ (tweet.content or '')|length }}/280</span>
+                        {% if (tweet.content or '')|length > 280 %}
+                        <span class="text-danger ms-1">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </span>
+                        {% elif (tweet.content or '')|length > 250 %}
+                        <span class="text-warning ms-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </span>
+                        {% else %}
+                        <span class="text-success ms-1">
+                            <i class="fas fa-check-circle"></i>
+                        </span>
+                        {% endif %}
+                    </div>
                             
-                            <!-- Tweet Önizleme Simülasyonu -->
-                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                <div class="flex items-start space-x-3">
-                                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-robot text-white text-sm"></i>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex items-center space-x-2 mb-1">
-                                            <span class="font-semibold text-gray-900">AI Tweet Bot</span>
-                                            <span class="text-gray-500">@ai_tweet_bot</span>
-                                            <span class="text-gray-400">•</span>
-                                            <span class="text-gray-500 text-sm">şimdi</span>
-                                        </div>
-                                        <p class="text-gray-900 leading-relaxed">{{ tweet.content if tweet.content else 'Tweet metni bulunamadı' }}</p>
-                                        
-                                        <!-- Tweet Etkileşim Simülasyonu -->
-                                        <div class="flex items-center space-x-6 mt-3 text-gray-500 text-sm">
-                                            <span class="flex items-center space-x-1 hover:text-blue-500 cursor-pointer">
-                                                <i class="far fa-comment"></i>
-                                                <span>0</span>
-                                            </span>
-                                            <span class="flex items-center space-x-1 hover:text-green-500 cursor-pointer">
-                                                <i class="fas fa-retweet"></i>
-                                                <span>0</span>
-                                            </span>
-                                            <span class="flex items-center space-x-1 hover:text-red-500 cursor-pointer">
-                                                <i class="far fa-heart"></i>
-                                                <span>0</span>
-                                            </span>
-                                            <span class="flex items-center space-x-1 hover:text-blue-500 cursor-pointer">
-                                                <i class="far fa-share-square"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- Tweet Preview -->
+                    <div class="tweet-action">
+                        <i class="fas fa-eye tweet-action-icon"></i>
+                        <span>Önizleme</span>
+                    </div>
+                    
+                    <!-- Share -->
+                    <div class="tweet-action share">
+                        <i class="fas fa-share tweet-action-icon"></i>
+                        <span>Paylaş</span>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="d-flex">
+                        {% if not is_invalid_tweet %}
+                        <button onclick="postTweet({{ tweet.id }})" class="twitter-btn twitter-btn-success me-2">
+                            <i class="fas fa-check me-1"></i> Onayla
+                        </button>
+                        <button onclick="manualPostTweet({{ tweet.id }})" class="twitter-btn twitter-btn-secondary me-2">
+                            <i class="fas fa-external-link-alt me-1"></i> Manuel Paylaş
+                        </button>
+                        {% else %}
+                        <button class="twitter-btn twitter-btn-secondary me-2" disabled>
+                            <i class="fas fa-times me-1"></i> Kalite Problemi
+                        </button>
+                        {% endif %}
+                        <button onclick="deleteTweet({{ tweet.id }})" class="twitter-btn twitter-btn-danger">
+                            <i class="fas fa-trash me-1"></i> Reddet
+                        </button>
+                    </div>
+                    
+                    <!-- Source Badge -->
+                    <div class="status-indicator status-online">
+                        <i class="fas fa-newspaper me-1"></i>
+                        Haber
+                    </div>
+                </div>
                             
                             <!-- Resimli Tweet için Resim Gösterimi -->
                             {% if tweet.tweet_data and tweet.tweet_data.source_data and tweet.tweet_data.source_data.type == 'image' %}
@@ -764,106 +777,92 @@
                             </div>
                             
                             <!-- Kalite durumu bilgi kutusu -->
-                            <div class="w-full mt-2 p-3 bg-red-100 border border-red-300 rounded-lg">
-                                <div class="flex items-center space-x-2 text-red-700">
-                                    <i class="fas fa-shield-alt"></i>
-                                    <span class="font-medium text-sm">Bu tweet kalite kontrol nedeniyle paylaşılamaz</span>
-                                </div>
-                                {% if tweet.tweet_data and tweet.tweet_data.quality_analysis and tweet.tweet_data.quality_analysis.issues %}
-                                <div class="mt-2 text-xs text-red-600">
-                                    <strong>Tespit edilen sorunlar:</strong>
-                                    <ul class="list-disc list-inside mt-1">
-                                        {% for issue in tweet.tweet_data.quality_analysis.issues %}
-                                        <li>{{ issue }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                                {% endif %}
-                            </div>
                             {% else %}
                             <!-- Normal tweet'ler için aktif butonlar -->
-                            <button data-action="postTweet" data-tweet-id="{{ tweet.id }}" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-medium flex items-center space-x-2">
+                            <button onclick="postTweet({{ tweet.id }})" 
+                                    class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium flex items-center space-x-2 transition-colors">
                                 <i class="fas fa-robot"></i>
                                 <span>API ile Paylaş</span>
                             </button>
-                            <button data-action="manualPostTweet" data-tweet-id="{{ tweet.id }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium flex items-center space-x-2">
+                            <button onclick="manualPostTweet({{ tweet.id }})" 
+                                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium flex items-center space-x-2 transition-colors">
                                 <i class="fab fa-twitter"></i>
                                 <span>X'te Manuel Paylaş</span>
                             </button>
                             {% endif %}
-
-                            <button data-action="deleteTweet" data-tweet-id="{{ tweet.id }}" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 font-medium flex items-center space-x-2">
+                            
+                            <button onclick="deleteTweet({{ tweet.id }})" 
+                                    class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium flex items-center space-x-2 transition-colors">
                                 <i class="fas fa-trash"></i>
-                                <span>Sil</span>
+                                <span>Reddet</span>
                             </button>
-                            <a href="{{ tweet.url if tweet.url else '#' }}" target="_blank" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium flex items-center space-x-2 {{ 'opacity-50 cursor-not-allowed' if not tweet.url else '' }}">
-                                <i class="fas fa-external-link-alt"></i>
-                                <span>Makaleyi Oku</span>
-                            </a>
                         </div>
                     </div>
-                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    <!-- Reddedilen Tweetler Bölümü -->
+    {% if rejected_articles %}
+    <div class="twitter-card mb-4">
+        <div class="twitter-card-header">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <div class="twitter-nav-icon me-3">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    <div class="twitter-card-title">Reddedilen Tweetler</div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="status-indicator status-offline me-2">
+                        {{ rejected_articles|length }} reddedilen
+                    </span>
+                    <a href="{{ url_for('rejected_articles') }}" class="twitter-btn twitter-btn-secondary">
+                        <i class="fas fa-external-link-alt me-1"></i>
+                        Tümünü Gör
+                    </a>
                 </div>
             </div>
         </div>
-        {% endif %}
-
-        <!-- Reddedilen Tweetler Bölümü -->
-        {% if rejected_articles %}
-        <div class="card-modern">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-ban text-white"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900">Reddedilen Tweetler</h3>
-                            <p class="text-sm text-gray-500">Kalite kontrolü tarafından reddedilen tweetler</p>
-                        </div>
+                
+        <div class="tweet-list">
+            {% for article in rejected_articles[:5] %}
+            <div class="tweet-card">
+                <div class="tweet-header">
+                    <div class="tweet-avatar">
+                        <i class="fas fa-ban"></i>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
-                            {{ rejected_articles|length }} reddedilen
-                        </span>
-                        <a href="{{ url_for('rejected_articles') }}" class="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors flex items-center gap-2 text-sm">
-                            <i class="fas fa-external-link-alt"></i>
-                            Tümünü Gör
-                        </a>
+                    
+                    <div class="tweet-user-info">
+                        <div class="d-flex align-items-center">
+                            <span class="tweet-username">Reddedilen Tweet</span>
+                            <span class="tweet-handle">@ai_tweet_bot</span>
+                            <span class="tweet-time">• {{ article.rejected_at_formatted }}</span>
+                        </div>
+                        
+                        <div class="mt-1">
+                            <div class="d-flex align-items-center text-danger small">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                <span class="fw-medium">Red Sebebi:</span>
+                                <span class="ms-1">{{ article.reason }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="space-y-4">
-                    {% for article in rejected_articles[:5] %}
-                    <div class="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl p-4 hover:shadow-lg transition-all duration-300">
-                        <div class="flex items-start space-x-4">
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-start">
-                                    <div class="flex-1">
-                                        <h4 class="text-lg font-medium text-gray-900 line-clamp-2 text-red-700">
-                                            {{ article.title if article.title else 'Başlık bulunamadı' }}
-                                        </h4>
-                                        
-                                        <!-- Red Sebebi -->
-                                        <div class="mt-2 flex items-center space-x-2 text-red-600 text-sm">
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                            <span class="font-medium">Red Sebebi:</span>
-                                            <span>{{ article.reason }}</span>
-                                        </div>
-                                        
-                                        <!-- Red Tarihi -->
-                                        <div class="mt-1 flex items-center space-x-2 text-sm text-gray-500">
-                                            <i class="fas fa-clock"></i>
-                                            <span>{{ article.rejected_at_formatted }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-2 ml-4 flex-shrink-0">
-                                        <span class="px-3 py-1 bg-red-500 text-white rounded-full text-sm font-medium">
-                                            Reddedildi
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="tweet-content">
+                    <p>{{ article.title if article.title else 'Başlık bulunamadı' }}</p>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="status-indicator status-offline">
+                        <i class="fas fa-times-circle me-1"></i>
+                        Reddedildi
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
                         </div>
                         
                         <!-- İçerik Önizlemesi -->
@@ -3013,8 +3012,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
-    </div>
-</div>
 
 {% endblock %}
