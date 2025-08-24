@@ -1,0 +1,11 @@
+{
+  "name": "flask-tweet-app",
+  "version": "1.0.0",
+  "description": "AI Tweet Bot with Tailwind CSS",
+  "scripts": {
+    "build-css": "tailwindcss -i ./static/src/input.css -o ./static/css/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}
