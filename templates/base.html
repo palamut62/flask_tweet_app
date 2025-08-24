@@ -20,7 +20,7 @@
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     
     <!-- Bootstrap CSS - PythonAnywhere Optimized -->
-    {% if is_pythonanywhere %}
+    {% if is_pythonanywhere or config.get('USE_LOCAL_ASSETS', False) %}
         <!-- PythonAnywhere için local fallback -->
         <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
     {% else %}
@@ -30,13 +30,13 @@
     {% endif %}
     
     <!-- Font Awesome - PythonAnywhere Optimized -->
-    {% if is_pythonanywhere %}
+    {% if is_pythonanywhere or config.get('USE_LOCAL_ASSETS', False) %}
         <!-- PythonAnywhere için local fallback -->
         <link href="{{ url_for('static', filename='css/all.min.css') }}" rel="stylesheet">
     {% else %}
         <!-- CDN Fallback Sistemi -->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css';">
-        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://unpkg.com/@fortawesome/fontawesome-free@6.4.0/css/all.min.css';">
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.js" rel="stylesheet" onerror="this.onerror=null;this.href='https://unpkg.com/@fortawesome/fontawesome-free@6.4.0/css/all.min.css';">
     {% endif %}
     
     <!-- Twitter Style CSS -->
