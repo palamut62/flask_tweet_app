@@ -41,9 +41,10 @@ from utils import (
 # GitHub modülü kaldırıldı
 
 # Version Information
-APP_VERSION = "1.4.0"
-APP_RELEASE_DATE = "2025-02-03"
+APP_VERSION = "1.4.1"
+APP_RELEASE_DATE = "2025-08-24"
 VERSION_CHANGELOG = {
+    "1.4.1": "Sistem kontrolü ve doğrulama, Otomatik version tracking sistemi, Duplicate kontrol iyileştirmeleri",
     "1.4.0": "OpenRouter OCR entegrasyonu, Çok katmanlı fallback sistemi, Gelişmiş hata yönetimi",
     "1.3.0": "GitHub kaldırıldı, Footer düzeltildi, Navbar yenilendi",
     "1.2.0": "UI iyileştirmeleri ve performans optimizasyonları", 

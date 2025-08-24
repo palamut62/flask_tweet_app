@@ -1,17 +1,30 @@
 # Version Information
 
-## Current Version: 1.4.0
+## Current Version: 1.4.1
 
-### Release Date: 2025-02-03
+### Release Date: 2025-08-24
 
 ### Version History
 
 | Version | Release Date | Major Changes | Status |
 |---------|-------------|---------------|--------|
-| **1.4.0** | 2025-02-03 | OpenRouter OCR Integration | ✅ Current |
+| **1.4.1** | 2025-08-24 | Sistem Kontrolü ve Otomatik Version Tracking | ✅ Current |
+| 1.4.0 | 2025-02-03 | OpenRouter OCR Integration | ✅ Stable |
 | 1.3.0 | 2025-01-XX | GitHub Module Removal, UI Updates | ✅ Stable |
 | 1.2.0 | 2025-01-XX | UI Improvements, Performance | ✅ Stable |
 | 1.1.0 | 2024-XX-XX | Auto Tweet System, AI Integration | ✅ Stable |
+
+## Version 1.4.1 Details
+
+### 🔧 System Verification & Improvements
+- **Comprehensive Duplicate Control**: All 4 duplicate detection methods verified and active
+  - URL-based duplicate detection: ✅ Active
+  - Hash-based duplicate detection: ✅ Active
+  - Title/Content similarity detection: ✅ Active
+  - Cross-duplicate detection: ✅ Active
+- **Bulk Tweet System**: Security and duplicate prevention verified
+- **News Fetching System**: Multi-source duplicate prevention confirmed
+- **Automatic Version Tracking**: New system for tracking all updates and changes
 
 ## Version 1.4.0 Details
 

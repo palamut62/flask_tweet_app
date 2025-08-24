@@ -2,6 +2,29 @@
 
 Bu dosya, AI Tweet Bot Flask uygulamasındaki tüm önemli değişiklikleri takip eder.
 
+## [1.4.1] - 2025-08-24
+
+### 🔧 Sistem Kontrolü ve İyileştirmeleri
+- **Duplicate Kontrol Sistemi**: Kapsamlı kontrol ve doğrulama yapıldı
+  - URL tabanlı duplicate kontrolü: ✅ Aktif
+  - Hash tabanlı duplicate kontrolü: ✅ Aktif
+  - Title/Content similarity kontrolü: ✅ Aktif
+  - Cross-duplicate kontrolü: ✅ Aktif
+- **Toplu Tweet Sistemi**: Güvenlik kontrolleri doğrulandı
+  - Bulk operations'da duplicate prevention: ✅ Aktif
+  - Error handling: ✅ Geliştirilmiş
+- **Haber Çekme Sistemi**: Multi-source duplicate prevention doğrulandı
+  - AI Keywords, MCP, Custom sources: ✅ Tüm yöntemler aktif
+  - Content fingerprinting: ✅ Çalışıyor
+- **Version Tracking Sistemi**: Otomatik güncelleme sistemi eklendi
+  - VERSION_TRACKER.md dosyası oluşturuldu
+  - Otomatik version management kuralları belirlendi
+
+### 📝 Dokümantasyon
+- `VERSION_TRACKER.md`: Otomatik güncelleme takip sistemi
+- Duplicate kontrol sistemlerinin detaylı durumu belgelendi
+- Gelecek güncellemeler için otomatik checklist oluşturuldu
+
 ## [1.4.0] - 2025-02-03
 
 ### Eklenen Özellikler 🚀
