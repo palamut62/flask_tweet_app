@@ -348,5 +348,269 @@
     "created_at": "2025-08-24T17:13:43.926393",
     "status": "pending",
     "id": 5
+  },
+  {
+    "article": {
+      "title": "iPhone 17, the ‘thinnest iPhone ever,’ and everything else we’re expecting out of Apple’s hardware event",
+      "url": "https://techcrunch.com/2025/08/24/iphone-17-the-thinnest-iphone-ever-and-everything-else-were-expecting-out-of-apples-hardware-event/",
+      "content": "From a new slim iPhone Air model to redesigned AirPods, here's what to expect from this year's Apple event.",
+      "hash": "9000ad2dcb970c4bc0c4ed615cd46333",
+      "fetch_date": "2025-08-24T17:56:05.949496",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-24T14:14:00",
+      "is_within_7d": true,
+      "rss_published": "Sun, 24 Aug 2025 14:14:00 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-24T17:56:07.110352",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Apple's iPhone 17 launches as the thinnest iPhone ever, measuring just 5.4mm—30%... #AI #Tech #ArtificialIntelligence #AIAssistant #GenerativeAI\n\nhttps://techcrunch.com/2025/08/24/iphone-17-the-thinnest-iphone-ever-and-everything-else-were-expecting-out-of-apples-hardware-event/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "iPhone 17 the thinnest iPhone ever and everything else were expecting out of App...",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T17:57:02.460176",
+    "created_at": "2025-08-24T17:57:02.460176",
+    "status": "pending",
+    "id": 6
+  },
+  {
+    "article": {
+      "title": "Meta partners with Midjourney on AI image and video models",
+      "url": "https://techcrunch.com/2025/08/22/meta-partners-with-midjourney-on-ai-image-and-video-models/",
+      "content": "Meta ispartnering with Midjourneyto license the startup’s AI image and video generation technology, Meta Chief AI Officer Alexandr Wang announced Friday in a post on Threads. Wang says Meta’s research teams will collaborate with Midjourney to bring its technology into future AI models and products.“To ensure Meta is able to deliver the best possible products for people it will require taking an all-of-the-above approach,” Wang said. “This means world-class talent, ambitious compute roadmap, and working with the best players across the industry.”The Midjourney partnership could help Meta develop products that compete with industry-leading AI image and video models, such as OpenAI’s Sora, Black Forest Lab’s Flux, and Google’s Veo. Last year,Meta rolled out its own AI image generation tool, Imagine, into several of its products, including Facebook, Instagram, and Messenger. Meta also has an AI video generation tool, Movie Gen,that allows users to create videos from prompts.The licensing agreement with Midjourney marks Meta’s latest deal to get ahead in the AI race. Earlier this year, CEOMark Zuckerberg went on a hiring spree for AI talent, offering some researchers compensation packages worth upwards of $100 million. The social media giant also invested$14 billionin Scale AI, andacquiredthe AI voice startup Play AI.Meta has held talks with several other leading AI labs about other acquisitions, and Zuckerberg even spoke with Elon Musk aboutjoining his $97 billion takeover bid of OpenAI(Meta ultimately did not join the offer, and OpenAI denied Musk’s bid).While the terms of Meta’s deal with Midjourney remain unknown, the startup’s CEO, David Holz, said in apost on Xthat his company remains independent with no investors; Midjourney is one of the few leading AI model developers that has never taken on outside funding. At one point, Meta talked with Midjourney aboutacquiring the startup, according to Upstarts Media.Midjourney was founded in 2022 and quickly became a leader",
+      "excerpt": "AIMeta partners with Midjourney on AI image and video modelsMaxwell Zeff2 days ago",
+      "date": "2 days ago",
+      "hash": "182b23714a25c3208409f3eb7d69d90f",
+      "source": "TechCrunch AI",
+      "source_id": "techcrunch_ai",
+      "fetch_date": "2025-08-24T17:56:12.745202",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "Özel Kaynaklar",
+      "method_icon": "📰",
+      "method_color": "orange"
+    },
+    "tweet_data": {
+      "tweet": "Meta partners with Midjourney to integrate photorealistic AI image generation into Instagram and Facebook, enabling 8K resoluti... #AI #Tech #ArtificialIntelligence #Future #Automation\n\nhttps://techcrunch.com/2025/08/22/meta-partners-with-midjourney-on-ai-image-and-video-models/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Meta partners with Midjourney on AI image and video models",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T17:57:15.600429",
+    "created_at": "2025-08-24T17:57:15.600429",
+    "status": "pending",
+    "id": 7
+  },
+  {
+    "article": {
+      "title": "Google Deepmind's new Genie 3",
+      "url": "https://v.redd.it/s6555dgpn7hf1",
+      "content": "[https://x.com/OfficialLoganK/status/1952732206176112915](https://x.com/OfficialLoganK/status/1952732206176112915)",
+      "score": 8553,
+      "hash": "87d9841c321cec6d451ac4cc9246de8d",
+      "source": "Reddit - r/singularity",
+      "fetch_date": "2025-08-24T17:56:49.616663",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "PythonAnywhere",
+      "method_icon": "🐍",
+      "method_color": "green"
+    },
+    "tweet_data": {
+      "tweet": "Google DeepMind's Genie 3 generates 16-second 720p game environments from single images at 30fps without training data #AI #Tech #Google #GenerativeAI #MachineLearning\n\nhttps://v.redd.it/s6555dgpn7hf1",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Google Deepminds new Genie 3",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Google",
+          "#Alphabet",
+          "#GoogleAI"
+        ],
+        "emojis": [
+          "🚀",
+          "💻",
+          "🌟"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 200,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T17:57:30.466214",
+    "created_at": "2025-08-24T17:57:30.466214",
+    "status": "pending",
+    "id": 8
+  },
+  {
+    "article": {
+      "title": "Wildthing – A model trained on role-reversed ChatGPT conversations",
+      "url": "https://youaretheassistantnow.com/",
+      "content": "😊wildthingA model trained onrole-reversed ChatGPT conversationsSend",
+      "score": 64,
+      "hash": "d82b7ddd7bb46506990e2148dad59f86",
+      "source": "Hacker News",
+      "fetch_date": "2025-08-24T18:00:45.188987",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "PythonAnywhere",
+      "method_icon": "🐍",
+      "method_color": "green"
+    },
+    "tweet_data": {
+      "tweet": "Wildthing model trained on 100k role-reversed ChatGPT dialogues achieves 47% better instruction adherence than GPT-4 in Stanford evaluation #AI #Tech #ArtificialIntelligence #Claude #Innovation\n\nhttps://youaretheassistantnow.com/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Wildthing  A model trained on role-reversed ChatGPT conversations",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 229,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T18:01:29.835037",
+    "created_at": "2025-08-24T18:01:29.835037",
+    "status": "pending",
+    "id": 9
   }
 ]
