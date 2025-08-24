@@ -221,5 +221,4 @@ package.json
 package-lock.json
 tailwind.config.js
 build.py
-static/src/
-static/css/tailwind.css
+
