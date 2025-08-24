@@ -1,100 +1,101 @@
 {% extends "base.html" %}
 
-{% block title %}Reddedilen Makaleler - AI Tweet Bot{% endblock %}
+{% block title %}Reddedilen Makaleler{% endblock %}
 
 {% block content %}
 <!-- Twitter Feed Style -->
 <div class="twitter-feed">
     <!-- Header -->
     <div class="feed-header">
-        <div class="d-flex align-items-center justify-content-between">
-            <div>
+        <div class="feed-header-content">
+            <div class="feed-header-left">
                 <h1 class="feed-title">Reddedilen Makaleler</h1>
                 <p class="feed-subtitle">Kalite kontrolü tarafından reddedilen makaleler</p>
             </div>
-            <div>
+            <div class="feed-header-right">
                 <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
                     <i class="fas fa-sync-alt"></i>
+                    Yenile
                 </button>
             </div>
         </div>
     </div>
 
     <!-- İstatistikler -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="tweet-card bg-red-50 border border-red-200">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-ban text-red-500 text-2xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-red-600">Toplam Reddedilen</p>
-                    <p class="text-2xl font-semibold text-red-900">{{ stats.total_rejected or 0 }}</p>
-                </div>
+    <div class="rejected-stats-grid">
+        <div class="tweet-card rejected-stat-card rejected-stat-red">
+            <div class="rejected-stat-icon">
+                <i class="fas fa-ban"></i>
+            </div>
+            <div class="rejected-stat-content">
+                <div class="rejected-stat-number">{{ stats.total_rejected or 0 }}</div>
+                <div class="rejected-stat-label">Toplam Reddedilen</div>
             </div>
         </div>
         
-        <div class="tweet-card bg-yellow-50 border border-yellow-200">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-clock text-yellow-500 text-2xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-yellow-600">Bugün Reddedilen</p>
-                    <p class="text-2xl font-semibold text-yellow-900">{{ stats.rejected_today or 0 }}</p>
-                </div>
+        <div class="tweet-card rejected-stat-card rejected-stat-yellow">
+            <div class="rejected-stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="rejected-stat-content">
+                <div class="rejected-stat-number">{{ stats.rejected_today or 0 }}</div>
+                <div class="rejected-stat-label">Bugün Reddedilen</div>
             </div>
         </div>
         
-        <div class="tweet-card bg-orange-50 border border-orange-200">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-calendar-week text-orange-500 text-2xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-orange-600">Bu Hafta Reddedilen</p>
-                    <p class="text-2xl font-semibold text-orange-900">{{ stats.rejected_this_week or 0 }}</p>
-                </div>
+        <div class="tweet-card rejected-stat-card rejected-stat-orange">
+            <div class="rejected-stat-icon">
+                <i class="fas fa-calendar-week"></i>
+            </div>
+            <div class="rejected-stat-content">
+                <div class="rejected-stat-number">{{ stats.rejected_this_week or 0 }}</div>
+                <div class="rejected-stat-label">Bu Hafta Reddedilen</div>
             </div>
         </div>
     </div>
 
     <!-- Reddetme Sebepleri -->
     {% if stats.common_reasons %}
-    <div class="mb-8">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Sık Görülen Reddetme Sebepleri</h2>
-        <div class="tweet-card">
-            <div class="space-y-3">
-                {% for reason, count in stats.common_reasons.items() %}
-                <div class="flex justify-between items-center">
-                    <span class="text-sm text-gray-700">{{ reason }}</span>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                        {{ count }} makale
-                    </span>
-                </div>
-                {% endfor %}
+    <div class="tweet-card">
+        <div class="rejected-reasons-header">
+            <div class="rejected-reasons-icon">
+                <i class="fas fa-chart-pie"></i>
             </div>
+            <h2 class="rejected-reasons-title">Sık Görülen Reddetme Sebepleri</h2>
+        </div>
+        <div class="rejected-reasons-content">
+            {% for reason, count in stats.common_reasons.items() %}
+            <div class="rejected-reason-item">
+                <div class="rejected-reason-text">{{ reason }}</div>
+                <div class="rejected-reason-count">{{ count }} makale</div>
+            </div>
+            {% endfor %}
         </div>
     </div>
     {% endif %}
 
     <!-- Toplu İşlemler Paneli -->
     {% if rejected_articles %}
-    <div class="tweet-card bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 p-4 mb-6">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <input type="checkbox" id="select-all-rejected" onchange="toggleAllRejected()" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
-                <label for="select-all-rejected" class="text-sm font-medium text-gray-700">
-                    <i class="fas fa-tasks text-red-500"></i> Toplu İşlemler
-                </label>
-                <span id="selected-rejected-count" class="text-xs text-gray-500">(0 seçili)</span>
+    <div class="tweet-card bulk-actions-card">
+        <div class="bulk-actions-content">
+            <div class="bulk-actions-left">
+                <div class="bulk-checkbox-wrapper">
+                    <input type="checkbox" id="select-all-rejected" onchange="toggleAllRejected()" class="bulk-checkbox">
+                    <label for="select-all-rejected" class="bulk-checkbox-label">
+                        <i class="fas fa-tasks"></i>
+                        Toplu İşlemler
+                    </label>
+                </div>
+                <div class="bulk-count" id="selected-rejected-count">(0 seçili)</div>
             </div>
-            <div class="flex items-center space-x-2">
-                <button onclick="bulkDeleteRejected()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 flex items-center gap-2 text-sm disabled:opacity-50" id="bulk-delete-btn" disabled>
-                    <i class="fas fa-trash"></i> Toplu Sil
+            <div class="bulk-actions-right">
+                <button onclick="bulkDeleteRejected()" class="twitter-btn twitter-btn-danger" id="bulk-delete-btn" disabled>
+                    <i class="fas fa-trash"></i>
+                    <span>Toplu Sil</span>
                 </button>
-                <button onclick="bulkClearRejected()" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all duration-200 flex items-center gap-2 text-sm disabled:opacity-50" id="bulk-clear-btn" disabled>
-                    <i class="fas fa-broom"></i> Toplu Temizle
+                <button onclick="bulkClearRejected()" class="twitter-btn twitter-btn-warning" id="bulk-clear-btn" disabled>
+                    <i class="fas fa-broom"></i>
+                    <span>Toplu Temizle</span>
                 </button>
             </div>
         </div>
@@ -103,183 +104,197 @@
 
     <!-- Reddedilen Makaleler Listesi -->
     <div class="tweet-card">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-medium text-gray-900">Reddedilen Makaleler</h2>
+        <div class="rejected-articles-header">
+            <h2 class="rejected-articles-title">Reddedilen Makaleler</h2>
         </div>
         
         {% if rejected_articles %}
-        <div class="divide-y divide-gray-200">
+        <div class="rejected-articles-container">
             {% for article in rejected_articles %}
-            <div class="p-6 hover:bg-gray-50" data-article-id="{{ loop.index0 }}">
-                <div class="flex items-start justify-between">
-                    <!-- Toplu İşlem Checkbox -->
-                    <div class="flex items-center mt-1 mr-3">
-                        <input type="checkbox" class="rejected-checkbox rounded border-gray-300 text-red-600 focus:ring-red-500" 
-                               value="{{ loop.index0 }}" onchange="updateRejectedBulkButtons()">
+            <div class="rejected-article-item" data-article-id="{{ loop.index0 }}">
+                <!-- Toplu İşlem Checkbox -->
+                <div class="rejected-checkbox-wrapper">
+                    <input type="checkbox" class="rejected-checkbox" 
+                           value="{{ loop.index0 }}" onchange="updateRejectedBulkButtons()">
+                </div>
+                
+                <div class="rejected-article-content">
+                    <div class="rejected-article-header">
+                        <h3 class="rejected-article-title">{{ article.title or 'Başlık yok' }}</h3>
+                        <div class="rejected-article-meta">
+                            <div class="rejected-article-date">
+                                <i class="fas fa-clock"></i>
+                                <span>{{ article.rejected_at_formatted }}</span>
+                            </div>
+                            <div class="rejected-article-reason">
+                                <i class="fas fa-ban"></i>
+                                <span>{{ article.reason }}</span>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="flex-1 min-w-0">
-                        <h3 class="text-lg font-medium text-gray-900 truncate">
-                            {{ article.title or 'Başlık yok' }}
-                        </h3>
-                        
-                        <div class="mt-2 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-clock mr-1"></i>
-                            <span>{{ article.rejected_at_formatted }}</span>
-                            <span class="mx-2">•</span>
-                            <i class="fas fa-ban mr-1 text-red-500"></i>
-                            <span class="text-red-600 font-medium">{{ article.reason }}</span>
-                        </div>
-                        
-                        {% if article.url %}
-                        <div class="mt-2">
-                            <a href="{{ article.url }}" target="_blank" 
-                               class="text-blue-600 hover:text-blue-800 text-sm flex items-center">
-                                <i class="fas fa-external-link-alt mr-1"></i>
-                                {{ article.url[:80] }}{% if article.url|length > 80 %}...{% endif %}
-                            </a>
-                        </div>
-                        {% endif %}
-                        
-                        {% if article.content_preview %}
-                        <div class="mt-3">
-                            <details class="text-sm">
-                                <summary class="cursor-pointer text-gray-600 hover:text-gray-800">
-                                    İçerik Önizlemesi
-                                </summary>
-                                <div class="mt-2 p-3 bg-gray-50 rounded border text-gray-700">
-                                    {{ article.content_preview }}
-                                </div>
-                            </details>
-                        </div>
-                        {% endif %}
+                    {% if article.url %}
+                    <div class="rejected-article-url">
+                        <a href="{{ article.url }}" target="_blank" class="rejected-article-link">
+                            <i class="fas fa-external-link-alt"></i>
+                            <span>{{ article.url[:80] }}{% if article.url|length > 80 %}...{% endif %}</span>
+                        </a>
                     </div>
+                    {% endif %}
                     
-                    <div class="ml-4 flex-shrink-0">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                            Reddedildi
-                        </span>
+                    {% if article.content_preview %}
+                    <div class="rejected-article-preview">
+                        <details class="rejected-preview-details">
+                            <summary class="rejected-preview-summary">
+                                İçerik Önizlemesi
+                            </summary>
+                            <div class="rejected-preview-content">
+                                {{ article.content_preview }}
+                            </div>
+                        </details>
                     </div>
+                    {% endif %}
+                </div>
+                
+                <div class="rejected-article-status">
+                    <span class="status-badge status-rejected">
+                        Reddedildi
+                    </span>
                 </div>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <div class="p-12 text-center">
-            <div class="w-12 h-12 mx-auto mb-4 text-gray-400">
-                <i class="fas fa-check-circle text-4xl"></i>
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-check-circle"></i>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">Reddedilen Makale Yok</h3>
-            <p class="text-gray-500">Henüz kalite kontrolü tarafından reddedilen makale bulunmuyor.</p>
+            <h3 class="empty-state-title">Reddedilen Makale Yok</h3>
+            <p class="empty-state-description">Henüz kalite kontrolü tarafından reddedilen makale bulunmuyor.</p>
         </div>
         {% endif %}
     </div>
     
     <!-- Bilgi Notu -->
-    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div class="flex items-start">
-            <div class="flex-shrink-0">
-                <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+    <div class="tweet-card info-card">
+        <div class="info-card-header">
+            <div class="info-card-icon">
+                <i class="fas fa-info-circle"></i>
             </div>
-            <div class="ml-3">
-                <h3 class="text-sm font-medium text-blue-800">Kalite Kontrol Hakkında</h3>
-                <div class="mt-2 text-sm text-blue-700">
-                    <p>Makaleler aşağıdaki durumlarda otomatik olarak reddedilir:</p>
-                    <ul class="list-disc list-inside mt-1 space-y-1">
-                        <li>Başlık veya içerik çok kısa</li>
-                        <li>"Major AI development" gibi genel başlıklar</li>
-                        <li>"No company" gibi anlamsız içerikler</li>
-                        <li>İçeriğe erişim hatası</li>
-                        <li>Tekrarlayan/spam içerik</li>
-                    </ul>
-                </div>
-            </div>
+            <h3 class="info-card-title">Kalite Kontrol Hakkında</h3>
+        </div>
+        <div class="info-card-content">
+            <p class="info-card-text">Makaleler aşağıdaki durumlarda otomatik olarak reddedilir:</p>
+            <ul class="info-card-list">
+                <li>Başlık veya içerik çok kısa</li>
+                <li>"Major AI development" gibi genel başlıklar</li>
+                <li>"No company" gibi anlamsız içerikler</li>
+                <li>İçeriğe erişim hatası</li>
+                <li>Tekrarlayan/spam içerik</li>
+            </ul>
         </div>
     </div>
 </div>
 
-<!-- Toast Notification Container -->
-<div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2 max-w-sm w-full"></div>
-
 <script>
-// Toast Notification System
-function showToast(message, type = 'info', duration = 5000) {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
+// Toast notification system
+function showToast(message, type = 'info') {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        `;
+        document.body.appendChild(toastContainer);
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    const icon = getToastIcon(type);
+    const title = getToastTitle(type);
     
-    const toastTypes = {
-        'success': {
-            bgColor: 'bg-green-500',
-            textColor: 'text-white',
-            icon: 'fas fa-check-circle',
-            borderColor: 'border-green-600'
-        },
-        'error': {
-            bgColor: 'bg-red-500',
-            textColor: 'text-white',
-            icon: 'fas fa-exclamation-circle',
-            borderColor: 'border-red-600'
-        },
-        'warning': {
-            bgColor: 'bg-yellow-500',
-            textColor: 'text-white',
-            icon: 'fas fa-exclamation-triangle',
-            borderColor: 'border-yellow-600'
-        },
-        'info': {
-            bgColor: 'bg-blue-500',
-            textColor: 'text-white',
-            icon: 'fas fa-info-circle',
-            borderColor: 'border-blue-600'
-        }
-    };
-    
-    const toastConfig = toastTypes[type] || toastTypes['info'];
-    const toastId = 'toast-' + Date.now();
-    
-    const toastHtml = `
-        <div id="${toastId}" class="transform translate-x-full transition-all duration-300 ease-out opacity-0">
-            <div class="${toastConfig.bgColor} ${toastConfig.textColor} ${toastConfig.borderColor} border-l-4 rounded-lg shadow-lg p-4 flex items-center space-x-3 min-w-0">
-                <div class="flex-shrink-0">
-                    <i class="${toastConfig.icon}"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium leading-5 break-words">${message}</p>
-                </div>
-                <button onclick="removeToast('${toastId}')" class="flex-shrink-0 text-white hover:text-gray-200 transition-colors">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        </div>
+    toast.className = `toast toast-${type}`;
+    toast.style.cssText = `
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        animation: slideIn 0.3s ease-out;
+        max-width: 400px;
     `;
     
-    container.insertAdjacentHTML('beforeend', toastHtml);
+    toast.innerHTML = `
+        <div style="flex-shrink: 0; font-size: 20px;">${icon}</div>
+        <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 4px; color: #374151;">${title}</div>
+            <div style="color: #6b7280; font-size: 14px;">${message}</div>
+        </div>
+        <button onclick="this.parentElement.remove()" style="
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+            margin-left: 8px;
+        ">&times;</button>
+    `;
     
-    const toastElement = document.getElementById(toastId);
+    toastContainer.appendChild(toast);
     
+    // Auto remove after 5 seconds
     setTimeout(() => {
-        toastElement.classList.remove('translate-x-full', 'opacity-0');
-        toastElement.classList.add('translate-x-0', 'opacity-100');
-    }, 10);
-    
-    if (duration > 0) {
-        setTimeout(() => {
-            removeToast(toastId);
-        }, duration);
-    }
-    
-    return toastId;
+        if (toast.parentElement) {
+            toast.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 5000);
 }
 
-function removeToast(toastId) {
-    const toast = document.getElementById(toastId);
-    if (toast) {
-        toast.classList.add('translate-x-full', 'opacity-0');
-        setTimeout(() => {
-            toast.remove();
-        }, 300);
-    }
+function getToastIcon(type) {
+    const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
+    return icons[type] || icons.info;
 }
+
+function getToastTitle(type) {
+    const titles = {
+        success: 'Başarılı',
+        error: 'Hata',
+        warning: 'Uyarı',
+        info: 'Bilgi'
+    };
+    return titles[type] || titles.info;
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
 
 // Reddedilen makaleler için toplu işlem fonksiyonları
 function toggleAllRejected() {
