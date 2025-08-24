@@ -6110,10 +6110,23 @@ def shared_tweets():
         # Paylaşılan makaleleri yükle
         articles = load_json(HISTORY_FILE)
         
-        # Sadece paylaşılan tweetleri filtrele (silinmemiş olanlar)
-        shared_articles = [article for article in articles if not article.get('deleted', False)]
+        # Sadece paylaşılan tweetleri filtrele (silinmemiş ve arşivlenmemiş olanlar)
+        shared_articles = [article for article in articles if not article.get('deleted', False) and not article.get('archived', False)]
         
         return render_template('shared_tweets.html', articles=shared_articles)
+    except Exception as e:
+        flash(f'Sayfa yükleme hatası: {str(e)}', 'danger')
+        return redirect(url_for('index'))
+
+@app.route('/archived_tweets')
+@login_required
+def archived_tweets():
+    """Arşivlenen tweetler sayfası"""
+    try:
+        # Arşivlenen makaleleri yükle
+        archived_articles = load_json("archived_articles.json", [])
+        
+        return render_template('archived_tweets.html', archived_articles=archived_articles)
     except Exception as e:
         flash(f'Sayfa yükleme hatası: {str(e)}', 'danger')
         return redirect(url_for('index'))
@@ -6657,6 +6670,111 @@ def get_rate_limit_status_api():
         
     except Exception as e:
         terminal_log(f"❌ Rate limit API hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/archive_tweet', methods=['POST'])
+@login_required
+def archive_tweet_api():
+    """Tweet arşivleme endpoint'i"""
+    try:
+        data = request.get_json()
+        tweet_id = data.get('tweet_id')
+        archive_reason = data.get('archive_reason', 'manual')
+        
+        if not tweet_id:
+            return jsonify({"success": False, "error": "Tweet ID gerekli"})
+        
+        # Paylaşılan tweet'leri yükle
+        articles = load_json("posted_articles.json", [])
+        
+        # Tweet'i bul
+        tweet_to_archive = None
+        for article in articles:
+            if (str(article.get('hash', '')) == str(tweet_id) or 
+                str(article.get('id', '')) == str(tweet_id) or
+                str(article.get('tweet_id', '')) == str(tweet_id)):
+                tweet_to_archive = article
+                break
+        
+        if not tweet_to_archive:
+            return jsonify({"success": False, "error": "Tweet bulunamadı"})
+        
+        # Arşivleme bilgilerini ekle
+        tweet_to_archive['archived'] = True
+        tweet_to_archive['archived_at'] = datetime.now().isoformat()
+        tweet_to_archive['archive_reason'] = archive_reason
+        
+        # Arşivlenen tweet'leri ayrı dosyaya kaydet
+        archived_articles = load_json("archived_articles.json", [])
+        archived_articles.append(tweet_to_archive)
+        save_json("archived_articles.json", archived_articles)
+        
+        # Ana listeden kaldır
+        articles = [article for article in articles if article != tweet_to_archive]
+        save_json("posted_articles.json", articles)
+        
+        terminal_log(f"✅ Tweet arşivlendi: {tweet_id}", "info")
+        
+        return jsonify({
+            "success": True,
+            "message": "Tweet başarıyla arşivlendi",
+            "archived_tweet": tweet_to_archive
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Tweet arşivleme hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/restore_archived_tweet', methods=['POST'])
+@login_required
+def restore_archived_tweet_api():
+    """Arşivlenen tweet'i geri yükleme endpoint'i"""
+    try:
+        data = request.get_json()
+        tweet_id = data.get('tweet_id')
+        
+        if not tweet_id:
+            return jsonify({"success": False, "error": "Tweet ID gerekli"})
+        
+        # Arşivlenen tweet'leri yükle
+        archived_articles = load_json("archived_articles.json", [])
+        
+        # Tweet'i bul
+        tweet_to_restore = None
+        for article in archived_articles:
+            if (str(article.get('hash', '')) == str(tweet_id) or 
+                str(article.get('id', '')) == str(tweet_id) or
+                str(article.get('tweet_id', '')) == str(tweet_id)):
+                tweet_to_restore = article
+                break
+        
+        if not tweet_to_restore:
+            return jsonify({"success": False, "error": "Tweet bulunamadı"})
+        
+        # Arşivleme bilgilerini kaldır
+        tweet_to_restore.pop('archived', None)
+        tweet_to_restore.pop('archived_at', None)
+        tweet_to_restore.pop('archive_reason', None)
+        
+        # Ana listeye geri ekle
+        articles = load_json("posted_articles.json", [])
+        articles.append(tweet_to_restore)
+        save_json("posted_articles.json", articles)
+        
+        # Arşiv listesinden kaldır
+        archived_articles = [article for article in archived_articles if article != tweet_to_restore]
+        save_json("archived_articles.json", archived_articles)
+        
+        terminal_log(f"✅ Tweet geri yüklendi: {tweet_id}", "info")
+        
+        return jsonify({
+            "success": True,
+            "message": "Tweet başarıyla geri yüklendi",
+            "restored_tweet": tweet_to_restore
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Tweet geri yükleme hatası: {e}", "error")
         return jsonify({"success": False, "error": str(e)})
 
 if __name__ == '__main__':

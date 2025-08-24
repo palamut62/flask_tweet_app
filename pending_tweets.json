@@ -612,5 +612,69 @@
     "created_at": "2025-08-24T18:01:29.835037",
     "status": "pending",
     "id": 9
+  },
+  {
+    "article": {
+      "title": "Researchers fed 7.9 million speeches into AI—and what they found upends our understanding of language",
+      "url": "https://www.psypost.org/researchers-fed-7-9-million-speeches-into-ai-and-what-they-found-upends-our-understanding-of-language/",
+      "content": "Artificial IntelligenceTop AI models fail spectacularly when faced with slightly altered medical questionsAugust 24, 2025Artificial intelligence has dazzled with its test scores on medical exams, but a new study suggests this success may be superficial. When answer choices were modified, AI performance dropped sharply—raising questions about whether these systems truly understand what they're doing.Read moreDetails",
+      "score": 23,
+      "hash": "2a4fc1cb93bffad05ca07c6b3e4a12a4",
+      "source": "Reddit - r/artificial",
+      "fetch_date": "2025-08-24T18:17:01.320004",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "PythonAnywhere",
+      "method_icon": "🐍",
+      "method_color": "green"
+    },
+    "tweet_data": {
+      "tweet": "Researchers analyze 7.9M speeches with AI, revealing hidden linguistic patterns that resh... #AI #Tech #ArtificialIntelligence #MachineLearning #Claude\n\nhttps://www.psypost.org/researchers-fed-7-9-million-speeches-into-ai-and-what-they-found-upends-our-understanding-of-language/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Researchers fed 79 million speeches into AIand what they found upends our unders...",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-24T18:17:16.444097",
+    "created_at": "2025-08-24T18:17:16.444097",
+    "status": "pending",
+    "id": 10
   }
 ]

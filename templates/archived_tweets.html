@@ -1,73 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Paylaşılan Tweetler{% endblock %}
-
-<!-- Haber kaynağı gösterimi için makro -->
-{% macro render_source_badge(source, source_id, url, badge_type='primary') %}
-    {% if source %}
-        {% set source_class = 'source-badge-' + badge_type %}
-        {% if 'techcrunch' in source.lower() %}
-            {% set source_class = 'source-techcrunch' %}
-        {% elif 'venturebeat' in source.lower() %}
-            {% set source_class = 'source-venturebeat' %}
-        {% elif 'wired' in source.lower() %}
-            {% set source_class = 'source-wired' %}
-        {% elif 'reddit' in source.lower() %}
-            {% set source_class = 'source-reddit' %}
-        {% elif 'economist' in source.lower() %}
-            {% set source_class = 'source-economist' %}
-        {% elif 'atlantic' in source.lower() %}
-            {% set source_class = 'source-atlantic' %}
-        {% elif 'guardian' in source.lower() %}
-            {% set source_class = 'source-guardian' %}
-        {% elif 'apple' in source.lower() %}
-            {% set source_class = 'source-apple' %}
-        {% elif 'hacker news' in source.lower() %}
-            {% set source_class = 'source-hackernews' %}
-        {% endif %}
-        
-        <div class="mb-4">
-            <div class="source-badge {{ source_class }}">
-                <i class="fas fa-newspaper source-icon"></i>
-                <span>Kaynak:</span>
-                <span class="source-name">{{ source }}</span>
-                {% if source_id %}
-                <span class="source-id">{{ source_id }}</span>
-                {% endif %}
-            </div>
-        </div>
-    {% elif url %}
-        <!-- Fallback: URL'den kaynak adını çıkar -->
-        {% set fallback_source = '' %}
-        {% set fallback_class = 'source-badge-fallback' %}
-        
-        {% if 'techcrunch.com' in url %}
-            {% set fallback_source = 'TechCrunch' %}
-            {% set fallback_class = 'source-techcrunch' %}
-        {% elif 'venturebeat.com' in url %}
-            {% set fallback_source = 'VentureBeat' %}
-            {% set fallback_class = 'source-venturebeat' %}
-        {% elif 'wired.com' in url %}
-            {% set fallback_source = 'Wired' %}
-            {% set fallback_class = 'source-wired' %}
-        {% elif 'reddit.com' in url %}
-            {% set fallback_source = 'Reddit' %}
-            {% set fallback_class = 'source-reddit' %}
-        {% elif 'github.com' in url %}
-            {% set fallback_source = 'GitHub' %}
-            {% set fallback_class = 'source-badge-dark' %}
-        {% endif %}
-        
-        {% if fallback_source %}
-        <div class="mb-4">
-            <div class="source-badge {{ fallback_class }}">
-                <i class="fas fa-link source-icon"></i>
-                <span>{{ fallback_source }}</span>
-            </div>
-        </div>
-        {% endif %}
-    {% endif %}
-{% endmacro %}
+{% block title %}Arşivlenen Tweetler{% endblock %}
 
 {% block content %}
 <!-- Twitter Feed Style -->
@@ -76,8 +9,8 @@
     <div class="feed-header">
         <div class="feed-header-content">
             <div class="feed-header-left">
-                <h1 class="feed-title">Paylaşılan Tweetler</h1>
-                <p class="feed-subtitle">Başarıyla paylaşılmış olan tüm tweetleriniz</p>
+                <h1 class="feed-title">Arşivlenen Tweetler</h1>
+                <p class="feed-subtitle">Arşivlenmiş olan tüm tweetleriniz</p>
             </div>
             <div class="feed-header-right">
                 <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
@@ -120,22 +53,21 @@
                 
                 <!-- Toplam Sayı -->
                 <div class="total-count">
-                    <i class="fas fa-chart-bar"></i>
-                    <span id="totalCount">{{ articles|length if articles else 0 }}</span> Tweet
+                    <i class="fas fa-archive"></i>
+                    <span id="totalCount">{{ archived_articles|length if archived_articles else 0 }}</span> Tweet
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Paylaşılan Tweetler -->
-    {% if articles %}
+    <!-- Arşivlenen Tweetler -->
+    {% if archived_articles %}
     <div id="tweetsContainer" class="tweets-container">
-        {% for article in articles|reverse %}
-        {% if not article.deleted and not article.archived %}
-        <div class="tweet-card {% if article.source_type == 'github' or article.type == 'github_repo' %}github-tweet{% else %}news-tweet{% endif %}"
+        {% for article in archived_articles|reverse %}
+        <div class="tweet-card archived-tweet {% if article.source_type == 'github' or article.type == 'github_repo' %}github-tweet{% else %}news-tweet{% endif %}"
              data-source="{{ 'github' if (article.source_type == 'github' or article.type == 'github_repo') else 'news' }}"
              data-manual="{{ 'true' if article.manual_post else 'false' }}"
-             data-date="{{ article.post_date[:10] if article.post_date else '' }}"
+             data-date="{{ article.archived_at[:10] if article.archived_at else '' }}"
              data-title="{{ article.title|lower }}"
              data-content="{{ article.tweet_text|lower if article.tweet_text else article.content|lower }}"
              data-index="{{ loop.index0 }}"
@@ -144,16 +76,16 @@
             <!-- Tweet Header -->
             <div class="tweet-header">
                 <div class="tweet-avatar">
-                    <i class="fas fa-robot"></i>
+                    <i class="fas fa-archive"></i>
                 </div>
                 <div class="tweet-user-info">
                     <div class="tweet-user-name">Tweet Bot</div>
                     <div class="tweet-user-handle">@tweetbot</div>
                 </div>
                 <div class="tweet-status-badges">
-                    <span class="status-badge status-success">
-                        <i class="fas fa-check-circle"></i>
-                        Paylaşıldı
+                    <span class="status-badge status-archived">
+                        <i class="fas fa-archive"></i>
+                        Arşivlendi
                     </span>
                     {% if article.source_type == 'github' or article.type == 'github_repo' %}
                     <span class="status-badge status-github">
@@ -190,8 +122,8 @@
                         <span>{{ article.post_date[:10] if article.post_date else 'Belirtilmemiş' }}</span>
                     </div>
                     <div class="tweet-info-item">
-                        <i class="fas fa-clock"></i>
-                        <span>{{ article.post_date[11:19] if article.post_date and article.post_date|length > 19 else 'N/A' }}</span>
+                        <i class="fas fa-archive"></i>
+                        <span>{{ article.archived_at[:10] if article.archived_at else 'Bilinmiyor' }}</span>
                     </div>
                     {% if article.tweet_id %}
                     <div class="tweet-info-item">
@@ -224,43 +156,26 @@
                         <i class="fas fa-external-link-alt"></i>
                         <span>{% if article.source_type == 'github' or article.type == 'github_repo' %}Repo'yu Görüntüle{% else %}Makaleyi Oku{% endif %}</span>
                     </button>
-                    <button class="tweet-action-btn tweet-action-archive" onclick="restoreDeletedTweet('{{ loop.index0 }}')">
-                        <i class="fas fa-archive"></i>
-                        <span>Arşivle</span>
+                    <button class="tweet-action-btn tweet-action-restore" onclick="restoreArchivedTweet('{{ loop.index0 }}')">
+                        <i class="fas fa-undo"></i>
+                        <span>Geri Yükle</span>
                     </button>
                 </div>
             </div>
         </div>
-        {% endif %}
         {% endfor %}
-    </div>
-    
-    <!-- Sayfalama -->
-    <div class="pagination-container">
-        <nav class="pagination">
-            <button class="pagination-btn pagination-prev">
-                <i class="fas fa-chevron-left"></i>
-                Önceki
-            </button>
-            <button class="pagination-btn pagination-active">1</button>
-            <button class="pagination-btn">2</button>
-            <button class="pagination-btn pagination-next">
-                Sonraki
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </nav>
     </div>
     {% else %}
     <!-- Empty State -->
     <div class="tweet-card empty-state">
         <div class="empty-state-icon">
-            <i class="fab fa-twitter"></i>
+            <i class="fas fa-archive"></i>
         </div>
-        <h3 class="empty-state-title">Henüz Paylaşılan Tweet Yok</h3>
-        <p class="empty-state-description">İlk tweetinizi paylaştığınızda burada görünecek. Tweet paylaşmaya başlamak için ana sayfaya gidin.</p>
-        <a href="{{ url_for('index') }}" class="twitter-btn twitter-btn-primary">
-            <i class="fas fa-plus"></i>
-            <span>Tweet Paylaş</span>
+        <h3 class="empty-state-title">Henüz Arşivlenen Tweet Yok</h3>
+        <p class="empty-state-description">Arşivlenen tweet'leriniz burada görünecek. Paylaşılan tweet'ler sayfasından tweet'leri arşivleyebilirsiniz.</p>
+        <a href="{{ url_for('shared_tweets') }}" class="twitter-btn twitter-btn-primary">
+            <i class="fas fa-arrow-left"></i>
+            <span>Paylaşılan Tweetler</span>
         </a>
     </div>
     {% endif %}
@@ -381,8 +296,8 @@ function showConfirmDialog(title, message, onConfirm, onCancel = null) {
     
     modalContent.innerHTML = `
         <div style="margin-bottom: 24px;">
-            <div style="width: 64px; height: 64px; margin: 0 auto 16px; background: #fef3c7; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 28px; color: #f59e0b;"></i>
+            <div style="width: 64px; height: 64px; margin: 0 auto 16px; background: #dbeafe; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-undo" style="font-size: 28px; color: #3b82f6;"></i>
             </div>
             <h3 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 8px;">${title}</h3>
             <p style="color: #6b7280; font-size: 16px; line-height: 1.5;">${message}</p>
@@ -402,12 +317,12 @@ function showConfirmDialog(title, message, onConfirm, onCancel = null) {
                 padding: 12px 24px;
                 border: none;
                 border-radius: 8px;
-                background: #e0245e;
+                background: #3b82f6;
                 color: white;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.2s ease;
-            ">Arşivle</button>
+            ">Geri Yükle</button>
         </div>
     `;
     
@@ -543,21 +458,21 @@ document.addEventListener('DOMContentLoaded', function() {
     dateFilter.addEventListener('change', filterTweets);
 });
 
-// Tweet arşivleme fonksiyonu
-function restoreDeletedTweet(index) {
+// Tweet geri yükleme fonksiyonu
+function restoreArchivedTweet(index) {
     showConfirmDialog(
-        'Tweet Arşivle',
-        'Bu tweeti arşivlemek istediğinizden emin misiniz? Arşivlenen tweetler silinmez, sadece bu sayfadan gizlenir.',
+        'Tweet Geri Yükle',
+        'Bu tweeti arşivden geri yüklemek istediğinizden emin misiniz? Tweet tekrar paylaşılan tweetler sayfasında görünecek.',
         () => {
-            // Arşivleme işlemi
-            archiveTweet(index);
+            // Geri yükleme işlemi
+            restoreTweet(index);
         }
     );
 }
 
-// Tweet arşivleme API çağrısı
-function archiveTweet(index) {
-    showToast('Tweet arşivleniyor...', 'info');
+// Tweet geri yükleme API çağrısı
+function restoreTweet(index) {
+    showToast('Tweet geri yükleniyor...', 'info');
     
     // Tweet ID'sini al
     const tweetCard = document.querySelector(`[data-index="${index}"]`);
@@ -569,30 +484,29 @@ function archiveTweet(index) {
     const tweetId = tweetCard.dataset.tweetId || index;
     
     // API çağrısı
-    fetch('/api/archive_tweet', {
+    fetch('/api/restore_archived_tweet', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            tweet_id: tweetId,
-            archive_reason: 'manual'
+            tweet_id: tweetId
         })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showToast('Tweet başarıyla arşivlendi!', 'success');
+            showToast('Tweet başarıyla geri yüklendi!', 'success');
             // Tweet'i gizle
             tweetCard.style.display = 'none';
             // Toplam sayıyı güncelle
             updateTotalCount();
         } else {
-            showToast('Arşivleme hatası: ' + data.error, 'error');
+            showToast('Geri yükleme hatası: ' + data.error, 'error');
         }
     })
     .catch(error => {
-        console.error('Arşivleme hatası:', error);
+        console.error('Geri yükleme hatası:', error);
         showToast('Bir hata oluştu: ' + error.message, 'error');
     });
 }

@@ -1139,116 +1139,167 @@ function viewTweetDetails(tweetId) {
 function showTweetDetailsModal(tweet) {
   // Modal HTML'i oluştur
   const modalHTML = `
-    <div id="tweet-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-bold text-gray-900">Tweet Detayları</h3>
-          <button onclick="closeTweetDetailsModal()" class="text-gray-500 hover:text-gray-700">
-            <i class="fas fa-times text-xl"></i>
+    <div id="tweet-detail-modal" class="tweet-detail-modal">
+      <div class="tweet-detail-overlay"></div>
+      <div class="tweet-detail-container">
+        <!-- Modal Header -->
+        <div class="tweet-detail-header">
+          <div class="tweet-detail-title">
+            <i class="fas fa-info-circle"></i>
+            <span>Tweet Detayları</span>
+          </div>
+          <button onclick="closeTweetDetailsModal()" class="tweet-detail-close">
+            <i class="fas fa-times"></i>
           </button>
         </div>
         
-        <!-- Tweet İçeriği -->
-        <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h4 class="font-semibold text-gray-800 mb-2">Tweet İçeriği</h4>
-          <p class="text-gray-700 whitespace-pre-wrap">${tweet.content}</p>
-          <div class="flex justify-between items-center mt-2 text-sm text-gray-500">
-            <span>Karakter: ${tweet.char_count}/280</span>
-            <span>Hashtag: ${tweet.hashtag_count} | Emoji: ${tweet.emoji_count}</span>
-          </div>
-        </div>
-        
-        <!-- Tweet Bilgileri -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div class="space-y-2">
-            <div class="flex justify-between">
-              <span class="font-medium text-gray-700">ID:</span>
-              <span class="text-gray-600">${tweet.id}</span>
+        <!-- Tweet Content Section -->
+        <div class="tweet-detail-content">
+          <div class="tweet-detail-section">
+            <div class="tweet-detail-section-header">
+              <i class="fas fa-comment"></i>
+              <span>Tweet İçeriği</span>
             </div>
-            <div class="flex justify-between">
-              <span class="font-medium text-gray-700">Durum:</span>
-              <span class="px-2 py-1 rounded text-xs font-medium ${
-                tweet.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
-                tweet.status === 'ready' ? 'bg-green-100 text-green-700' :
-                tweet.status === 'posted' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-              }">
-                ${tweet.status === 'draft' ? 'Taslak' : 
-                  tweet.status === 'ready' ? 'Hazır' :
-                  tweet.status === 'posted' ? 'Paylaşıldı' : tweet.status}
-              </span>
+            <div class="tweet-detail-tweet-content">
+              <p>${tweet.content}</p>
             </div>
-            <div class="flex justify-between">
-              <span class="font-medium text-gray-700">Tema:</span>
-              <span class="text-gray-600">${tweet.theme || 'Belirtilmemiş'}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="font-medium text-gray-700">Oluşturulma:</span>
-              <span class="text-gray-600">${new Date(tweet.created_at).toLocaleString('tr-TR')}</span>
+            <div class="tweet-detail-stats">
+              <div class="tweet-stat">
+                <i class="fas fa-text-width"></i>
+                <span>${tweet.char_count}/280 karakter</span>
+              </div>
+              <div class="tweet-stat">
+                <i class="fas fa-hashtag"></i>
+                <span>${tweet.hashtag_count} hashtag</span>
+              </div>
+              <div class="tweet-stat">
+                <i class="fas fa-smile"></i>
+                <span>${tweet.emoji_count} emoji</span>
+              </div>
             </div>
           </div>
           
-          <div class="space-y-2">
-            <div class="flex justify-between">
-              <span class="font-medium text-gray-700">Kaynak Türü:</span>
-              <span class="text-gray-600">${
-                tweet.source_data?.type === 'text' ? 'Metin' :
-                tweet.source_data?.type === 'url' ? 'URL' :
-                tweet.source_data?.type === 'image' ? 'Resim' : 'Bilinmiyor'
-              }</span>
+          <!-- Tweet Info Section -->
+          <div class="tweet-detail-section">
+            <div class="tweet-detail-section-header">
+              <i class="fas fa-cog"></i>
+              <span>Tweet Bilgileri</span>
             </div>
-            ${tweet.is_posted ? `
-              <div class="flex justify-between">
-                <span class="font-medium text-gray-700">Paylaşım Tarihi:</span>
-                <span class="text-gray-600">${new Date(tweet.posted_at).toLocaleString('tr-TR')}</span>
+            <div class="tweet-detail-info-grid">
+              <div class="tweet-detail-info-item">
+                <span class="info-label">Tweet ID:</span>
+                <span class="info-value">${tweet.id}</span>
               </div>
-              ${tweet.posted_url ? `
-                <div class="flex justify-between">
-                  <span class="font-medium text-gray-700">Tweet URL:</span>
-                  <a href="${tweet.posted_url}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
-                    <i class="fas fa-external-link-alt"></i> Görüntüle
-                  </a>
+              <div class="tweet-detail-info-item">
+                <span class="info-label">Durum:</span>
+                <span class="info-badge ${tweet.status === 'draft' ? 'status-draft' : 
+                  tweet.status === 'ready' ? 'status-ready' : 
+                  tweet.status === 'posted' ? 'status-posted' : 'status-unknown'}">
+                  ${tweet.status === 'draft' ? 'Taslak' : 
+                    tweet.status === 'ready' ? 'Hazır' :
+                    tweet.status === 'posted' ? 'Paylaşıldı' : tweet.status}
+                </span>
+              </div>
+              <div class="tweet-detail-info-item">
+                <span class="info-label">Tema:</span>
+                <span class="info-value">${tweet.theme || 'Belirtilmemiş'}</span>
+              </div>
+              <div class="tweet-detail-info-item">
+                <span class="info-label">Oluşturulma:</span>
+                <span class="info-value">${new Date(tweet.created_at).toLocaleString('tr-TR')}</span>
+              </div>
+              <div class="tweet-detail-info-item">
+                <span class="info-label">Kaynak Türü:</span>
+                <span class="info-value">${
+                  tweet.source_data?.type === 'text' ? 'Metin' :
+                  tweet.source_data?.type === 'url' ? 'URL' :
+                  tweet.source_data?.type === 'image' ? 'Resim' : 'Bilinmiyor'
+                }</span>
+              </div>
+              ${tweet.is_posted ? `
+                <div class="tweet-detail-info-item">
+                  <span class="info-label">Paylaşım Tarihi:</span>
+                  <span class="info-value">${new Date(tweet.posted_at).toLocaleString('tr-TR')}</span>
                 </div>
+                ${tweet.posted_url ? `
+                  <div class="tweet-detail-info-item">
+                    <span class="info-label">Tweet URL:</span>
+                    <a href="${tweet.posted_url}" target="_blank" class="info-link">
+                      <i class="fas fa-external-link-alt"></i>
+                      <span>Görüntüle</span>
+                    </a>
+                  </div>
+                ` : ''}
               ` : ''}
-            ` : ''}
+            </div>
           </div>
+          
+          <!-- Source Data Section -->
+          ${tweet.source_data ? `
+            <div class="tweet-detail-section">
+              <div class="tweet-detail-section-header">
+                <i class="fas fa-link"></i>
+                <span>Kaynak Bilgileri</span>
+              </div>
+              <div class="tweet-detail-source">
+                ${tweet.source_data.type === 'url' ? `
+                  <div class="source-info">
+                    <div class="source-item">
+                      <span class="source-label">URL:</span>
+                      <a href="${tweet.source_data.source_url}" target="_blank" class="source-link">
+                        ${tweet.source_data.source_url}
+                      </a>
+                    </div>
+                    ${tweet.source_data.fetched_title ? `
+                      <div class="source-item">
+                        <span class="source-label">Başlık:</span>
+                        <span class="source-value">${tweet.source_data.fetched_title}</span>
+                      </div>
+                    ` : ''}
+                  </div>
+                ` : tweet.source_data.type === 'image' ? `
+                  <div class="source-info">
+                    <div class="source-item">
+                      <span class="source-label">Dosya:</span>
+                      <span class="source-value">${tweet.source_data.original_filename}</span>
+                    </div>
+                    ${tweet.source_data.ocr_text ? `
+                      <div class="source-item">
+                        <span class="source-label">OCR Metni:</span>
+                        <span class="source-value">${tweet.source_data.ocr_text.substring(0, 100)}...</span>
+                      </div>
+                    ` : ''}
+                  </div>
+                ` : tweet.source_data.type === 'text' ? `
+                  <div class="source-info">
+                    <div class="source-item">
+                      <span class="source-label">Orijinal Metin:</span>
+                      <span class="source-value">${tweet.source_data.original_text.substring(0, 100)}...</span>
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          ` : ''}
         </div>
         
-        <!-- Kaynak Bilgileri -->
-        ${tweet.source_data ? `
-          <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 class="font-semibold text-blue-800 mb-2">Kaynak Bilgileri</h4>
-            ${tweet.source_data.type === 'url' ? `
-              <div class="space-y-1 text-sm">
-                <div><span class="font-medium">URL:</span> <a href="${tweet.source_data.source_url}" target="_blank" class="text-blue-600 hover:text-blue-800">${tweet.source_data.source_url}</a></div>
-                ${tweet.source_data.fetched_title ? `<div><span class="font-medium">Başlık:</span> ${tweet.source_data.fetched_title}</div>` : ''}
-              </div>
-            ` : tweet.source_data.type === 'image' ? `
-              <div class="space-y-1 text-sm">
-                <div><span class="font-medium">Dosya:</span> ${tweet.source_data.original_filename}</div>
-                ${tweet.source_data.ocr_text ? `<div><span class="font-medium">OCR Metni:</span> ${tweet.source_data.ocr_text.substring(0, 100)}...</div>` : ''}
-              </div>
-            ` : tweet.source_data.type === 'text' ? `
-              <div class="space-y-1 text-sm">
-                <div><span class="font-medium">Orijinal Metin:</span> ${tweet.source_data.original_text.substring(0, 100)}...</div>
-              </div>
-            ` : ''}
-          </div>
-        ` : ''}
-        
-        <!-- Aksiyon Butonları -->
-        <div class="flex flex-wrap gap-3 justify-end">
+        <!-- Modal Actions -->
+        <div class="tweet-detail-actions">
           ${!tweet.is_posted ? `
             ${tweet.status === 'ready' ? `
-              <button onclick="postManualTweet('${tweet.id}')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center gap-2">
-                <i class="fab fa-twitter"></i> Paylaş
+              <button onclick="postManualTweet('${tweet.id}')" class="tweet-detail-btn tweet-detail-btn-primary">
+                <i class="fab fa-twitter"></i>
+                <span>Paylaş</span>
               </button>
             ` : ''}
-            <button onclick="deleteManualTweet('${tweet.id}')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 flex items-center gap-2">
-              <i class="fas fa-trash"></i> Sil
+            <button onclick="deleteManualTweet('${tweet.id}')" class="tweet-detail-btn tweet-detail-btn-danger">
+              <i class="fas fa-trash"></i>
+              <span>Sil</span>
             </button>
           ` : ''}
-          <button onclick="closeTweetDetailsModal()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200">
-            Kapat
+          <button onclick="closeTweetDetailsModal()" class="tweet-detail-btn tweet-detail-btn-secondary">
+            <i class="fas fa-times"></i>
+            <span>Kapat</span>
           </button>
         </div>
       </div>
