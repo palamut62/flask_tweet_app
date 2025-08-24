@@ -24,7 +24,7 @@
 
     <!-- Tweet Oluşturma Formu -->
     <div class="tweet-card">
-        <!-- Tweet Tema Seçimi -->
+    <!-- Tweet Tema Seçimi -->
         <div class="tweet-section">
             <div class="section-header">
                 <i class="fas fa-palette text-blue-500"></i>
@@ -32,117 +32,117 @@
             </div>
             <div class="section-content">
                 <select id="tweet_theme" name="tweet_theme" class="form-select">
-                    <option value="bilgilendirici" {% if default_theme == 'bilgilendirici' or not default_theme %}selected{% endif %}>📊 Bilgilendirici - Profesyonel ve eğitici</option>
-                    <option value="eğlenceli" {% if default_theme == 'eğlenceli' %}selected{% endif %}>🎉 Eğlenceli - Neşeli ve heyecanlı</option>
-                    <option value="mizahi" {% if default_theme == 'mizahi' %}selected{% endif %}>😂 Mizahi - Komik ve esprili</option>
-                    <option value="resmi" {% if default_theme == 'resmi' %}selected{% endif %}>📢 Resmi - Ciddi ve otoriteye dayalı</option>
-                    <option value="heyecanlı" {% if default_theme == 'heyecanlı' %}selected{% endif %}>🔥 Heyecanlı - Dinamik ve ilham verici</option>
-                    <option value="meraklı" {% if default_theme == 'meraklı' %}selected{% endif %}>🤔 Meraklı - Sorgulayıcı ve düşündürücü</option>
-                </select>
+         <option value="bilgilendirici" {% if default_theme == 'bilgilendirici' or not default_theme %}selected{% endif %}>📊 Bilgilendirici - Profesyonel ve eğitici</option>
+         <option value="eğlenceli" {% if default_theme == 'eğlenceli' %}selected{% endif %}>🎉 Eğlenceli - Neşeli ve heyecanlı</option>
+         <option value="mizahi" {% if default_theme == 'mizahi' %}selected{% endif %}>😂 Mizahi - Komik ve esprili</option>
+         <option value="resmi" {% if default_theme == 'resmi' %}selected{% endif %}>📢 Resmi - Ciddi ve otoriteye dayalı</option>
+         <option value="heyecanlı" {% if default_theme == 'heyecanlı' %}selected{% endif %}>🔥 Heyecanlı - Dinamik ve ilham verici</option>
+         <option value="meraklı" {% if default_theme == 'meraklı' %}selected{% endif %}>🤔 Meraklı - Sorgulayıcı ve düşündürücü</option>
+       </select>
                 <p class="form-help">
-                    <i class="fas fa-info-circle"></i> Seçilen temaya göre tweet tarzı, emoji ve hashtag'ler otomatik ayarlanacak
-                </p>
+        <i class="fas fa-info-circle"></i> Seçilen temaya göre tweet tarzı, emoji ve hashtag'ler otomatik ayarlanacak
+      </p>
             </div>
-        </div>
+    </div>
 
         <div class="tweet-form-section expanded">
                 <div class="tweet-tabs">
                     <button id="tab-text" class="tab-button active">
                         <i class="fas fa-keyboard"></i>
                         <span>Metinden Tweet</span>
-                    </button>
+            </button>
                     <button id="tab-image" class="tab-button">
                         <i class="fas fa-image"></i>
                         <span>Resimden Tweet</span>
-                    </button>
+            </button>
                     <button id="tab-link" class="tab-button">
                         <i class="fas fa-link"></i>
                         <span>Link'ten Tweet</span>
-                    </button>
-                </div>
+            </button>
+          </div>
 
                 <form method="POST" enctype="multipart/form-data" class="tweet-form" id="tweet-form">
-                    <input type="hidden" name="tweet_mode" id="tweet_mode" value="text">
-                    <input type="hidden" name="tweet_theme" id="hidden_tweet_theme" value="bilgilendirici">
-                    
-                    <!-- Metinden Tweet Sekmesi -->
+            <input type="hidden" name="tweet_mode" id="tweet_mode" value="text">
+            <input type="hidden" name="tweet_theme" id="hidden_tweet_theme" value="bilgilendirici">
+            
+            <!-- Metinden Tweet Sekmesi -->
                     <div id="text-content" class="tab-content active">
                         <div class="form-group">
                             <label for="tweet_text" class="form-label">
-                                <i class="fas fa-edit text-blue-500"></i> Tweet Metni
-                            </label>
-                            <textarea 
-                                name="tweet_text" 
-                                id="tweet_text" 
-                                rows="4" 
+                    <i class="fas fa-edit text-blue-500"></i> Tweet Metni
+                  </label>
+                  <textarea 
+                                         name="tweet_text" 
+                     id="tweet_text" 
+                     rows="4" 
                                 class="form-textarea"
-                                placeholder="Tweet için metin girin... AI ile optimize edilecek."
-                            ></textarea>
+                     placeholder="Tweet için metin girin... AI ile optimize edilecek."
+                  ></textarea>
                             <div class="form-footer">
                                 <span class="form-help">
-                                    <i class="fas fa-info-circle"></i> AI ile optimize edilecek
-                                </span>
+                      <i class="fas fa-info-circle"></i> AI ile optimize edilecek
+                    </span>
                                 <span id="text-char-count" class="char-count">0 karakter</span>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+              </div>
+            </div>
 
-                    <!-- Resimden Tweet Sekmesi -->
+            <!-- Resimden Tweet Sekmesi -->
                     <div id="image-content" class="tab-content">
                         <div class="form-group">
                             <label for="tweet_image" class="form-label">
-                                <i class="fas fa-upload text-blue-500"></i> Resim Yükle
-                            </label>
-                            <input 
-                                type="file" 
-                                name="tweet_image" 
-                                id="tweet_image" 
-                                accept="image/jpeg,image/png,image/gif,image/webp"
+                    <i class="fas fa-upload text-blue-500"></i> Resim Yükle
+                  </label>
+                  <input 
+                    type="file" 
+                    name="tweet_image" 
+                    id="tweet_image" 
+                    accept="image/jpeg,image/png,image/gif,image/webp"
                                 class="form-file"
-                                onchange="previewImage(this)"
-                            >
+                    onchange="previewImage(this)"
+                  >
                             <p class="form-help">
-                                <i class="fas fa-info-circle"></i> Desteklenen formatlar: JPEG, PNG, GIF, WebP (Max: 5MB)
-                            </p>
-                            <!-- Resim Önizlemesi -->
+                    <i class="fas fa-info-circle"></i> Desteklenen formatlar: JPEG, PNG, GIF, WebP (Max: 5MB)
+                  </p>
+                  <!-- Resim Önizlemesi -->
                             <div id="image-preview" class="image-preview hidden">
                                 <img id="preview-img" src="" alt="Önizleme" class="preview-image">
                                 <button type="button" onclick="removeImage()" class="remove-btn">
-                                    <i class="fas fa-times"></i> Kaldır
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                      <i class="fas fa-times"></i> Kaldır
+                    </button>
+                </div>
+              </div>
+            </div>
 
-                    <!-- Link'ten Tweet Sekmesi -->
+            <!-- Link'ten Tweet Sekmesi -->
                     <div id="link-content" class="tab-content">
                         <div class="form-group">
                             <label for="tweet_url" class="form-label">
-                                <i class="fas fa-globe text-blue-500"></i> Web Sitesi URL'si
-                            </label>
+                    <i class="fas fa-globe text-blue-500"></i> Web Sitesi URL'si
+                  </label>
                             <div class="url-input-group">
-                                <input 
-                                    type="url" 
-                                    name="tweet_url" 
-                                    id="tweet_url" 
+                  <input 
+                    type="url" 
+                    name="tweet_url" 
+                    id="tweet_url" 
                                     class="form-input"
-                                    placeholder="https://example.com/article"
-                                >
+                                         placeholder="https://example.com/article"
+                  >
                                 <button type="button" onclick="fetchUrlContent()" class="url-fetch-btn">
                                     <i class="fas fa-download"></i> İçeriği Çek
                                 </button>
                             </div>
                             <div id="url-status" class="url-status hidden"></div>
                             <p class="form-help">
-                                <i class="fas fa-info-circle"></i> Link içeriği MCP ile çekilip AI ile tweet oluşturulacak
-                            </p>
+                    <i class="fas fa-info-circle"></i> Link içeriği MCP ile çekilip AI ile tweet oluşturulacak
+                  </p>
                             
-                            <!-- URL Önizlemesi -->
+                  <!-- URL Önizlemesi -->
                             <div id="url-preview" class="url-preview hidden">
                                 <div class="url-preview-header">
                                     <i class="fas fa-link text-blue-500"></i>
                                     <span>Link Önizlemesi</span>
-                                </div>
+                      </div>
                                 <div class="url-preview-content">
                                     <div class="url-preview-image">
                                         <img id="url-image" src="" alt="Link Önizleme" class="preview-image">
@@ -174,82 +174,82 @@
                                         <span id="url-char-count" class="stat-item">
                                             <i class="fas fa-text-width"></i> <span>0</span> karakter
                                         </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                    <!-- Taslak Kaydetme Seçeneği -->
+            <!-- Taslak Kaydetme Seçeneği -->
                     <div class="draft-section">
                         <label class="draft-checkbox">
                             <input type="checkbox" name="save_as_draft" id="save_as_draft">
                             <span class="draft-label">
-                                <i class="fas fa-save text-yellow-500"></i> Taslak olarak kaydet (henüz paylaşma)
-                            </span>
-                        </label>
+                  <i class="fas fa-save text-yellow-500"></i> Taslak olarak kaydet (henüz paylaşma)
+                </span>
+              </label>
                         <p class="draft-help">
-                            Tweet oluşturulacak ancak otomatik paylaşılmayacak. Daha sonra manuel olarak paylaşabilirsiniz.
-                        </p>
-                    </div>
-
-                    <div class="form-actions">
-                        <button 
-                            type="submit" 
-                            name="action" 
-                            value="preview"
-                            class="action-btn action-btn-primary"
-                        >
-                            <i class="fas fa-magic"></i>
-                            <span>Tweet Oluştur ve Önizle</span>
-                        </button>
-                        <button 
-                            type="submit" 
-                            name="action" 
-                            value="direct_post"
-                            class="action-btn action-btn-success"
-                        >
-                            <i class="fas fa-rocket"></i>
-                            <span>Oluştur ve Hemen Paylaş</span>
-                        </button>
-                    </div>
-                    <div class="form-note">
-                        <p>
-                            <i class="fas fa-info-circle"></i> 
-                            "Hemen Paylaş" seçeneği tweet'i oluşturup otomatik olarak pending tweets'e ekler
-                        </p>
-                    </div>
-                                </form>
+                Tweet oluşturulacak ancak otomatik paylaşılmayacak. Daha sonra manuel olarak paylaşabilirsiniz.
+              </p>
             </div>
 
-        <!-- Oluşturulan Tweet Sonucu -->
-        {% if generated_tweet %}
+                    <div class="form-actions">
+              <button 
+                type="submit" 
+                name="action" 
+                value="preview"
+                            class="action-btn action-btn-primary"
+              >
+                <i class="fas fa-magic"></i>
+                <span>Tweet Oluştur ve Önizle</span>
+              </button>
+              <button 
+                type="submit" 
+                name="action" 
+                value="direct_post"
+                            class="action-btn action-btn-success"
+              >
+                <i class="fas fa-rocket"></i>
+                <span>Oluştur ve Hemen Paylaş</span>
+              </button>
+            </div>
+                    <div class="form-note">
+                        <p>
+                <i class="fas fa-info-circle"></i> 
+                "Hemen Paylaş" seçeneği tweet'i oluşturup otomatik olarak pending tweets'e ekler
+              </p>
+            </div>
+          </form>
+    </div>
+
+    <!-- Oluşturulan Tweet Sonucu -->
+    {% if generated_tweet %}
         <div class="tweet-card">
             <div class="tweet-header">
                 <div class="tweet-avatar">
                     <i class="fas fa-magic"></i>
-                </div>
+        </div>
                 <div class="tweet-user-info">
                     <span class="tweet-username">AI Tweet Bot</span>
                     <span class="tweet-handle">@aitweetbot</span>
                     <span class="tweet-time">• Şimdi</span>
-                </div>
-                <!-- Tweet Durum Bilgisi -->
-                {% if tweet_id %}
+      </div>
+      <!-- Tweet Durum Bilgisi -->
+      {% if tweet_id %}
                 <div class="status-indicator {% if is_draft %}status-warning{% else %}status-online{% endif %}">
-                    {% if is_draft %}
-                        <i class="fas fa-save"></i> Taslak
-                    {% else %}
-                        <i class="fas fa-check"></i> Hazır
-                    {% endif %}
-                </div>
+            {% if is_draft %}
+                <i class="fas fa-save"></i> Taslak
+            {% else %}
+                <i class="fas fa-check"></i> Hazır
+            {% endif %}
+          </div>
                 {% endif %}
-            </div>
+        </div>
             
             <!-- Tweet Content -->
             <div class="tweet-content">
                 <p>{{ generated_tweet }}</p>
-            </div>
+      </div>
             
             <!-- Tweet Actions -->
             <div class="tweet-actions">
@@ -269,7 +269,7 @@
                     <span class="text-success ms-1">
                         <i class="fas fa-check-circle"></i>
                     </span>
-                    {% endif %}
+      {% endif %}
                 </div>
                 
                 <!-- Tweet Preview -->
@@ -282,19 +282,19 @@
                 <button class="tweet-action" onclick="copyTweet()">
                     <i class="fas fa-copy tweet-action-icon"></i>
                     <span>Kopyala</span>
-                </button>
-                
+        </button>
+        
                 <!-- API ile Paylaş -->
-                {% if tweet_id and not is_draft %}
+        {% if tweet_id and not is_draft %}
                 <button class="tweet-action retweet" onclick="postManualTweet('{{ tweet_id }}')">
                     <i class="fab fa-twitter tweet-action-icon"></i>
                     <span>API ile Paylaş</span>
-                </button>
-                {% endif %}
-                
+        </button>
+        {% endif %}
+        
                 <!-- X'te Paylaş -->
                 <a href="https://twitter.com/intent/tweet?text={{ generated_tweet|urlencode }}" 
-                   target="_blank"
+          target="_blank"
                    class="tweet-action">
                     <i class="fab fa-twitter tweet-action-icon"></i>
                     <span>X'te Paylaş</span>
@@ -313,12 +313,12 @@
                 </button>
                 
                 <!-- Sil -->
-                {% if tweet_id %}
+        {% if tweet_id %}
                 <button class="tweet-action delete" onclick="deleteManualTweet('{{ tweet_id }}')">
                     <i class="fas fa-trash tweet-action-icon"></i>
                     <span>Sil</span>
-                </button>
-                {% endif %}
+        </button>
+        {% endif %}
             </div>
             
             <!-- Tweet Durum Bilgisi -->
@@ -331,13 +331,13 @@
                     </div>
                     <button onclick="viewTweetDetails('{{ tweet_id }}')" class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-info-circle"></i> Detaylar
-                    </button>
-                </div>
+        </button>
+      </div>
             </div>
             {% endif %}
-        </div>
-        {% endif %}
     </div>
+    {% endif %}
+  </div>
 </div>
 
 <!-- Loading Modal -->
@@ -348,8 +348,8 @@
         <p id="loading-text" class="loading-text">AI ile tweet metni hazırlanıyor...</p>
         <div class="loading-progress">
             <div id="loading-progress-bar" class="loading-progress-bar"></div>
-        </div>
     </div>
+  </div>
 </div>
 
 <script>
@@ -952,56 +952,56 @@ function postManualTweet(tweetId) {
   showConfirmDialog(
     'Bu tweet\'i API ile paylaşmak istediğinizden emin misiniz?',
     () => {
-      // Loading göster
-      const button = event.target.closest('button');
-      const originalContent = button.innerHTML;
-      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Paylaşılıyor...';
-      button.disabled = true;
-      
-      fetch(`/api/manual_tweets/${tweetId}/post`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
+  // Loading göster
+  const button = event.target.closest('button');
+  const originalContent = button.innerHTML;
+  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Paylaşılıyor...';
+  button.disabled = true;
+  
+  fetch(`/api/manual_tweets/${tweetId}/post`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
           showToast('✅ Tweet başarıyla paylaşıldı!', 'success');
-          
-          // Sayfayı yenile veya elementi güncelle
-          if (data.tweet_url) {
-            window.open(data.tweet_url, '_blank');
-          }
-          
-          // Dinamik güncelleme - sayfa yenilemesi yok
-          setTimeout(() => {
-            // Tweet listesini güncelle
-            if (typeof refreshPendingTweets === 'function') {
-              refreshPendingTweets();
-            }
-            // Sayfa ana sayfaya yönlendir
-            window.location.href = '/';
-          }, 1000);
-          
-        } else {
-          showToast('❌ Hata: ' + data.error, 'error');
-          
-          // Rate limit durumunda özel mesaj
-          if (data.rate_limited) {
-            showToast('⏰ Twitter API rate limit\'e takıldı. Lütfen daha sonra tekrar deneyin.', 'warning');
-          }
+      
+      // Sayfayı yenile veya elementi güncelle
+      if (data.tweet_url) {
+        window.open(data.tweet_url, '_blank');
+      }
+      
+      // Dinamik güncelleme - sayfa yenilemesi yok
+      setTimeout(() => {
+        // Tweet listesini güncelle
+        if (typeof refreshPendingTweets === 'function') {
+          refreshPendingTweets();
         }
-      })
-      .catch(error => {
-        console.error('Tweet paylaşım hatası:', error);
+        // Sayfa ana sayfaya yönlendir
+        window.location.href = '/';
+      }, 1000);
+      
+    } else {
+          showToast('❌ Hata: ' + data.error, 'error');
+      
+      // Rate limit durumunda özel mesaj
+      if (data.rate_limited) {
+            showToast('⏰ Twitter API rate limit\'e takıldı. Lütfen daha sonra tekrar deneyin.', 'warning');
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Tweet paylaşım hatası:', error);
         showToast('❌ Bir hata oluştu: ' + error.message, 'error');
-      })
-      .finally(() => {
-        // Button'u eski haline getir
-        button.innerHTML = originalContent;
-        button.disabled = false;
-      });
+  })
+  .finally(() => {
+    // Button'u eski haline getir
+    button.innerHTML = originalContent;
+    button.disabled = false;
+  });
     },
     null,
     'Tweet Paylaşımı',
@@ -1176,9 +1176,9 @@ function showTweetDetailsModal(tweet) {
                 <i class="fas fa-smile"></i>
                 <span>${tweet.emoji_count} emoji</span>
               </div>
-            </div>
           </div>
-          
+        </div>
+        
           <!-- Tweet Info Section -->
           <div class="tweet-detail-section">
             <div class="tweet-detail-section-header">
@@ -1195,54 +1195,54 @@ function showTweetDetailsModal(tweet) {
                 <span class="info-badge ${tweet.status === 'draft' ? 'status-draft' : 
                   tweet.status === 'ready' ? 'status-ready' : 
                   tweet.status === 'posted' ? 'status-posted' : 'status-unknown'}">
-                  ${tweet.status === 'draft' ? 'Taslak' : 
-                    tweet.status === 'ready' ? 'Hazır' :
-                    tweet.status === 'posted' ? 'Paylaşıldı' : tweet.status}
-                </span>
-              </div>
+                ${tweet.status === 'draft' ? 'Taslak' : 
+                  tweet.status === 'ready' ? 'Hazır' :
+                  tweet.status === 'posted' ? 'Paylaşıldı' : tweet.status}
+              </span>
+            </div>
               <div class="tweet-detail-info-item">
                 <span class="info-label">Tema:</span>
                 <span class="info-value">${tweet.theme || 'Belirtilmemiş'}</span>
-              </div>
+            </div>
               <div class="tweet-detail-info-item">
                 <span class="info-label">Oluşturulma:</span>
                 <span class="info-value">${new Date(tweet.created_at).toLocaleString('tr-TR')}</span>
-              </div>
+            </div>
               <div class="tweet-detail-info-item">
                 <span class="info-label">Kaynak Türü:</span>
                 <span class="info-value">${
-                  tweet.source_data?.type === 'text' ? 'Metin' :
-                  tweet.source_data?.type === 'url' ? 'URL' :
-                  tweet.source_data?.type === 'image' ? 'Resim' : 'Bilinmiyor'
-                }</span>
-              </div>
-              ${tweet.is_posted ? `
+                tweet.source_data?.type === 'text' ? 'Metin' :
+                tweet.source_data?.type === 'url' ? 'URL' :
+                tweet.source_data?.type === 'image' ? 'Resim' : 'Bilinmiyor'
+              }</span>
+            </div>
+            ${tweet.is_posted ? `
                 <div class="tweet-detail-info-item">
                   <span class="info-label">Paylaşım Tarihi:</span>
                   <span class="info-value">${new Date(tweet.posted_at).toLocaleString('tr-TR')}</span>
-                </div>
-                ${tweet.posted_url ? `
+              </div>
+              ${tweet.posted_url ? `
                   <div class="tweet-detail-info-item">
                     <span class="info-label">Tweet URL:</span>
                     <a href="${tweet.posted_url}" target="_blank" class="info-link">
                       <i class="fas fa-external-link-alt"></i>
                       <span>Görüntüle</span>
-                    </a>
-                  </div>
-                ` : ''}
+                  </a>
+                </div>
               ` : ''}
-            </div>
+            ` : ''}
           </div>
-          
+        </div>
+        
           <!-- Source Data Section -->
-          ${tweet.source_data ? `
+        ${tweet.source_data ? `
             <div class="tweet-detail-section">
               <div class="tweet-detail-section-header">
                 <i class="fas fa-link"></i>
                 <span>Kaynak Bilgileri</span>
               </div>
               <div class="tweet-detail-source">
-                ${tweet.source_data.type === 'url' ? `
+            ${tweet.source_data.type === 'url' ? `
                   <div class="source-info">
                     <div class="source-item">
                       <span class="source-label">URL:</span>
@@ -1256,8 +1256,8 @@ function showTweetDetailsModal(tweet) {
                         <span class="source-value">${tweet.source_data.fetched_title}</span>
                       </div>
                     ` : ''}
-                  </div>
-                ` : tweet.source_data.type === 'image' ? `
+              </div>
+            ` : tweet.source_data.type === 'image' ? `
                   <div class="source-info">
                     <div class="source-item">
                       <span class="source-label">Dosya:</span>
@@ -1269,18 +1269,18 @@ function showTweetDetailsModal(tweet) {
                         <span class="source-value">${tweet.source_data.ocr_text.substring(0, 100)}...</span>
                       </div>
                     ` : ''}
-                  </div>
-                ` : tweet.source_data.type === 'text' ? `
+              </div>
+            ` : tweet.source_data.type === 'text' ? `
                   <div class="source-info">
                     <div class="source-item">
                       <span class="source-label">Orijinal Metin:</span>
                       <span class="source-value">${tweet.source_data.original_text.substring(0, 100)}...</span>
                     </div>
-                  </div>
-                ` : ''}
               </div>
-            </div>
-          ` : ''}
+            ` : ''}
+              </div>
+          </div>
+        ` : ''}
         </div>
         
         <!-- Modal Actions -->
@@ -1780,7 +1780,7 @@ document.addEventListener('keydown', function(event) {
 
     <!-- Tweet Cards -->
     <div class="tweet-feed">
-        {% for tweet in (draft_tweets + ready_tweets) %}
+      {% for tweet in (draft_tweets + ready_tweets) %}
         <div class="tweet-card" data-tweet-id="{{ tweet.id }}">
             <div class="tweet-header">
                 <div class="tweet-avatar">
@@ -1815,40 +1815,40 @@ document.addEventListener('keydown', function(event) {
                     {% if tweet.content|length > 280 %}
                     <span class="text-danger ms-1">
                         <i class="fas fa-exclamation-triangle"></i>
-                    </span>
+              </span>
                     {% elif tweet.content|length > 250 %}
                     <span class="text-warning ms-1">
                         <i class="fas fa-exclamation-circle"></i>
-                    </span>
+              </span>
                     {% else %}
                     <span class="text-success ms-1">
                         <i class="fas fa-check-circle"></i>
-                    </span>
+              </span>
                     {% endif %}
-                </div>
-                
+            </div>
+            
                 <!-- Hashtag Count -->
-                {% if tweet.hashtag_count %}
+              {% if tweet.hashtag_count %}
                 <div class="tweet-action">
                     <i class="fas fa-hashtag tweet-action-icon"></i>
                     <span>{{ tweet.hashtag_count }} hashtag</span>
                 </div>
-                {% endif %}
+              {% endif %}
                 
                 <!-- Emoji Count -->
-                {% if tweet.emoji_count %}
+              {% if tweet.emoji_count %}
                 <div class="tweet-action">
                     <i class="fas fa-smile tweet-action-icon"></i>
                     <span>{{ tweet.emoji_count }} emoji</span>
                 </div>
-                {% endif %}
+              {% endif %}
                 
                 <!-- Theme -->
                 <div class="tweet-action">
                     <i class="fas fa-palette tweet-action-icon"></i>
                     <span>{{ tweet.theme|title }}</span>
-                </div>
-                
+          </div>
+          
                 <!-- Kopyala -->
                 <button class="tweet-action" data-tweet-content="{{ tweet.content }}" onclick="copyTweetContent(this.dataset.tweetContent)">
                     <i class="fas fa-copy tweet-action-icon"></i>
@@ -1856,11 +1856,11 @@ document.addEventListener('keydown', function(event) {
                 </button>
                 
                 <!-- API ile Paylaş -->
-                {% if not tweet.is_draft %}
+            {% if not tweet.is_draft %}
                 <button class="tweet-action retweet" onclick="confirmManualPost('{{ tweet.id }}')">
                     <i class="fab fa-twitter tweet-action-icon"></i>
                     <span>API ile Paylaş</span>
-                </button>
+            </button>
                 {% endif %}
                 
                 <!-- X'te Manuel Paylaş -->
@@ -1869,14 +1869,14 @@ document.addEventListener('keydown', function(event) {
                     <i class="fab fa-twitter tweet-action-icon"></i>
                     <span>X'te Paylaş</span>
                 </button>
-                {% endif %}
-                
+            {% endif %}
+            
                 <!-- Düzenle -->
                 <button class="tweet-action" onclick="editTweetContent('{{ tweet.id }}')">
                     <i class="fas fa-edit tweet-action-icon"></i>
                     <span>Düzenle</span>
-                </button>
-                
+            </button>
+            
                 <!-- Detaylar -->
                 <button class="tweet-action" onclick="viewTweetDetails('{{ tweet.id }}')">
                     <i class="fas fa-info-circle tweet-action-icon"></i>
@@ -1884,13 +1884,13 @@ document.addEventListener('keydown', function(event) {
                 </button>
                 
                 <!-- Sil -->
-                {% if tweet.is_draft or not tweet.is_posted %}
+            {% if tweet.is_draft or not tweet.is_posted %}
                 <button class="tweet-action delete" onclick="deleteManualTweet('{{ tweet.id }}')">
                     <i class="fas fa-trash tweet-action-icon"></i>
                     <span>Sil</span>
-                </button>
-                {% endif %}
-            </div>
+            </button>
+            {% endif %}
+          </div>
             
             <!-- Tweet Durum Bilgisi -->
             <div class="tweet-footer">
@@ -1898,7 +1898,7 @@ document.addEventListener('keydown', function(event) {
                     <div class="d-flex align-items-center">
                         <i class="fas fa-database text-blue-500 me-2"></i>
                         <span class="text-muted small">Tweet ID: {{ tweet.id }}</span>
-                    </div>
+        </div>
                     <div class="d-flex align-items-center gap-2">
                         {% if tweet.is_draft %}
                         <span class="badge bg-warning text-dark">
@@ -1909,12 +1909,12 @@ document.addEventListener('keydown', function(event) {
                             <i class="fas fa-check"></i> Hazır
                         </span>
                         {% endif %}
-                    </div>
-                </div>
-            </div>
+      </div>
+    </div>
+    </div>
         </div>
         {% endfor %}
-    </div>
+  </div>
 </div>
 {% endif %}
 

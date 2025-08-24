@@ -210,51 +210,51 @@
             
             <!-- Tweet Footer -->
             <div class="tweet-footer">
-                <!-- Tweet Bilgileri -->
+            <!-- Tweet Bilgileri -->
                 <div class="tweet-info-grid">
                     <div class="tweet-info-item">
                         <i class="fas fa-calendar-alt"></i>
                         <span>{{ article.post_date[:10] if article.post_date else 'Belirtilmemiş' }}</span>
-                    </div>
+                </div>
                     <div class="tweet-info-item">
                         <i class="fas fa-clock"></i>
                         <span>{{ article.post_date[11:19] if article.post_date and article.post_date|length > 19 else 'N/A' }}</span>
-                    </div>
-                    {% if article.tweet_id %}
+                </div>
+                {% if article.tweet_id %}
                     <div class="tweet-info-item">
                         <i class="fab fa-twitter"></i>
                         <span>ID: {{ article.tweet_id }}</span>
-                    </div>
-                    {% endif %}
-                    {% if article.hash %}
+                </div>
+                {% endif %}
+                {% if article.hash %}
                     <div class="tweet-info-item">
                         <i class="fas fa-fingerprint"></i>
                         <span>{{ article.hash[:8] }}...</span>
-                    </div>
-                    {% endif %}
                 </div>
-                
-                <!-- Kaynak Bilgisi -->
+                {% endif %}
+            </div>
+            
+            <!-- Kaynak Bilgisi -->
                 <div class="tweet-source">
-                    {{ render_source_badge(article.source, None, article.url) }}
-                </div>
-                
+                {{ render_source_badge(article.source, None, article.url) }}
+            </div>
+            
                 <!-- Tweet Actions -->
                 <div class="tweet-actions">
-                    {% if article.tweet_url %}
+                {% if article.tweet_url %}
                     <button class="tweet-action-btn" onclick="window.open('{{ article.tweet_url }}', '_blank')">
-                        <i class="fab fa-twitter"></i>
-                        <span>Tweet'i Görüntüle</span>
+                    <i class="fab fa-twitter"></i>
+                    <span>Tweet'i Görüntüle</span>
                     </button>
-                    {% endif %}
+                {% endif %}
                     <button class="tweet-action-btn" onclick="window.open('{{ article.url if article.url else '#' }}', '_blank')" {{ 'disabled' if not article.url else '' }}>
-                        <i class="fas fa-external-link-alt"></i>
-                        <span>{% if article.source_type == 'github' or article.type == 'github_repo' %}Repo'yu Görüntüle{% else %}Makaleyi Oku{% endif %}</span>
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>{% if article.source_type == 'github' or article.type == 'github_repo' %}Repo'yu Görüntüle{% else %}Makaleyi Oku{% endif %}</span>
                     </button>
                     <button class="tweet-action-btn tweet-action-archive" onclick="restoreDeletedTweet('{{ loop.index0 }}')">
-                        <i class="fas fa-archive"></i>
-                        <span>Arşivle</span>
-                    </button>
+                    <i class="fas fa-archive"></i>
+                    <span>Arşivle</span>
+                </button>
                 </div>
             </div>
         </div>

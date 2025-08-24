@@ -636,11 +636,21 @@
         </svg>
     </div>
 
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="mobile-overlay"></div>
+
     <!-- Twitter Style Layout -->
     <div class="twitter-layout">
 
+        <!-- Mobile Menu Toggle Button -->
+        <div class="mobile-menu-toggle">
+            <button id="mobileMenuToggle" class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
         <!-- Left Sidebar -->
-        <div class="twitter-sidebar">
+        <div class="twitter-sidebar" id="twitterSidebar">
             <div class="sidebar-content">
                 <!-- Logo -->
                 <div class="sidebar-logo">
@@ -653,6 +663,13 @@
                             <div class="logo-subtitle">Otomatik Tweet Sistemi</div>
                         </div>
                     </a>
+                </div>
+
+                <!-- Mobile Close Button -->
+                <div class="mobile-close-btn">
+                    <button id="mobileCloseBtn" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
 
                 <!-- Navigation Menu -->
@@ -1402,6 +1419,54 @@
     </style>
     
     {% block scripts %}{% endblock %}
+    
+    <!-- Mobile Menu JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+            const twitterSidebar = document.getElementById('twitterSidebar');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+            
+            // Mobile menu toggle
+            function openMobileMenu() {
+                twitterSidebar.classList.add('mobile-open');
+                mobileOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function closeMobileMenu() {
+                twitterSidebar.classList.remove('mobile-open');
+                mobileOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            // Event listeners
+            mobileMenuToggle.addEventListener('click', openMobileMenu);
+            mobileCloseBtn.addEventListener('click', closeMobileMenu);
+            mobileOverlay.addEventListener('click', closeMobileMenu);
+            
+            // Close menu when clicking on navigation items
+            const navItems = document.querySelectorAll('.twitter-nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', closeMobileMenu);
+            });
+            
+            // Close menu on window resize (if screen becomes larger)
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    closeMobileMenu();
+                }
+            });
+            
+            // Close menu on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeMobileMenu();
+                }
+            });
+        });
+    </script>
     
     </div><!-- End Twitter Layout -->
 </body>

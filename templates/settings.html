@@ -1,115 +1,117 @@
 {% extends "base.html" %}
 
-{% block title %}AI Tweet Bot - Ayarlar{% endblock %}
+{% block title %}Ayarlar{% endblock %}
 
 {% block content %}
 <!-- Twitter Feed Style -->
 <div class="twitter-feed">
     <!-- Header -->
     <div class="feed-header">
-        <div class="d-flex align-items-center justify-content-between">
-            <div>
+        <div class="feed-header-content">
+            <div class="feed-header-left">
                 <h1 class="feed-title">Otomasyon Ayarları</h1>
                 <p class="feed-subtitle">AI Tweet Bot'unuzun davranışını özelleştirin</p>
             </div>
-            <div>
+            <div class="feed-header-right">
                 <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
                     <i class="fas fa-sync-alt"></i>
+                    Yenile
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Temel Ayarlar Kartı -->
-    <div class="tweet-card">
-        <div class="p-8">
-            <div class="flex items-center space-x-3 mb-8">
-                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-cog text-white text-lg"></i>
+    <div class="tweet-card settings-card">
+        <div class="settings-card-header">
+            <div class="settings-card-icon">
+                <i class="fas fa-cog"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900">Temel Ayarlar</h2>
+            <h2 class="settings-card-title">Temel Ayarlar</h2>
             </div>
             
-            <form method="POST" action="{{ url_for('save_settings') }}" class="space-y-8">
+        <form method="POST" action="{{ url_for('save_settings') }}" class="settings-form">
                 <!-- Ana Kontroller -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="flex items-center space-x-3 cursor-pointer group">
-                            <div class="relative">
+            <div class="settings-section">
+                <h3 class="settings-section-title">Ana Kontroller</h3>
+                <div class="settings-controls-grid">
+                    <div class="settings-control-item">
+                        <label class="settings-toggle-wrapper">
+                            <div class="settings-toggle">
                                 <input type="checkbox" id="auto_mode" name="auto_mode" 
                                        {{ 'checked' if settings.auto_mode else '' }}
-                                       class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                       class="settings-toggle-input">
+                                <div class="settings-toggle-slider"></div>
                             </div>
-                            <div>
-                                <span class="text-lg font-semibold text-gray-900">Otomatik Mod</span>
-                                <p class="text-sm text-gray-600">Otomatik makale kontrolü ve tweet paylaşımı</p>
+                            <div class="settings-toggle-content">
+                                <div class="settings-toggle-title">Otomatik Mod</div>
+                                <div class="settings-toggle-description">Otomatik makale kontrolü ve tweet paylaşımı</div>
                             </div>
                         </label>
                     </div>
                     
-                    <div class="space-y-2">
-                        <label class="flex items-center space-x-3 cursor-pointer group">
-                            <div class="relative">
+                    <div class="settings-control-item">
+                        <label class="settings-toggle-wrapper">
+                            <div class="settings-toggle">
                                 <input type="checkbox" id="auto_post_enabled" name="auto_post_enabled" 
                                        {{ 'checked' if settings.auto_post_enabled else '' }}
-                                       class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                                       class="settings-toggle-input">
+                                <div class="settings-toggle-slider"></div>
                             </div>
-                            <div>
-                                <span class="text-lg font-semibold text-gray-900">Otomatik Paylaşım</span>
-                                <p class="text-sm text-gray-600">Onay beklemeden direkt paylaş</p>
+                            <div class="settings-toggle-content">
+                                <div class="settings-toggle-title">Otomatik Paylaşım</div>
+                                <div class="settings-toggle-description">Onay beklemeden direkt paylaş</div>
                             </div>
                         </label>
+                    </div>
                     </div>
                 </div>
 
                 <!-- Kontrol Ayarları -->
-                <div class="border-t border-gray-200 pt-8">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Kontrol Ayarları</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label for="check_interval_hours" class="block text-sm font-medium text-gray-700">
+            <div class="settings-section">
+                <h3 class="settings-section-title">Kontrol Ayarları</h3>
+                <div class="settings-inputs-grid">
+                    <div class="settings-input-group">
+                        <label for="check_interval_hours" class="settings-input-label">
                                 Kontrol Aralığı (Saat)
                             </label>
                             <input type="number" id="check_interval_hours" name="check_interval_hours" 
                                    value="{{ settings.check_interval_hours or 2 }}" min="1" max="24"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                            <p class="text-sm text-gray-600">Kaç saatte bir makale kontrolü yapılacak</p>
+                               class="settings-input">
+                        <div class="settings-input-description">Kaç saatte bir makale kontrolü yapılacak</div>
                         </div>
                         
-                        <div class="space-y-2">
-                            <label for="max_articles_per_run" class="block text-sm font-medium text-gray-700">
+                    <div class="settings-input-group">
+                        <label for="max_articles_per_run" class="settings-input-label">
                                 Maksimum Makale Sayısı
                             </label>
                             <input type="number" id="max_articles_per_run" name="max_articles_per_run" 
                                    value="{{ settings.max_articles_per_run or 3 }}" min="1" max="15"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                            <p class="text-sm text-gray-600">Her haber çekme işleminde bulunacak maksimum makale sayısı</p>
+                               class="settings-input">
+                        <div class="settings-input-description">Her haber çekme işleminde bulunacak maksimum makale sayısı</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Kalite Ayarları -->
-                <div class="border-t border-gray-200 pt-8">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Kalite Ayarları</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label for="min_score_threshold" class="block text-sm font-medium text-gray-700">
+            <div class="settings-section">
+                <h3 class="settings-section-title">Kalite Ayarları</h3>
+                <div class="settings-inputs-grid">
+                    <div class="settings-input-group">
+                        <label for="min_score_threshold" class="settings-input-label">
                                 Minimum Etki Skoru
                             </label>
                             <input type="number" id="min_score_threshold" name="min_score_threshold" 
                                    value="{{ settings.min_score_threshold or 5 }}" min="1" max="10"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                            <p class="text-sm text-gray-600">Bu skorun altındaki makaleler paylaşılmaz</p>
+                               class="settings-input">
+                        <div class="settings-input-description">Bu skorun altındaki makaleler paylaşılmaz</div>
                         </div>
                         
-                        <div class="space-y-2">
-                            <label for="tweet_theme" class="block text-sm font-medium text-gray-700">
+                    <div class="settings-input-group">
+                        <label for="tweet_theme" class="settings-input-label">
                                 Tweet Teması
                             </label>
-                            <select id="tweet_theme" name="tweet_theme" 
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                        <select id="tweet_theme" name="tweet_theme" class="settings-select">
                                 <option value="bilgilendirici" {{ 'selected' if settings.tweet_theme == 'bilgilendirici' else '' }}>
                                     📊 Bilgilendirici (Profesyonel ve eğitici)
                                 </option>
@@ -129,22 +131,21 @@
                                     🤔 Meraklı (Sorgulayıcı ve düşündürücü)
                                 </option>
                             </select>
-                            <p class="text-sm text-gray-600">Tweet'lerin hangi tarzda oluşturulacağını belirler</p>
+                        <div class="settings-input-description">Tweet'lerin hangi tarzda oluşturulacağını belirler</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Haber Çekme Yöntemi Ayarları -->
-                <div class="border-t border-gray-200 pt-8">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Haber Çekme Yöntemi Ayarları</h3>
+            <div class="settings-section">
+                <h3 class="settings-section-title">Haber Çekme Yöntemi Ayarları</h3>
                     
                     <!-- Ana Yöntem Seçimi -->
-                    <div class="space-y-2 mb-6">
-                        <label for="news_fetching_method" class="block text-sm font-medium text-gray-700">
+                <div class="settings-input-group">
+                    <label for="news_fetching_method" class="settings-input-label">
                             Haber Çekme Yöntemi
                         </label>
-                        <select id="news_fetching_method" name="news_fetching_method" 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                    <select id="news_fetching_method" name="news_fetching_method" class="settings-select">
                             <option value="auto" {{ 'selected' if settings.news_fetching_method == 'auto' else '' }}>
                                 🎯 Otomatik (AI Keywords + Tüm yöntemleri dene)
                             </option>
@@ -161,106 +162,109 @@
                                 🔧 Sadece MCP (Firecrawl)
                             </option>
                         </select>
-                        <p class="text-sm text-gray-600">Hangi yöntemle haber çekileceğini seçin</p>
+                    <div class="settings-input-description">Hangi yöntemle haber çekileceğini seçin</div>
                     </div>
                     
                     <!-- Yöntem Bazlı Ayarlar -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="settings-methods-grid">
                         <!-- AI Keywords Ayarları -->
-                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                            <h4 class="font-semibold text-blue-900 mb-3 flex items-center">
-                                <i class="fas fa-brain text-blue-600 mr-2"></i>
-                                AI Keywords Ayarları
-                            </h4>
-                            <div class="space-y-3">
-                                <label class="flex items-center space-x-3 cursor-pointer">
+                    <div class="settings-method-card settings-method-blue">
+                        <div class="settings-method-header">
+                            <i class="fas fa-brain"></i>
+                            <h4 class="settings-method-title">AI Keywords Ayarları</h4>
+                        </div>
+                        <div class="settings-method-content">
+                            <label class="settings-checkbox-wrapper">
                                     <input type="checkbox" name="ai_keywords_auto_post" 
                                            {{ 'checked' if settings.ai_keywords_auto_post else '' }}
-                                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-sm text-blue-800">Otomatik API ile paylaşım</span>
+                                       class="settings-checkbox">
+                                <span class="settings-checkbox-label">Otomatik API ile paylaşım</span>
                                 </label>
-                                <label class="flex items-center space-x-3 cursor-pointer">
+                            <label class="settings-checkbox-wrapper">
                                     <input type="checkbox" name="ai_keywords_duplicate_check" 
                                            {{ 'checked' if settings.ai_keywords_duplicate_check != False else '' }}
-                                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-sm text-blue-800">Duplicate kontrolü</span>
+                                       class="settings-checkbox">
+                                <span class="settings-checkbox-label">Duplicate kontrolü</span>
                                 </label>
                             </div>
                         </div>
                         
                         <!-- Custom Sources Ayarları -->
-                        <div class="bg-green-50 rounded-lg p-4 border border-green-200">
-                            <h4 class="font-semibold text-green-900 mb-3 flex items-center">
-                                <i class="fas fa-newspaper text-green-600 mr-2"></i>
-                                Özel Kaynak Ayarları
-                            </h4>
-                            <div class="space-y-3">
-                                <label class="flex items-center space-x-3 cursor-pointer">
+                    <div class="settings-method-card settings-method-green">
+                        <div class="settings-method-header">
+                            <i class="fas fa-newspaper"></i>
+                            <h4 class="settings-method-title">Özel Kaynak Ayarları</h4>
+                        </div>
+                        <div class="settings-method-content">
+                            <label class="settings-checkbox-wrapper">
                                     <input type="checkbox" name="custom_sources_auto_post" 
                                            {{ 'checked' if settings.custom_sources_auto_post else '' }}
-                                           class="rounded border-gray-300 text-green-600 focus:ring-green-500">
-                                    <span class="text-sm text-green-800">Otomatik API ile paylaşım</span>
+                                       class="settings-checkbox">
+                                <span class="settings-checkbox-label">Otomatik API ile paylaşım</span>
                                 </label>
-                                <label class="flex items-center space-x-3 cursor-pointer">
+                            <label class="settings-checkbox-wrapper">
                                     <input type="checkbox" name="custom_sources_duplicate_check" 
                                            {{ 'checked' if settings.custom_sources_duplicate_check != False else '' }}
-                                           class="rounded border-gray-300 text-green-600 focus:ring-green-500">
-                                    <span class="text-sm text-green-800">Duplicate kontrolü</span>
+                                       class="settings-checkbox">
+                                <span class="settings-checkbox-label">Duplicate kontrolü</span>
                                 </label>
                             </div>
                         </div>
                         
                         <!-- MCP Ayarları -->
-                        <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                            <h4 class="font-semibold text-purple-900 mb-3 flex items-center">
-                                <i class="fas fa-cogs text-purple-600 mr-2"></i>
-                                MCP Ayarları
-                            </h4>
-                            <div class="space-y-3">
-                                <label class="flex items-center space-x-3 cursor-pointer">
+                    <div class="settings-method-card settings-method-purple">
+                        <div class="settings-method-header">
+                            <i class="fas fa-cogs"></i>
+                            <h4 class="settings-method-title">MCP Ayarları</h4>
+                        </div>
+                        <div class="settings-method-content">
+                            <label class="settings-checkbox-wrapper">
                                     <input type="checkbox" name="mcp_auto_post" 
                                            {{ 'checked' if settings.mcp_auto_post else '' }}
-                                           class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                                    <span class="text-sm text-purple-800">Otomatik API ile paylaşım</span>
+                                       class="settings-checkbox">
+                                <span class="settings-checkbox-label">Otomatik API ile paylaşım</span>
                                 </label>
-                                <label class="flex items-center space-x-3 cursor-pointer">
+                            <label class="settings-checkbox-wrapper">
                                     <input type="checkbox" name="mcp_duplicate_check" 
                                            {{ 'checked' if settings.mcp_duplicate_check != False else '' }}
-                                           class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                                    <span class="text-sm text-purple-800">Duplicate kontrolü</span>
+                                       class="settings-checkbox">
+                                <span class="settings-checkbox-label">Duplicate kontrolü</span>
                                 </label>
                             </div>
                         </div>
                         
                         <!-- PythonAnywhere Ayarları -->
-                        <div class="bg-orange-50 rounded-lg p-4 border border-orange-200">
-                            <h4 class="font-semibold text-orange-900 mb-3 flex items-center">
-                                <i class="fab fa-python text-orange-600 mr-2"></i>
-                                PythonAnywhere Ayarları
-                            </h4>
-                            <div class="space-y-3">
-                                <label class="flex items-center space-x-3 cursor-pointer">
+                    <div class="settings-method-card settings-method-orange">
+                        <div class="settings-method-header">
+                            <i class="fab fa-python"></i>
+                            <h4 class="settings-method-title">PythonAnywhere Ayarları</h4>
+                        </div>
+                        <div class="settings-method-content">
+                            <label class="settings-checkbox-wrapper">
                                     <input type="checkbox" name="pythonanywhere_auto_post" 
                                            {{ 'checked' if settings.pythonanywhere_auto_post else '' }}
-                                           class="rounded border-gray-300 text-orange-600 focus:ring-orange-500">
-                                    <span class="text-sm text-orange-800">Otomatik API ile paylaşım</span>
+                                       class="settings-checkbox">
+                                <span class="settings-checkbox-label">Otomatik API ile paylaşım</span>
                                 </label>
-                                <label class="flex items-center space-x-3 cursor-pointer">
+                            <label class="settings-checkbox-wrapper">
                                     <input type="checkbox" name="pythonanywhere_duplicate_check" 
                                            {{ 'checked' if settings.pythonanywhere_duplicate_check != False else '' }}
-                                           class="rounded border-gray-300 text-orange-600 focus:ring-orange-500">
-                                    <span class="text-sm text-orange-800">Duplicate kontrolü</span>
+                                       class="settings-checkbox">
+                                <span class="settings-checkbox-label">Duplicate kontrolü</span>
                                 </label>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Duplicate Kontrol Açıklaması -->
-                    <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <div class="flex items-start">
-                            <i class="fas fa-info-circle text-yellow-600 mt-0.5 mr-2"></i>
-                            <div class="text-sm text-yellow-800">
-                                <strong>Duplicate Kontrolü:</strong> Farklı kaynaklardan gelen aynı haberin tekrar paylaşılmasını engeller. 
+                <div class="settings-info-box">
+                    <div class="settings-info-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="settings-info-content">
+                        <div class="settings-info-title">Duplicate Kontrolü</div>
+                        <div class="settings-info-text">
+                            Farklı kaynaklardan gelen aynı haberin tekrar paylaşılmasını engeller. 
                                 Bu özellik aktif olduğunda, benzer içerikli makaleler otomatik olarak filtrelenir.
                             </div>
                         </div>
@@ -268,50 +272,50 @@
                 </div>
 
                 <!-- Onay Ayarları -->
-                <div class="border-t border-gray-200 pt-8">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Onay ve Bildirim Ayarları</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="space-y-2">
-                            <label class="flex items-center space-x-3 cursor-pointer group">
-                                <div class="relative">
+            <div class="settings-section">
+                <h3 class="settings-section-title">Onay ve Bildirim Ayarları</h3>
+                <div class="settings-controls-grid">
+                    <div class="settings-control-item">
+                        <label class="settings-toggle-wrapper">
+                            <div class="settings-toggle">
                                     <input type="checkbox" id="manual_approval_required" name="manual_approval_required" 
                                            {{ 'checked' if settings.manual_approval_required else '' }}
-                                           class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-600"></div>
+                                       class="settings-toggle-input">
+                                <div class="settings-toggle-slider"></div>
                                 </div>
-                                <div>
-                                    <span class="text-lg font-semibold text-gray-900">Manuel Onay</span>
-                                    <p class="text-sm text-gray-600">Tweet'ler onay beklesin</p>
+                            <div class="settings-toggle-content">
+                                <div class="settings-toggle-title">Manuel Onay</div>
+                                <div class="settings-toggle-description">Tweet'ler onay beklesin</div>
                                 </div>
                             </label>
                         </div>
                         
-                        <div class="space-y-2">
-                            <label class="flex items-center space-x-3 cursor-pointer group">
-                                <div class="relative">
+                    <div class="settings-control-item">
+                        <label class="settings-toggle-wrapper">
+                            <div class="settings-toggle">
                                     <input type="checkbox" id="email_notifications" name="email_notifications" 
                                            {{ 'checked' if settings.email_notifications else '' }}
-                                           class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                       class="settings-toggle-input">
+                                <div class="settings-toggle-slider"></div>
                                 </div>
-                                <div>
-                                    <span class="text-lg font-semibold text-gray-900">📧 E-posta</span>
-                                    <p class="text-sm text-gray-600">Gmail bildirimleri</p>
+                            <div class="settings-toggle-content">
+                                <div class="settings-toggle-title">📧 E-posta</div>
+                                <div class="settings-toggle-description">Gmail bildirimleri</div>
                                 </div>
                             </label>
                         </div>
                         
-                        <div class="space-y-2">
-                            <label class="flex items-center space-x-3 cursor-pointer group">
-                                <div class="relative">
+                    <div class="settings-control-item">
+                        <label class="settings-toggle-wrapper">
+                            <div class="settings-toggle">
                                     <input type="checkbox" id="telegram_notifications" name="telegram_notifications" 
                                            {{ 'checked' if settings.telegram_notifications else '' }}
-                                           class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                       class="settings-toggle-input">
+                                <div class="settings-toggle-slider"></div>
                                 </div>
-                                <div>
-                                    <span class="text-lg font-semibold text-gray-900">📱 Telegram</span>
-                                    <p class="text-sm text-gray-600">Fallback bildirim</p>
+                            <div class="settings-toggle-content">
+                                <div class="settings-toggle-title">📱 Telegram</div>
+                                <div class="settings-toggle-description">Fallback bildirim</div>
                                 </div>
                             </label>
                         </div>
@@ -319,97 +323,100 @@
                 </div>
 
                 <!-- Kaydet Butonu -->
-                <div class="border-t border-gray-200 pt-8">
-                    <button type="submit" class="btn-primary w-full md:w-auto flex items-center justify-center space-x-2">
+            <div class="settings-actions">
+                <button type="submit" class="twitter-btn twitter-btn-primary">
                         <i class="fas fa-save"></i>
                         <span>Ayarları Kaydet</span>
                     </button>
                 </div>
             </form>
-        </div>
     </div>
 
                     <!-- Red Koşulları Ayarları Kartı -->
-                <div class="card-modern">
-                    <div class="p-8">
-                        <div class="flex items-center space-x-3 mb-8">
-                            <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-shield-alt text-white text-lg"></i>
+    <div class="tweet-card settings-card">
+        <div class="settings-card-header">
+            <div class="settings-card-icon">
+                <i class="fas fa-shield-alt"></i>
                             </div>
-                            <h2 class="text-2xl font-bold text-gray-900">Red Koşulları Ayarları</h2>
+            <h2 class="settings-card-title">Red Koşulları Ayarları</h2>
                         </div>
                         
-                        <div class="mb-6">
-                            <div class="flex items-center space-x-3 mb-4">
-                                <label class="flex items-center space-x-3 cursor-pointer group">
-                                    <div class="relative">
+        <div class="settings-form">
+            <div class="settings-section">
+                <div class="settings-control-item">
+                    <label class="settings-toggle-wrapper">
+                        <div class="settings-toggle">
                                         <input type="checkbox" id="flexible_rejection_rules" name="flexible_rejection_rules" 
                                                {{ 'checked' if settings.flexible_rejection_rules else '' }}
-                                               class="sr-only peer">
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                                   class="settings-toggle-input">
+                            <div class="settings-toggle-slider"></div>
                                     </div>
-                                    <div>
-                                        <span class="text-lg font-semibold text-gray-900">Esnek Red Koşulları</span>
-                                        <p class="text-sm text-gray-600">Daha toleranslı ve esnek kalite kontrol kuralları uygula</p>
+                        <div class="settings-toggle-content">
+                            <div class="settings-toggle-title">Esnek Red Koşulları</div>
+                            <div class="settings-toggle-description">Daha toleranslı ve esnek kalite kontrol kuralları uygula</div>
                                     </div>
                                 </label>
                             </div>
                         </div>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div class="space-y-2">
-                                <label for="min_title_length" class="block text-sm font-medium text-gray-700">
+            <div class="settings-section">
+                <h3 class="settings-section-title">Kalite Kontrol Parametreleri</h3>
+                <div class="settings-inputs-grid">
+                    <div class="settings-input-group">
+                        <label for="min_title_length" class="settings-input-label">
                                     Minimum Başlık Uzunluğu
                                 </label>
                                 <input type="number" id="min_title_length" name="min_title_length" 
                                        value="{{ settings.min_title_length or 5 }}" 
                                        min="3" max="20" step="1"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200">
-                                <p class="text-sm text-gray-600">Bu uzunluğun altındaki başlıklar reddedilir</p>
+                               class="settings-input">
+                        <div class="settings-input-description">Bu uzunluğun altındaki başlıklar reddedilir</div>
                             </div>
                             
-                            <div class="space-y-2">
-                                <label for="min_content_length" class="block text-sm font-medium text-gray-700">
+                    <div class="settings-input-group">
+                        <label for="min_content_length" class="settings-input-label">
                                     Minimum İçerik Uzunluğu
                                 </label>
                                 <input type="number" id="min_content_length" name="min_content_length" 
                                        value="{{ settings.min_content_length or 30 }}" 
                                        min="10" max="100" step="5"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200">
-                                <p class="text-sm text-gray-600">Bu uzunluğun altındaki içerikler reddedilir</p>
-                            </div>
+                               class="settings-input">
+                        <div class="settings-input-description">Bu uzunluğun altındaki içerikler reddedilir</div>
                         </div>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div class="space-y-2">
-                                <label for="min_sentence_length" class="block text-sm font-medium text-gray-700">
+                    <div class="settings-input-group">
+                        <label for="min_sentence_length" class="settings-input-label">
                                     Minimum Cümle Uzunluğu
                                 </label>
                                 <input type="number" id="min_sentence_length" name="min_sentence_length" 
                                        value="{{ settings.min_sentence_length or 15 }}" 
                                        min="5" max="30" step="1"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200">
-                                <p class="text-sm text-gray-600">Bu uzunluğun altındaki cümleler anlamsız sayılır</p>
+                               class="settings-input">
+                        <div class="settings-input-description">Bu uzunluğun altındaki cümleler anlamsız sayılır</div>
                             </div>
                             
-                            <div class="space-y-2">
-                                <label for="spam_threshold" class="block text-sm font-medium text-gray-700">
+                    <div class="settings-input-group">
+                        <label for="spam_threshold" class="settings-input-label">
                                     Spam Eşiği (%)
                                 </label>
                                 <input type="number" id="spam_threshold" name="spam_threshold" 
                                        value="{{ (settings.spam_threshold * 100) if settings.spam_threshold else 40 }}" 
                                        min="20" max="80" step="5"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200">
-                                <p class="text-sm text-gray-600">Bu oranın üzerinde tekrarlayan kelimeler spam sayılır</p>
+                               class="settings-input">
+                        <div class="settings-input-description">Bu oranın üzerinde tekrarlayan kelimeler spam sayılır</div>
+                    </div>
                             </div>
                         </div>
                         
                         <!-- Red Koşulları Açıklaması -->
-                        <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
-                            <div class="flex items-start">
-                                <i class="fas fa-info-circle text-red-600 mt-0.5 mr-2"></i>
-                                <div class="text-sm text-red-800">
-                                    <strong>Esnek Red Koşulları:</strong> Bu ayarlar aktif olduğunda, kalite kontrol sistemi daha toleranslı davranır. 
+            <div class="settings-info-box">
+                <div class="settings-info-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="settings-info-content">
+                    <div class="settings-info-title">Esnek Red Koşulları</div>
+                    <div class="settings-info-text">
+                        Bu ayarlar aktif olduğunda, kalite kontrol sistemi daha toleranslı davranır. 
                                     Kısa başlıklar ve içerikler daha kolay kabul edilir, genel başlıklar sadece çok kısa olduğunda reddedilir.
                                 </div>
                             </div>
@@ -418,56 +425,60 @@
                 </div>
 
                 <!-- Duplikat Kontrol Ayarları Kartı -->
-                <div class="card-modern">
-                    <div class="p-8">
-                        <div class="flex items-center space-x-3 mb-8">
-                            <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-copy text-white text-lg"></i>
+    <div class="tweet-card settings-card">
+        <div class="settings-card-header">
+            <div class="settings-card-icon">
+                <i class="fas fa-copy"></i>
                             </div>
-                            <h2 class="text-2xl font-bold text-gray-900">Duplikat Kontrol Ayarları</h2>
+            <h2 class="settings-card-title">Duplikat Kontrol Ayarları</h2>
                         </div>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div class="space-y-2">
-                                <label for="title_similarity_threshold" class="block text-sm font-medium text-gray-700">
+        <div class="settings-form">
+            <div class="settings-section">
+                <h3 class="settings-section-title">Benzerlik Eşikleri</h3>
+                <div class="settings-inputs-grid">
+                    <div class="settings-input-group">
+                        <label for="title_similarity_threshold" class="settings-input-label">
                                     Başlık Benzerlik Eşiği (%)
                                 </label>
                                 <input type="number" id="title_similarity_threshold" name="title_similarity_threshold" 
                                        value="{{ (settings.title_similarity_threshold * 100) if settings.title_similarity_threshold else 80 }}" 
                                        min="50" max="100" step="5"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
-                                <p class="text-sm text-gray-600">Bu oranın üzerinde benzer başlıklar duplikat sayılır</p>
+                               class="settings-input">
+                        <div class="settings-input-description">Bu oranın üzerinde benzer başlıklar duplikat sayılır</div>
                             </div>
                             
-                            <div class="space-y-2">
-                                <label for="content_similarity_threshold" class="block text-sm font-medium text-gray-700">
+                    <div class="settings-input-group">
+                        <label for="content_similarity_threshold" class="settings-input-label">
                                     İçerik Benzerlik Eşiği (%)
                                 </label>
                                 <input type="number" id="content_similarity_threshold" name="content_similarity_threshold" 
                                        value="{{ (settings.content_similarity_threshold * 100) if settings.content_similarity_threshold else 60 }}" 
                                        min="30" max="90" step="5"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
-                                <p class="text-sm text-gray-600">Bu oranın üzerinde benzer içerikler duplikat sayılır</p>
+                               class="settings-input">
+                        <div class="settings-input-description">Bu oranın üzerinde benzer içerikler duplikat sayılır</div>
+                    </div>
                             </div>
                         </div>
                         
-                        <div class="space-y-4">
-                            <label class="flex items-center space-x-3 cursor-pointer group">
-                                <div class="relative">
+            <div class="settings-section">
+                <div class="settings-control-item">
+                    <label class="settings-toggle-wrapper">
+                        <div class="settings-toggle">
                                     <input type="checkbox" id="enable_duplicate_detection" name="enable_duplicate_detection" 
                                            {{ 'checked' if settings.enable_duplicate_detection != False else '' }}
-                                           class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                   class="settings-toggle-input">
+                            <div class="settings-toggle-slider"></div>
                                 </div>
-                                <div>
-                                    <span class="text-lg font-semibold text-gray-900">Gelişmiş Duplikat Tespiti</span>
-                                    <p class="text-sm text-gray-600">Farklı sitelerden gelen aynı haberleri tespit et ve filtrele</p>
+                        <div class="settings-toggle-content">
+                            <div class="settings-toggle-title">Gelişmiş Duplikat Tespiti</div>
+                            <div class="settings-toggle-description">Farklı sitelerden gelen aynı haberleri tespit et ve filtrele</div>
                                 </div>
                             </label>
+                </div>
                             
-                            <div class="flex space-x-3">
-                                <a href="{{ url_for('test_duplicate_detection') }}" 
-                                   class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-200 font-medium flex items-center space-x-2">
+                <div class="settings-actions">
+                    <a href="{{ url_for('test_duplicate_detection') }}" class="twitter-btn twitter-btn-secondary">
                                     <i class="fas fa-vial"></i>
                                     <span>Duplikat Tespitini Test Et</span>
                                 </a>
@@ -477,73 +488,69 @@
                 </div>
 
     <!-- Gmail E-posta Bildirimleri Kartı -->
-    <div class="card-modern">
-        <div class="p-8">
-            <div class="flex items-center space-x-3 mb-8">
-                <div class="w-12 h-12 bg-gradient-to-r from-red-400 to-pink-500 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-envelope text-white text-lg"></i>
+    <div class="tweet-card settings-card">
+        <div class="settings-card-header">
+            <div class="settings-card-icon">
+                <i class="fas fa-envelope"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900">Gmail E-posta Bildirimleri</h2>
+            <h2 class="settings-card-title">Gmail E-posta Bildirimleri</h2>
             </div>
             
+        <div class="settings-form">
             {% if gmail_config %}
-                <div class="p-4 rounded-xl border-l-4 mb-6 {{ 'bg-green-50 border-green-400' if gmail_config.ready else 'bg-yellow-50 border-yellow-400' if gmail_config.status == 'partial' else 'bg-red-50 border-red-400' }}">
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-{{ 'check-circle text-green-600' if gmail_config.ready else 'exclamation-triangle text-yellow-600' if gmail_config.status == 'partial' else 'times-circle text-red-600' }}"></i>
-                        <span class="font-medium {{ 'text-green-800' if gmail_config.ready else 'text-yellow-800' if gmail_config.status == 'partial' else 'text-red-800' }}">
-                            {{ gmail_config.message }}
-                        </span>
+                <div class="settings-section">
+                    <div class="settings-status-box {{ 'settings-status-success' if gmail_config.ready else 'settings-status-warning' if gmail_config.status == 'partial' else 'settings-status-error' }}">
+                        <div class="settings-status-icon">
+                            <i class="fas fa-{{ 'check-circle' if gmail_config.ready else 'exclamation-triangle' if gmail_config.status == 'partial' else 'times-circle' }}"></i>
+                        </div>
+                        <div class="settings-status-content">
+                            <div class="settings-status-title">{{ gmail_config.message }}</div>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="flex flex-wrap gap-3 mb-6">
-                    <a href="{{ url_for('test_gmail') }}" class="px-6 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all duration-200 font-medium flex items-center space-x-2">
+                <div class="settings-section">
+                    <div class="settings-actions">
+                        <a href="{{ url_for('test_gmail') }}" class="twitter-btn twitter-btn-secondary">
                         <i class="fas fa-vial"></i>
                         <span>Gmail Bağlantısını Test Et</span>
                     </a>
+                    </div>
                 </div>
                 
-                <div class="bg-red-50 border border-red-200 rounded-xl p-6">
-                    <h3 class="flex items-center space-x-2 text-lg font-semibold text-red-900 mb-4">
+                <div class="settings-section">
+                    <div class="settings-info-box settings-info-red">
+                        <div class="settings-info-icon">
                         <i class="fas fa-info-circle"></i>
-                        <span>Gmail SMTP Kurulumu</span>
-                    </h3>
-                    <ol class="space-y-3 text-red-800">
-                        <li class="flex items-start space-x-2">
-                            <span class="flex-shrink-0 w-6 h-6 bg-red-200 text-red-800 rounded-full flex items-center justify-center text-sm font-medium">1</span>
-                            <div>
-                                <strong>Gmail hesabınızda 2-Factor Authentication'ı etkinleştirin</strong>
-                                <p class="text-sm text-red-700 mt-1">Google hesap güvenlik ayarlarından 2FA'yı açın</p>
                             </div>
-                        </li>
-                        <li class="flex items-start space-x-2">
-                            <span class="flex-shrink-0 w-6 h-6 bg-red-200 text-red-800 rounded-full flex items-center justify-center text-sm font-medium">2</span>
-                            <div>
-                                <strong>Uygulama şifresi oluşturun</strong>
-                                <p class="text-sm text-red-700 mt-1">Google hesap → Güvenlik → Uygulama şifreleri → "AI Tweet Bot" için şifre oluşturun</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start space-x-2">
-                            <span class="flex-shrink-0 w-6 h-6 bg-red-200 text-red-800 rounded-full flex items-center justify-center text-sm font-medium">3</span>
-                            <div>
-                                <strong>.env dosyasına ekleyin:</strong>
-                                <div class="bg-red-100 p-3 rounded mt-2 font-mono text-sm">
+                        <div class="settings-info-content">
+                            <div class="settings-info-title">Gmail SMTP Kurulumu</div>
+                            <div class="settings-info-text">
+                                <ol class="settings-info-list">
+                                    <li><strong>Gmail hesabınızda 2-Factor Authentication'ı etkinleştirin</strong><br>
+                                        <span class="settings-info-detail">Google hesap güvenlik ayarlarından 2FA'yı açın</span></li>
+                                    <li><strong>Uygulama şifresi oluşturun</strong><br>
+                                        <span class="settings-info-detail">Google hesap → Güvenlik → Uygulama şifreleri → "AI Tweet Bot" için şifre oluşturun</span></li>
+                                    <li><strong>.env dosyasına ekleyin:</strong><br>
+                                        <div class="settings-code-block">
                                     <div>GMAIL_EMAIL=sizin_email@gmail.com</div>
                                     <div>GMAIL_APP_PASSWORD=uygulama_şifreniz</div>
+                                        </div></li>
+                                    <li>"Gmail Bağlantısını Test Et" butonu ile test edin</li>
+                                </ol>
                                 </div>
                             </div>
-                        </li>
-                        <li class="flex items-start space-x-2">
-                            <span class="flex-shrink-0 w-6 h-6 bg-red-200 text-red-800 rounded-full flex items-center justify-center text-sm font-medium">4</span>
-                            <span>"Gmail Bağlantısını Test Et" butonu ile test edin</span>
-                        </li>
-                    </ol>
+                    </div>
                 </div>
             {% else %}
-                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-exclamation-triangle text-yellow-600"></i>
-                        <span class="text-yellow-800 font-medium">Gmail yapılandırması yüklenemedi</span>
+                <div class="settings-section">
+                    <div class="settings-status-box settings-status-warning">
+                        <div class="settings-status-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="settings-status-content">
+                            <div class="settings-status-title">Gmail yapılandırması yüklenemedi</div>
+                        </div>
                     </div>
                 </div>
             {% endif %}
@@ -551,40 +558,48 @@
     </div>
 
     <!-- Telegram Ayarları Kartı -->
-    <div class="card-modern">
-        <div class="p-8">
-            <div class="flex items-center space-x-3 mb-8">
-                <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
-                    <i class="fab fa-telegram text-white text-lg"></i>
+    <div class="tweet-card settings-card">
+        <div class="settings-card-header">
+            <div class="settings-card-icon">
+                <i class="fab fa-telegram"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900">Telegram Ayarları <span class="text-sm text-gray-500">(Opsiyonel)</span></h2>
+            <h2 class="settings-card-title">Telegram Ayarları <span class="settings-card-subtitle">(Opsiyonel)</span></h2>
             </div>
             
+        <div class="settings-form">
             {% if telegram_config %}
-                <div class="p-4 rounded-xl border-l-4 mb-6 {{ 'bg-green-50 border-green-400' if telegram_config.ready else 'bg-yellow-50 border-yellow-400' }}">
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-{{ 'check-circle text-green-600' if telegram_config.ready else 'exclamation-triangle text-yellow-600' }}"></i>
-                        <span class="font-medium {{ 'text-green-800' if telegram_config.ready else 'text-yellow-800' }}">
-                            {{ telegram_config.message }}
-                        </span>
+                <div class="settings-section">
+                    <div class="settings-status-box {{ 'settings-status-success' if telegram_config.ready else 'settings-status-warning' }}">
+                        <div class="settings-status-icon">
+                            <i class="fas fa-{{ 'check-circle' if telegram_config.ready else 'exclamation-triangle' }}"></i>
+                        </div>
+                        <div class="settings-status-content">
+                            <div class="settings-status-title">{{ telegram_config.message }}</div>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="flex flex-wrap gap-3 mb-6">
-                    <a href="{{ url_for('test_telegram') }}" class="px-6 py-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 font-medium flex items-center space-x-2">
+                <div class="settings-section">
+                    <div class="settings-actions">
+                        <a href="{{ url_for('test_telegram') }}" class="twitter-btn twitter-btn-secondary">
                         <i class="fas fa-vial"></i>
                         <span>Bağlantıyı Test Et</span>
                     </a>
-                    <a href="{{ url_for('auto_detect_chat_id') }}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium flex items-center space-x-2">
+                        <a href="{{ url_for('auto_detect_chat_id') }}" class="twitter-btn twitter-btn-secondary">
                         <i class="fas fa-search"></i>
                         <span>Chat ID Algıla</span>
                     </a>
+                    </div>
                 </div>
             {% else %}
-                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-exclamation-triangle text-yellow-600"></i>
-                        <span class="text-yellow-800 font-medium">Telegram yapılandırması yüklenemedi</span>
+                <div class="settings-section">
+                    <div class="settings-status-box settings-status-warning">
+                        <div class="settings-status-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="settings-status-content">
+                            <div class="settings-status-title">Telegram yapılandırması yüklenemedi</div>
+                        </div>
                     </div>
                 </div>
             {% endif %}
@@ -592,309 +607,348 @@
     </div>
 
     <!-- API Durumu Kartı -->
-    <div class="card-modern">
-        <div class="p-8">
-            <div class="flex items-center space-x-3 mb-8">
-                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-key text-white text-lg"></i>
+    <div class="tweet-card settings-card">
+        <div class="settings-card-header">
+            <div class="settings-card-icon">
+                <i class="fas fa-key"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900">API Durumu</h2>
+            <h2 class="settings-card-title">API Durumu</h2>
             </div>
             
+        <div class="settings-form">
             {% if api_status %}
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="settings-section">
+                    <div class="settings-api-grid">
                     <!-- Google Gemini API -->
-                    <div class="border rounded-xl p-6 text-center {{ 'border-green-200 bg-green-50' if api_status.google_api and api_status.google_api_working else 'border-yellow-200 bg-yellow-50' if api_status.google_api else 'border-red-200 bg-red-50' }}">
-                        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center {{ 'bg-green-100' if api_status.google_api and api_status.google_api_working else 'bg-yellow-100' if api_status.google_api else 'bg-red-100' }}">
-                            <i class="fab fa-google text-2xl {{ 'text-green-600' if api_status.google_api and api_status.google_api_working else 'text-yellow-600' if api_status.google_api else 'text-red-600' }}"></i>
+                        <div class="settings-api-card {{ 'settings-api-success' if api_status.google_api and api_status.google_api_working else 'settings-api-warning' if api_status.google_api else 'settings-api-error' }}">
+                            <div class="settings-api-icon">
+                                <i class="fab fa-google"></i>
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Google Gemini</h3>
+                            <h3 class="settings-api-title">Google Gemini</h3>
                         {% if api_status.google_api and api_status.google_api_working %}
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                <i class="fas fa-check-circle mr-2"></i>Çalışıyor
+                                <span class="settings-api-status settings-api-status-success">
+                                    <i class="fas fa-check-circle"></i>Çalışıyor
                             </span>
                         {% elif api_status.google_api %}
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>Sorunlu
+                                <span class="settings-api-status settings-api-status-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>Sorunlu
                             </span>
                         {% else %}
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                                <i class="fas fa-times-circle mr-2"></i>Eksik
+                                <span class="settings-api-status settings-api-status-error">
+                                    <i class="fas fa-times-circle"></i>Eksik
                             </span>
                         {% endif %}
                     </div>
                     
                     <!-- OpenRouter API -->
-                    <div class="border rounded-xl p-6 text-center {{ 'border-green-200 bg-green-50' if api_status.openrouter_api and api_status.openrouter_api_working else 'border-yellow-200 bg-yellow-50' if api_status.openrouter_api else 'border-gray-200 bg-gray-50' }}">
-                        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center {{ 'bg-green-100' if api_status.openrouter_api and api_status.openrouter_api_working else 'bg-yellow-100' if api_status.openrouter_api else 'bg-gray-100' }}">
-                            <i class="fas fa-route text-2xl {{ 'text-green-600' if api_status.openrouter_api and api_status.openrouter_api_working else 'text-yellow-600' if api_status.openrouter_api else 'text-gray-400' }}"></i>
+                        <div class="settings-api-card {{ 'settings-api-success' if api_status.openrouter_api and api_status.openrouter_api_working else 'settings-api-warning' if api_status.openrouter_api else 'settings-api-neutral' }}">
+                            <div class="settings-api-icon">
+                                <i class="fas fa-route"></i>
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">OpenRouter</h3>
+                            <h3 class="settings-api-title">OpenRouter</h3>
                         {% if api_status.openrouter_api and api_status.openrouter_api_working %}
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                <i class="fas fa-check-circle mr-2"></i>Çalışıyor
+                                <span class="settings-api-status settings-api-status-success">
+                                    <i class="fas fa-check-circle"></i>Çalışıyor
                             </span>
                         {% elif api_status.openrouter_api %}
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>Sorunlu
+                                <span class="settings-api-status settings-api-status-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>Sorunlu
                             </span>
                         {% else %}
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                                <i class="fas fa-info-circle mr-2"></i>Yedek
+                                <span class="settings-api-status settings-api-status-neutral">
+                                    <i class="fas fa-info-circle"></i>Yedek
                             </span>
                         {% endif %}
-                        <div class="mt-3 space-y-2">
-                            <button onclick="testOpenRouterAPI()" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-sm font-medium">
-                                Test Et
+                            <div class="settings-api-actions">
+                                <button onclick="testOpenRouterAPI()" class="twitter-btn twitter-btn-secondary twitter-btn-sm">
+                                    <i class="fas fa-vial"></i>
+                                    <span>Test Et</span>
                             </button>
                         </div>
                     </div>
                     
                     <!-- Twitter API -->
-                    <div class="border rounded-xl p-6 text-center {{ 'border-green-200 bg-green-50' if api_status.twitter_bearer and api_status.twitter_api_key and api_status.twitter_api_secret and api_status.twitter_access_token and api_status.twitter_access_secret else 'border-yellow-200 bg-yellow-50' if api_status.twitter_bearer or api_status.twitter_api_key else 'border-red-200 bg-red-50' }}">
-                        <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center {{ 'bg-green-100' if api_status.twitter_bearer and api_status.twitter_api_key and api_status.twitter_api_secret and api_status.twitter_access_token and api_status.twitter_access_secret else 'bg-yellow-100' if api_status.twitter_bearer or api_status.twitter_api_key else 'bg-red-100' }}">
-                            <i class="fab fa-twitter text-2xl {{ 'text-green-600' if api_status.twitter_bearer and api_status.twitter_api_key and api_status.twitter_api_secret and api_status.twitter_access_token and api_status.twitter_access_secret else 'text-yellow-600' if api_status.twitter_bearer or api_status.twitter_api_key else 'text-red-600' }}"></i>
+                        <div class="settings-api-card {{ 'settings-api-success' if api_status.twitter_bearer and api_status.twitter_api_key and api_status.twitter_api_secret and api_status.twitter_access_token and api_status.twitter_access_secret else 'settings-api-warning' if api_status.twitter_bearer or api_status.twitter_api_key else 'settings-api-error' }}">
+                            <div class="settings-api-icon">
+                                <i class="fab fa-twitter"></i>
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Twitter API</h3>
+                            <h3 class="settings-api-title">Twitter API</h3>
                         {% if api_status.twitter_bearer and api_status.twitter_api_key and api_status.twitter_api_secret and api_status.twitter_access_token and api_status.twitter_access_secret %}
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                <i class="fas fa-check-circle mr-2"></i>Tamamı Mevcut
+                                <span class="settings-api-status settings-api-status-success">
+                                    <i class="fas fa-check-circle"></i>Tamamı Mevcut
                             </span>
                         {% elif api_status.twitter_bearer or api_status.twitter_api_key %}
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                <i class="fas fa-exclamation-triangle mr-2"></i>Eksik
+                                <span class="settings-api-status settings-api-status-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>Eksik
                             </span>
                         {% else %}
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                                <i class="fas fa-times-circle mr-2"></i>Hiçbiri Yok
+                                <span class="settings-api-status settings-api-status-error">
+                                    <i class="fas fa-times-circle"></i>Hiçbiri Yok
                             </span>
                         {% endif %}
+                        </div>
                     </div>
                 </div>
             {% else %}
-                <div class="p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-exclamation-triangle text-red-600"></i>
-                        <span class="text-red-800 font-medium">API durumu kontrol edilemedi</span>
+                <div class="settings-section">
+                    <div class="settings-status-box settings-status-error">
+                        <div class="settings-status-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
                     </div>
+                        <div class="settings-status-content">
+                            <div class="settings-status-title">API durumu kontrol edilemedi</div>
+                </div>
+        </div>
                 </div>
             {% endif %}
-        </div>
     </div>
 </div>
 
 <!-- API Yönetimi Kartı -->
-<div class="card-modern">
-    <div class="p-8">
-        <div class="flex items-center space-x-3 mb-8">
-            <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-xl flex items-center justify-center">
-                <i class="fas fa-key text-white text-lg"></i>
+    <div class="tweet-card settings-card">
+        <div class="settings-card-header">
+            <div class="settings-card-icon">
+                <i class="fas fa-key"></i>
             </div>
-            <h2 class="text-2xl font-bold text-gray-900">API Anahtarları Yönetimi</h2>
+            <h2 class="settings-card-title">API Anahtarları Yönetimi</h2>
         </div>
 
         <!-- API Anahtarları Formu -->
-        <form id="apiKeysForm" class="space-y-6">
+        <form id="apiKeysForm" class="settings-form">
             <!-- Google Gemini API -->
-            <div class="border border-gray-200 rounded-lg p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center space-x-3">
-                        <i class="fab fa-google text-blue-500 text-xl"></i>
-                        <h3 class="text-lg font-semibold text-gray-900">Google Gemini API</h3>
-                        <span class="px-2 py-1 text-xs font-medium rounded-full {{ 'bg-green-100 text-green-800' if api_status.google_api_working else 'bg-red-100 text-red-800' }}">
+            <div class="settings-section">
+                <div class="settings-api-form-card">
+                    <div class="settings-api-form-header">
+                        <div class="settings-api-form-title">
+                            <i class="fab fa-google"></i>
+                            <h3>Google Gemini API</h3>
+                            <span class="settings-api-form-status {{ 'settings-api-form-status-success' if api_status.google_api_working else 'settings-api-form-status-error' }}">
                             {{ '✅ Aktif' if api_status.google_api_working else '❌ Pasif' }}
                         </span>
                     </div>
-                    <button type="button" onclick="testSingleAPI('google')" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
-                        Test Et
+                        <button type="button" onclick="testSingleAPI('google')" class="twitter-btn twitter-btn-secondary twitter-btn-sm">
+                            <i class="fas fa-vial"></i>
+                            <span>Test Et</span>
                     </button>
                 </div>
+                    <div class="settings-api-form-content">
                 <input type="password" name="GOOGLE_API_KEY" id="google_api_key" 
                        placeholder="Google Gemini API anahtarınızı girin..."
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <div class="mt-2 text-sm text-gray-600">
+                               class="settings-input">
+                        <div class="settings-input-description">
                     <i class="fas fa-info-circle"></i>
                     AI tweet oluşturma ve analiz için kullanılır
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- OpenRouter API -->
-            <div class="border border-gray-200 rounded-lg p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-route text-purple-500 text-xl"></i>
-                        <h3 class="text-lg font-semibold text-gray-900">OpenRouter API</h3>
-                        <span class="px-2 py-1 text-xs font-medium rounded-full {{ 'bg-green-100 text-green-800' if api_status.openrouter_api_working else 'bg-red-100 text-red-800' }}">
+            <div class="settings-section">
+                <div class="settings-api-form-card">
+                    <div class="settings-api-form-header">
+                        <div class="settings-api-form-title">
+                            <i class="fas fa-route"></i>
+                            <h3>OpenRouter API</h3>
+                            <span class="settings-api-form-status {{ 'settings-api-form-status-success' if api_status.openrouter_api_working else 'settings-api-form-status-error' }}">
                             {{ '✅ Aktif' if api_status.openrouter_api_working else '❌ Pasif' }}
                         </span>
                     </div>
-                    <button type="button" onclick="testSingleAPI('openrouter')" class="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm">
-                        Test Et
+                        <button type="button" onclick="testSingleAPI('openrouter')" class="twitter-btn twitter-btn-secondary twitter-btn-sm">
+                            <i class="fas fa-vial"></i>
+                            <span>Test Et</span>
                     </button>
                 </div>
+                    <div class="settings-api-form-content">
                 <input type="password" name="OPENROUTER_API_KEY" id="openrouter_api_key"
                        placeholder="OpenRouter API anahtarınızı girin..."
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-                <div class="mt-2 text-sm text-gray-600">
+                               class="settings-input">
+                        <div class="settings-input-description">
                     <i class="fas fa-info-circle"></i>
                     Gemini başarısız olduğunda yedek AI servisi
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Twitter API -->
-            <div class="border border-gray-200 rounded-lg p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center space-x-3">
-                        <i class="fab fa-twitter text-blue-400 text-xl"></i>
-                        <h3 class="text-lg font-semibold text-gray-900">Twitter API v2</h3>
-                        <span class="px-2 py-1 text-xs font-medium rounded-full {{ 'bg-green-100 text-green-800' if api_status.twitter_api_available else 'bg-red-100 text-red-800' }}">
+            <div class="settings-section">
+                <div class="settings-api-form-card">
+                    <div class="settings-api-form-header">
+                        <div class="settings-api-form-title">
+                            <i class="fab fa-twitter"></i>
+                            <h3>Twitter API v2</h3>
+                            <span class="settings-api-form-status {{ 'settings-api-form-status-success' if api_status.twitter_api_available else 'settings-api-form-status-error' }}">
                             {{ '✅ Aktif' if api_status.twitter_api_available else '❌ Pasif' }}
                         </span>
                     </div>
-                    <button type="button" onclick="testSingleAPI('twitter')" class="px-3 py-1 bg-blue-400 text-white rounded hover:bg-blue-500 text-sm">
-                        Test Et
+                        <button type="button" onclick="testSingleAPI('twitter')" class="twitter-btn twitter-btn-secondary twitter-btn-sm">
+                            <i class="fas fa-vial"></i>
+                            <span>Test Et</span>
                     </button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="settings-api-form-content">
+                        <div class="settings-inputs-grid">
                     <input type="password" name="TWITTER_BEARER_TOKEN" id="twitter_bearer_token"
                            placeholder="Bearer Token"
-                           class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400">
+                                   class="settings-input">
                     <input type="password" name="TWITTER_API_KEY" id="twitter_api_key"
                            placeholder="API Key"
-                           class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400">
+                                   class="settings-input">
                     <input type="password" name="TWITTER_API_SECRET" id="twitter_api_secret"
                            placeholder="API Secret"
-                           class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400">
+                                   class="settings-input">
                     <input type="password" name="TWITTER_ACCESS_TOKEN" id="twitter_access_token"
                            placeholder="Access Token"
-                           class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400">
+                                   class="settings-input">
                 </div>
                 <input type="password" name="TWITTER_ACCESS_TOKEN_SECRET" id="twitter_access_token_secret"
                        placeholder="Access Token Secret"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 mt-4">
-                <div class="mt-2 text-sm text-gray-600">
+                               class="settings-input">
+                        <div class="settings-input-description">
                     <i class="fas fa-info-circle"></i>
                     Tweet paylaşımı için gerekli
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- GitHub API -->
-            <div class="border border-gray-200 rounded-lg p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center space-x-3">
-                        <i class="fab fa-github text-gray-800 text-xl"></i>
-                        <h3 class="text-lg font-semibold text-gray-900">GitHub API</h3>
-                        <span class="px-2 py-1 text-xs font-medium rounded-full {{ 'bg-green-100 text-green-800' if api_status.github_token else 'bg-red-100 text-red-800' }}">
+            <div class="settings-section">
+                <div class="settings-api-form-card">
+                    <div class="settings-api-form-header">
+                        <div class="settings-api-form-title">
+                            <i class="fab fa-github"></i>
+                            <h3>GitHub API</h3>
+                            <span class="settings-api-form-status {{ 'settings-api-form-status-success' if api_status.github_token else 'settings-api-form-status-error' }}">
                             {{ '✅ Aktif' if api_status.github_token else '❌ Pasif' }}
                         </span>
                     </div>
-                    <button type="button" onclick="testSingleAPI('github')" class="px-3 py-1 bg-gray-800 text-white rounded hover:bg-gray-900 text-sm">
-                        Test Et
+                        <button type="button" onclick="testSingleAPI('github')" class="twitter-btn twitter-btn-secondary twitter-btn-sm">
+                            <i class="fas fa-vial"></i>
+                            <span>Test Et</span>
                     </button>
                 </div>
+                    <div class="settings-api-form-content">
                 <input type="password" name="GITHUB_TOKEN" id="github_token"
                        placeholder="GitHub Personal Access Token"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-800 focus:border-gray-800">
-                <div class="mt-2 text-sm text-gray-600">
+                               class="settings-input">
+                        <div class="settings-input-description">
                     <i class="fas fa-info-circle"></i>
                     GitHub repo bilgilerini çekmek için (opsiyonel)
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Telegram & Gmail -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="settings-section">
+                <div class="settings-inputs-grid">
                 <!-- Telegram -->
-                <div class="border border-gray-200 rounded-lg p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <i class="fab fa-telegram text-blue-500 text-xl"></i>
-                            <h3 class="text-lg font-semibold text-gray-900">Telegram</h3>
+                    <div class="settings-api-form-card">
+                        <div class="settings-api-form-header">
+                            <div class="settings-api-form-title">
+                                <i class="fab fa-telegram"></i>
+                                <h3>Telegram</h3>
                         </div>
                     </div>
-                    <div class="space-y-3">
+                        <div class="settings-api-form-content">
                         <input type="password" name="TELEGRAM_BOT_TOKEN" id="telegram_bot_token"
                                placeholder="Bot Token"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                   class="settings-input">
                         <input type="text" name="TELEGRAM_CHAT_ID" id="telegram_chat_id"
                                placeholder="Chat ID"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                   class="settings-input">
                     </div>
                 </div>
 
                 <!-- Gmail -->
-                <div class="border border-gray-200 rounded-lg p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-envelope text-red-500 text-xl"></i>
-                            <h3 class="text-lg font-semibold text-gray-900">Gmail SMTP</h3>
+                    <div class="settings-api-form-card">
+                        <div class="settings-api-form-header">
+                            <div class="settings-api-form-title">
+                                <i class="fas fa-envelope"></i>
+                                <h3>Gmail SMTP</h3>
                         </div>
                     </div>
-                    <div class="space-y-3">
+                        <div class="settings-api-form-content">
                         <input type="email" name="GMAIL_EMAIL" id="gmail_email"
                                placeholder="Gmail Adresi"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                   class="settings-input">
                         <input type="password" name="GMAIL_APP_PASSWORD" id="gmail_app_password"
                                placeholder="App Password"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                   class="settings-input">
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Kaydet Butonu -->
-            <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-                <div class="flex items-center space-x-4">
-                    <button type="button" onclick="loadCurrentApiKeys()" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
-                        <i class="fas fa-sync-alt mr-2"></i>
-                        Mevcut Değerleri Yükle
+            <div class="settings-actions">
+                <div class="settings-actions-left">
+                    <button type="button" onclick="loadCurrentApiKeys()" class="twitter-btn twitter-btn-secondary">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Mevcut Değerleri Yükle</span>
                     </button>
-                    <button type="button" onclick="testAllAPIs()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                        <i class="fas fa-vial mr-2"></i>
-                        Tümünü Test Et
+                    <button type="button" onclick="testAllAPIs()" class="twitter-btn twitter-btn-secondary">
+                        <i class="fas fa-vial"></i>
+                        <span>Tümünü Test Et</span>
                     </button>
                 </div>
-                <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-                    <i class="fas fa-save mr-2"></i>
-                    API Anahtarlarını Kaydet
+                <button type="submit" class="twitter-btn twitter-btn-primary">
+                    <i class="fas fa-save"></i>
+                    <span>API Anahtarlarını Kaydet</span>
                 </button>
             </div>
         </form>
 
         <!-- Test Sonuçları -->
-        <div id="apiTestResults" class="mt-6 hidden">
-            <h4 class="text-lg font-semibold text-gray-900 mb-4">Test Sonuçları</h4>
-            <div id="testResultsContent" class="space-y-2"></div>
+        <div id="apiTestResults" class="settings-section hidden">
+            <h3 class="settings-section-title">Test Sonuçları</h3>
+            <div id="testResultsContent" class="settings-test-results"></div>
         </div>
     </div>
 
     <!-- Rate Limit Yönetimi Kartı -->
-    <div class="card-modern">
-        <div class="p-8">
-            <div class="flex items-center space-x-3 mb-8">
-                <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-clock text-white text-lg"></i>
+    <div class="tweet-card settings-card">
+        <div class="settings-card-header">
+            <div class="settings-card-icon">
+                <i class="fas fa-clock"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900">Rate Limit Yönetimi</h2>
+            <h2 class="settings-card-title">Rate Limit Yönetimi</h2>
             </div>
             
-            <div class="space-y-6">
-                <p class="text-gray-600">Twitter API rate limit durumunu kontrol edin ve gerekirse sıfırlayın.</p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button onclick="checkRateLimit()" class="btn-secondary">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        Rate Limit Durumunu Kontrol Et
+        <div class="settings-form">
+            <div class="settings-section">
+                <div class="settings-info-box">
+                    <div class="settings-info-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="settings-info-content">
+                        <div class="settings-info-title">Rate Limit Kontrolü</div>
+                        <div class="settings-info-text">
+                            Twitter API rate limit durumunu kontrol edin ve gerekirse sıfırlayın.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <div class="settings-actions">
+                    <button onclick="checkRateLimit()" class="twitter-btn twitter-btn-secondary">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Rate Limit Durumunu Kontrol Et</span>
                     </button>
                     
-                    <button onclick="resetRateLimit()" class="btn-warning">
-                        <i class="fas fa-redo mr-2"></i>
-                        Rate Limit'i Sıfırla
+                    <button onclick="resetRateLimit()" class="twitter-btn twitter-btn-warning">
+                        <i class="fas fa-redo"></i>
+                        <span>Rate Limit'i Sıfırla</span>
                     </button>
                 </div>
-                
-                <div id="rateLimitResults" class="hidden">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Rate Limit Durumu</h3>
-                    <div id="rateLimitContent" class="space-y-3"></div>
                 </div>
+                
+            <div id="rateLimitResults" class="settings-section hidden">
+                <h3 class="settings-section-title">Rate Limit Durumu</h3>
+                <div id="rateLimitContent" class="settings-rate-limit-content"></div>
             </div>
         </div>
     </div>

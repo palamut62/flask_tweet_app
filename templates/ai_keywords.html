@@ -2,164 +2,173 @@
 
 {% block title %}AI Anahtar Kelime Yönetimi{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/twitter-style.css') }}">
+{% endblock %}
+
 {% block content %}
-<!-- Twitter Feed Style -->
-<div class="twitter-feed">
-    <!-- Header -->
-    <div class="feed-header">
-        <div class="d-flex align-items-center justify-content-between">
-            <div>
-                <h1 class="feed-title">AI Anahtar Kelime Yönetimi</h1>
-                <p class="feed-subtitle">Gelişmiş yapay zeka haber arama sistemi için anahtar kelimeleri yönetin</p>
-            </div>
-            <div>
-                <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
-            </div>
-        </div>
-    </div>
+<!-- AI Keywords Header - Twitter Tarzı -->
+<div class="ai-keywords-header">
+    <h1 class="ai-keywords-title">
+        <i class="fas fa-brain"></i>
+        AI Anahtar Kelime Yönetimi
+    </h1>
+</div>
+
+<div class="ai-keywords-content">
+    <p style="color: var(--twitter-text-secondary); margin-bottom: 20px; font-size: 14px;">
+        Gelişmiş yapay zeka haber arama sistemi için anahtar kelimeleri yönetin
+    </p>
 
     <!-- İstatistikler -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      <div class="tweet-card p-4 text-center">
-        <div class="text-2xl font-bold text-blue-600">{{ stats.total_categories }}</div>
-        <div class="text-sm text-gray-500 mt-1">Toplam Kategori</div>
-      </div>
-      <div class="tweet-card p-4 text-center">
-        <div class="text-2xl font-bold text-green-600">{{ stats.enabled_categories }}</div>
-        <div class="text-sm text-gray-500 mt-1">Aktif Kategori</div>
-      </div>
-      <div class="tweet-card p-4 text-center">
-        <div class="text-2xl font-bold text-indigo-600">{{ stats.total_default_keywords + stats.total_user_keywords }}</div>
-        <div class="text-sm text-gray-500 mt-1">Toplam Keyword</div>
-      </div>
-      <div class="tweet-card p-4 text-center">
-        <div class="text-2xl font-bold text-purple-600">{{ stats.total_user_keywords }}</div>
-        <div class="text-sm text-gray-500 mt-1">Kullanıcı Keyword</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Genel Ayarlar -->
-  <section class="tweet-card p-6">
-    <h3 class="text-lg font-semibold mb-6 flex items-center space-x-2"><i class="fas fa-gear"></i><span>Genel Ayarlar</span></h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <!-- Toggle Enabled -->
-      <div class="flex items-center space-x-4">
-        <label for="aiKeywordsEnabled" class="flex-1 text-gray-700 font-medium">AI Keyword Araması</label>
-        <input id="aiKeywordsEnabled" type="checkbox" class="h-6 w-6 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500" {{ 'checked' if config.settings.enabled else '' }} onchange="updateGeneralSetting('enabled', this.checked)">
-      </div>
-      <!-- Search Time Range -->
-      <div class="flex flex-col space-y-1">
-        <label for="searchTimeRange" class="text-gray-700 font-medium">Arama Zaman Aralığı (Saat)</label>
-        <input id="searchTimeRange" type="number" min="1" max="168" value="{{ config.settings.search_time_range_hours }}" class="input-mobile" onchange="updateGeneralSetting('search_time_range_hours', parseInt(this.value))">
-      </div>
-      <!-- Max Articles -->
-      <div class="flex flex-col space-y-1">
-        <label for="maxArticles" class="text-gray-700 font-medium">Maksimum Makale Sayısı</label>
-        <input id="maxArticles" type="number" min="1" max="50" value="{{ config.settings.max_articles_per_search }}" class="input-mobile" onchange="updateGeneralSetting('max_articles_per_search', parseInt(this.value))">
-      </div>
-      <!-- Search Depth -->
-      <div class="flex flex-col space-y-1">
-        <label for="searchDepth" class="text-gray-700 font-medium">Arama Derinliği</label>
-        <select id="searchDepth" class="input-mobile" onchange="updateGeneralSetting('search_depth', this.value)">
-          <option value="basic" {{ 'selected' if config.settings.search_depth == 'basic' else '' }}>Temel Arama</option>
-          <option value="deep" {{ 'selected' if config.settings.search_depth == 'deep' else '' }}>Derin Arama</option>
-          <option value="comprehensive" {{ 'selected' if config.settings.search_depth == 'comprehensive' else '' }}>Kapsamlı Arama</option>
-        </select>
-      </div>
-    </div>
-  </section>
-
-  <!-- Kategoriler -->
-  <section>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {% for category_name, category_data in config.keyword_categories.items() %}
-      <div id="category-{{ category_name }}" class="tweet-card flex flex-col">
-        <!-- Header -->
-        <div class="px-6 py-4 rounded-t-xl text-white flex justify-between items-center {{ 'bg-gradient-to-r from-gray-500 to-gray-600' if not category_data.enabled else 'bg-gradient-to-r from-blue-500 to-purple-600' }}">
-          <div class="font-semibold">
-            {% if category_name == 'ai_models' %}🤖 AI Modelleri
-            {% elif category_name == 'ai_tools' %}🛠️ AI Araçları
-            {% elif category_name == 'ai_companies' %}🏢 AI Şirketleri
-            {% elif category_name == 'ai_technologies' %}⚡ AI Teknolojileri
-            {% elif category_name == 'ai_applications' %}📱 AI Uygulamaları
-            {% else %}{{ category_name.title() }}
-            {% endif %}
-          </div>
-          <span class="priority-badge inline-block bg-white/20 px-3 py-1 rounded-full text-xs font-semibold tracking-wide">{{ category_data.priority.upper() }}</span>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total_categories }}</div>
+            <div class="stat-label">Toplam Kategori</div>
         </div>
-
-        <!-- Body -->
-        <div class="flex-1 px-6 py-4 space-y-4 text-sm">
-          <p class="text-gray-500">Varsayılan: {{ category_data.default_keywords|length }} • Kullanıcı: {{ category_data.user_keywords|length }}</p>
-
-          <!-- Default Keywords -->
-          <div>
-            <div class="font-medium mb-1">Varsayılan Anahtar Kelimeler</div>
-            <div class="flex flex-wrap gap-2">
-              {% for keyword in category_data.default_keywords %}
-              <span class="cursor-pointer inline-flex items-center rounded-full px-3 py-1 transition-colors duration-200 {{ 'bg-gray-300 text-gray-500' if keyword in category_data.excluded_keywords else 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}" onclick="toggleKeywordInCard('{{ category_name }}', '{{ keyword }}')" title="{{ 'Pasif - Tıkla aktifleştir' if keyword in category_data.excluded_keywords else 'Aktif - Tıkla pasifleştir' }}">
-                {{ keyword }}
-              </span>
-              {% endfor %}
-            </div>
-          </div>
-
-          <!-- User Keywords -->
-          {% if category_data.user_keywords %}
-          <div>
-            <div class="font-medium mb-1 flex items-center justify-between">
-              <span>Kullanıcı Anahtar Kelimeleri</span>
-              <button class="text-xs text-red-600 hover:text-red-800 flex items-center space-x-1" onclick="showDeleteUserKeywords('{{ category_name }}')">
-                <i class="fas fa-trash"></i>
-                <span>Tümünü Sil</span>
-              </button>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              {% for keyword in category_data.user_keywords %}
-              <span class="cursor-pointer inline-flex items-center rounded-full px-3 py-1 transition-colors duration-200 group {{ 'bg-red-200 text-red-600' if keyword in category_data.excluded_keywords else 'bg-green-100 text-green-700 hover:bg-green-200' }}" onclick="toggleKeywordInCard('{{ category_name }}', '{{ keyword }}')" title="{{ 'Pasif - Tıkla aktifleştir' if keyword in category_data.excluded_keywords else 'Aktif - Tıkla pasifleştir' }}">
-                {{ keyword }}
-                <button class="ml-1 opacity-0 group-hover:opacity-100 text-xs hover:text-red-600 transition-opacity" onclick="event.stopPropagation(); removeUserKeyword('{{ category_name }}', '{{ keyword }}')" title="Bu kelimeyi sil">
-                  <i class="fas fa-times"></i>
-                </button>
-              </span>
-              {% endfor %}
-            </div>
-          </div>
-          {% endif %}
-
-
-
-          <!-- Add Keyword Form -->
-          <form class="space-y-2" onsubmit="addUserKeyword('{{ category_name }}');return false;">
-            <input id="newKeyword-{{ category_name }}" type="text" placeholder="Yeni anahtar kelime, virgülle ayırabilirsiniz" class="input-mobile w-full" />
-            <button type="submit" class="btn-success w-full">Ekle</button>
-          </form>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.enabled_categories }}</div>
+            <div class="stat-label">Aktif Kategori</div>
         </div>
-
-        <!-- Footer Buttons -->
-        <div class="px-6 py-4 border-t border-gray-100 flex justify-between items-center rounded-b-xl bg-gray-50">
-          <button class="btn-secondary text-sm" onclick="toggleCategory('{{ category_name }}')">{{ 'Aktif' if category_data.enabled else 'Pasif' }}</button>
-          <button class="btn-warning text-sm" onclick="changePriority('{{ category_name }}')">Öncelik Değiştir</button>
-          <button class="btn-danger text-sm" onclick="resetCategory('{{ category_name }}')">Sıfırla</button>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total_default_keywords + stats.total_user_keywords }}</div>
+            <div class="stat-label">Toplam Keyword</div>
         </div>
-      </div>
-      {% endfor %}
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total_user_keywords }}</div>
+            <div class="stat-label">Kullanıcı Keyword</div>
+        </div>
     </div>
-  </section>
 
-  <!-- Aktif Anahtar Kelimeler Önizleme -->
-  <section class="card-modern p-6" id="activeKeywordsContainer">
-    <h3 class="font-semibold mb-4 flex items-center space-x-2"><i class="fas fa-eye"></i><span>Aktif Anahtar Kelimeler</span></h3>
-    <div class="flex flex-wrap gap-2 mb-2">
-      {% for keyword in active_keywords %}
-      <span class="cursor-pointer inline-flex items-center bg-blue-100 text-blue-700 rounded-full px-3 py-1 hover:bg-blue-200" onclick="toggleKeyword('{{ keyword }}')" title="Tıkla → hariç tut / geri al">{{ keyword }}</span>
-      {% endfor %}
+    <!-- Genel Ayarlar -->
+    <div class="ai-keywords-card">
+        <div class="ai-keywords-card-header">
+            <h3 class="ai-keywords-card-title">
+                <i class="fas fa-gear"></i>
+                Genel Ayarlar
+            </h3>
+        </div>
+        <div class="ai-keywords-card-body">
+            <div class="settings-grid">
+                <!-- Toggle Enabled -->
+                <div class="form-group">
+                    <label for="aiKeywordsEnabled" class="form-label">AI Keyword Araması</label>
+                    <input id="aiKeywordsEnabled" type="checkbox" class="form-checkbox" {{ 'checked' if config.settings.enabled else '' }} onchange="updateGeneralSetting('enabled', this.checked)">
+                </div>
+                <!-- Search Time Range -->
+                <div class="form-group">
+                    <label for="searchTimeRange" class="form-label">Arama Zaman Aralığı (Saat)</label>
+                    <input id="searchTimeRange" type="number" min="1" max="168" value="{{ config.settings.search_time_range_hours }}" class="form-control" onchange="updateGeneralSetting('search_time_range_hours', parseInt(this.value))">
+                </div>
+                <!-- Max Articles -->
+                <div class="form-group">
+                    <label for="maxArticles" class="form-label">Maksimum Makale Sayısı</label>
+                    <input id="maxArticles" type="number" min="1" max="50" value="{{ config.settings.max_articles_per_search }}" class="form-control" onchange="updateGeneralSetting('max_articles_per_search', parseInt(this.value))">
+                </div>
+                <!-- Search Depth -->
+                <div class="form-group">
+                    <label for="searchDepth" class="form-label">Arama Derinliği</label>
+                    <select id="searchDepth" class="form-control" onchange="updateGeneralSetting('search_depth', this.value)">
+                        <option value="basic" {{ 'selected' if config.settings.search_depth == 'basic' else '' }}>Temel Arama</option>
+                        <option value="deep" {{ 'selected' if config.settings.search_depth == 'deep' else '' }}>Derin Arama</option>
+                        <option value="comprehensive" {{ 'selected' if config.settings.search_depth == 'comprehensive' else '' }}>Kapsamlı Arama</option>
+                    </select>
+                </div>
+            </div>
+        </div>
     </div>
-    <small class="text-gray-500">Toplam {{ active_keywords|length }} anahtar kelime aktif</small>
-  </section>
+
+    <!-- Kategoriler -->
+    <div class="categories-grid">
+        {% for category_name, category_data in config.keyword_categories.items() %}
+        <div id="category-{{ category_name }}" class="category-card">
+            <!-- Header -->
+            <div class="category-card-header {{ 'category-disabled' if not category_data.enabled else 'category-enabled' }}">
+                <div class="category-name">
+                    {% if category_name == 'ai_models' %}🤖 AI Modelleri
+                    {% elif category_name == 'ai_tools' %}🛠️ AI Araçları
+                    {% elif category_name == 'ai_companies' %}🏢 AI Şirketleri
+                    {% elif category_name == 'ai_technologies' %}⚡ AI Teknolojileri
+                    {% elif category_name == 'ai_applications' %}📱 AI Uygulamaları
+                    {% else %}{{ category_name.title() }}
+                    {% endif %}
+                </div>
+                <span class="priority-badge">{{ category_data.priority.upper() }}</span>
+            </div>
+
+            <!-- Body -->
+            <div class="category-card-body">
+                <p class="category-stats">Varsayılan: {{ category_data.default_keywords|length }} • Kullanıcı: {{ category_data.user_keywords|length }}</p>
+
+                <!-- Default Keywords -->
+                <div class="keywords-section">
+                    <div class="keywords-title">Varsayılan Anahtar Kelimeler</div>
+                    <div class="keywords-container">
+                        {% for keyword in category_data.default_keywords %}
+                        <span class="keyword-tag {{ 'keyword-inactive' if keyword in category_data.excluded_keywords else 'keyword-default' }}" onclick="toggleKeywordInCard('{{ category_name }}', '{{ keyword }}')" title="{{ 'Pasif - Tıkla aktifleştir' if keyword in category_data.excluded_keywords else 'Aktif - Tıkla pasifleştir' }}">
+                            {{ keyword }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- User Keywords -->
+                {% if category_data.user_keywords %}
+                <div class="keywords-section">
+                    <div class="keywords-title">
+                        <span>Kullanıcı Anahtar Kelimeleri</span>
+                        <button class="delete-all-btn" onclick="showDeleteUserKeywords('{{ category_name }}')">
+                            <i class="fas fa-trash"></i>
+                            <span>Tümünü Sil</span>
+                        </button>
+                    </div>
+                    <div class="keywords-container">
+                        {% for keyword in category_data.user_keywords %}
+                        <span class="keyword-tag keyword-user {{ 'keyword-inactive' if keyword in category_data.excluded_keywords else 'keyword-active' }}" onclick="toggleKeywordInCard('{{ category_name }}', '{{ keyword }}')" title="{{ 'Pasif - Tıkla aktifleştir' if keyword in category_data.excluded_keywords else 'Aktif - Tıkla pasifleştir' }}">
+                            {{ keyword }}
+                            <button class="remove-keyword-btn" onclick="event.stopPropagation(); removeUserKeyword('{{ category_name }}', '{{ keyword }}')" title="Bu kelimeyi sil">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Add Keyword Form -->
+                <form class="add-keyword-form" onsubmit="addUserKeyword('{{ category_name }}');return false;">
+                    <input id="newKeyword-{{ category_name }}" type="text" placeholder="Yeni anahtar kelime, virgülle ayırabilirsiniz" class="form-control" />
+                    <button type="submit" class="btn btn-primary">Ekle</button>
+                </form>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="category-card-footer">
+                <button class="btn btn-secondary" onclick="toggleCategory('{{ category_name }}')">{{ 'Aktif' if category_data.enabled else 'Pasif' }}</button>
+                <button class="btn btn-warning" onclick="changePriority('{{ category_name }}')">Öncelik Değiştir</button>
+                <button class="btn btn-danger" onclick="resetCategory('{{ category_name }}')">Sıfırla</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Aktif Anahtar Kelimeler Önizleme -->
+    <div class="ai-keywords-card" id="activeKeywordsContainer">
+        <div class="ai-keywords-card-header">
+            <h3 class="ai-keywords-card-title">
+                <i class="fas fa-eye"></i>
+                Aktif Anahtar Kelimeler
+            </h3>
+        </div>
+        <div class="ai-keywords-card-body">
+            <div class="active-keywords-container">
+                {% for keyword in active_keywords %}
+                <span class="keyword-tag keyword-active" onclick="toggleKeyword('{{ keyword }}')" title="Tıkla → hariç tut / geri al">{{ keyword }}</span>
+                {% endfor %}
+            </div>
+            <small class="keywords-count">Toplam {{ active_keywords|length }} anahtar kelime aktif</small>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -671,30 +680,29 @@ function updateKeywordVisualState(categoryName, keyword, isActive) {
         
         if (spanText === keyword) {
             // Renk sınıflarını temizle
-            span.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200', 'bg-gray-300', 'text-gray-500');
-            span.classList.remove('bg-green-100', 'text-green-700', 'hover:bg-green-200', 'bg-red-200', 'text-red-600');
+            span.classList.remove('keyword-default', 'keyword-inactive', 'keyword-user', 'keyword-active');
             
             // Kullanıcı kelimesi mi varsayılan kelime mi?
-            const isUserKeyword = span.closest('div').previousElementSibling?.textContent.includes('Kullanıcı');
+            const isUserKeyword = span.closest('.keywords-section').previousElementSibling?.textContent.includes('Kullanıcı');
             
             if (isActive) {
                 // Aktif görünüm
                 if (isUserKeyword) {
                     // Kullanıcı kelimesi
-                    span.classList.add('bg-green-100', 'text-green-700', 'hover:bg-green-200');
+                    span.classList.add('keyword-user', 'keyword-active');
                 } else {
                     // Varsayılan kelime
-                    span.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                    span.classList.add('keyword-default', 'keyword-active');
                 }
                 span.title = 'Aktif - Tıkla pasifleştir';
             } else {
                 // Pasif görünüm
                 if (isUserKeyword) {
                     // Kullanıcı kelimesi
-                    span.classList.add('bg-red-200', 'text-red-600');
+                    span.classList.add('keyword-user', 'keyword-inactive');
                 } else {
                     // Varsayılan kelime
-                    span.classList.add('bg-gray-300', 'text-gray-500');
+                    span.classList.add('keyword-default', 'keyword-inactive');
                 }
                 span.title = 'Pasif - Tıkla aktifleştir';
             }
@@ -703,14 +711,14 @@ function updateKeywordVisualState(categoryName, keyword, isActive) {
 }
 
 function updateActiveKeywordsList(activeKeywords) {
-    const container = document.querySelector('#activeKeywordsContainer .flex.flex-wrap');
+    const container = document.querySelector('#activeKeywordsContainer .active-keywords-container');
     if (container) {
         container.innerHTML = '';
         
         // Tüm aktif kelimeleri göster (sınır yok)
         activeKeywords.forEach(keyword => {
             const span = document.createElement('span');
-            span.className = 'cursor-pointer inline-flex items-center bg-blue-100 text-blue-700 rounded-full px-3 py-1 hover:bg-blue-200';
+            span.className = 'keyword-tag keyword-active';
             span.onclick = () => toggleKeyword(keyword);
             span.title = 'Tıkla → hariç tut / geri al';
             span.textContent = keyword;
@@ -727,7 +735,7 @@ function updateActiveKeywordsList(activeKeywords) {
 
 function updateStatsDisplay(stats) {
     // İstatistik kartlarını güncelle
-    const statCards = document.querySelectorAll('.card-modern .text-2xl');
+    const statCards = document.querySelectorAll('.stats-grid .stat-number');
     if (statCards.length >= 4) {
         statCards[0].textContent = stats.total_categories || 0;
         statCards[1].textContent = stats.enabled_categories || 0;

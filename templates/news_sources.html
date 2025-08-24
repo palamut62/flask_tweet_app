@@ -1,183 +1,823 @@
 {% extends "base.html" %}
 
-{% block title %}AI Tweet Bot - Haber Kaynakları{% endblock %}
+{% block title %}Haber Kaynakları{% endblock %}
 
-{% block extra_head %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/twitter-style.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Haber Kaynakları Header - Twitter Tarzı -->
+<div class="news-sources-header">
+    <h1 class="news-sources-title">
+        <i class="fas fa-newspaper"></i>
+        Haber Kaynakları Yönetimi
+    </h1>
+</div>
+
+<div class="news-sources-content">
+    <p style="color: var(--twitter-text-secondary); margin-bottom: 20px; font-size: 14px;">
+        Özel haber kaynaklarınızı ekleyin ve yönetin. Sistem bu kaynaklardan otomatik olarak makale çekecek.
+    </p>
+
+    <!-- İstatistikler -->
+    {% if stats %}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total_sources }}</div>
+            <div class="stat-label">Toplam Kaynak</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.enabled_sources }}</div>
+            <div class="stat-label">Aktif Kaynak</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.disabled_sources }}</div>
+            <div class="stat-label">Pasif Kaynak</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.average_success_rate }}%</div>
+            <div class="stat-label">Ortalama Başarı</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Yeni Kaynak Ekleme -->
+    <div class="news-source-card">
+        <div class="news-source-header">
+            <div class="news-source-info">
+                <div class="news-source-name">
+                    <i class="fas fa-plus"></i>
+                    Yeni Haber Kaynağı Ekle
+                </div>
+            </div>
+        </div>
+        
+        <form method="POST" action="{{ url_for('add_news_source_route') }}" id="addSourceForm" onsubmit="debugFormSubmit(event)">
+            <div class="form-sections">
+                <!-- Temel Bilgiler -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Temel Bilgiler
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name" class="form-label">
+                                Kaynak Adı *
+                            </label>
+                            <input type="text" 
+                                   id="name" 
+                                   name="name" 
+                                   required 
+                                   placeholder="örn: Wired AI"
+                                   class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="description" class="form-label">
+                                Açıklama
+                            </label>
+                            <input type="text" 
+                                   id="description" 
+                                   name="description" 
+                                   placeholder="Kısa açıklama"
+                                   class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- URL ve Analiz -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="fas fa-link"></i>
+                        URL ve Analiz
+                    </h3>
+                    <div class="form-group">
+                        <label for="url" class="form-label">
+                            URL *
+                        </label>
+                        <input type="url" 
+                               id="url" 
+                               name="url" 
+                               required 
+                               placeholder="https://example.com/ai-news"
+                               onchange="onUrlChange()"
+                               class="form-control">
+                        <div class="form-actions">
+                            <button type="button" 
+                                    id="analyzePageBtn"
+                                    onclick="analyzePageSource()"
+                                    class="btn btn-primary"
+                                    title="Sayfa kaynağını AI ile analiz et">
+                                <i class="fas fa-brain"></i>
+                                AI Analiz
+                            </button>
+                            <button type="button" 
+                                    id="testUrlBtn"
+                                    onclick="testUrlBeforeAdd()"
+                                    class="btn btn-secondary"
+                                    title="URL'yi test et">
+                                <i class="fas fa-vial"></i>
+                                Test Et
+                            </button>
+                        </div>
+                        <div id="urlTestResult" class="form-result hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Otomatik Tespit Seçeneği -->
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="fas fa-magic"></i>
+                        Selector Tespiti
+                    </h3>
+                    <div class="form-info-card">
+                        <div class="form-info-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="form-info-content">
+                            <div class="form-info-title">Otomatik Selector Tespiti</div>
+                            <div class="form-info-text">
+                                <div class="form-checkbox-wrapper">
+                                    <input type="checkbox" 
+                                           id="auto_detect" 
+                                           name="auto_detect" 
+                                           value="on"
+                                           checked 
+                                           onchange="toggleManualSelectors()"
+                                           class="form-checkbox">
+                                    <span class="form-checkbox-label">Otomatik Selector Tespiti</span>
+                                </div>
+                                <p class="form-info-detail">
+                                    Önerilen: Sayfa yapısını otomatik analiz ederek makale selector'larını tespit eder. 
+                                    Bu seçenek kapalıysa manuel selector'lar kullanılır.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manuel Selector'lar (Otomatik tespit kapalıysa gösterilir) -->
+                <div id="manualSelectorsSection" class="form-section hidden">
+                    <h3 class="form-section-title">
+                        <i class="fas fa-code"></i>
+                        Manuel CSS Selector'ları
+                    </h3>
+                    <div class="form-info-card">
+                        <div class="form-info-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="form-info-content">
+                            <div class="form-info-title">Manuel CSS Selector'ları</div>
+                            <div class="form-info-text">
+                                <div class="form-actions">
+                                    <button type="button" 
+                                            onclick="showSelectorHelp()" 
+                                            class="btn btn-secondary">
+                                        <i class="fas fa-question-circle"></i>
+                                        Yardım
+                                    </button>
+                                    <a href="{{ url_for('selector_guide') }}" 
+                                       target="_blank"
+                                       class="btn btn-secondary">
+                                        <i class="fas fa-external-link-alt"></i>
+                                        Detaylı Kılavuz
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="article_container" class="form-label">
+                                Makale Konteyner Selector *
+                            </label>
+                            <input type="text" 
+                                   id="article_container" 
+                                   name="article_container" 
+                                   placeholder="örn: .article-item, article, .post"
+                                   class="form-control manual-selector-input">
+                            <div class="form-help-text">Her makaleyi içeren ana konteyner</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="title_selector" class="form-label">
+                                Başlık Selector *
+                            </label>
+                            <input type="text" 
+                                   id="title_selector" 
+                                   name="title_selector" 
+                                   placeholder="örn: h2, .title, .headline"
+                                   class="form-control manual-selector-input">
+                            <div class="form-help-text">Makale başlığını içeren element</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="link_selector" class="form-label">
+                                Link Selector *
+                            </label>
+                            <input type="text" 
+                                   id="link_selector" 
+                                   name="link_selector" 
+                                   placeholder="örn: a, .link, .read-more"
+                                   class="form-control manual-selector-input">
+                            <div class="form-help-text">Makale linkini içeren element</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="date_selector" class="form-label">
+                                Tarih Selector
+                            </label>
+                            <input type="text" 
+                                   id="date_selector" 
+                                   name="date_selector" 
+                                   placeholder="örn: .date, time, .published"
+                                   class="form-control manual-selector-input">
+                            <div class="form-help-text">Makale tarihini içeren element (opsiyonel)</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="summary_selector" class="form-label">
+                                Özet Selector
+                            </label>
+                            <input type="text" 
+                                   id="summary_selector" 
+                                   name="summary_selector" 
+                                   placeholder="örn: .excerpt, .summary, p"
+                                   class="form-control manual-selector-input">
+                            <div class="form-help-text">Makale özetini içeren element (opsiyonel)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions-main">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Haber Kaynağı Ekle
+                </button>
+                <button type="button" onclick="resetForm()" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i>
+                    Sıfırla
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- RSS Kaynak Ekleme -->
+    <div class="news-source-card rss-sources-section">
+        <div class="rss-sources-header">
+            <h2 class="rss-sources-title">
+                <i class="fas fa-rss"></i>
+                RSS Kaynağı Ekle
+            </h2>
+        </div>
+        
+        <form method="POST" action="{{ url_for('add_rss_source_route') }}">
+            <div class="form-sections">
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="fas fa-rss"></i>
+                        RSS Bilgileri
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="rss_name" class="form-label">
+                                RSS Kaynak Adı *
+                            </label>
+                            <input type="text" 
+                                   id="rss_name" 
+                                   name="rss_name" 
+                                   required 
+                                   placeholder="örn: MIT Technology Review"
+                                   class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="rss_url" class="form-label">
+                                RSS Feed URL *
+                            </label>
+                            <input type="url" 
+                                   id="rss_url" 
+                                   name="rss_url" 
+                                   required 
+                                   placeholder="https://example.com/feed.xml"
+                                   class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="rss_description" class="form-label">
+                                Açıklama
+                            </label>
+                            <input type="text" 
+                                   id="rss_description" 
+                                   name="rss_description" 
+                                   placeholder="Kısa açıklama"
+                                   class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions-main">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    RSS Kaynağı Ekle
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Mevcut Kaynaklar -->
+    <div class="existing-sources-section">
+        <div class="existing-sources-header">
+            <h2 class="existing-sources-title">
+                <i class="fas fa-list"></i>
+                Mevcut Haber Kaynakları
+            </h2>
+        </div>
+        
+        {% if stats and stats.sources %}
+            <div class="sources-grid">
+                {% for source in stats.sources %}
+                <div class="source-card {{ 'disabled' if not source.enabled }}">
+                    <div class="source-header">
+                        <div class="source-info">
+                            <div class="source-name">{{ source.name }}</div>
+                            <div class="source-description">{{ source.description or 'Açıklama yok' }}</div>
+                            <a href="{{ source.url }}" target="_blank" class="source-url">
+                                {{ source.url }}
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                        <div class="source-badges">
+                            {% if source.type == 'rss' %}
+                                <span class="source-badge source-badge-rss">
+                                    <i class="fas fa-rss"></i>RSS
+                                </span>
+                            {% else %}
+                                <span class="source-badge source-badge-scraping">
+                                    <i class="fas fa-spider"></i>Scraping
+                                </span>
+                            {% endif %}
+                            
+                            {% if not source.enabled %}
+                                <span class="source-badge source-badge-disabled">
+                                    Pasif
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- İstatistikler -->
+                    <div class="source-stats">
+                        <div class="source-stat">
+                            <div class="source-stat-number {{ 'success' if source.success_rate >= 80 else ('warning' if source.success_rate >= 50 else 'error') }}">
+                                {{ source.success_rate }}%
+                            </div>
+                            <div class="source-stat-label">Başarı Oranı</div>
+                        </div>
+                        <div class="source-stat">
+                            <div class="source-stat-number info">{{ source.total_articles }}</div>
+                            <div class="source-stat-label">Toplam Makale</div>
+                        </div>
+                        <div class="source-stat">
+                            <div class="source-stat-number info">{{ source.last_check_hours }}h</div>
+                            <div class="source-stat-label">Son Kontrol</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Butonlar -->
+                    <div class="source-actions">
+                        <!-- Test Butonu -->
+                        <button onclick="testSource('{{ source.id }}', this)" 
+                                class="source-action-btn btn btn-secondary">
+                            <i class="fas fa-vial"></i>
+                            Test
+                        </button>
+                        
+                        <!-- Aktif/Pasif Butonu -->
+                        <form method="POST" action="{{ url_for('toggle_news_source_route') }}" class="inline">
+                            <input type="hidden" name="source_id" value="{{ source.id }}">
+                            <input type="hidden" name="enabled" value="{{ 'false' if source.enabled else 'true' }}">
+                            <button type="submit" 
+                                    class="source-action-btn btn {{ 'btn-warning' if source.enabled else 'btn-success' }}">
+                                <i class="fas fa-{{ 'pause' if source.enabled else 'play' }}"></i>
+                                {{ 'Pasif Yap' if source.enabled else 'Aktif Yap' }}
+                            </button>
+                        </form>
+                        
+                        <!-- Sil Butonu -->
+                        <form method="POST" action="{{ url_for('remove_news_source_route') }}" class="inline">
+                            <input type="hidden" name="source_id" value="{{ source.id }}">
+                            <input type="hidden" name="source_type" value="{{ source.type }}">
+                            <button type="submit" 
+                                    onclick="return showConfirmDialog('Kaynak Silme', 'Bu kaynağı silmek istediğinizden emin misiniz?', () => this.form.submit())"
+                                    class="source-action-btn btn btn-danger">
+                                <i class="fas fa-trash"></i>
+                                Sil
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+                <h3 class="empty-state-title">Henüz Haber Kaynağı Yok</h3>
+                <p class="empty-state-text">Yukarıdaki formu kullanarak ilk haber kaynağınızı ekleyin.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Test Sonucu Modal -->
+<div id="testModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Test Sonucu</h3>
+            <button onclick="closeTestModal()" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="testResult">
+                <!-- Test sonucu buraya gelecek -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeTestModal()" class="btn btn-secondary">Kapat</button>
+        </div>
+    </div>
+</div>
+
+<!-- Sayfa Kaynağı Analiz Modal -->
+<div id="pageSourceModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 95vw; width: 1200px;">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title">🧠 AI Sayfa Kaynağı Analizi</h3>
+                <p style="font-size: 12px; color: var(--twitter-text-secondary); margin-top: 4px;">
+                    Sayfa yapısı analiz ediliyor ve selector'lar otomatik tespit ediliyor
+                </p>
+            </div>
+            <button onclick="closePageSourceModal()" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body" style="padding: 0;">
+            <div style="display: flex; height: 600px;">
+                <!-- Sol Panel: AI Analizi -->
+                <div style="width: 30%; padding: 20px; border-right: 1px solid var(--twitter-border); overflow-y: auto;">
+                    <div id="aiAnalysisContent">
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <div class="loading-spinner"></div>
+                            <p style="color: var(--twitter-text-secondary); margin-top: 16px;">AI analizi yapılıyor...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sağ Panel: HTML Kaynağı -->
+                <div style="width: 70%; display: flex; flex-direction: column;">
+                    <!-- Tab Navigation -->
+                    <div style="border-bottom: 1px solid var(--twitter-border); background: var(--twitter-secondary-bg);">
+                        <nav style="display: flex; padding: 0 20px;">
+                            <button onclick="switchTab('highlighted')" 
+                                    id="highlightedTab"
+                                    class="tab-button active">
+                                <i class="fas fa-palette" style="color: var(--twitter-blue);"></i>
+                                <span>Renklendirilmiş</span>
+                                <span style="margin-left: 4px; font-size: 10px; background: var(--twitter-blue); color: white; padding: 2px 6px; border-radius: 10px;">AI</span>
+                            </button>
+                            <button onclick="switchTab('source')" 
+                                    id="sourceTab"
+                                    class="tab-button">
+                                <i class="fas fa-code" style="color: var(--twitter-blue);"></i>
+                                <span>Orijinal Kaynak</span>
+                                <span style="margin-left: 4px; font-size: 10px; background: var(--twitter-blue); color: white; padding: 2px 6px; border-radius: 10px;">RAW</span>
+                            </button>
+                            <button onclick="switchTab('formatted')" 
+                                    id="formattedTab"
+                                    class="tab-button">
+                                <i class="fas fa-file-code" style="color: var(--twitter-success);"></i>
+                                <span>Formatlanmış</span>
+                                <span style="margin-left: 4px; font-size: 10px; background: var(--twitter-success); color: white; padding: 2px 6px; border-radius: 10px;">SYNTAX</span>
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div style="flex: 1; overflow: hidden;">
+                        <!-- Highlighted Tab -->
+                        <div id="highlightedContent" class="tab-content active" style="height: 100%; display: flex; flex-direction: column;">
+                            <!-- Toolbar -->
+                            <div style="padding: 16px 20px; border-bottom: 1px solid var(--twitter-border); background: var(--twitter-secondary-bg);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <h4 style="font-weight: 600; color: var(--twitter-text); margin: 0;">Renklendirilmiş Sayfa Kaynağı</h4>
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div id="htmlStats" style="font-size: 11px; color: var(--twitter-text-secondary);">
+                                            <!-- HTML istatistikleri buraya gelecek -->
+                                        </div>
+                                        <button onclick="scrollToNextHighlight()" 
+                                                style="padding: 4px 8px; background: rgba(29, 161, 242, 0.1); color: var(--twitter-blue); border: none; border-radius: 4px; font-size: 11px; cursor: pointer;"
+                                                title="Sonraki işaretli alana git">
+                                            <i class="fas fa-arrow-down"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <div style="display: flex; align-items: center;">
+                                            <div style="width: 12px; height: 12px; background: var(--twitter-error); border-radius: 2px; margin-right: 4px;"></div>
+                                            <span>Konteyner</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center;">
+                                            <div style="width: 12px; height: 12px; background: var(--twitter-success); border-radius: 2px; margin-right: 4px;"></div>
+                                            <span>Başlık</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center;">
+                                            <div style="width: 12px; height: 12px; background: var(--twitter-blue); border-radius: 2px; margin-right: 4px;"></div>
+                                            <span>Link</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center;">
+                                            <div style="width: 12px; height: 12px; background: var(--twitter-warning); border-radius: 2px; margin-right: 4px;"></div>
+                                            <span>Tarih</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center;">
+                                            <div style="width: 12px; height: 12px; background: var(--twitter-text-secondary); border-radius: 2px; margin-right: 4px;"></div>
+                                            <span>Özet</span>
+                                        </div>
+                                    </div>
+                                    <div style="color: var(--twitter-text-secondary);">
+                                        💡 Renkli alanları tıklayarak selector'ları kopyalayın
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Highlighted HTML Content -->
+                            <div style="flex: 1; overflow-y: auto;">
+                                <div id="htmlSourceContent" style="min-height: 100%; padding: 20px;">
+                                    <div style="text-align: center; padding: 40px 20px;">
+                                        <div class="loading-spinner"></div>
+                                        <p style="color: var(--twitter-success); margin-top: 16px;">Renklendirilmiş sayfa kaynağı yükleniyor...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Source Tab -->
+                        <div id="sourceContent" class="tab-content" style="height: 100%; display: none; flex-direction: column;">
+                            <!-- Source Toolbar -->
+                            <div style="padding: 16px 20px; border-bottom: 1px solid var(--twitter-border); background: var(--twitter-secondary-bg);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h4 style="font-weight: 600; color: var(--twitter-text); margin: 0;">Orijinal HTML Kaynağı</h4>
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div id="sourceStats" style="font-size: 11px; color: var(--twitter-text-secondary);">
+                                            <!-- Kaynak istatistikleri buraya gelecek -->
+                                        </div>
+                                        <button onclick="copySourceToClipboard()" 
+                                                style="padding: 4px 8px; background: rgba(29, 161, 242, 0.1); color: var(--twitter-blue); border: none; border-radius: 4px; font-size: 11px; cursor: pointer;"
+                                                title="Tüm kaynağı kopyala">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                        <button onclick="downloadSource()" 
+                                                style="padding: 4px 8px; background: rgba(0, 186, 124, 0.1); color: var(--twitter-success); border: none; border-radius: 4px; font-size: 11px; cursor: pointer;"
+                                                title="HTML dosyası olarak indir">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Original HTML Content -->
+                            <div style="flex: 1; overflow-y: auto;">
+                                <div class="code-container" style="background: var(--twitter-background); min-height: 100%;">
+                                    <div class="line-numbers" id="originalLineNumbers">
+                                        <!-- Satır numaraları buraya gelecek -->
+                                    </div>
+                                    <div id="originalSourceContent" class="code-content" style="min-height: 100%;">
+                                        <div style="text-align: center; padding: 40px 20px;">
+                                            <div class="loading-spinner"></div>
+                                            <p style="color: var(--twitter-text-secondary); margin-top: 16px;">Orijinal sayfa kaynağı yükleniyor...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formatted Tab -->
+                        <div id="formattedContent" class="tab-content" style="height: 100%; display: none; flex-direction: column;">
+                            <!-- Formatted Toolbar -->
+                            <div style="padding: 16px 20px; border-bottom: 1px solid var(--twitter-border); background: var(--twitter-secondary-bg);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h4 style="font-weight: 600; color: var(--twitter-text); margin: 0;">Formatlanmış HTML</h4>
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div id="formattedStats" style="font-size: 11px; color: var(--twitter-text-secondary);">
+                                            <!-- Formatlanmış istatistikler buraya gelecek -->
+                                        </div>
+                                        <button onclick="copyFormattedToClipboard()" 
+                                                style="padding: 4px 8px; background: rgba(29, 161, 242, 0.1); color: var(--twitter-blue); border: none; border-radius: 4px; font-size: 11px; cursor: pointer;"
+                                                title="Formatlanmış kodu kopyala">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Formatted HTML Content -->
+                            <div style="flex: 1; overflow-y: auto;">
+                                <div class="code-container" style="background: var(--twitter-background); min-height: 100%;">
+                                    <div class="line-numbers" id="formattedLineNumbers">
+                                        <!-- Satır numaraları buraya gelecek -->
+                                    </div>
+                                    <div id="formattedSourceContent" class="code-content" style="min-height: 100%;">
+                                        <div style="text-align: center; padding: 40px 20px;">
+                                            <div class="loading-spinner"></div>
+                                            <p style="color: var(--twitter-text-secondary); margin-top: 16px;">Formatlanmış sayfa kaynağı yükleniyor...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <div style="flex: 1; font-size: 12px; color: var(--twitter-text-secondary);">
+                💡 Renkli alanlar tıklanabilir - Selector'ı kopyalamak için tıklayın
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button onclick="applyDetectedSelectors()" 
+                        class="btn btn-primary">
+                    <i class="fas fa-magic"></i>
+                    Tespit Edilen Selector'ları Uygula
+                </button>
+                <button onclick="closePageSourceModal()" 
+                        class="btn btn-secondary">
+                    Kapat
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Selector Yardım Modal -->
+<div id="selectorHelpModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h3 class="modal-title">CSS Selector Yardımı</h3>
+            <button onclick="closeSelectorHelpModal()" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                <!-- Temel Selector'lar -->
+                <div>
+                    <h4 style="font-size: 16px; font-weight: 600; color: var(--twitter-text); margin-bottom: 12px;">🎯 Temel CSS Selector'ları</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <div style="background: var(--twitter-secondary-bg); padding: 12px; border-radius: 8px;">
+                            <code style="font-size: 13px; font-family: monospace; color: var(--twitter-blue);">.class-name</code>
+                            <p style="font-size: 11px; color: var(--twitter-text-secondary); margin-top: 4px;">Class ile seçim</p>
+                        </div>
+                        <div style="background: var(--twitter-secondary-bg); padding: 12px; border-radius: 8px;">
+                            <code style="font-size: 13px; font-family: monospace; color: var(--twitter-blue);">#id-name</code>
+                            <p style="font-size: 11px; color: var(--twitter-text-secondary); margin-top: 4px;">ID ile seçim</p>
+                        </div>
+                        <div style="background: var(--twitter-secondary-bg); padding: 12px; border-radius: 8px;">
+                            <code style="font-size: 13px; font-family: monospace; color: var(--twitter-blue);">tag</code>
+                            <p style="font-size: 11px; color: var(--twitter-text-secondary); margin-top: 4px;">HTML tag ile seçim</p>
+                        </div>
+                        <div style="background: var(--twitter-secondary-bg); padding: 12px; border-radius: 8px;">
+                            <code style="font-size: 13px; font-family: monospace; color: var(--twitter-blue);">parent child</code>
+                            <p style="font-size: 11px; color: var(--twitter-text-secondary); margin-top: 4px;">Alt element seçimi</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Örnek Siteler -->
+                <div>
+                    <h4 style="font-size: 16px; font-weight: 600; color: var(--twitter-text); margin-bottom: 12px;">📰 Popüler Haber Sitelerinde Örnek Selector'lar</h4>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="border: 1px solid var(--twitter-border); border-radius: 8px; padding: 16px;">
+                            <h5 style="font-weight: 600; color: var(--twitter-text); margin-bottom: 8px;">TechCrunch</h5>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; font-size: 13px;">
+                                <div><strong>Konteyner:</strong> <code style="color: var(--twitter-blue);">.post-block</code></div>
+                                <div><strong>Başlık:</strong> <code style="color: var(--twitter-blue);">h2 a</code></div>
+                                <div><strong>Link:</strong> <code style="color: var(--twitter-blue);">h2 a</code></div>
+                                <div><strong>Tarih:</strong> <code style="color: var(--twitter-blue);">.river-byline time</code></div>
+                            </div>
+                        </div>
+                        
+                        <div style="border: 1px solid var(--twitter-border); border-radius: 8px; padding: 16px;">
+                            <h5 style="font-weight: 600; color: var(--twitter-text); margin-bottom: 8px;">The Verge</h5>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; font-size: 13px;">
+                                <div><strong>Konteyner:</strong> <code style="color: var(--twitter-blue);">.c-entry-box</code></div>
+                                <div><strong>Başlık:</strong> <code style="color: var(--twitter-blue);">h2 a</code></div>
+                                <div><strong>Link:</strong> <code style="color: var(--twitter-blue);">h2 a</code></div>
+                                <div><strong>Tarih:</strong> <code style="color: var(--twitter-blue);">.c-byline time</code></div>
+                            </div>
+                        </div>
+                        
+                        <div style="border: 1px solid var(--twitter-border); border-radius: 8px; padding: 16px;">
+                            <h5 style="font-weight: 600; color: var(--twitter-text); margin-bottom: 8px;">Wired</h5>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; font-size: 13px;">
+                                <div><strong>Konteyner:</strong> <code style="color: var(--twitter-blue);">.SummaryItemWrapper</code></div>
+                                <div><strong>Başlık:</strong> <code style="color: var(--twitter-blue);">h3 a</code></div>
+                                <div><strong>Link:</strong> <code style="color: var(--twitter-blue);">h3 a</code></div>
+                                <div><strong>Tarih:</strong> <code style="color: var(--twitter-blue);">.SummaryItemPublishDate</code></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Adım Adım Kılavuz -->
+                <div>
+                    <h4 style="font-size: 16px; font-weight: 600; color: var(--twitter-text); margin-bottom: 12px;">🔍 Adım Adım Selector Bulma</h4>
+                    <div style="background: rgba(29, 161, 242, 0.05); border: 1px solid rgba(29, 161, 242, 0.1); border-radius: 8px; padding: 16px;">
+                        <ol style="font-size: 13px; line-height: 1.6; color: var(--twitter-text); margin: 0; padding-left: 20px;">
+                            <li><strong>1.</strong> Hedef siteyi tarayıcıda açın</li>
+                            <li><strong>2.</strong> F12 tuşuna basarak Developer Tools'u açın</li>
+                            <li><strong>3.</strong> Bir makale başlığına sağ tıklayıp "Inspect" seçin</li>
+                            <li><strong>4.</strong> Seçilen element üzerinde sağ tıklayıp "Copy → Copy selector" seçin</li>
+                            <li><strong>5.</strong> Kopyalanan selector'ı test edin</li>
+                            <li><strong>6.</strong> Gerekirse selector'ı sadeleştirin (çok uzunsa)</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <!-- İpuçları -->
+                <div>
+                    <h4 style="font-size: 16px; font-weight: 600; color: var(--twitter-text); margin-bottom: 12px;">💡 İpuçları</h4>
+                    <div style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 8px; padding: 16px;">
+                        <ul style="font-size: 13px; line-height: 1.6; color: var(--twitter-text); margin: 0; padding-left: 20px;">
+                            <li>• Çok spesifik selector'lar yerine genel olanları tercih edin</li>
+                            <li>• Birden fazla makale için çalıştığından emin olun</li>
+                            <li>• Relative linkler için base URL'yi unutmayın</li>
+                            <li>• Tarih ve özet selector'ları opsiyoneldir</li>
+                            <li>• Test butonunu kullanarak selector'ları doğrulayın</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button onclick="closeSelectorHelpModal()" class="btn btn-primary">Anladım</button>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner -->
 <style>
-/* Sayfa kaynağı görüntüleyici stilleri */
-.html-source-viewer {
-    font-family: 'Fira Code', 'Courier New', monospace;
-    font-size: 12px;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-word;
-    background: #1a1a1a;
-    color: #e0e0e0;
-    padding: 16px;
-    border-radius: 8px;
-    overflow-x: auto;
+.loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--twitter-border);
+    border-top: 2px solid var(--twitter-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
 }
 
-/* Highlighted selector'lar */
-.html-source-viewer .highlighted-selector {
-    transition: all 0.3s ease;
-    border-radius: 4px;
-    padding: 2px 6px;
-    margin: 2px;
-    display: inline-block;
-    position: relative;
-    cursor: pointer;
-    font-weight: 500;
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-.html-source-viewer .highlighted-selector:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    z-index: 100;
-    filter: brightness(1.2);
-}
-
-.html-source-viewer .highlighted-selector:active {
-    transform: scale(0.98);
-}
-
-/* Selector türlerine göre renkler */
-.html-source-viewer [data-selector="article_container"] {
-    background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 107, 107, 0.1)) !important;
-    border: 2px solid #ff6b6b !important;
-    color: #ff6b6b !important;
-    box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);
-}
-
-.html-source-viewer [data-selector="title_selector"] {
-    background: linear-gradient(135deg, rgba(78, 205, 196, 0.3), rgba(78, 205, 196, 0.1)) !important;
-    border: 2px solid #4ecdc4 !important;
-    color: #4ecdc4 !important;
-    box-shadow: 0 0 10px rgba(78, 205, 196, 0.2);
-}
-
-.html-source-viewer [data-selector="link_selector"] {
-    background: linear-gradient(135deg, rgba(69, 183, 209, 0.3), rgba(69, 183, 209, 0.1)) !important;
-    border: 2px solid #45b7d1 !important;
-    color: #45b7d1 !important;
-    box-shadow: 0 0 10px rgba(69, 183, 209, 0.2);
-}
-
-.html-source-viewer [data-selector="date_selector"] {
-    background: linear-gradient(135deg, rgba(150, 206, 180, 0.3), rgba(150, 206, 180, 0.1)) !important;
-    border: 2px solid #96ceb4 !important;
-    color: #96ceb4 !important;
-    box-shadow: 0 0 10px rgba(150, 206, 180, 0.2);
-}
-
-.html-source-viewer [data-selector="summary_selector"] {
-    background: linear-gradient(135deg, rgba(254, 202, 87, 0.3), rgba(254, 202, 87, 0.1)) !important;
-    border: 2px solid #feca57 !important;
-    color: #feca57 !important;
-    box-shadow: 0 0 10px rgba(254, 202, 87, 0.2);
-}
-
-/* Label gösterimi */
-.html-source-viewer .highlighted-selector::before {
-    content: attr(data-selector-label) " #" counter(selector-counter);
-    position: absolute;
-    top: -20px;
-    left: 0;
-    background: rgba(0,0,0,0.9);
-    color: white;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: bold;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.2s;
-    z-index: 1000;
-    pointer-events: none;
-}
-
-.html-source-viewer .highlighted-selector:hover::before {
-    opacity: 1;
-}
-
-/* HTML syntax highlighting */
-.html-source-viewer {
-    counter-reset: selector-counter;
-}
-
-.html-source-viewer .highlighted-selector {
-    counter-increment: selector-counter;
-}
-
-/* HTML tag renkleri */
-.html-source-viewer {
-    color: #e0e0e0;
-}
-
-/* Daha iyi görünüm için HTML formatlaması */
-.html-source-viewer pre {
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    border: none;
-    font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
-    white-space: pre-wrap;
-}
-
-/* Mevcut highlight */
-.html-source-viewer .current-highlight {
-    animation: pulse-highlight 2s ease-in-out;
-    transform: scale(1.1) !important;
-    z-index: 200 !important;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5) !important;
-}
-
-@keyframes pulse-highlight {
-    0%, 100% { 
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-    }
-    50% { 
-        box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
-    }
-}
-
-/* Tab sistemi stilleri - Chrome Style */
 .tab-button {
-    border-bottom: 2px solid transparent;
-    color: #6b7280;
-    transition: all 0.2s ease;
+    padding: 12px 16px;
+    border: none;
     background: transparent;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    margin-right: 2px;
-    position: relative;
+    color: var(--twitter-text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .tab-button:hover {
-    color: #374151;
+    color: var(--twitter-text);
     background: rgba(0, 0, 0, 0.05);
-    border-bottom-color: #d1d5db;
 }
 
 .tab-button.active {
-    color: #1f2937;
-    border-bottom-color: #7c3aed;
-    background: white;
-    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-    z-index: 10;
-}
-
-.tab-button.active::before {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: white;
-    z-index: 11;
+    color: var(--twitter-text);
+    border-bottom-color: var(--twitter-blue);
+    background: var(--twitter-background);
 }
 
 .tab-content {
@@ -188,1039 +828,34 @@
     display: flex;
 }
 
-/* Orijinal kaynak stilleri */
-#originalSourceContent {
-    font-family: 'Fira Code', 'Courier New', monospace;
-    white-space: pre-wrap;
-    word-break: break-word;
-    line-height: 1.4;
-}
-
-/* Formatlanmış kaynak stilleri */
-#formattedSourceContent {
-    font-family: 'Fira Code', 'Courier New', monospace;
-    white-space: pre-wrap;
-    word-break: break-word;
-    line-height: 1.5;
-}
-
-/* Chrome DevTools benzeri kod görüntüleyici */
 .code-container {
     display: flex;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    overflow: hidden;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.5;
 }
 
 .line-numbers {
-    background: #f9fafb;
-    border-right: 1px solid #e5e7eb;
-    padding: 12px 8px;
-    font-family: 'Fira Code', 'Courier New', monospace;
-    font-size: 12px;
-    line-height: 1.5;
-    color: #6b7280;
-    text-align: right;
-    user-select: none;
-    min-width: 50px;
-}
-
-.line-numbers .line-number {
-    padding: 0 4px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-.line-numbers .line-number:hover {
-    background: #e5e7eb;
-}
-
-.code-content {
-    flex: 1;
-    padding: 12px;
-    font-family: 'Fira Code', 'Courier New', monospace;
-    font-size: 12px;
-    line-height: 1.5;
-    color: #1f2937;
-    overflow-x: auto;
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-/* Syntax highlighting için gelişmiş renkler */
-.html-tag {
-    color: #dc2626;
-    font-weight: 600;
-}
-
-.html-attr {
-    color: #059669;
-    font-weight: 500;
-}
-
-.html-value {
-    color: #2563eb;
-    font-weight: 400;
-}
-
-.html-equals {
-    color: #6b7280;
-}
-
-.html-bracket {
-    color: #374151;
-    font-weight: 600;
-}
-
-.html-comment {
-    color: #6b7280;
-    font-style: italic;
-}
-
-.html-text {
-    color: #1f2937;
-    font-style: italic;
-}
-
-#formattedSourceContent .html-equals {
-    color: #6b7280;
-}
-
-#formattedSourceContent .html-bracket {
-    color: #dc2626;
-    font-weight: 600;
-}
-
-/* Formatlanmış tab'da selector renklendirme */
-#formattedSourceContent .highlighted-selector {
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    border-radius: 3px !important;
-    padding: 1px 2px !important;
-    margin: 0 1px !important;
-}
-
-#formattedSourceContent .highlighted-selector:hover {
-    transform: scale(1.02) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-}
-
-/* Orijinal kaynak için temiz görünüm */
-#originalSourceContent {
-    color: #374151;
-    line-height: 1.6;
-}
-
-/* Satır numaraları için stil */
-.line-numbers {
-    background: #f9fafb;
-    border-right: 1px solid #e5e7eb;
-    color: #9ca3af;
+    background: var(--twitter-secondary-bg);
+    border-right: 1px solid var(--twitter-border);
+    padding: 8px 6px;
     font-size: 11px;
-    padding: 0 8px;
+    color: var(--twitter-text-secondary);
     text-align: right;
     user-select: none;
-    min-width: 50px;
-    font-family: 'Fira Code', 'Courier New', monospace;
-}
-
-.line-number {
-    line-height: 1.5;
-    padding: 0 4px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-.line-number:hover {
-    background: #e5e7eb;
-}
-
-/* Code container için flex layout */
-.code-container {
-    display: flex;
-    font-family: 'Fira Code', 'Courier New', monospace;
-    font-size: 12px;
-    line-height: 1.5;
-    overflow-x: auto;
+    min-width: 40px;
 }
 
 .code-content {
     flex: 1;
-    padding: 0 12px;
-    white-space: pre;
+    padding: 8px 12px;
     overflow-x: auto;
-}
-
-/* Tooltip stilleri */
-.html-source-viewer [data-selector]::after {
-    content: attr(title);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.9);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-    z-index: 1000;
-}
-
-.html-source-viewer [data-selector]:hover::after {
-    opacity: 1;
-}
-
-/* Loading animasyonları */
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-.animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Modal responsive */
-@media (max-width: 1024px) {
-    #pageSourceModal .flex-1 {
-        flex-direction: column;
-    }
-    
-    #pageSourceModal .w-1\/3 {
-        width: 100%;
-        max-height: 300px;
-    }
-    
-    #pageSourceModal .w-2\/3 {
-        width: 100%;
-    }
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 </style>
-{% endblock %}
 
-{% block content %}
-<!-- Twitter Feed Style -->
-<div class="twitter-feed">
-    <!-- Header -->
-    <div class="feed-header">
-        <div class="d-flex align-items-center justify-content-between">
-            <div>
-                <h1 class="feed-title">📰 Haber Kaynakları Yönetimi</h1>
-                <p class="feed-subtitle">Özel haber kaynaklarınızı ekleyin ve yönetin. Sistem bu kaynaklardan otomatik olarak makale çekecek.</p>
-            </div>
-            <div>
-                <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- İstatistikler -->
-    {% if stats %}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="tweet-card bg-gradient-to-r from-purple-500 to-blue-600 text-white">
-            <div class="p-6 text-center">
-                <i class="fas fa-newspaper text-3xl mb-3"></i>
-                <h3 class="text-2xl font-bold">{{ stats.total_sources }}</h3>
-                <p class="text-purple-100">Toplam Kaynak</p>
-            </div>
-        </div>
-        <div class="tweet-card bg-gradient-to-r from-green-500 to-emerald-600 text-white">
-            <div class="p-6 text-center">
-                <i class="fas fa-check-circle text-3xl mb-3"></i>
-                <h3 class="text-2xl font-bold">{{ stats.enabled_sources }}</h3>
-                <p class="text-green-100">Aktif Kaynak</p>
-            </div>
-        </div>
-        <div class="tweet-card bg-gradient-to-r from-yellow-500 to-orange-600 text-white">
-            <div class="p-6 text-center">
-                <i class="fas fa-pause-circle text-3xl mb-3"></i>
-                <h3 class="text-2xl font-bold">{{ stats.disabled_sources }}</h3>
-                <p class="text-yellow-100">Pasif Kaynak</p>
-            </div>
-        </div>
-        <div class="tweet-card bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
-            <div class="p-6 text-center">
-                <i class="fas fa-chart-line text-3xl mb-3"></i>
-                <h3 class="text-2xl font-bold">{{ stats.average_success_rate }}%</h3>
-                <p class="text-blue-100">Ortalama Başarı</p>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Yeni Kaynak Ekleme -->
-    <div class="tweet-card">
-        <div class="p-8">
-            <div class="flex items-center space-x-3 mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-plus text-white text-lg"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-900">Yeni Haber Kaynağı Ekle</h2>
-            </div>
-            
-            <form method="POST" action="{{ url_for('add_news_source_route') }}" class="space-y-6" id="addSourceForm" onsubmit="debugFormSubmit(event)">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="space-y-2">
-                        <label for="name" class="block text-sm font-medium text-gray-700">
-                            Kaynak Adı *
-                        </label>
-                        <input type="text" 
-                               id="name" 
-                               name="name" 
-                               required 
-                               placeholder="örn: Wired AI"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
-                    </div>
-                    <div class="space-y-2">
-                        <label for="url" class="block text-sm font-medium text-gray-700">
-                            URL *
-                        </label>
-                        <div class="relative">
-                            <input type="url" 
-                                   id="url" 
-                                   name="url" 
-                                   required 
-                                   placeholder="https://example.com/ai-news"
-                                   onchange="onUrlChange()"
-                                   class="w-full px-4 py-3 pr-24 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
-                            <div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-1">
-                                <button type="button" 
-                                        id="analyzePageBtn"
-                                        onclick="analyzePageSource()"
-                                        class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 transition-all duration-200"
-                                        title="Sayfa kaynağını AI ile analiz et">
-                                    <i class="fas fa-brain"></i>
-                                </button>
-                                <button type="button" 
-                                        id="testUrlBtn"
-                                        onclick="testUrlBeforeAdd()"
-                                        class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition-all duration-200"
-                                        title="URL'yi test et">
-                                    <i class="fas fa-vial"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div id="urlTestResult" class="text-sm mt-1 hidden"></div>
-                    </div>
-                    <div class="space-y-2">
-                        <label for="description" class="block text-sm font-medium text-gray-700">
-                            Açıklama
-                        </label>
-                        <input type="text" 
-                               id="description" 
-                               name="description" 
-                               placeholder="Kısa açıklama"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
-                    </div>
-                </div>
-                
-                <!-- Otomatik Tespit Seçeneği -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div class="flex items-center space-x-3">
-                        <input type="checkbox" 
-                               id="auto_detect" 
-                               name="auto_detect" 
-                               value="on"
-                               checked 
-                               onchange="toggleManualSelectors()"
-                               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                        <label for="auto_detect" class="text-sm font-medium text-gray-700">
-                            Otomatik Selector Tespiti
-                        </label>
-                        <i class="fas fa-info-circle text-blue-500" title="Sayfa yapısını otomatik analiz ederek en uygun selector'ları bulur"></i>
-                        
-                        <!-- Debug Butonu -->
-                        <button type="button" 
-                                onclick="debugToggle()" 
-                                class="ml-4 px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs hover:bg-gray-300">
-                            Debug
-                        </button>
-                    </div>
-                    <p class="text-xs text-gray-600 mt-2 ml-7">
-                        Önerilen: Sayfa yapısını otomatik analiz ederek makale selector'larını tespit eder. 
-                        Bu seçenek kapalıysa manuel selector'lar kullanılır.
-                    </p>
-                    
-                    <!-- Debug Bilgisi -->
-                    <div id="debugInfo" class="mt-3 p-2 bg-gray-100 border border-gray-300 rounded text-xs text-gray-700 hidden">
-                        <strong>Debug:</strong> 
-                        <span id="debugStatus">Checkbox durumu kontrol ediliyor...</span>
-                    </div>
-                </div>
-
-                <!-- Manuel Selector'lar (Otomatik tespit kapalıysa gösterilir) -->
-                <div id="manualSelectorsSection" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 hidden">
-                    <div class="flex items-center space-x-3 mb-4">
-                        <i class="fas fa-code text-yellow-600"></i>
-                        <h3 class="text-lg font-medium text-gray-900">Manuel CSS Selector'ları</h3>
-                        <button type="button" 
-                                onclick="showSelectorHelp()" 
-                                class="text-yellow-600 hover:text-yellow-800">
-                            <i class="fas fa-question-circle"></i>
-                        </button>
-                        <a href="{{ url_for('selector_guide') }}" 
-                           target="_blank"
-                           class="text-blue-600 hover:text-blue-800 text-sm">
-                            <i class="fas fa-external-link-alt mr-1"></i>
-                            Detaylı Kılavuz
-                        </a>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="space-y-2">
-                            <label for="article_container" class="block text-sm font-medium text-gray-700">
-                                Makale Konteyner Selector *
-                            </label>
-                            <input type="text" 
-                                   id="article_container" 
-                                   name="article_container" 
-                                   placeholder="örn: .article-item, article, .post"
-                                   class="manual-selector-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
-                            <p class="text-xs text-gray-600">Her makaleyi içeren ana konteyner</p>
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <label for="title_selector" class="block text-sm font-medium text-gray-700">
-                                Başlık Selector *
-                            </label>
-                            <input type="text" 
-                                   id="title_selector" 
-                                   name="title_selector" 
-                                   placeholder="örn: h2 a, .title, h3"
-                                   class="manual-selector-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
-                            <p class="text-xs text-gray-600">Makale başlığını içeren element</p>
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <label for="link_selector" class="block text-sm font-medium text-gray-700">
-                                Link Selector *
-                            </label>
-                            <input type="text" 
-                                   id="link_selector" 
-                                   name="link_selector" 
-                                   placeholder="örn: a, .read-more, h2 a"
-                                   class="manual-selector-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
-                            <p class="text-xs text-gray-600">Makale linkini içeren element</p>
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <label for="date_selector" class="block text-sm font-medium text-gray-700">
-                                Tarih Selector
-                            </label>
-                            <input type="text" 
-                                   id="date_selector" 
-                                   name="date_selector" 
-                                   placeholder="örn: .date, time, .published"
-                                   class="manual-selector-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
-                            <p class="text-xs text-gray-600">Yayın tarihini içeren element (opsiyonel)</p>
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <label for="summary_selector" class="block text-sm font-medium text-gray-700">
-                                Özet Selector
-                            </label>
-                            <input type="text" 
-                                   id="summary_selector" 
-                                   name="summary_selector" 
-                                   placeholder="örn: .excerpt, .summary, p"
-                                   class="manual-selector-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
-                            <p class="text-xs text-gray-600">Makale özetini içeren element (opsiyonel)</p>
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <label for="base_url" class="block text-sm font-medium text-gray-700">
-                                Base URL
-                            </label>
-                            <input type="text" 
-                                   id="base_url" 
-                                   name="base_url" 
-                                   placeholder="örn: https://example.com"
-                                   class="manual-selector-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm">
-                            <p class="text-xs text-gray-600">Relative linkler için base URL (opsiyonel)</p>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
-                        <div class="flex items-start space-x-2">
-                            <i class="fas fa-lightbulb text-yellow-600 mt-0.5"></i>
-                            <div class="text-sm text-yellow-800">
-                                <p class="font-medium mb-1">💡 Selector Bulma İpuçları:</p>
-                                <ul class="text-xs space-y-1">
-                                    <li>• <strong>F12</strong> ile Developer Tools'u açın</li>
-                                    <li>• Makale elementine sağ tıklayıp <strong>"Inspect"</strong> seçin</li>
-                                    <li>• Element üzerinde sağ tıklayıp <strong>"Copy → Copy selector"</strong> seçin</li>
-                                    <li>• Birden fazla makale için ortak selector kullanın</li>
-                                    <li>• <strong>Class'lar:</strong> <code>.article-title</code>, <code>.post h2</code></li>
-                                    <li>• <strong>Kombinasyonlar:</strong> <code>.container .title a</code></li>
-                                </ul>
-                                <div class="mt-2 pt-2 border-t border-yellow-200">
-                                    <a href="{{ url_for('selector_guide') }}" 
-                                       target="_blank"
-                                       class="text-blue-700 hover:text-blue-900 font-medium">
-                                        📖 Detaylı Kılavuz ve Örnekler →
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4 flex justify-end">
-                        <button type="button" 
-                                onclick="testManualSelectors()" 
-                                class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-all duration-200 text-sm">
-                            <i class="fas fa-vial mr-2"></i>
-                            Manuel Selector'ları Test Et
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-                    <div class="flex space-x-3">
-                        <button type="submit" class="btn-primary flex items-center space-x-2" id="submitBtn">
-                            <i class="fas fa-plus"></i>
-                            <span>Kaynak Ekle</span>
-                        </button>
-                        
-                        <button type="button" 
-                                onclick="debugAddSource()" 
-                                class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 text-sm">
-                            <i class="fas fa-bug mr-2"></i>
-                            Debug
-                        </button>
-                    </div>
-                    
-                    <div class="text-sm text-gray-600">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <strong>Popüler AI Haber Siteleri:</strong>
-                        VentureBeat AI, The Verge AI, MIT Technology Review, AI News, OpenAI Blog
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- RSS Kaynak Ekleme -->
-    <div class="card-modern">
-        <div class="p-8">
-            <div class="flex items-center space-x-3 mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-rss text-white text-lg"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-900">RSS Kaynağı Ekle</h2>
-            </div>
-            
-            <form method="POST" action="{{ url_for('add_rss_source_route') }}" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="space-y-2">
-                        <label for="rss_name" class="block text-sm font-medium text-gray-700">
-                            RSS Kaynak Adı *
-                        </label>
-                        <input type="text" 
-                               id="rss_name" 
-                               name="rss_name" 
-                               required 
-                               placeholder="örn: MIT Technology Review"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200">
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <label for="rss_url" class="block text-sm font-medium text-gray-700">
-                            RSS Feed URL *
-                        </label>
-                        <input type="url" 
-                               id="rss_url" 
-                               name="rss_url" 
-                               required 
-                               placeholder="https://example.com/feed.xml"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200">
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <label for="rss_description" class="block text-sm font-medium text-gray-700">
-                            Açıklama
-                        </label>
-                        <input type="text" 
-                               id="rss_description" 
-                               name="rss_description" 
-                               placeholder="Kısa açıklama"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200">
-                    </div>
-                </div>
-                
-                <div class="flex justify-between items-center">
-                    <button type="submit" class="btn-primary bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 flex items-center space-x-2">
-                        <i class="fas fa-plus"></i>
-                        <span>RSS Kaynağı Ekle</span>
-                    </button>
-                    
-                    <div class="text-sm text-gray-600">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <strong>Popüler RSS Feed'ler:</strong>
-                        TechCrunch, Wired, MIT Tech Review, VentureBeat
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Mevcut Kaynaklar -->
-    <div class="card-modern">
-        <div class="p-8">
-            <div class="flex items-center space-x-3 mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-gray-500 to-gray-700 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-list text-white text-lg"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-900">Mevcut Haber Kaynakları</h2>
-            </div>
-            
-            {% if stats and stats.sources %}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {% for source in stats.sources %}
-                    <div class="border rounded-xl p-6 transition-all duration-200 hover:shadow-lg {{ 'border-gray-300 bg-gray-50' if not source.enabled else ('border-green-200 bg-green-50' if source.success_rate >= 80 else ('border-yellow-200 bg-yellow-50' if source.success_rate >= 50 else 'border-red-200 bg-red-50')) }}">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex-grow-1">
-                                <div class="flex items-center space-x-2 mb-2">
-                                    <h3 class="text-lg font-semibold text-gray-900">
-                                        {{ source.name }}
-                                    </h3>
-                                    <!-- Kaynak Tipi Badge -->
-                                    {% if source.type == 'rss' %}
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                            <i class="fas fa-rss mr-1"></i>RSS
-                                        </span>
-                                    {% else %}
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            <i class="fas fa-spider mr-1"></i>Scraping
-                                        </span>
-                                    {% endif %}
-                                    
-                                    {% if not source.enabled %}
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                            Pasif
-                                        </span>
-                                    {% endif %}
-                                </div>
-                                <p class="text-sm text-gray-600 mb-2">{{ source.description or 'Açıklama yok' }}</p>
-                                <a href="{{ source.url }}" target="_blank" class="text-sm text-blue-600 hover:text-blue-800 break-all">
-                                    {{ source.url }}
-                                    <i class="fas fa-external-link-alt ml-1"></i>
-                                </a>
-                            </div>
-                        </div>
-                        
-                        <!-- İstatistikler -->
-                        <div class="grid grid-cols-3 gap-4 mb-4 text-center">
-                            <div>
-                                <div class="text-lg font-bold {{ 'text-green-600' if source.success_rate >= 80 else ('text-yellow-600' if source.success_rate >= 50 else 'text-red-600') }}">
-                                    {{ source.success_rate }}%
-                                </div>
-                                <div class="text-xs text-gray-500">Başarı Oranı</div>
-                            </div>
-                            <div>
-                                <div class="text-lg font-bold text-blue-600">{{ source.total_articles }}</div>
-                                <div class="text-xs text-gray-500">Toplam Makale</div>
-                            </div>
-                            <div>
-                                <div class="text-lg font-bold text-purple-600">{{ source.last_check_hours }}h</div>
-                                <div class="text-xs text-gray-500">Son Kontrol</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Butonlar -->
-                        <div class="flex flex-wrap gap-2">
-                            <!-- Test Butonu -->
-                            <button onclick="testSource('{{ source.id }}', this)" 
-                                    class="flex items-center space-x-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 text-sm">
-                                <i class="fas fa-vial"></i>
-                                <span>Test</span>
-                            </button>
-                            
-                            <!-- Aktif/Pasif Butonu -->
-                            <form method="POST" action="{{ url_for('toggle_news_source_route') }}" class="inline">
-                                <input type="hidden" name="source_id" value="{{ source.id }}">
-                                <input type="hidden" name="enabled" value="{{ 'false' if source.enabled else 'true' }}">
-                                <button type="submit" 
-                                        class="flex items-center space-x-1 px-3 py-2 {{ 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' if source.enabled else 'bg-green-100 text-green-700 hover:bg-green-200' }} rounded-lg transition-all duration-200 text-sm">
-                                    <i class="fas fa-{{ 'pause' if source.enabled else 'play' }}"></i>
-                                    <span>{{ 'Pasif Yap' if source.enabled else 'Aktif Yap' }}</span>
-                                </button>
-                            </form>
-                            
-                            <!-- Sil Butonu -->
-                            <form method="POST" action="{{ url_for('remove_news_source_route') }}" class="inline">
-                                <input type="hidden" name="source_id" value="{{ source.id }}">
-                                <input type="hidden" name="source_type" value="{{ source.type }}">
-                                <button type="submit" 
-                                        onclick="return confirm('Bu kaynağı silmek istediğinizden emin misiniz?')"
-                                        class="flex items-center space-x-1 px-3 py-2 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg transition-all duration-200 text-sm">
-                                    <i class="fas fa-trash"></i>
-                                    <span>Sil</span>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="text-center py-12">
-                    <i class="fas fa-newspaper text-gray-400 text-4xl mb-4"></i>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Henüz Haber Kaynağı Yok</h3>
-                    <p class="text-gray-600">Yukarıdaki formu kullanarak ilk haber kaynağınızı ekleyin.</p>
-                </div>
-            {% endif %}
-        </div>
-    </div>
-</div>
-
-<!-- Test Sonucu Modal -->
-<div id="testModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">Test Sonucu</h3>
-            <button onclick="closeTestModal()" class="text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div id="testResult" class="space-y-3">
-            <!-- Test sonucu buraya gelecek -->
-        </div>
-        <div class="mt-6 text-right">
-            <button onclick="closeTestModal()" class="btn-secondary">Kapat</button>
-        </div>
-    </div>
-</div>
-
-<!-- Sayfa Kaynağı Analiz Modal -->
-<div id="pageSourceModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl max-w-7xl w-full mx-4 max-h-[95vh] flex flex-col">
-        <!-- Modal Header -->
-        <div class="flex justify-between items-center p-6 border-b border-gray-200">
-            <div>
-                <h3 class="text-xl font-semibold text-gray-900">🧠 AI Sayfa Kaynağı Analizi</h3>
-                <p class="text-sm text-gray-600 mt-1">Sayfa yapısı analiz ediliyor ve selector'lar otomatik tespit ediliyor</p>
-            </div>
-            <button onclick="closePageSourceModal()" class="text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        
-        <!-- Modal Content -->
-        <div class="flex-1 flex overflow-hidden">
-            <!-- Sol Panel: AI Analizi -->
-            <div class="w-1/3 p-6 border-r border-gray-200 overflow-y-auto">
-                <div id="aiAnalysisContent">
-                    <div class="text-center py-8">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
-                        <p class="text-gray-600">AI analizi yapılıyor...</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Sağ Panel: HTML Kaynağı -->
-            <div class="w-2/3 flex flex-col">
-                <!-- Tab Navigation - Chrome Style -->
-                <div class="border-b border-gray-200 bg-gray-50">
-                    <nav class="flex px-4" aria-label="Tabs">
-                        <button onclick="switchTab('highlighted')" 
-                                id="highlightedTab"
-                                class="tab-button active py-3 px-4 border-b-2 font-medium text-sm flex items-center space-x-2 rounded-t-lg">
-                            <i class="fas fa-palette text-purple-500"></i>
-                            <span>Renklendirilmiş</span>
-                            <span class="ml-1 text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full">AI</span>
-                        </button>
-                        <button onclick="switchTab('source')" 
-                                id="sourceTab"
-                                class="tab-button py-3 px-4 border-b-2 font-medium text-sm flex items-center space-x-2 rounded-t-lg">
-                            <i class="fas fa-code text-blue-500"></i>
-                            <span>Orijinal Kaynak</span>
-                            <span class="ml-1 text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">RAW</span>
-                        </button>
-                        <button onclick="switchTab('formatted')" 
-                                id="formattedTab"
-                                class="tab-button py-3 px-4 border-b-2 font-medium text-sm flex items-center space-x-2 rounded-t-lg">
-                            <i class="fas fa-file-code text-green-500"></i>
-                            <span>Formatlanmış</span>
-                            <span class="ml-1 text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">SYNTAX</span>
-                        </button>
-                    </nav>
-                </div>
-
-                <!-- Tab Content -->
-                <div class="flex-1 flex flex-col">
-                    <!-- Highlighted Tab -->
-                    <div id="highlightedContent" class="tab-content active flex-1 flex flex-col">
-                        <!-- Toolbar -->
-                        <div class="p-4 border-b border-gray-200 bg-gray-50">
-                            <div class="flex items-center justify-between mb-2">
-                                <h4 class="font-medium text-gray-900">Renklendirilmiş Sayfa Kaynağı</h4>
-                                <div class="flex items-center space-x-3">
-                                    <div id="htmlStats" class="text-xs text-gray-600">
-                                        <!-- HTML istatistikleri buraya gelecek -->
-                                    </div>
-                                    <button onclick="scrollToNextHighlight()" 
-                                            class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200"
-                                            title="Sonraki işaretli alana git">
-                                        <i class="fas fa-arrow-down"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-4 text-xs">
-                                    <div class="flex items-center">
-                                        <div class="w-3 h-3 bg-red-400 rounded mr-1"></div>
-                                        <span>Konteyner</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <div class="w-3 h-3 bg-teal-400 rounded mr-1"></div>
-                                        <span>Başlık</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <div class="w-3 h-3 bg-blue-400 rounded mr-1"></div>
-                                        <span>Link</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <div class="w-3 h-3 bg-green-400 rounded mr-1"></div>
-                                        <span>Tarih</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <div class="w-3 h-3 bg-yellow-400 rounded mr-1"></div>
-                                        <span>Özet</span>
-                                    </div>
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    💡 Renkli alanları tıklayarak selector'ları kopyalayın
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Highlighted HTML Content -->
-                        <div class="flex-1 overflow-y-auto">
-                            <div id="htmlSourceContent" class="min-h-full">
-                                <div class="text-center py-8">
-                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-400 mx-auto mb-4"></div>
-                                    <p class="text-green-400">Renklendirilmiş sayfa kaynağı yükleniyor...</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Source Tab -->
-                    <div id="sourceContent" class="tab-content flex-1 flex flex-col hidden">
-                        <!-- Source Toolbar -->
-                        <div class="p-4 border-b border-gray-200 bg-gray-50">
-                            <div class="flex items-center justify-between">
-                                <h4 class="font-medium text-gray-900">Orijinal HTML Kaynağı</h4>
-                                <div class="flex items-center space-x-3">
-                                    <div id="sourceStats" class="text-xs text-gray-600">
-                                        <!-- Kaynak istatistikleri buraya gelecek -->
-                                    </div>
-                                    <button onclick="copySourceToClipboard()" 
-                                            class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
-                                            title="Tüm kaynağı kopyala">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                    <button onclick="downloadSource()" 
-                                            class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
-                                            title="HTML dosyası olarak indir">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Original HTML Content -->
-                        <div class="flex-1 overflow-y-auto">
-                            <div class="code-container bg-white min-h-full">
-                                <div class="line-numbers" id="originalLineNumbers">
-                                    <!-- Satır numaraları buraya gelecek -->
-                                </div>
-                                <div id="originalSourceContent" class="code-content min-h-full">
-                                    <div class="text-center py-8">
-                                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400 mx-auto mb-4"></div>
-                                        <p class="text-gray-600">Orijinal sayfa kaynağı yükleniyor...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Formatted Tab -->
-                    <div id="formattedContent" class="tab-content flex-1 flex flex-col hidden">
-                        <!-- Formatted Toolbar -->
-                        <div class="p-4 border-b border-gray-200 bg-gray-50">
-                            <div class="flex items-center justify-between">
-                                <h4 class="font-medium text-gray-900">Formatlanmış HTML</h4>
-                                <div class="flex items-center space-x-3">
-                                    <div id="formattedStats" class="text-xs text-gray-600">
-                                        <!-- Formatlanmış istatistikler buraya gelecek -->
-                                    </div>
-                                    <button onclick="copyFormattedToClipboard()" 
-                                            class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
-                                            title="Formatlanmış kodu kopyala">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Formatted HTML Content -->
-                        <div class="flex-1 overflow-y-auto">
-                            <div class="code-container bg-white min-h-full">
-                                <div class="line-numbers" id="formattedLineNumbers">
-                                    <!-- Satır numaraları buraya gelecek -->
-                                </div>
-                                <div id="formattedSourceContent" class="code-content min-h-full">
-                                    <div class="text-center py-8">
-                                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400 mx-auto mb-4"></div>
-                                        <p class="text-gray-600">Formatlanmış sayfa kaynağı yükleniyor...</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Modal Footer -->
-        <div class="p-6 border-t border-gray-200 bg-gray-50">
-            <div class="flex justify-between items-center">
-                <div class="text-sm text-gray-600">
-                    💡 Renkli alanlar tıklanabilir - Selector'ı kopyalamak için tıklayın
-                </div>
-                <div class="flex space-x-3">
-                    <button onclick="applyDetectedSelectors()" 
-                            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200">
-                        <i class="fas fa-magic mr-2"></i>
-                        Tespit Edilen Selector'ları Uygula
-                    </button>
-                    <button onclick="closePageSourceModal()" 
-                            class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200">
-                        Kapat
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Selector Yardım Modal -->
-<div id="selectorHelpModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">CSS Selector Yardımı</h3>
-            <button onclick="closeSelectorHelpModal()" class="text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <div class="space-y-6">
-            <!-- Temel Selector'lar -->
-            <div>
-                <h4 class="text-md font-semibold text-gray-900 mb-3">🎯 Temel CSS Selector'ları</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-gray-50 p-3 rounded-lg">
-                        <code class="text-sm font-mono text-blue-600">.class-name</code>
-                        <p class="text-xs text-gray-600 mt-1">Class ile seçim</p>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded-lg">
-                        <code class="text-sm font-mono text-blue-600">#id-name</code>
-                        <p class="text-xs text-gray-600 mt-1">ID ile seçim</p>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded-lg">
-                        <code class="text-sm font-mono text-blue-600">tag</code>
-                        <p class="text-xs text-gray-600 mt-1">HTML tag ile seçim</p>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded-lg">
-                        <code class="text-sm font-mono text-blue-600">parent child</code>
-                        <p class="text-xs text-gray-600 mt-1">Alt element seçimi</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Örnek Siteler -->
-            <div>
-                <h4 class="text-md font-semibold text-gray-900 mb-3">📰 Popüler Haber Sitelerinde Örnek Selector'lar</h4>
-                <div class="space-y-3">
-                    <div class="border border-gray-200 rounded-lg p-4">
-                        <h5 class="font-medium text-gray-900 mb-2">TechCrunch</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                            <div><strong>Konteyner:</strong> <code class="text-blue-600">.post-block</code></div>
-                            <div><strong>Başlık:</strong> <code class="text-blue-600">h2 a</code></div>
-                            <div><strong>Link:</strong> <code class="text-blue-600">h2 a</code></div>
-                            <div><strong>Tarih:</strong> <code class="text-blue-600">.river-byline time</code></div>
-                        </div>
-                    </div>
-                    
-                    <div class="border border-gray-200 rounded-lg p-4">
-                        <h5 class="font-medium text-gray-900 mb-2">The Verge</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                            <div><strong>Konteyner:</strong> <code class="text-blue-600">.c-entry-box</code></div>
-                            <div><strong>Başlık:</strong> <code class="text-blue-600">h2 a</code></div>
-                            <div><strong>Link:</strong> <code class="text-blue-600">h2 a</code></div>
-                            <div><strong>Tarih:</strong> <code class="text-blue-600">.c-byline time</code></div>
-                        </div>
-                    </div>
-                    
-                    <div class="border border-gray-200 rounded-lg p-4">
-                        <h5 class="font-medium text-gray-900 mb-2">Wired</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                            <div><strong>Konteyner:</strong> <code class="text-blue-600">.SummaryItemWrapper</code></div>
-                            <div><strong>Başlık:</strong> <code class="text-blue-600">h3 a</code></div>
-                            <div><strong>Link:</strong> <code class="text-blue-600">h3 a</code></div>
-                            <div><strong>Tarih:</strong> <code class="text-blue-600">.SummaryItemPublishDate</code></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Adım Adım Kılavuz -->
-            <div>
-                <h4 class="text-md font-semibold text-gray-900 mb-3">🔍 Adım Adım Selector Bulma</h4>
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <ol class="text-sm space-y-2">
-                        <li><strong>1.</strong> Hedef siteyi tarayıcıda açın</li>
-                        <li><strong>2.</strong> F12 tuşuna basarak Developer Tools'u açın</li>
-                        <li><strong>3.</strong> Bir makale başlığına sağ tıklayıp "Inspect" seçin</li>
-                        <li><strong>4.</strong> Seçilen element üzerinde sağ tıklayıp "Copy → Copy selector" seçin</li>
-                        <li><strong>5.</strong> Kopyalanan selector'ı test edin</li>
-                        <li><strong>6.</strong> Gerekirse selector'ı sadeleştirin (çok uzunsa)</li>
-                    </ol>
-                </div>
-            </div>
-            
-            <!-- İpuçları -->
-            <div>
-                <h4 class="text-md font-semibold text-gray-900 mb-3">💡 İpuçları</h4>
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <ul class="text-sm space-y-1">
-                        <li>• Çok spesifik selector'lar yerine genel olanları tercih edin</li>
-                        <li>• Birden fazla makale için çalıştığından emin olun</li>
-                        <li>• Relative linkler için base URL'yi unutmayın</li>
-                        <li>• Tarih ve özet selector'ları opsiyoneldir</li>
-                        <li>• Test butonunu kullanarak selector'ları doğrulayın</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <div class="mt-6 text-right">
-            <button onclick="closeSelectorHelpModal()" class="btn-primary">Anladım</button>
-        </div>
-    </div>
-</div>
-
+<!-- JavaScript Functions -->
 <script>
 // Toast notification system
 function showToast(message, type = 'info') {
@@ -1246,8 +881,8 @@ function showToast(message, type = 'info') {
     
     toast.className = `toast toast-${type}`;
     toast.style.cssText = `
-        background: white;
-        border: 1px solid #e5e7eb;
+        background: var(--twitter-background);
+        border: 1px solid var(--twitter-border);
         border-radius: 8px;
         padding: 16px;
         margin-bottom: 10px;
@@ -1262,13 +897,13 @@ function showToast(message, type = 'info') {
     toast.innerHTML = `
         <div style="flex-shrink: 0; font-size: 20px;">${icon}</div>
         <div style="flex: 1;">
-            <div style="font-weight: 600; margin-bottom: 4px; color: #374151;">${title}</div>
-            <div style="color: #6b7280; font-size: 14px;">${message}</div>
+            <div style="font-weight: 600; margin-bottom: 4px; color: var(--twitter-text);">${title}</div>
+            <div style="color: var(--twitter-text-secondary); font-size: 14px;">${message}</div>
         </div>
         <button onclick="this.parentElement.remove()" style="
             background: none;
             border: none;
-            color: #9ca3af;
+            color: var(--twitter-text-secondary);
             cursor: pointer;
             font-size: 18px;
             padding: 0;
@@ -1321,47 +956,10 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Debug fonksiyonu
-function debugToggle() {
-    const debugInfo = document.getElementById('debugInfo');
-    const debugStatus = document.getElementById('debugStatus');
-    const autoDetect = document.getElementById('auto_detect');
-    const manualSection = document.getElementById('manualSelectorsSection');
-    
-    if (debugInfo.classList.contains('hidden')) {
-        debugInfo.classList.remove('hidden');
-        updateDebugStatus();
-    } else {
-        debugInfo.classList.add('hidden');
-    }
-}
-
-function updateDebugStatus() {
-    const debugStatus = document.getElementById('debugStatus');
-    const autoDetect = document.getElementById('auto_detect');
-    const manualSection = document.getElementById('manualSelectorsSection');
-    
-    const status = {
-        'Checkbox checked': autoDetect ? autoDetect.checked : 'Element bulunamadı',
-        'Manuel section exists': manualSection ? 'Var' : 'Yok',
-        'Manuel section hidden': manualSection ? manualSection.classList.contains('hidden') : 'Element yok',
-        'Manuel section classes': manualSection ? manualSection.className : 'Element yok'
-    };
-    
-    debugStatus.innerHTML = Object.entries(status).map(([key, value]) => 
-        `${key}: <strong>${value}</strong>`
-    ).join('<br>');
-}
-
 // Manuel selector'ları göster/gizle
 function toggleManualSelectors() {
     const autoDetect = document.getElementById('auto_detect');
     const manualSection = document.getElementById('manualSelectorsSection');
-    
-    console.log('toggleManualSelectors çağrıldı');
-    console.log('autoDetect:', autoDetect);
-    console.log('autoDetect.checked:', autoDetect ? autoDetect.checked : 'Element yok');
-    console.log('manualSection:', manualSection);
     
     if (!autoDetect || !manualSection) {
         console.error('Gerekli elementler bulunamadı!');
@@ -1369,20 +967,11 @@ function toggleManualSelectors() {
     }
     
     if (autoDetect.checked) {
-        console.log('Otomatik tespit aktif - Manuel bölüm gizleniyor');
         manualSection.classList.add('hidden');
-        // Manuel selector'ları temizle ve disable et
         clearManualSelectors();
     } else {
-        console.log('Manuel mod aktif - Manuel bölüm gösteriliyor');
         manualSection.classList.remove('hidden');
-        // Manuel selector'ları aktif et
         enableManualSelectors();
-    }
-    
-    // Debug bilgisini güncelle
-    if (!document.getElementById('debugInfo').classList.contains('hidden')) {
-        updateDebugStatus();
     }
 }
 
@@ -1391,10 +980,9 @@ function clearManualSelectors() {
     const manualInputs = document.querySelectorAll('.manual-selector-input');
     manualInputs.forEach(input => {
         input.value = '';
-        // Disabled yerine readonly kullan (form'a dahil olsun ama düzenlenemesin)
         input.readOnly = true;
-        input.style.backgroundColor = '#f9fafb';
-        input.style.color = '#9ca3af';
+        input.style.backgroundColor = 'var(--twitter-secondary-bg)';
+        input.style.color = 'var(--twitter-text-secondary)';
         input.style.cursor = 'not-allowed';
     });
 }
@@ -1413,14 +1001,12 @@ function enableManualSelectors() {
 // Selector yardım modalını göster
 function showSelectorHelp() {
     const modal = document.getElementById('selectorHelpModal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.classList.add('active');
 }
 
 function closeSelectorHelpModal() {
     const modal = document.getElementById('selectorHelpModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    modal.classList.remove('active');
 }
 
 // URL değiştiğinde çağrılır
@@ -1448,22 +1034,21 @@ function analyzePageSource() {
     
     // Modal'ı aç
     const modal = document.getElementById('pageSourceModal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.classList.add('active');
     
     // Loading state'i göster
     document.getElementById('aiAnalysisContent').innerHTML = `
-        <div class="text-center py-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p class="text-gray-600">AI analizi yapılıyor...</p>
-            <p class="text-xs text-gray-500 mt-2">Bu işlem 10-30 saniye sürebilir</p>
+        <div style="text-align: center; padding: 40px 20px;">
+            <div class="loading-spinner"></div>
+            <p style="color: var(--twitter-text-secondary); margin-top: 16px;">AI analizi yapılıyor...</p>
+            <p style="font-size: 11px; color: var(--twitter-text-secondary); margin-top: 8px;">Bu işlem 10-30 saniye sürebilir</p>
         </div>
     `;
     
     document.getElementById('htmlSourceContent').innerHTML = `
-        <div class="text-center py-8">
-            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-400 mx-auto mb-4"></div>
-            <p class="text-green-400">Sayfa kaynağı yükleniyor...</p>
+        <div style="text-align: center; padding: 40px 20px;">
+            <div class="loading-spinner"></div>
+            <p style="color: var(--twitter-success); margin-top: 16px;">Sayfa kaynağı yükleniyor...</p>
         </div>
     `;
     
@@ -1510,59 +1095,59 @@ function displayAnalysisResults(data) {
     
     // AI analizi sonuçlarını göster
     document.getElementById('aiAnalysisContent').innerHTML = `
-        <div class="space-y-4">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
             <!-- Güven Seviyesi -->
-            <div class="bg-${getConfidenceColor(aiAnalysis.confidence)}-50 border border-${getConfidenceColor(aiAnalysis.confidence)}-200 rounded-lg p-3">
-                <div class="flex items-center">
-                    <i class="fas fa-${getConfidenceIcon(aiAnalysis.confidence)} text-${getConfidenceColor(aiAnalysis.confidence)}-600 mr-2"></i>
-                    <span class="font-medium text-${getConfidenceColor(aiAnalysis.confidence)}-800">
+            <div style="background: ${getConfidenceColor(aiAnalysis.confidence)}-50; border: 1px solid ${getConfidenceColor(aiAnalysis.confidence)}-200; border-radius: 8px; padding: 12px;">
+                <div style="display: flex; align-items: center;">
+                    <i class="fas fa-${getConfidenceIcon(aiAnalysis.confidence)}" style="color: ${getConfidenceColor(aiAnalysis.confidence)}-600; margin-right: 8px;"></i>
+                    <span style="font-weight: 600; color: ${getConfidenceColor(aiAnalysis.confidence)}-800;">
                         Güven: ${aiAnalysis.confidence}
                     </span>
                 </div>
             </div>
             
             <!-- HTML Boyut Bilgisi -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <i class="fas fa-file-code text-blue-600 mr-2"></i>
-                        <span class="font-medium text-blue-800">HTML Boyutu</span>
+            <div style="background: rgba(29, 161, 242, 0.05); border: 1px solid rgba(29, 161, 242, 0.1); border-radius: 8px; padding: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fas fa-file-code" style="color: var(--twitter-blue); margin-right: 8px;"></i>
+                        <span style="font-weight: 600; color: var(--twitter-blue);">HTML Boyutu</span>
                     </div>
-                    <div class="text-sm text-blue-700">
+                    <div style="font-size: 12px; color: var(--twitter-blue);">
                         ${formatBytes(htmlSize)} ${originalSize > htmlSize ? `(${formatBytes(originalSize)} → kısaltıldı)` : ''}
                     </div>
                 </div>
             </div>
             
             <!-- Analiz Sonucu -->
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                <h4 class="font-medium text-gray-900 mb-2">📊 Sayfa Analizi</h4>
-                <p class="text-sm text-gray-700">${aiAnalysis.analysis}</p>
+            <div style="background: var(--twitter-secondary-bg); border: 1px solid var(--twitter-border); border-radius: 8px; padding: 12px;">
+                <h4 style="font-weight: 600; color: var(--twitter-text); margin: 0 0 8px 0;">📊 Sayfa Analizi</h4>
+                <p style="font-size: 13px; color: var(--twitter-text); margin: 0;">${aiAnalysis.analysis}</p>
             </div>
             
             <!-- Tespit Edilen Selector'lar -->
-            <div class="space-y-3">
-                <h4 class="font-medium text-gray-900">🎯 Tespit Edilen Selector'lar</h4>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <h4 style="font-weight: 600; color: var(--twitter-text); margin: 0;">🎯 Tespit Edilen Selector'lar</h4>
                 
                 ${Object.entries(aiAnalysis.selectors).map(([key, value]) => `
-                    <div class="bg-white border border-gray-200 rounded-lg p-3">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-xs font-medium text-gray-500 uppercase">${getSelectorLabel(key)}</span>
+                    <div style="background: var(--twitter-background); border: 1px solid var(--twitter-border); border-radius: 8px; padding: 12px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="font-size: 11px; font-weight: 600; color: var(--twitter-text-secondary); text-transform: uppercase;">${getSelectorLabel(key)}</span>
                             <button onclick="copyToClipboard('${value}')" 
-                                    class="text-xs text-blue-600 hover:text-blue-800">
+                                    style="font-size: 11px; color: var(--twitter-blue); background: none; border: none; cursor: pointer;">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
-                        <code class="text-sm text-gray-800 bg-gray-100 px-2 py-1 rounded block break-all">${value}</code>
+                        <code style="font-size: 12px; color: var(--twitter-text); background: var(--twitter-secondary-bg); padding: 4px 8px; border-radius: 4px; display: block; word-break: break-all;">${value}</code>
                     </div>
                 `).join('')}
             </div>
             
             <!-- Notlar -->
             ${aiAnalysis.notes ? `
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                    <h4 class="font-medium text-yellow-800 mb-2">📝 Notlar</h4>
-                    <p class="text-sm text-yellow-700">${aiAnalysis.notes}</p>
+                <div style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 8px; padding: 12px;">
+                    <h4 style="font-weight: 600; color: var(--twitter-warning); margin: 0 0 8px 0;">📝 Notlar</h4>
+                    <p style="font-size: 13px; color: var(--twitter-warning); margin: 0;">${aiAnalysis.notes}</p>
                 </div>
             ` : ''}
         </div>
@@ -1571,8 +1156,8 @@ function displayAnalysisResults(data) {
     // Renklendirilmiş HTML kaynağını göster
     const htmlContainer = document.getElementById('htmlSourceContent');
     htmlContainer.innerHTML = `
-        <div class="html-source-viewer p-4 font-mono text-xs bg-gray-900 text-green-400">
-            <pre class="whitespace-pre-wrap break-words">${htmlContent}</pre>
+        <div style="font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace; font-size: 11px; line-height: 1.4; white-space: pre-wrap; word-break: break-word; background: var(--twitter-background); color: var(--twitter-text); border: 1px solid var(--twitter-border); border-radius: 8px; padding: 12px; overflow-x: auto; max-height: 400px; overflow-y: auto;">
+            <pre style="margin: 0; padding: 0; background: transparent; border: none; font-family: inherit; font-size: inherit; line-height: inherit; white-space: pre-wrap;">${htmlContent}</pre>
         </div>
     `;
     
@@ -1598,21 +1183,21 @@ function displayAnalysisResults(data) {
 // Analiz hatasını göster
 function showAnalysisError(error) {
     document.getElementById('aiAnalysisContent').innerHTML = `
-        <div class="text-center py-8">
-            <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
-            <h4 class="font-medium text-gray-900 mb-2">Analiz Başarısız</h4>
-            <p class="text-sm text-gray-600 mb-4">${error}</p>
+        <div style="text-align: center; padding: 40px 20px;">
+            <i class="fas fa-exclamation-triangle" style="color: var(--twitter-error); font-size: 48px; margin-bottom: 16px;"></i>
+            <h4 style="font-weight: 600; color: var(--twitter-text); margin: 0 0 8px 0;">Analiz Başarısız</h4>
+            <p style="font-size: 13px; color: var(--twitter-text-secondary); margin: 0 0 16px 0;">${error}</p>
             <button onclick="analyzePageSource()" 
-                    class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                    style="padding: 8px 16px; background: var(--twitter-blue); color: white; border: none; border-radius: 8px; cursor: pointer;">
                 Tekrar Dene
             </button>
         </div>
     `;
     
     document.getElementById('htmlSourceContent').innerHTML = `
-        <div class="text-center py-8">
-            <i class="fas fa-times text-red-400 text-2xl mb-4"></i>
-            <p class="text-red-400">Sayfa kaynağı yüklenemedi</p>
+        <div style="text-align: center; padding: 40px 20px;">
+            <i class="fas fa-times" style="color: var(--twitter-error); font-size: 32px; margin-bottom: 16px;"></i>
+            <p style="color: var(--twitter-error);">Sayfa kaynağı yüklenemedi</p>
         </div>
     `;
 }
@@ -1636,7 +1221,7 @@ function activateClickableElements() {
             
             // Visual feedback
             const originalBg = this.style.backgroundColor;
-            this.style.backgroundColor = '#10b981';
+            this.style.backgroundColor = 'var(--twitter-success)';
             this.style.color = 'white';
             
             setTimeout(() => {
@@ -1645,7 +1230,7 @@ function activateClickableElements() {
             }, 500);
             
             // Toast notification
-            showToast(`${getSelectorLabel(selectorType)} selector kopyalandı: ${selector}`);
+            showToast(`${getSelectorLabel(selectorType)} selector kopyalandı: ${selector}`, 'success');
         });
     });
 }
@@ -1688,7 +1273,7 @@ function applyDetectedSelectors() {
                 field.value = selectorValue;
                 
                 // Visual feedback
-                field.style.backgroundColor = '#dcfce7';
+                field.style.backgroundColor = 'rgba(0, 186, 124, 0.1)';
                 setTimeout(() => {
                     field.style.backgroundColor = '';
                 }, 1000);
@@ -1700,23 +1285,22 @@ function applyDetectedSelectors() {
     closePageSourceModal();
     
     // Başarı mesajı
-    showToast('✅ AI tarafından tespit edilen selector\'lar forma uygulandı!');
+    showToast('✅ AI tarafından tespit edilen selector\'lar forma uygulandı!', 'success');
 }
 
 // Modal'ı kapat
 function closePageSourceModal() {
     const modal = document.getElementById('pageSourceModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    modal.classList.remove('active');
 }
 
 // Yardımcı fonksiyonlar
 function getConfidenceColor(confidence) {
     switch(confidence) {
-        case 'Yüksek': return 'green';
-        case 'Orta': return 'yellow';
-        case 'Düşük': return 'red';
-        default: return 'gray';
+        case 'Yüksek': return 'var(--twitter-success)';
+        case 'Orta': return 'var(--twitter-warning)';
+        case 'Düşük': return 'var(--twitter-error)';
+        default: return 'var(--twitter-text-secondary)';
     }
 }
 
@@ -1755,19 +1339,6 @@ function copyToClipboard(text) {
     });
 }
 
-function showToast(message) {
-    // Basit toast notification
-    const toast = document.createElement('div');
-    toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-    toast.textContent = message;
-    
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
-
 function formatBytes(bytes) {
     if (bytes === 0) return '0 Bytes';
     
@@ -1785,7 +1356,7 @@ function scrollToNextHighlight() {
     const highlights = document.querySelectorAll('.highlighted-selector');
     
     if (highlights.length === 0) {
-        showToast('⚠️ Henüz işaretli element bulunamadı');
+        showToast('⚠️ Henüz işaretli element bulunamadı', 'warning');
         return;
     }
     
@@ -1808,7 +1379,7 @@ function scrollToNextHighlight() {
     // Bilgi göster
     const selectorType = currentElement.getAttribute('data-selector-label');
     const selectorValue = currentElement.getAttribute('data-selector-value');
-    showToast(`🎯 ${selectorType}: ${selectorValue}`);
+    showToast(`🎯 ${selectorType}: ${selectorValue}`, 'info');
 }
 
 // HTML istatistiklerini güncelle
@@ -1829,213 +1400,12 @@ function updateHtmlStats(data) {
     }).join(' | ');
     
     document.getElementById('htmlStats').innerHTML = `
-        <span class="font-medium">${highlights.length} işaretli element</span>
+        <span style="font-weight: 600;">${highlights.length} işaretli element</span>
         ${statsHtml ? ` (${statsHtml})` : ''}
     `;
 }
 
-// Manuel selector'ları test et
-function testManualSelectors() {
-    const url = document.getElementById('url').value.trim();
-    const articleContainer = document.getElementById('article_container').value.trim();
-    const titleSelector = document.getElementById('title_selector').value.trim();
-    const linkSelector = document.getElementById('link_selector').value.trim();
-    const dateSelector = document.getElementById('date_selector').value.trim();
-    const summarySelector = document.getElementById('summary_selector').value.trim();
-    const baseUrl = document.getElementById('base_url').value.trim();
-    
-    if (!url) {
-        showToast('Önce URL girin!', 'warning');
-        return;
-    }
-    
-    if (!articleContainer || !titleSelector || !linkSelector) {
-        showToast('Konteyner, başlık ve link selector\'ları zorunludur!', 'warning');
-        return;
-    }
-    
-    // Test butonunu disable et
-    const testBtn = event.target;
-    testBtn.disabled = true;
-    testBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Test Ediliyor...';
-    
-    fetch('/test_manual_selectors', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            url: url,
-            selectors: {
-                article_container: articleContainer,
-                title_selector: titleSelector,
-                link_selector: linkSelector,
-                date_selector: dateSelector,
-                summary_selector: summarySelector,
-                base_url: baseUrl
-            }
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        showManualTestResult(data);
-        // Test butonunu tekrar aktif et
-        testBtn.disabled = false;
-        testBtn.innerHTML = '<i class="fas fa-vial mr-2"></i>Manuel Selector\'ları Test Et';
-    })
-    .catch(error => {
-        showManualTestResult({success: false, error: 'Test sırasında hata oluştu: ' + error});
-        // Test butonunu tekrar aktif et
-        testBtn.disabled = false;
-        testBtn.innerHTML = '<i class="fas fa-vial mr-2"></i>Manuel Selector\'ları Test Et';
-    });
-}
-
-function showManualTestResult(data) {
-    const modal = document.getElementById('testModal');
-    const resultDiv = document.getElementById('testResult');
-    
-    if (data.success) {
-        resultDiv.innerHTML = `
-            <div class="flex items-center space-x-2 text-green-600">
-                <i class="fas fa-check-circle"></i>
-                <span class="font-medium">Manuel Selector Test Başarılı!</span>
-            </div>
-            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p class="text-sm text-green-800 mb-3">
-                    <strong>Bulunan Makale Sayısı:</strong> ${data.article_count}
-                </p>
-                ${data.articles && data.articles.length > 0 ? `
-                    <div class="space-y-2">
-                        <p class="text-sm font-medium text-green-800">Tespit Edilen Makaleler:</p>
-                        <div class="space-y-2 max-h-60 overflow-y-auto">
-                            ${data.articles.map(article => `
-                                <div class="bg-white border border-green-200 rounded p-3">
-                                    <h4 class="text-sm font-medium text-gray-900">${article.title || 'Başlık bulunamadı'}</h4>
-                                    <p class="text-xs text-gray-600 mt-1">
-                                        <strong>Link:</strong> ${article.url || 'Link bulunamadı'}
-                                    </p>
-                                    ${article.date ? `<p class="text-xs text-gray-600"><strong>Tarih:</strong> ${article.date}</p>` : ''}
-                                    ${article.summary ? `<p class="text-xs text-gray-600"><strong>Özet:</strong> ${article.summary.substring(0, 100)}...</p>` : ''}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                ` : ''}
-                <div class="mt-3 p-2 bg-green-100 rounded">
-                    <p class="text-xs text-green-700">
-                        ✅ Selector'larınız doğru çalışıyor! Kaynağı ekleyebilirsiniz.
-                    </p>
-                </div>
-            </div>
-        `;
-    } else {
-        resultDiv.innerHTML = `
-            <div class="flex items-center space-x-2 text-red-600">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span class="font-medium">Manuel Selector Test Başarısız!</span>
-            </div>
-            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p class="text-sm text-red-800 mb-3">${data.error}</p>
-                ${data.details ? `
-                    <div class="mt-3">
-                        <p class="text-sm font-medium text-red-800">Detaylar:</p>
-                        <ul class="text-xs text-red-700 mt-1 space-y-1">
-                            ${Object.entries(data.details).map(([key, value]) => 
-                                `<li><strong>${key}:</strong> ${value}</li>`
-                            ).join('')}
-                        </ul>
-                    </div>
-                ` : ''}
-                <div class="mt-3 p-2 bg-red-100 rounded">
-                    <p class="text-xs text-red-700">
-                        ❌ Selector'larınızı kontrol edin ve tekrar deneyin.
-                    </p>
-                </div>
-            </div>
-        `;
-    }
-    
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-}
-
-// URL test fonksiyonu (kaynak eklemeden önce)
-function testUrlBeforeAdd() {
-    const urlInput = document.getElementById('url');
-    const testBtn = document.getElementById('testUrlBtn');
-    const resultDiv = document.getElementById('urlTestResult');
-    const submitBtn = document.getElementById('submitBtn');
-    
-    const url = urlInput.value.trim();
-    
-    if (!url) {
-        showUrlTestResult('URL gerekli', 'error');
-        return;
-    }
-    
-    // Test butonunu disable et
-    testBtn.disabled = true;
-    testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    
-    fetch('/test_news_source_url', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({url: url})
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const message = `✅ ${data.container_count} konteyner bulundu. ${data.sample_articles ? data.sample_articles.length : 0} örnek makale tespit edildi.`;
-            showUrlTestResult(message, 'success');
-            
-            // Submit butonunu aktif et
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('opacity-50');
-        } else {
-            showUrlTestResult(`❌ ${data.message}`, 'error');
-            
-            // Submit butonunu pasif et
-            submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-50');
-        }
-        
-        // Test butonunu tekrar aktif et
-        testBtn.disabled = false;
-        testBtn.innerHTML = '<i class="fas fa-vial"></i>';
-    })
-    .catch(error => {
-        showUrlTestResult(`❌ Test hatası: ${error}`, 'error');
-        
-        // Test butonunu tekrar aktif et
-        testBtn.disabled = false;
-        testBtn.innerHTML = '<i class="fas fa-vial"></i>';
-        
-        // Submit butonunu pasif et
-        submitBtn.disabled = true;
-        submitBtn.classList.add('opacity-50');
-    });
-}
-
-function showUrlTestResult(message, type) {
-    const resultDiv = document.getElementById('urlTestResult');
-    resultDiv.className = `text-sm mt-1 ${type === 'success' ? 'text-green-600' : 'text-red-600'}`;
-    resultDiv.textContent = message;
-    resultDiv.classList.remove('hidden');
-}
-
-// URL değiştiğinde test sonucunu temizle
-document.getElementById('url').addEventListener('input', function() {
-    const resultDiv = document.getElementById('urlTestResult');
-    const submitBtn = document.getElementById('submitBtn');
-    
-    resultDiv.classList.add('hidden');
-    submitBtn.disabled = false;
-    submitBtn.classList.remove('opacity-50');
-});
-
+// Test fonksiyonları
 function testSource(sourceId, buttonElement) {
     // Test butonunu disable et
     buttonElement.disabled = true;
@@ -2053,13 +1423,13 @@ function testSource(sourceId, buttonElement) {
         showTestResult(data);
         // Test butonunu tekrar aktif et
         buttonElement.disabled = false;
-        buttonElement.innerHTML = '<i class="fas fa-vial"></i> <span>Test</span>';
+        buttonElement.innerHTML = '<i class="fas fa-vial"></i> Test';
     })
     .catch(error => {
         showTestResult({success: false, error: 'Test sırasında hata oluştu: ' + error});
         // Test butonunu tekrar aktif et
         buttonElement.disabled = false;
-        buttonElement.innerHTML = '<i class="fas fa-vial"></i> <span>Test</span>';
+        buttonElement.innerHTML = '<i class="fas fa-vial"></i> Test';
     });
 }
 
@@ -2069,19 +1439,19 @@ function showTestResult(data) {
     
     if (data.success) {
         resultDiv.innerHTML = `
-            <div class="flex items-center space-x-2 text-green-600">
+            <div style="display: flex; align-items: center; gap: 8px; color: var(--twitter-success); margin-bottom: 16px;">
                 <i class="fas fa-check-circle"></i>
-                <span class="font-medium">Test Başarılı!</span>
+                <span style="font-weight: 600;">Test Başarılı!</span>
             </div>
-            <p class="text-gray-600">${data.message}</p>
-            <div class="bg-green-50 border border-green-200 rounded-lg p-3">
-                <p class="text-sm text-green-800">
+            <p style="color: var(--twitter-text); margin-bottom: 16px;">${data.message}</p>
+            <div style="background: rgba(0, 186, 124, 0.05); border: 1px solid rgba(0, 186, 124, 0.1); border-radius: 8px; padding: 12px;">
+                <p style="font-size: 13px; color: var(--twitter-success); margin: 0 0 12px 0;">
                     <strong>Bulunan Makale Sayısı:</strong> ${data.article_count}
                 </p>
                 ${data.articles && data.articles.length > 0 ? `
-                    <div class="mt-2">
-                        <p class="text-sm font-medium text-green-800">Örnek Makaleler:</p>
-                        <ul class="text-xs text-green-700 mt-1 space-y-1">
+                    <div style="margin-top: 8px;">
+                        <p style="font-size: 13px; font-weight: 600; color: var(--twitter-success); margin: 0 0 8px 0;">Örnek Makaleler:</p>
+                        <ul style="font-size: 12px; color: var(--twitter-success); margin: 0; padding-left: 20px;">
                             ${data.articles.map(article => `<li>• ${article.title}</li>`).join('')}
                         </ul>
                     </div>
@@ -2090,762 +1460,112 @@ function showTestResult(data) {
         `;
     } else {
         resultDiv.innerHTML = `
-            <div class="flex items-center space-x-2 text-red-600">
+            <div style="display: flex; align-items: center; gap: 8px; color: var(--twitter-error); margin-bottom: 16px;">
                 <i class="fas fa-exclamation-triangle"></i>
-                <span class="font-medium">Test Başarısız!</span>
+                <span style="font-weight: 600;">Test Başarısız!</span>
             </div>
-            <div class="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p class="text-sm text-red-800">${data.error}</p>
+            <div style="background: rgba(244, 36, 94, 0.05); border: 1px solid rgba(244, 36, 94, 0.1); border-radius: 8px; padding: 12px;">
+                <p style="font-size: 13px; color: var(--twitter-error); margin: 0;">${data.error}</p>
             </div>
         `;
     }
     
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.classList.add('active');
 }
 
 function closeTestModal() {
     const modal = document.getElementById('testModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    modal.classList.remove('active');
 }
 
-// Modal dışına tıklanınca kapat
-document.getElementById('testModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeTestModal();
-    }
-});
-
-// Selector yardım modalı için de aynı
-document.getElementById('selectorHelpModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeSelectorHelpModal();
-    }
-});
-
-// Debug add source fonksiyonu
-function debugAddSource() {
-    const form = document.getElementById('addSourceForm');
-    const formData = new FormData(form);
+// URL test fonksiyonu (kaynak eklemeden önce)
+function testUrlBeforeAdd() {
+    const urlInput = document.getElementById('url');
+    const testBtn = document.getElementById('testUrlBtn');
+    const resultDiv = document.getElementById('urlTestResult');
     
-    console.log('=== DEBUG ADD SOURCE ===');
+    const url = urlInput.value.trim();
     
-    fetch('/debug/test_add_source', {
+    if (!url) {
+        showUrlTestResult('URL gerekli', 'error');
+        return;
+    }
+    
+    // Test butonunu disable et
+    testBtn.disabled = true;
+    testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Test Ediliyor...';
+    
+    fetch('/test_news_source_url', {
         method: 'POST',
-        body: formData
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({url: url})
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Debug sonucu:', data);
-        showToast('Debug tamamlandı! Console loglarını kontrol edin.', 'info');
+        if (data.success) {
+            const message = `✅ ${data.container_count} konteyner bulundu. ${data.sample_articles ? data.sample_articles.length : 0} örnek makale tespit edildi.`;
+            showUrlTestResult(message, 'success');
+        } else {
+            showUrlTestResult(`❌ ${data.message}`, 'error');
+        }
+        
+        // Test butonunu tekrar aktif et
+        testBtn.disabled = false;
+        testBtn.innerHTML = '<i class="fas fa-vial"></i> Test Et';
     })
     .catch(error => {
-        console.error('Debug hatası:', error);
-        showToast('Debug hatası: ' + error, 'error');
+        showUrlTestResult(`❌ Test hatası: ${error}`, 'error');
+        
+        // Test butonunu tekrar aktif et
+        testBtn.disabled = false;
+        testBtn.innerHTML = '<i class="fas fa-vial"></i> Test Et';
     });
 }
 
-// Form submit debug fonksiyonu
-function debugFormSubmit(event) {
-    const autoDetect = document.getElementById('auto_detect');
-    const manualInputs = document.querySelectorAll('.manual-selector-input');
-    
-    console.log('=== FORM SUBMIT DEBUG ===');
-    console.log('auto_detect element:', autoDetect);
-    console.log('auto_detect.checked:', autoDetect ? autoDetect.checked : 'Element yok');
-    console.log('auto_detect.value:', autoDetect ? autoDetect.value : 'Element yok');
-    console.log('auto_detect.name:', autoDetect ? autoDetect.name : 'Element yok');
-    
-    // Manuel input değerlerini kontrol et
-    console.log('Manuel input değerleri:');
-    manualInputs.forEach(input => {
-        console.log(`${input.id}: "${input.value}" (readOnly: ${input.readOnly}, disabled: ${input.disabled})`);
-    });
-    
-    // Form data'yı kontrol et
-    const formData = new FormData(event.target);
-    console.log('Form data:');
-    for (let [key, value] of formData.entries()) {
-        console.log(`${key}: "${value}"`);
-    }
-    
-    console.log('=== FORM SUBMIT DEBUG END ===');
-    
-    // Form submit'e devam et
-    return true;
+function showUrlTestResult(message, type) {
+    const resultDiv = document.getElementById('urlTestResult');
+    resultDiv.className = `form-result ${type}`;
+    resultDiv.textContent = message;
+    resultDiv.classList.remove('hidden');
 }
 
-// ===== TAB SİSTEMİ FONKSİYONLARI =====
+// URL değiştiğinde test sonucunu temizle
+document.getElementById('url').addEventListener('input', function() {
+    const resultDiv = document.getElementById('urlTestResult');
+    resultDiv.classList.add('hidden');
+});
 
-// Tab değiştirme fonksiyonu (Chrome benzeri)
-function switchTab(tabName) {
-    // Tüm tab butonlarını pasif yap
-    document.querySelectorAll('.tab-button').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Tüm tab içeriklerini gizle
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-        content.classList.add('hidden');
-    });
-    
-    // Seçilen tab'ı aktif yap
-    const activeTab = document.getElementById(tabName + 'Tab');
-    const activeContent = document.getElementById(tabName + 'Content');
-    
-    activeTab.classList.add('active');
-    activeContent.classList.remove('hidden');
-    activeContent.classList.add('active');
-    
-    // Loading state göster
-    if ((tabName === 'source' && !window.originalSourceLoaded) || 
-        (tabName === 'formatted' && !window.formattedSourceLoaded)) {
-        
-        const contentElement = activeContent.querySelector('.code-content, #htmlSourceContent');
-        if (contentElement) {
-            contentElement.innerHTML = `
-                <div class="text-center py-8">
-                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400 mx-auto mb-4"></div>
-                    <p class="text-gray-600">${tabName === 'source' ? 'Orijinal kaynak' : 'Formatlanmış kaynak'} yükleniyor...</p>
-                </div>
-            `;
-        }
+// Form sıfırlama
+function resetForm() {
+    document.getElementById('addSourceForm').reset();
+    document.getElementById('urlTestResult').classList.add('hidden');
+    const manualSection = document.getElementById('manualSelectorsSection');
+    if (manualSection) {
+        manualSection.classList.add('hidden');
     }
-    
-    // Tab'a özel işlemler (async)
-    setTimeout(() => {
-        if (tabName === 'source' && !window.originalSourceLoaded) {
-            loadOriginalSource();
-        } else if (tabName === 'formatted' && !window.formattedSourceLoaded) {
-            loadFormattedSource();
-        }
-    }, 100);
-    
-    // Tab değişikliği için toast
-    const tabLabels = {
-        'highlighted': 'Renklendirilmiş Görünüm',
-        'source': 'Orijinal Kaynak',
-        'formatted': 'Formatlanmış Kod'
-    };
-    
-    showToast(`📄 ${tabLabels[tabName]} aktif`, 'info');
+    clearManualSelectors();
+    showToast('Form sıfırlandı', 'info');
 }
 
-// Orijinal kaynağı yükle
-function loadOriginalSource() {
-    if (window.currentAnalysisData && window.currentAnalysisData.original_html) {
-        const content = window.currentAnalysisData.original_html;
-        const formattedContent = formatHtmlForDisplay(content, false); // Görüntüleme için formatla
-        document.getElementById('originalSourceContent').textContent = formattedContent;
-        
-        // Satır numaralarını oluştur
-        generateLineNumbers(formattedContent, 'originalLineNumbers');
-        
-        // İstatistikleri güncelle
-        const lineCount = formattedContent.split('\n').length;
-        document.getElementById('sourceStats').innerHTML = `
-            <span class="font-medium">${formatBytes(content.length)}</span>
-            <span class="text-gray-400">|</span>
-            <span>${lineCount} satır</span>
-            <span class="text-gray-400">|</span>
-            <span>Orijinal</span>
-        `;
-        
-        window.originalSourceLoaded = true;
-    } else {
-        // Eğer orijinal HTML yoksa, renklendirilmiş versiyondan temizle
-        const highlightedContent = document.getElementById('htmlSourceContent').innerHTML;
-        if (highlightedContent) {
-            // HTML'den renklendirme etiketlerini temizle
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = highlightedContent;
-            
-            // Tüm style ve data attribute'larını kaldır
-            const elements = tempDiv.querySelectorAll('*');
-            elements.forEach(el => {
-                el.removeAttribute('style');
-                el.removeAttribute('data-selector');
-                el.removeAttribute('data-selector-value');
-                el.removeAttribute('data-selector-label');
-                el.removeAttribute('data-before-content');
-                el.removeAttribute('title');
-                el.classList.remove('highlighted-selector');
-            });
-            
-            const cleanContent = tempDiv.innerHTML || '';
-            const formattedContent = formatHtmlForDisplay(cleanContent, false);
-            document.getElementById('originalSourceContent').textContent = formattedContent;
-            
-            // Satır numaralarını oluştur
-            generateLineNumbers(formattedContent, 'originalLineNumbers');
-            
-            // İstatistikleri güncelle
-            const lineCount = formattedContent.split('\n').length;
-            document.getElementById('sourceStats').innerHTML = `
-                <span class="font-medium">${formatBytes(cleanContent.length)}</span>
-                <span class="text-gray-400">|</span>
-                <span>${lineCount} satır</span>
-                <span class="text-gray-400">|</span>
-                <span>Temizlenmiş</span>
-            `;
-            
-            window.originalSourceLoaded = true;
-        }
+// Onay dialog'u
+function showConfirmDialog(title, message, onConfirm) {
+    if (confirm(`${title}\n\n${message}`)) {
+        onConfirm();
     }
 }
 
-// Formatlanmış kaynağı yükle
-function loadFormattedSource() {
-    if (window.currentAnalysisData && window.currentAnalysisData.html_content) {
-        // Renklendirilmiş HTML'i kullan (selector'lar dahil)
-        const highlightedContent = window.currentAnalysisData.html_content;
-        const formattedContent = formatHtmlForDisplay(highlightedContent, true, true); // Syntax highlighting + selector'ları koru
-        document.getElementById('formattedSourceContent').innerHTML = formattedContent;
-        
-        // Satır numaralarını oluştur
-        const plainText = document.getElementById('formattedSourceContent').textContent || formattedContent;
-        generateLineNumbers(plainText, 'formattedLineNumbers');
-        
-        // Tıklanabilir elementleri aktif et
-        activateClickableElementsInFormatted();
-        
-        // İstatistikleri güncelle
-        const lineCount = plainText.split('\n').length;
-        document.getElementById('formattedStats').innerHTML = `
-            <span class="font-medium">${formatBytes(highlightedContent.length)}</span>
-            <span class="text-gray-400">|</span>
-            <span>${lineCount} satır</span>
-            <span class="text-gray-400">|</span>
-            <span>Syntax + Selectors</span>
-        `;
-        
-        window.formattedSourceLoaded = true;
-    } else {
-        // Renklendirilmiş versiyondan formatla
-        const highlightedContent = document.getElementById('htmlSourceContent').innerHTML;
-        if (highlightedContent) {
-            const formattedContent = formatHtmlForDisplay(highlightedContent, true, true); // Selector'ları koru
-            document.getElementById('formattedSourceContent').innerHTML = formattedContent;
-            
-            // Satır numaralarını oluştur
-            const plainText = document.getElementById('formattedSourceContent').textContent || formattedContent;
-            generateLineNumbers(plainText, 'formattedLineNumbers');
-            
-            // Tıklanabilir elementleri aktif et
-            activateClickableElementsInFormatted();
-            
-            // İstatistikleri güncelle
-            const lineCount = plainText.split('\n').length;
-            document.getElementById('formattedStats').innerHTML = `
-                <span class="font-medium">${formatBytes(highlightedContent.length)}</span>
-                <span class="text-gray-400">|</span>
-                <span>${lineCount} satır</span>
-                <span class="text-gray-400">|</span>
-                <span>Syntax + Selectors</span>
-            `;
-            
-            window.formattedSourceLoaded = true;
-        }
-    }
-}
-
-// HTML'i görüntüleme için formatla (Chrome DevTools benzeri)
-function formatHtmlForDisplay(htmlContent, withSyntaxHighlighting = false, preserveSelectors = false) {
-    try {
-        if (!htmlContent || htmlContent.trim() === '') {
-            return '';
-        }
-        
-        // HTML'i temizle
-        let content = htmlContent.trim();
-        
-        // Eğer syntax highlighting isteniyorsa
-        if (withSyntaxHighlighting) {
-            return formatHtmlWithSyntaxHighlighting(content, preserveSelectors);
-        }
-        
-        // Sadece düz metin formatlaması
-        return formatHtmlAsPlainText(content);
-        
-    } catch (error) {
-        console.error('HTML formatlama hatası:', error);
-        return htmlContent;
-    }
-}
-
-// HTML'i düz metin olarak formatla
-function formatHtmlAsPlainText(htmlContent) {
-    try {
-        // HTML'i güzel formatla
-        let formatted = '';
-        let indentLevel = 0;
-        const indentSize = 2;
-        
-        // HTML'i token'lara böl
-        const tokens = htmlContent.split(/(<[^>]*>)/);
-        
-        for (const token of tokens) {
-            const trimmedToken = token.trim();
-            if (!trimmedToken) continue;
-            
-            if (trimmedToken.startsWith('<')) {
-                // HTML tag
-                const isClosingTag = trimmedToken.startsWith('</');
-                const isSelfClosing = trimmedToken.endsWith('/>') || 
-                    ['<br>', '<hr>', '<img', '<input', '<meta', '<link', '<area', '<base', '<col', '<embed', '<source', '<track', '<wbr'].some(tag => 
-                        trimmedToken.toLowerCase().startsWith(tag));
-                
-                // Kapanış tag'i ise girinti azalt
-                if (isClosingTag) {
-                    indentLevel = Math.max(0, indentLevel - 1);
-                }
-                
-                // Girinti ekle
-                const indent = ' '.repeat(indentLevel * indentSize);
-                formatted += indent + trimmedToken + '\n';
-                
-                // Açılış tag'i ise girinti artır
-                if (!isClosingTag && !isSelfClosing) {
-                    indentLevel++;
-                }
-            } else {
-                // Text content
-                if (trimmedToken.length > 0) {
-                    const indent = ' '.repeat(indentLevel * indentSize);
-                    // Uzun text'leri böl
-                    if (trimmedToken.length > 100) {
-                        const words = trimmedToken.split(' ');
-                        let line = '';
-                        for (const word of words) {
-                            if (line.length + word.length > 100) {
-                                if (line.trim()) {
-                                    formatted += indent + line.trim() + '\n';
-                                }
-                                line = word + ' ';
-                            } else {
-                                line += word + ' ';
-                            }
-                        }
-                        if (line.trim()) {
-                            formatted += indent + line.trim() + '\n';
-                        }
-                    } else {
-                        formatted += indent + trimmedToken + '\n';
-                    }
-                }
-            }
-        }
-        
-        return formatted.trim();
-        
-    } catch (error) {
-        console.error('Düz metin formatlama hatası:', error);
-        return htmlContent;
-    }
-}
-
-// HTML'i syntax highlighting ile formatla
-function formatHtmlWithSyntaxHighlighting(htmlContent, preserveSelectors = false) {
-    try {
-        // HTML'i güzel formatla ve syntax highlighting ekle
-        let formatted = '';
-        let indentLevel = 0;
-        const indentSize = 2;
-        
-        // HTML'i token'lara böl
-        const tokens = htmlContent.split(/(<[^>]*>)/);
-        
-        for (const token of tokens) {
-            const trimmedToken = token.trim();
-            if (!trimmedToken) continue;
-            
-            if (trimmedToken.startsWith('<')) {
-                // HTML tag
-                const isClosingTag = trimmedToken.startsWith('</');
-                const isSelfClosing = trimmedToken.endsWith('/>') || 
-                    ['<br>', '<hr>', '<img', '<input', '<meta', '<link', '<area', '<base', '<col', '<embed', '<source', '<track', '<wbr'].some(tag => 
-                        trimmedToken.toLowerCase().startsWith(tag));
-                
-                // Kapanış tag'i ise girinti azalt
-                if (isClosingTag) {
-                    indentLevel = Math.max(0, indentLevel - 1);
-                }
-                
-                // Girinti ekle
-                const indent = ' '.repeat(indentLevel * indentSize);
-                
-                // Syntax highlighting ekle
-                const highlightedTag = addAdvancedSyntaxHighlighting(trimmedToken, preserveSelectors);
-                formatted += indent + highlightedTag + '\n';
-                
-                // Açılış tag'i ise girinti artır
-                if (!isClosingTag && !isSelfClosing) {
-                    indentLevel++;
-                }
-            } else {
-                // Text content
-                if (trimmedToken.length > 0) {
-                    const indent = ' '.repeat(indentLevel * indentSize);
-                    formatted += indent + `<span class="html-text">${escapeHtml(trimmedToken)}</span>\n`;
-                }
-            }
-        }
-        
-        return formatted.trim();
-        
-    } catch (error) {
-        console.error('Syntax highlighting formatlama hatası:', error);
-        return escapeHtml(htmlContent);
-    }
-}
-
-// HTML'i düzgün formatla (satır satır, girintili) - ESKİ FONKSİYON
-function formatHtmlProperly(htmlContent, withSyntaxHighlighting = false, preserveSelectors = false) {
-    try {
-        // HTML'i temizle ve parse et
-        let cleanHtml = htmlContent.trim();
-        
-        // Eğer selector'ları koruyacaksak, önce DOM parse edelim
-        if (preserveSelectors) {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = cleanHtml;
-            cleanHtml = tempDiv.innerHTML;
-        }
-        
-        // Tek satırda olan HTML'i düzgün formatlayalım
-        let formatted = '';
-        let indentLevel = 0;
-        const indentSize = 2; // 2 boşluk girinti
-        
-        // HTML'i tag'lere böl
-        const tokens = cleanHtml.split(/(<[^>]*>)/);
-        
-        for (let i = 0; i < tokens.length; i++) {
-            const token = tokens[i].trim();
-            if (!token) continue;
-            
-            if (token.startsWith('<')) {
-                // Bu bir HTML tag'i
-                const isClosingTag = token.startsWith('</');
-                const isSelfClosing = token.endsWith('/>') || 
-                    ['<br>', '<hr>', '<img', '<input', '<meta', '<link'].some(tag => token.startsWith(tag));
-                
-                // Kapanış tag'i ise girinti azalt
-                if (isClosingTag) {
-                    indentLevel = Math.max(0, indentLevel - 1);
-                }
-                
-                // Girinti ekle ve tag'i yaz
-                const indent = ' '.repeat(indentLevel * indentSize);
-                
-                if (withSyntaxHighlighting) {
-                    // Gelişmiş syntax highlighting ekle (selector'ları koruyarak)
-                    const highlightedTag = addAdvancedSyntaxHighlighting(token, preserveSelectors);
-                    formatted += indent + highlightedTag + '\n';
-                } else {
-                    // Sadece escape et (selector'ları koruyarak)
-                    if (preserveSelectors && token.includes('data-selector')) {
-                        // Selector'lı element'i olduğu gibi bırak
-                        formatted += indent + token + '\n';
-                    } else {
-                        const escapedTag = escapeHtml(token);
-                        formatted += indent + escapedTag + '\n';
-                    }
-                }
-                
-                // Açılış tag'i ise girinti artır (self-closing değilse)
-                if (!isClosingTag && !isSelfClosing) {
-                    indentLevel++;
-                }
-            } else {
-                // Bu text content
-                if (token.length > 0) {
-                    const indent = ' '.repeat(indentLevel * indentSize);
-                    const escapedText = withSyntaxHighlighting ? escapeHtml(token) : escapeHtml(token);
-                    
-                    // Uzun text'leri böl
-                    if (token.length > 80) {
-                        const words = token.split(' ');
-                        let line = '';
-                        for (const word of words) {
-                            if (line.length + word.length > 80) {
-                                if (line.trim()) {
-                                    formatted += indent + escapeHtml(line.trim()) + '\n';
-                                }
-                                line = word + ' ';
-                            } else {
-                                line += word + ' ';
-                            }
-                        }
-                        if (line.trim()) {
-                            formatted += indent + escapeHtml(line.trim()) + '\n';
-                        }
-                    } else {
-                        formatted += indent + escapedText + '\n';
-                    }
-                }
-            }
-        }
-        
-        return formatted.trim();
-        
-    } catch (error) {
-        console.error('HTML formatlama hatası:', error);
-        // Hata durumunda basit escape
-        return escapeHtml(htmlContent);
-    }
-}
-
-// HTML karakterlerini escape et
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// Gelişmiş syntax highlighting ekle
-function addSyntaxHighlighting(htmlTag, preserveSelectors = false) {
-    if (preserveSelectors && htmlTag.includes('data-selector')) {
-        // Selector'lı element'i olduğu gibi döndür (zaten renklendirilmiş)
-        return htmlTag;
-    }
-    
-    let highlighted = escapeHtml(htmlTag);
-    
-    // Tag adını renklendir
-    highlighted = highlighted.replace(/&lt;(\/?[a-zA-Z][a-zA-Z0-9]*)/g, 
-        '&lt;<span class="html-tag">$1</span>');
-    
-    // Attribute'ları renklendir
-    highlighted = highlighted.replace(/(\s+)([a-zA-Z-]+)(=)(&quot;[^&]*?&quot;|&#39;[^&]*?&#39;)/g, 
-        '$1<span class="html-attr">$2</span><span class="html-equals">$3</span><span class="html-value">$4</span>');
-    
-    // Kapanış > işaretini renklendir
-    highlighted = highlighted.replace(/(&gt;)$/, '<span class="html-bracket">$1</span>');
-    
-    return highlighted;
-}
-
-// Gelişmiş syntax highlighting (Chrome DevTools benzeri)
-function addAdvancedSyntaxHighlighting(htmlTag, preserveSelectors = false) {
-    if (preserveSelectors && htmlTag.includes('data-selector')) {
-        // Selector'lı element için hem syntax highlighting hem selector renklendirme
-        let highlighted = htmlTag;
-        
-        // Önce HTML karakterlerini escape et (selector attribute'ları hariç)
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlTag;
-        const element = tempDiv.firstChild;
-        
-        if (element) {
-            // Tag adını renklendir
-            const tagName = element.tagName.toLowerCase();
-            highlighted = highlighted.replace(new RegExp(`<${tagName}`, 'i'), 
-                `<span class="html-tag">&lt;${tagName}</span>`);
-            
-            // Kapanış tag'i varsa onu da renklendir
-            if (htmlTag.includes(`</${tagName}`)) {
-                highlighted = highlighted.replace(new RegExp(`</${tagName}>`, 'i'), 
-                    `<span class="html-tag">&lt;/${tagName}</span><span class="html-bracket">&gt;</span>`);
-            }
-            
-            // Attribute'ları renklendir (selector attribute'ları hariç)
-            highlighted = highlighted.replace(/(\s+)([a-zA-Z-]+(?!-selector))=(["'][^"']*["'])/g, 
-                '$1<span class="html-attr">$2</span><span class="html-equals">=</span><span class="html-value">$3</span>');
-        }
-        
-        return highlighted;
-    }
-    
-    // Normal syntax highlighting
-    let highlighted = escapeHtml(htmlTag);
-    
-    // Comment kontrolü
-    if (htmlTag.startsWith('<!--')) {
-        return `<span class="html-comment">${highlighted}</span>`;
-    }
-    
-    // Tag adını renklendir
-    highlighted = highlighted.replace(/&lt;(\/?[a-zA-Z][a-zA-Z0-9]*)/g, 
-        '&lt;<span class="html-tag">$1</span>');
-    
-    // Attribute'ları renklendir
-    highlighted = highlighted.replace(/(\s+)([a-zA-Z-]+)(=)(&quot;[^&]*?&quot;|&#39;[^&]*?&#39;)/g, 
-        '$1<span class="html-attr">$2</span><span class="html-equals">$3</span><span class="html-value">$4</span>');
-    
-    // Kapanış > işaretini renklendir
-    highlighted = highlighted.replace(/(&gt;)$/, '<span class="html-bracket">$1</span>');
-    
-    return highlighted;
-}
-
-// Satır numaralarını oluştur
-function generateLineNumbers(content, targetElementId) {
-    const lines = content.split('\n');
-    const lineNumbers = [];
-    
-    for (let i = 1; i <= lines.length; i++) {
-        lineNumbers.push(`<div class="line-number">${i}</div>`);
-    }
-    
-    document.getElementById(targetElementId).innerHTML = lineNumbers.join('');
-}
-
-// Formatlanmış tab'da tıklanabilir elementleri aktif et
-function activateClickableElementsInFormatted() {
-    const formattedContainer = document.getElementById('formattedSourceContent');
-    const elements = formattedContainer.querySelectorAll('[data-selector]');
-    
-    elements.forEach(element => {
-        element.style.cursor = 'pointer';
-        element.title = `Tıklayın: ${element.getAttribute('data-selector-value')}`;
-        
-        element.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const selector = this.getAttribute('data-selector-value');
-            const selectorType = this.getAttribute('data-selector');
-            
-            copyToClipboard(selector);
-            
-            // Visual feedback
-            const originalBg = this.style.backgroundColor;
-            this.style.backgroundColor = '#10b981';
-            this.style.color = 'white';
-            
-            setTimeout(() => {
-                this.style.backgroundColor = originalBg;
-                this.style.color = '';
-            }, 500);
-            
-            // Toast notification
-            showToast(`${getSelectorLabel(selectorType)} selector kopyalandı: ${selector}`, 'success');
-        });
-    });
-}
-
-// Orijinal kaynağı panoya kopyala
-function copySourceToClipboard() {
-    const contentElement = document.getElementById('originalSourceContent');
-    if (!contentElement || !contentElement.textContent.trim()) {
-        showToast('Henüz orijinal kaynak yüklenmedi!', 'error');
-        return;
-    }
-    
-    // HTML etiketlerini kaldırıp sadece text içeriği al
-    const content = contentElement.textContent || contentElement.innerText || '';
-    
-    navigator.clipboard.writeText(content).then(() => {
-        showToast('✅ Orijinal kaynak panoya kopyalandı!', 'success');
-    }).catch(err => {
-        showToast('❌ Kopyalama hatası!', 'error');
-    });
-}
-
-// Formatlanmış kodu panoya kopyala
-function copyFormattedToClipboard() {
-    const contentElement = document.getElementById('formattedSourceContent');
-    if (!contentElement || !contentElement.textContent.trim()) {
-        showToast('Henüz formatlanmış kaynak yüklenmedi!', 'error');
-        return;
-    }
-    
-    // HTML etiketlerini kaldırıp sadece text içeriği al
-    const content = contentElement.textContent || contentElement.innerText || '';
-    
-    navigator.clipboard.writeText(content).then(() => {
-        showToast('✅ Formatlanmış kod panoya kopyalandı!', 'success');
-    }).catch(err => {
-        showToast('❌ Kopyalama hatası!', 'error');
-    });
-}
-
-// HTML dosyası olarak indir
-function downloadSource() {
-    const content = document.getElementById('originalSourceContent').textContent;
-    if (!content) {
-        showToast('Henüz orijinal kaynak yüklenmedi!', 'error');
-        return;
-    }
-    
-    const blob = new Blob([content], { type: 'text/html' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'page_source.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-    showToast('✅ HTML dosyası indirildi!', 'success');
-}
-
-// Dosya boyutunu formatla
-function formatBytes(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-// Gelişmiş toast sistemi
-function showToast(message, type = 'info') {
-    const colors = {
-        'success': 'bg-green-600',
-        'error': 'bg-red-600',
-        'warning': 'bg-yellow-600',
-        'info': 'bg-blue-600'
-    };
-    
-    const icons = {
-        'success': 'fas fa-check',
-        'error': 'fas fa-times',
-        'warning': 'fas fa-exclamation',
-        'info': 'fas fa-info'
-    };
-    
-    const toast = document.createElement('div');
-    toast.className = `fixed top-4 right-4 ${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2 transform translate-x-full transition-transform duration-300`;
-    
-    toast.innerHTML = `
-        <i class="${icons[type]}"></i>
-        <span>${message}</span>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    // Animasyon ile göster
-    setTimeout(() => {
-        toast.classList.remove('translate-x-full');
-    }, 100);
-    
-    // 3 saniye sonra kaldır
-    setTimeout(() => {
-        toast.classList.add('translate-x-full');
-        setTimeout(() => {
-            toast.remove();
-        }, 300);
-    }, 3000);
-}
-
-// Sayfa yüklendiğinde manuel selector'ları gizle
+// Sayfa yüklendiğinde
 document.addEventListener('DOMContentLoaded', function() {
     const autoDetect = document.getElementById('auto_detect');
     const manualSection = document.getElementById('manualSelectorsSection');
     
-    console.log('Sayfa yüklendi, başlangıç durumu ayarlanıyor');
-    
     if (autoDetect && autoDetect.checked) {
         manualSection.classList.add('hidden');
-        clearManualSelectors(); // Başlangıçta disable et
+        clearManualSelectors();
     } else {
-        enableManualSelectors(); // Manuel modda aktif et
+        enableManualSelectors();
     }
     
     // URL analiz butonunu başlangıçta devre dışı bırak
@@ -2865,6 +1585,21 @@ document.addEventListener('DOMContentLoaded', function() {
     window.originalSourceLoaded = false;
     window.formattedSourceLoaded = false;
     window.currentAnalysisData = null;
+});
+
+// Modal dışına tıklanınca kapat
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal-overlay')) {
+        e.target.classList.remove('active');
+    }
+});
+
+// ESC tuşu ile modal kapatma
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modals = document.querySelectorAll('.modal-overlay.active');
+        modals.forEach(modal => modal.classList.remove('active'));
+    }
 });
 </script>
 {% endblock %}

@@ -26,13 +26,13 @@
             {% set source_class = 'source-hackernews' %}
         {% endif %}
         
-        <div class="source-badge {{ source_class }}">
-            <i class="fas fa-newspaper source-icon"></i>
-            <span>Kaynak:</span>
-            <span class="source-name">{{ source }}</span>
-            {% if source_id %}
-            <span class="source-id">{{ source_id }}</span>
-            {% endif %}
+            <div class="source-badge {{ source_class }}">
+                <i class="fas fa-newspaper source-icon"></i>
+                <span>Kaynak:</span>
+                <span class="source-name">{{ source }}</span>
+                {% if source_id %}
+                <span class="source-id">{{ source_id }}</span>
+                {% endif %}
         </div>
     {% elif url %}
         <!-- Fallback: URL'den kaynak adını çıkar -->
@@ -67,11 +67,11 @@
             {% set fallback_source = url.split('//')[1].split('/')[0] if '//' in url else 'Bilinmeyen' %}
         {% endif %}
         
-        <div class="source-badge {{ fallback_class }}">
-            <i class="fas fa-globe source-icon"></i>
-            <span>Kaynak:</span>
-            <span class="source-name">{{ fallback_source }}</span>
-            <span class="source-id">URL'den tespit</span>
+            <div class="source-badge {{ fallback_class }}">
+                <i class="fas fa-globe source-icon"></i>
+                <span>Kaynak:</span>
+                <span class="source-name">{{ fallback_source }}</span>
+                <span class="source-id">URL'den tespit</span>
         </div>
     {% endif %}
 {% endmacro %}
@@ -84,19 +84,19 @@
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 <h1 class="feed-title">Ana Sayfa</h1>
-            </div>
-            <div class="d-flex align-items-center">
+        </div>
+        <div class="d-flex align-items-center">
                 <button onclick="toggleAutoRefresh()" class="twitter-btn twitter-btn-secondary me-2">
-                    <i class="fas fa-sync me-1" id="refresh-icon"></i>
-                    <span id="refresh-text">Auto</span>
-                </button>
+                <i class="fas fa-sync me-1" id="refresh-icon"></i>
+                <span id="refresh-text">Auto</span>
+            </button>
                 <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
                     <i class="fas fa-sync-alt"></i>
-                </button>
+            </button>
+        </div>
             </div>
         </div>
-    </div>
-
+        
     <!-- Otomasyon Durumu Tweet Card -->
     <div class="tweet-card">
         <div class="tweet-header">
@@ -107,18 +107,18 @@
                 <span class="tweet-username">AI Tweet Bot</span>
                 <span class="tweet-handle">@aitweetbot</span>
                 <span class="tweet-time">• Şimdi</span>
-            </div>
+        </div>
             <div class="status-indicator status-online">
                 <i class="fas fa-circle"></i> Aktif
-            </div>
-        </div>
+                            </div>
+                        </div>
         <div class="tweet-content">
             🤖 Sistem durumu: Çevrimiçi<br>
             📊 Bekleyen: {{ pending_tweets|length if pending_tweets else 0 }} tweet<br>
             ✅ Paylaşılan: {{ posted_count if posted_count else 0 }} tweet<br>
             🗑️ Reddedilen: {{ rejected_count if rejected_count else 0 }} tweet
-        </div>
-        
+                    </div>
+                    
         <!-- Otomasyon Detayları -->
         {% if automation_status %}
         <div class="tweet-footer">
@@ -126,15 +126,15 @@
                 <div class="d-flex align-items-center">
                     <span class="text-secondary small me-2">Auto-refresh: 
                         <span class="text-success">Aktif</span>
-                    </span>
+                        </span>
                     <span class="text-secondary small">• {{ automation_status.check_interval_hours }}h aralık</span>
-                </div>
-                <div class="d-flex align-items-center">
+                    </div>
+            <div class="d-flex align-items-center">
                     <span class="text-secondary small me-2">Min Skor: {{ automation_status.min_score_threshold }}/10</span>
                     <span class="text-secondary small">• Limit: {{ automation_status.max_articles_per_run or 5 }}</span>
                 </div>
             </div>
-        </div>
+            </div>
         {% endif %}
     </div>
 
@@ -143,8 +143,8 @@
     <div class="tweet-card">
         <div class="tweet-header">
             <div class="tweet-avatar">
-                <i class="fas fa-key"></i>
-            </div>
+                    <i class="fas fa-key"></i>
+                </div>
             <div class="tweet-user-info">
                 <span class="tweet-username">API Durumu</span>
                 <span class="tweet-handle">@system</span>
@@ -158,103 +158,103 @@
                     <span>OpenRouter AI:</span>
                     <span class="status-badge {{ 'status-success' if api_check.openrouter_api_available else 'status-error' }}">
                         {{ 'Mevcut' if api_check.openrouter_api_available else 'Eksik' }}
-                    </span>
-                </div>
+                                </span>
+                            </div>
                 <div class="api-status-item">
                     <i class="fab fa-twitter text-primary"></i>
                     <span>Twitter API:</span>
                     <span class="status-badge {{ 'status-success' if api_check.twitter_api_available else 'status-error' }}">
                         {{ 'Mevcut' if api_check.twitter_api_available else 'Eksik' }}
-                    </span>
-                </div>
+                                </span>
+                            </div>
                 <div class="api-status-item">
                     <i class="fas fa-eye text-info"></i>
                     <span>Google OCR:</span>
                     <span class="status-badge {{ 'status-success' if api_check.google_api_available else 'status-warning' }}">
                         {{ 'Mevcut' if api_check.google_api_available else 'Opsiyonel' }}
-                    </span>
-                </div>
+                                </span>
+                            </div>
                 <div class="api-status-item">
                     <i class="fab fa-telegram text-info"></i>
                     <span>Telegram:</span>
                     <span class="status-badge {{ 'status-success' if api_check.telegram_available else 'status-warning' }}">
                         {{ 'Mevcut' if api_check.telegram_available else 'Opsiyonel' }}
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
+                                </span>
+                            </div>
+                                </div>
+                            </div>
+                        </div>
+                {% endif %}
 
     <!-- Versiyon Bilgisi Tweet Card -->
-    {% if app_version %}
+        {% if app_version %}
     <div class="tweet-card">
         <div class="tweet-header">
             <div class="tweet-avatar">
                 <i class="fas fa-code-branch"></i>
-            </div>
+                    </div>
             <div class="tweet-user-info">
                 <span class="tweet-username">Versiyon Bilgisi</span>
                 <span class="tweet-handle">@system</span>
                 <span class="tweet-time">• {{ app_release_date if app_release_date else 'Güncel' }}</span>
-            </div>
-        </div>
+                </div>
+                    </div>
         <div class="tweet-content">
             📦 Mevcut Versiyon: <strong>v{{ app_version }}</strong><br>
             📅 Yayın Tarihi: {{ app_release_date if app_release_date else 'Bilinmiyor' }}
-            {% if version_changelog and app_version in version_changelog %}
+                    {% if version_changelog and app_version in version_changelog %}
             <br>📝 Son Değişiklikler: {{ version_changelog[app_version][:150] }}...
-            {% endif %}
+                    {% endif %}
             <br>🔗 <a href="{{ url_for('changelog') }}" class="text-primary text-decoration-none">Tüm Değişiklikleri Görüntüle</a>
+            </div>
         </div>
-    </div>
-    {% endif %}
+        {% endif %}
 
     <!-- Manuel Kontrol Tweet Card -->
     <div class="tweet-card">
         <div class="tweet-header">
             <div class="tweet-avatar">
                 <i class="fas fa-sync-alt"></i>
-            </div>
+                    </div>
             <div class="tweet-user-info">
                 <span class="tweet-username">Manuel Kontrol</span>
                 <span class="tweet-handle">@manual</span>
                 <span class="tweet-time">• Şimdi</span>
-            </div>
-        </div>
+                </div>
+                        </div>
         <div class="tweet-content">
             🔍 Yeni haberleri manuel olarak kontrol etmek için aşağıdaki butonu kullanın.
-        </div>
+                        </div>
         <div class="tweet-actions">
             <button id="check-articles-btn" onclick="startArticleCheck()" class="tweet-action">
                 <i class="fas fa-sync-alt tweet-action-icon"></i>
                 <span id="check-text">Şimdi Kontrol Et</span>
-            </button>
-        </div>
-    </div>
+                                </button>
+                            </div>
+                        </div>
 
     <!-- Bekleyen Tweet'ler Başlığı -->
     {% if pending_tweets %}
     <div class="tweet-card">
         <div class="tweet-header">
             <div class="tweet-avatar">
-                <i class="fas fa-clock"></i>
-            </div>
+                        <i class="fas fa-clock"></i>
+                    </div>
             <div class="tweet-user-info">
                 <span class="tweet-username">Onay Bekleyen Tweet'ler</span>
                 <span class="tweet-handle">@pending</span>
                 <span class="tweet-time">• {{ pending_tweets|length }} toplam</span>
-            </div>
-            {% if news_count > 0 %}
+                </div>
+                    {% if news_count > 0 %}
             <div class="status-indicator status-online">
                 <i class="fas fa-newspaper"></i> {{ news_count }} haber
             </div>
-            {% endif %}
-        </div>
-    </div>
+                    {% endif %}
+                </div>
+            </div>
     {% endif %}
-
-    <!-- Toplu İşlemler Paneli -->
+                
+        <!-- Toplu İşlemler Paneli -->
     {% if pending_tweets %}
     <div class="tweet-card bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
         <div class="p-4">
@@ -282,110 +282,110 @@
                     </label>
                 </div>
                 {% endif %}
+                </div>
             </div>
         </div>
-    </div>
-    {% endif %}
-
+        {% endif %}
+                
     <!-- Bekleyen Tweet'ler -->
     {% if pending_tweets %}
-        {% for tweet in pending_tweets %}
-        <!-- Tweet kalite kontrolü -->
-        {% set is_invalid_tweet = tweet.tweet_data and (tweet.tweet_data.get('is_valid') == false or (tweet.tweet_data.get('quality_score', 7) | int) <= 4) %}
-        <div class="tweet-card {{ 'invalid-tweet' if is_invalid_tweet }}" 
-             data-tweet-id="{{ tweet.id }}" 
-             data-source-type="{{ tweet.source_type or 'news' }}"
-             data-tweet-valid="{{ 'false' if is_invalid_tweet else 'true' }}"
-             data-quality-score="{{ tweet.tweet_data.get('quality_score', 7) if tweet.tweet_data else 7 }}"
-             {% if is_invalid_tweet %}title="Bu tweet kalite kontrolünden geçemedi ve paylaşılmayacak"{% endif %}>
-            
-            <div class="tweet-header">
-                <!-- Toplu İşlem Checkbox -->
-                {% if pending_tweets|length > 1 %}
-                <div class="me-3">
+            {% for tweet in pending_tweets %}
+            <!-- Tweet kalite kontrolü -->
+            {% set is_invalid_tweet = tweet.tweet_data and (tweet.tweet_data.get('is_valid') == false or (tweet.tweet_data.get('quality_score', 7) | int) <= 4) %}
+            <div class="tweet-card {{ 'invalid-tweet' if is_invalid_tweet }}" 
+                 data-tweet-id="{{ tweet.id }}" 
+                 data-source-type="{{ tweet.source_type or 'news' }}"
+                 data-tweet-valid="{{ 'false' if is_invalid_tweet else 'true' }}"
+                 data-quality-score="{{ tweet.tweet_data.get('quality_score', 7) if tweet.tweet_data else 7 }}"
+                 {% if is_invalid_tweet %}title="Bu tweet kalite kontrolünden geçemedi ve paylaşılmayacak"{% endif %}>
+                
+                <div class="tweet-header">
+                    <!-- Toplu İşlem Checkbox -->
+                    {% if pending_tweets|length > 1 %}
+                    <div class="me-3">
                     <input type="checkbox" class="tweet-select-checkbox" 
-                           value="{{ tweet.id }}" onchange="updateBulkButtons()">
-                </div>
-                {% endif %}
-                
-                <!-- Avatar -->
-                <div class="tweet-avatar">
+                               value="{{ tweet.id }}" onchange="updateBulkButtons()">
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Avatar -->
+                    <div class="tweet-avatar">
                     <i class="fas fa-newspaper"></i>
-                </div>
-                
-                <!-- User Info -->
-                <div class="tweet-user-info">
-                    <div class="d-flex align-items-center">
-                        <span class="tweet-username">AI Haber Bot</span>
-                        <span class="tweet-handle">@aihaberbot</span>
-                        <span class="tweet-time">• {{ tweet.created_at[:10] if tweet.created_at else 'Yeni' }}</span>
                     </div>
                     
-                    <!-- Kalite Kontrol Göstergesi -->
-                    {% if tweet.tweet_data and tweet.tweet_data.quality_analysis %}
-                        <div class="mt-1">
-                            {% if is_invalid_tweet %}
-                            <div class="d-flex align-items-center text-danger small">
-                                <i class="fas fa-exclamation-triangle me-1"></i>
-                                <span class="fw-medium">Kalite Problemi</span>
-                                <span class="status-indicator status-offline ms-2">
-                                    {{ tweet.tweet_data.get('quality_score', 7) }}/10
-                                </span>
-                            </div>
-                            {% elif tweet.tweet_data.quality_analysis.warnings %}
-                            <div class="d-flex align-items-center text-warning small">
-                                <i class="fas fa-exclamation-circle me-1"></i>
-                                <span>Uyarı: {{ tweet.tweet_data.quality_analysis.warnings[0] }}</span>
-                                <span class="status-indicator status-warning ms-2">
-                                    {{ tweet.tweet_data.get('quality_score', 7) }}/10
-                                </span>
-                            </div>
-                            {% else %}
-                            <div class="d-flex align-items-center text-success small">
-                                <i class="fas fa-check-circle me-1"></i>
-                                <span>Kalite: Yüksek</span>
-                                <span class="status-indicator status-online ms-2">
-                                    {{ tweet.tweet_data.get('quality_score', 7) }}/10
-                                </span>
-                            </div>
-                            {% endif %}
+                    <!-- User Info -->
+                    <div class="tweet-user-info">
+                        <div class="d-flex align-items-center">
+                        <span class="tweet-username">AI Haber Bot</span>
+                        <span class="tweet-handle">@aihaberbot</span>
+                            <span class="tweet-time">• {{ tweet.created_at[:10] if tweet.created_at else 'Yeni' }}</span>
                         </div>
-                    {% endif %}
-                </div>
-            </div>
-                    
-            <!-- Tweet Content -->
-            <div class="tweet-content">
-                <p>{{ tweet.content if tweet.content else 'Tweet metni bulunamadı' }}</p>
-            </div>
-            
-            <!-- Tweet Actions -->
-            <div class="tweet-actions">
-                <!-- Character Count -->
-                <div class="tweet-action">
-                    <i class="fas fa-text-width tweet-action-icon"></i>
-                    <span>{{ (tweet.content or '')|length }}/280</span>
-                    {% if (tweet.content or '')|length > 280 %}
-                    <span class="text-danger ms-1">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </span>
-                    {% elif (tweet.content or '')|length > 250 %}
-                    <span class="text-warning ms-1">
-                        <i class="fas fa-exclamation-circle"></i>
-                    </span>
-                    {% else %}
-                    <span class="text-success ms-1">
-                        <i class="fas fa-check-circle"></i>
-                    </span>
-                    {% endif %}
+                        
+                        <!-- Kalite Kontrol Göstergesi -->
+                        {% if tweet.tweet_data and tweet.tweet_data.quality_analysis %}
+                            <div class="mt-1">
+                                {% if is_invalid_tweet %}
+                                <div class="d-flex align-items-center text-danger small">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    <span class="fw-medium">Kalite Problemi</span>
+                                    <span class="status-indicator status-offline ms-2">
+                                        {{ tweet.tweet_data.get('quality_score', 7) }}/10
+                                    </span>
+                                </div>
+                                {% elif tweet.tweet_data.quality_analysis.warnings %}
+                                <div class="d-flex align-items-center text-warning small">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    <span>Uyarı: {{ tweet.tweet_data.quality_analysis.warnings[0] }}</span>
+                                    <span class="status-indicator status-warning ms-2">
+                                        {{ tweet.tweet_data.get('quality_score', 7) }}/10
+                                    </span>
+                                </div>
+                                {% else %}
+                                <div class="d-flex align-items-center text-success small">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    <span>Kalite: Yüksek</span>
+                                    <span class="status-indicator status-online ms-2">
+                                        {{ tweet.tweet_data.get('quality_score', 7) }}/10
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
                         
-                <!-- Tweet Preview -->
-                <div class="tweet-action">
-                    <i class="fas fa-eye tweet-action-icon"></i>
-                    <span>Önizleme</span>
+                <!-- Tweet Content -->
+                <div class="tweet-content">
+                    <p>{{ tweet.content if tweet.content else 'Tweet metni bulunamadı' }}</p>
                 </div>
                 
+                <!-- Tweet Actions -->
+                <div class="tweet-actions">
+                    <!-- Character Count -->
+                    <div class="tweet-action">
+                        <i class="fas fa-text-width tweet-action-icon"></i>
+                        <span>{{ (tweet.content or '')|length }}/280</span>
+                        {% if (tweet.content or '')|length > 280 %}
+                        <span class="text-danger ms-1">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </span>
+                        {% elif (tweet.content or '')|length > 250 %}
+                        <span class="text-warning ms-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </span>
+                        {% else %}
+                        <span class="text-success ms-1">
+                            <i class="fas fa-check-circle"></i>
+                        </span>
+                        {% endif %}
+                    </div>
+                            
+                    <!-- Tweet Preview -->
+                    <div class="tweet-action">
+                        <i class="fas fa-eye tweet-action-icon"></i>
+                        <span>Önizleme</span>
+                    </div>
+                    
                 <!-- Onayla -->
                 <button class="tweet-action" onclick="postTweet('{{ tweet.id }}')" {{ 'disabled' if is_invalid_tweet }}>
                     <i class="fas fa-check tweet-action-icon"></i>
@@ -396,15 +396,15 @@
                 <button class="tweet-action retweet" onclick="manualPostTweet('{{ tweet.id }}')" {{ 'disabled' if is_invalid_tweet }}>
                     <i class="fas fa-external-link-alt tweet-action-icon"></i>
                     <span>Manuel Paylaş</span>
-                </button>
+                        </button>
                 
                 <!-- Reddet -->
                 <button class="tweet-action like" onclick="deleteTweet('{{ tweet.id }}')">
                     <i class="fas fa-trash tweet-action-icon"></i>
                     <span>Reddet</span>
-                </button>
-            </div>
-            
+                        </button>
+                    </div>
+                    
             <!-- Haber Kaynağı Badge'i -->
             <div class="tweet-footer">
                 <div class="d-flex justify-content-between align-items-center">
@@ -414,27 +414,27 @@
                         <div class="source-badge source-badge-primary">
                             <i class="fas fa-newspaper source-icon"></i>
                             <span class="source-name">Haber Kaynağı</span>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+                    </div>
+                                        {% endif %}
+                                    </div>
+                                        </div>
+                                        </div>
         {% endfor %}
-    {% endif %}
-
+                            {% endif %}
+                            
     <!-- Reddedilen Makaleler -->
     {% if rejected_articles %}
     <div class="tweet-card">
         <div class="tweet-header">
             <div class="tweet-avatar">
                 <i class="fas fa-ban"></i>
-            </div>
+                                    </div>
             <div class="tweet-user-info">
                 <span class="tweet-username">Reddedilen Makaleler</span>
                 <span class="tweet-handle">@rejected</span>
                 <span class="tweet-time">• {{ rejected_articles|length }} makale</span>
-            </div>
-        </div>
+                                        </div>
+                                        </div>
         
         <!-- Toplu İşlemler Paneli -->
         <div class="tweet-card bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 mb-3">
@@ -443,7 +443,7 @@
                     <div class="d-flex align-items-center">
                         <i class="fas fa-tasks text-danger me-2"></i>
                         <h6 class="mb-0 text-danger">Toplu İşlemler</h6>
-                    </div>
+                                </div>
                     <div class="d-flex gap-2">
                         <button onclick="bulkConvertRejected()" class="twitter-btn twitter-btn-primary" id="bulk-convert-btn" disabled>
                             <i class="fas fa-undo me-1"></i> Toplu Tweet'e Çevir
@@ -451,8 +451,8 @@
                         <button onclick="bulkRemoveRejected()" class="twitter-btn twitter-btn-danger" id="bulk-remove-btn" disabled>
                             <i class="fas fa-trash me-1"></i> Toplu Kalıcı Sil
                         </button>
-                    </div>
-                </div>
+                            </div>
+                        </div>
                 <div class="d-flex align-items-center justify-content-between">
                     <span class="text-muted small">Seçili makale sayısı: <span id="selected-rejected-count">0</span></span>
                     {% if rejected_articles|length > 1 %}
@@ -461,11 +461,11 @@
                         <label class="form-check-label small" for="select-all-rejected">
                             Tümünü Seç
                         </label>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                            </div>
+                            </div>
         
         <div class="tweet-content">
             <div class="rejected-articles-list">
@@ -474,7 +474,7 @@
                     <div class="d-flex align-items-start">
                         <div class="form-check me-2 mt-1">
                             <input class="form-check-input rejected-checkbox" type="checkbox" value="{{ article.url }}" onchange="updateRejectedButtons()">
-                        </div>
+                            </div>
                         <div class="flex-grow-1">
                             <div class="article-title">{{ article.title[:100] }}{% if article.title|length > 100 %}...{% endif %}</div>
                             <div class="article-meta">
@@ -484,46 +484,46 @@
                             <div class="article-actions">
                                 <button class="btn btn-sm btn-outline-primary convert-rejected-btn" data-url="{{ article.url }}" data-title="{{ article.title }}">
                                     <i class="fas fa-undo"></i> Tweet'e Çevir
-                                </button>
+                            </button>
                                 <button class="btn btn-sm btn-outline-danger remove-rejected-btn" data-url="{{ article.url }}">
                                     <i class="fas fa-trash"></i> Kalıcı Sil
-                                </button>
+                            </button>
                             </div>
                         </div>
+                        </div>
                     </div>
-                </div>
                 {% endfor %}
                 {% if rejected_articles|length > 5 %}
                 <div class="text-center mt-2">
                     <span class="text-muted small">... ve {{ rejected_articles|length - 5 }} makale daha</span>
-                </div>
-                {% endif %}
             </div>
-        </div>
-    </div>
+        {% endif %}
+                    </div>
+                </div>
+                </div>
     {% endif %}
-
+                
     <!-- Mesaj -->
     {% if not pending_tweets %}
-    <div class="tweet-card">
-        <div class="tweet-header">
-            <div class="tweet-avatar">
+            <div class="tweet-card">
+                <div class="tweet-header">
+                    <div class="tweet-avatar">
                 <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="tweet-user-info">
+                    </div>
+                    <div class="tweet-user-info">
                 <span class="tweet-username">AI Tweet Bot</span>
                 <span class="tweet-handle">@aitweetbot</span>
                 <span class="tweet-time">• Şimdi</span>
-            </div>
-        </div>
-        <div class="tweet-content">
+                        </div>
+                            </div>
+                <div class="tweet-content">
             ✅ Tüm tweet'ler işlendi!<br>
             📋 Bekleyen tweet bulunmuyor.<br>
             🔄 Yeni haberler için kontrol devam ediyor.
-        </div>
-    </div>
-    {% endif %}
-</div>
+                </div>
+                    </div>
+                                {% endif %}
+                            </div>
 
 <script>
 // Auto-refresh functionality
@@ -600,7 +600,7 @@ function updateBulkButtons() {
     if (checkboxes.length > 0) {
         bulkApproveBtn.disabled = false;
         bulkRejectBtn.disabled = false;
-    } else {
+        } else {
         bulkApproveBtn.disabled = true;
         bulkRejectBtn.disabled = true;
     }
@@ -616,9 +616,9 @@ function bulkApproveTweets() {
     
     if (tweetIds.length === 0) {
         showToast('Lütfen en az bir tweet seçin!', 'warning');
-        return;
-    }
-    
+            return;
+        }
+        
     showConfirmDialog(
         `${tweetIds.length} tweet'i toplu olarak onaylamak istediğinizden emin misiniz?`,
         () => bulkProcessTweets(tweetIds, 'approve'),
@@ -648,7 +648,7 @@ function bulkRejectTweets() {
 
 function bulkProcessTweets(tweetIds, action) {
     const button = action === 'approve' ? document.getElementById('bulk-approve-btn') : document.getElementById('bulk-reject-btn');
-    const originalText = button.innerHTML;
+        const originalText = button.innerHTML;
     
     // Loading state
     button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> İşleniyor...';
@@ -716,23 +716,23 @@ function postTweet(tweetId) {
         'Bu tweet\'i onaylamak istediğinizden emin misiniz?',
         () => {
             fetch('/post_tweet', {
-                method: 'POST',
+        method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({ tweet_id: tweetId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
                     showToast('Tweet başarıyla onaylandı!', 'success');
-                    setTimeout(() => location.reload(), 1000);
-                } else {
+            setTimeout(() => location.reload(), 1000);
+        } else {
                     showToast(`Hata: ${data.error || 'Bilinmeyen hata oluştu'}`, 'error');
-                }
-            })
-            .catch(error => {
+        }
+    })
+    .catch(error => {
                 console.error('Error:', error);
                 showToast('İşlem sırasında hata oluştu!', 'error');
             });
@@ -748,24 +748,24 @@ function manualPostTweet(tweetId) {
         'Bu tweet\'i manuel olarak paylaşmak istediğinizden emin misiniz?',
         () => {
             fetch('/manual_post_tweet', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
-                },
+            },
                 body: JSON.stringify({ tweet_id: tweetId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                     showToast('Tweet manuel olarak paylaşıldı!', 'success');
                     setTimeout(() => location.reload(), 1000);
-                } else {
+            } else {
                     showToast(`Hata: ${data.error || 'Bilinmeyen hata oluştu'}`, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
                 showToast('İşlem sırasında hata oluştu!', 'error');
             });
         },
@@ -779,25 +779,25 @@ function deleteTweet(tweetId) {
     showConfirmDialog(
         'Bu tweet\'i reddetmek istediğinizden emin misiniz?',
         () => {
-            fetch('/delete_tweet', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+        fetch('/delete_tweet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
-                },
+            },
                 body: JSON.stringify({ tweet_id: tweetId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                     showToast('Tweet reddedildi!', 'success');
                     setTimeout(() => location.reload(), 1000);
-                } else {
+            } else {
                     showToast(`Hata: ${data.error || 'Bilinmeyen hata oluştu'}`, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
                 showToast('İşlem sırasında hata oluştu!', 'error');
             });
         },
@@ -832,7 +832,7 @@ function startArticleCheck() {
             }
         } else {
             showToast(`Hata: ${data.error || 'Bilinmeyen hata oluştu'}`, 'error');
-        }
+            }
         button.innerHTML = originalText;
         button.disabled = false;
     })
@@ -869,7 +869,7 @@ function convertRejectedToTweet(articleUrl, articleTitle) {
         if (data.success) {
             showToast('Tweet başarıyla bekleyen listesine eklendi!', 'success');
             setTimeout(() => location.reload(), 1000);
-        } else {
+    } else {
             showToast(`Hata: ${data.error}`, 'error');
         }
     })
@@ -889,24 +889,24 @@ function removeFromRejected(articleUrl) {
         'Bu makaleyi reddedilen listesinden kalıcı olarak kaldırmak istediğinizden emin misiniz?',
         () => {
             fetch('/api/remove_from_rejected', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
                     article_url: articleUrl
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
                     showToast('Makale reddedilen listesinden kaldırıldı!', 'success');
                     setTimeout(() => location.reload(), 1000);
-                } else {
+        } else {
                     showToast(`Hata: ${data.error}`, 'error');
-                }
-            })
-            .catch(error => {
+        }
+    })
+    .catch(error => {
                 console.error('Remove from rejected error:', error);
                 showToast('Makale kaldırılırken hata oluştu!', 'error');
             });
@@ -944,8 +944,8 @@ function updateTweetCounts() {
                 // Sayıları güncelle
                 const pendingElements = document.querySelectorAll('[data-stat="pending_tweets"]');
                 pendingElements.forEach(el => {
-                    el.textContent = data.stats.pending_tweets || 0;
-                });
+        el.textContent = data.stats.pending_tweets || 0;
+    });
             }
         })
         .catch(error => {
@@ -1063,7 +1063,7 @@ function showConfirmDialog(message, onConfirm, onCancel = null, title = 'Onay Ge
                     transition: all 0.2s;
                 " onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
                     Onayla
-                </button>
+            </button>
             </div>
         </div>
     `;
@@ -1202,24 +1202,24 @@ function bulkConvertRejected() {
             
             // Tüm URL'leri tek seferde gönder
             fetch('/api/bulk_convert_rejected', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
                     urls: selectedUrls
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
                     showToast(`${data.converted_count} makale başarıyla tweet'e çevrildi`, 'success');
                     setTimeout(() => window.location.reload(), 1500);
-                } else {
-                    showToast(`Hata: ${data.error}`, 'error');
-                }
-            })
-            .catch(error => {
+        } else {
+            showToast(`Hata: ${data.error}`, 'error');
+        }
+    })
+    .catch(error => {
                 showToast('İşlem sırasında hata oluştu', 'error');
                 console.error('Error:', error);
             });
@@ -1247,24 +1247,24 @@ function bulkRemoveRejected() {
             
             // Tüm URL'leri tek seferde gönder
             fetch('/api/bulk_remove_rejected', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
                     urls: selectedUrls
-                })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                     showToast(`${data.removed_count} makale başarıyla silindi`, 'success');
                     setTimeout(() => window.location.reload(), 1500);
-                } else {
+            } else {
                     showToast(`Hata: ${data.error}`, 'error');
-                }
-            })
-            .catch(error => {
+            }
+        })
+        .catch(error => {
                 showToast('İşlem sırasında hata oluştu', 'error');
                 console.error('Error:', error);
             });
