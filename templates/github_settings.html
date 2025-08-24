@@ -69,6 +69,25 @@
     </nav>
 
     <div class="container mt-4">
+        <!-- Twitter Feed Style Header -->
+        <div class="card settings-card mb-4">
+            <div class="settings-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0">
+                            <i class="fab fa-github me-2"></i>GitHub Repo Çekme Ayarları
+                        </h4>
+                        <p class="mb-0 mt-2 opacity-75">GitHub repolarını çekmek için varsayılan ayarları yapılandırın</p>
+                    </div>
+                    <div>
+                                        <button onclick="location.reload();" class="btn btn-outline-light">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -85,12 +104,6 @@
             <div class="col-lg-8">
                 <!-- Ana Ayarlar -->
                 <div class="card settings-card">
-                    <div class="settings-header">
-                        <h4 class="mb-0">
-                            <i class="fab fa-github me-2"></i>GitHub Repo Çekme Ayarları
-                        </h4>
-                        <p class="mb-0 mt-2 opacity-75">GitHub repolarını çekmek için varsayılan ayarları yapılandırın</p>
-                    </div>
                     <div class="card-body">
                         <form method="POST" action="{{ url_for('save_github_settings_route') }}" id="githubSettingsForm">
                             <div class="row">

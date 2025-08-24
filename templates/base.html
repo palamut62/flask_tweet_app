@@ -19,13 +19,249 @@
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Bootstrap CSS - CDN Fallback Sistemi -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css';">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://unpkg.com/bootstrap@5.3.0/dist/css/bootstrap.min.css';">
+    
+    <!-- Font Awesome - CDN Fallback Sistemi -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css';">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://unpkg.com/@fortawesome/fontawesome-free@6.4.0/css/all.min.css';">
+    
     <!-- Twitter Style CSS -->
     <link href="{{ url_for('static', filename='css/twitter-style.css') }}" rel="stylesheet">
+    
+    <!-- Fallback CSS - CDN'ler yüklenemezse kullanılacak -->
     <style>
+        /* Bootstrap Fallback Styles */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 15px; }
+        .row { display: flex; flex-wrap: wrap; margin: 0 -15px; }
+        .col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12 { padding: 0 15px; }
+        .col-12 { flex: 0 0 100%; max-width: 100%; }
+        .col-6 { flex: 0 0 50%; max-width: 50%; }
+        .col-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+        .col-3 { flex: 0 0 25%; max-width: 25%; }
+        
+        /* Card Fallback */
+        .card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        
+        /* Button Fallback */
+        .btn { display: inline-block; padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; border-color: #007bff; }
+        .btn-success { background: #28a745; color: white; border-color: #28a745; }
+        .btn-danger { background: #dc3545; color: white; border-color: #dc3545; }
+        .btn-warning { background: #ffc107; color: black; border-color: #ffc107; }
+        
+        /* Alert Fallback */
+        .alert { padding: 12px 16px; border: 1px solid transparent; border-radius: 4px; margin-bottom: 20px; }
+        .alert-success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .alert-danger { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .alert-warning { background: #fff3cd; border-color: #ffeaa7; color: #856404; }
+        .alert-info { background: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        
+        /* Form Fallback */
+        .form-control { display: block; width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
+        .form-group { margin-bottom: 15px; }
+        .form-label { display: block; margin-bottom: 5px; font-weight: bold; }
+        
+        /* Table Fallback */
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+        .table th { background: #f8f9fa; }
+        
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .d-none { display: none; }
+        .d-block { display: block; }
+        .d-flex { display: flex; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+        .mt-3 { margin-top: 15px; }
+        .mb-3 { margin-bottom: 15px; }
+        .p-3 { padding: 15px; }
+        
+        /* Font Awesome Fallback Icons */
+        .fa, .fas, .far, .fab { font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+        .fa-check::before { content: "✓"; }
+        .fa-times::before { content: "✗"; }
+        .fa-exclamation-triangle::before { content: "⚠"; }
+        .fa-info-circle::before { content: "ℹ"; }
+        .fa-cog::before { content: "⚙"; }
+        .fa-home::before { content: "🏠"; }
+        .fa-twitter::before { content: "🐦"; }
+        .fa-github::before { content: "📦"; }
+        .fa-envelope::before { content: "✉"; }
+        .fa-bell::before { content: "🔔"; }
+        .fa-chart-bar::before { content: "📊"; }
+        .fa-cogs::before { content: "⚙"; }
+        .fa-trash::before { content: "🗑"; }
+        .fa-edit::before { content: "✏"; }
+        .fa-plus::before { content: "+"; }
+        .fa-minus::before { content: "-"; }
+        .fa-arrow-up::before { content: "↑"; }
+        .fa-arrow-down::before { content: "↓"; }
+        .fa-arrow-left::before { content: "←"; }
+        .fa-arrow-right::before { content: "→"; }
+        .fa-search::before { content: "🔍"; }
+        .fa-download::before { content: "⬇"; }
+        .fa-upload::before { content: "⬆"; }
+        .fa-save::before { content: "💾"; }
+        .fa-refresh::before { content: "🔄"; }
+        .fa-play::before { content: "▶"; }
+        .fa-pause::before { content: "⏸"; }
+        .fa-stop::before { content: "⏹"; }
+        .fa-clock::before { content: "🕐"; }
+        .fa-calendar::before { content: "📅"; }
+        .fa-user::before { content: "👤"; }
+        .fa-lock::before { content: "🔒"; }
+        .fa-unlock::before { content: "🔓"; }
+        .fa-eye::before { content: "👁"; }
+        .fa-eye-slash::before { content: "🙈"; }
+        .fa-heart::before { content: "❤"; }
+        .fa-star::before { content: "⭐"; }
+        .fa-thumbs-up::before { content: "👍"; }
+        .fa-thumbs-down::before { content: "👎"; }
+        .fa-share::before { content: "📤"; }
+        .fa-link::before { content: "🔗"; }
+        .fa-external-link-alt::before { content: "🔗"; }
+        .fa-copy::before { content: "📋"; }
+        .fa-paste::before { content: "📋"; }
+        .fa-cut::before { content: "✂"; }
+        .fa-undo::before { content: "↶"; }
+        .fa-redo::before { content: "↷"; }
+        .fa-print::before { content: "🖨"; }
+        .fa-file::before { content: "📄"; }
+        .fa-folder::before { content: "📁"; }
+        .fa-image::before { content: "🖼"; }
+        .fa-video::before { content: "🎥"; }
+        .fa-music::before { content: "🎵"; }
+        .fa-volume-up::before { content: "🔊"; }
+        .fa-volume-mute::before { content: "🔇"; }
+        .fa-volume-down::before { content: "🔉"; }
+        .fa-microphone::before { content: "🎤"; }
+        .fa-camera::before { content: "📷"; }
+        .fa-phone::before { content: "📞"; }
+        .fa-mobile-alt::before { content: "📱"; }
+        .fa-laptop::before { content: "💻"; }
+        .fa-desktop::before { content: "🖥"; }
+        .fa-tablet-alt::before { content: "📱"; }
+        .fa-wifi::before { content: "📶"; }
+        .fa-bluetooth::before { content: "📶"; }
+        .fa-battery-full::before { content: "🔋"; }
+        .fa-battery-half::before { content: "🔋"; }
+        .fa-battery-empty::before { content: "🔋"; }
+        .fa-sun::before { content: "☀"; }
+        .fa-moon::before { content: "🌙"; }
+        .fa-cloud::before { content: "☁"; }
+        .fa-rain::before { content: "🌧"; }
+        .fa-snowflake::before { content: "❄"; }
+        .fa-fire::before { content: "🔥"; }
+        .fa-leaf::before { content: "🍃"; }
+        .fa-seedling::before { content: "🌱"; }
+        .fa-tree::before { content: "🌳"; }
+        .fa-flower::before { content: "🌸"; }
+        .fa-bug::before { content: "🐛"; }
+        .fa-spider::before { content: "🕷"; }
+        .fa-fish::before { content: "🐟"; }
+        .fa-dog::before { content: "🐕"; }
+        .fa-cat::before { content: "🐈"; }
+        .fa-horse::before { content: "🐎"; }
+        .fa-cow::before { content: "🐄"; }
+        .fa-pig::before { content: "🐷"; }
+        .fa-sheep::before { content: "🐑"; }
+        .fa-chicken::before { content: "🐔"; }
+        .fa-duck::before { content: "🦆"; }
+        .fa-eagle::before { content: "🦅"; }
+        .fa-owl::before { content: "🦉"; }
+        .fa-bat::before { content: "🦇"; }
+        .fa-bear::before { content: "🐻"; }
+        .fa-fox::before { content: "🦊"; }
+        .fa-wolf::before { content: "🐺"; }
+        .fa-tiger::before { content: "🐯"; }
+        .fa-lion::before { content: "🦁"; }
+        .fa-elephant::before { content: "🐘"; }
+        .fa-giraffe::before { content: "🦒"; }
+        .fa-zebra::before { content: "🦓"; }
+        .fa-penguin::before { content: "🐧"; }
+        .fa-panda::before { content: "🐼"; }
+        .fa-koala::before { content: "🐨"; }
+        .fa-kangaroo::before { content: "🦘"; }
+        .fa-sloth::before { content: "🦥"; }
+        .fa-otter::before { content: "🦦"; }
+        .fa-skunk::before { content: "🦨"; }
+        .fa-raccoon::before { content: "🦝"; }
+        .fa-beaver::before { content: "🦫"; }
+        .fa-hedgehog::before { content: "🦔"; }
+        .fa-mouse::before { content: "🐭"; }
+        .fa-rat::before { content: "🐀"; }
+        .fa-hamster::before { content: "🐹"; }
+        .fa-rabbit::before { content: "🐰"; }
+        .fa-deer::before { content: "🦌"; }
+        .fa-moose::before { content: "🫎"; }
+        .fa-buffalo::before { content: "🐃"; }
+        .fa-goat::before { content: "🐐"; }
+        .fa-camel::before { content: "🐪"; }
+        .fa-llama::before { content: "🦙"; }
+        .fa-alpaca::before { content: "🦙"; }
+        .fa-guanaco::before { content: "🦙"; }
+        .fa-vicuna::before { content: "🦙"; }
+        .fa-yak::before { content: "🐂"; }
+        .fa-ox::before { content: "🐂"; }
+        .fa-water-buffalo::before { content: "🐃"; }
+        .fa-bison::before { content: "🦬"; }
+        .fa-antelope::before { content: "🦌"; }
+        .fa-gazelle::before { content: "🦌"; }
+        .fa-impala::before { content: "🦌"; }
+        .fa-wildebeest::before { content: "🦌"; }
+        .fa-gnu::before { content: "🦌"; }
+        .fa-oryx::before { content: "🦌"; }
+        .fa-addax::before { content: "🦌"; }
+        .fa-dik-dik::before { content: "🦌"; }
+        .fa-klipspringer::before { content: "🦌"; }
+        .fa-springbok::before { content: "🦌"; }
+        .fa-steenbok::before { content: "🦌"; }
+        .fa-duiker::before { content: "🦌"; }
+        .fa-royal-antelope::before { content: "🦌"; }
+        .fa-pygmy-antelope::before { content: "🦌"; }
+        .fa-suni::before { content: "🦌"; }
+        .fa-bates-antelope::before { content: "🦌"; }
+        .fa-bay-duiker::before { content: "🦌"; }
+        .fa-black-duiker::before { content: "🦌"; }
+        .fa-blue-duiker::before { content: "🦌"; }
+        .fa-bushbuck::before { content: "🦌"; }
+        .fa-common-duiker::before { content: "🦌"; }
+        .fa-harvey-duiker::before { content: "🦌"; }
+        .fa-jentink-duiker::before { content: "🦌"; }
+        .fa-maxwell-duiker::before { content: "🦌"; }
+        .fa-ogilby-duiker::before { content: "🦌"; }
+        .fa-peters-duiker::before { content: "🦌"; }
+        .fa-red-duiker::before { content: "🦌"; }
+        .fa-white-bellied-duiker::before { content: "🦌"; }
+        .fa-yellow-backed-duiker::before { content: "🦌"; }
+        .fa-zebra-duiker::before { content: "🦌"; }
+        .fa-abbott-duiker::before { content: "🦌"; }
+        .fa-ada-duiker::before { content: "🦌"; }
+        .fa-brooke-duiker::before { content: "🦌"; }
+        .fa-cape-duiker::before { content: "🦌"; }
+        .fa-congo-duiker::before { content: "🦌"; }
+        .fa-crawshay-duiker::before { content: "🦌"; }
+        .fa-dulker::before { content: "🦌"; }
+        .fa-eastern-duiker::before { content: "🦌"; }
+        .fa-forest-duiker::before { content: "🦌"; }
+        .fa-giant-forest-duiker::before { content: "🦌"; }
+        .fa-grey-duiker::before { content: "🦌"; }
+        .fa-harvey-duiker::before { content: "🦌"; }
+        .fa-jentink-duiker::before { content: "🦌"; }
+        .fa-maxwell-duiker::before { content: "🦌"; }
+        .fa-mountain-duiker::before { content: "🦌"; }
+        .fa-natal-duiker::before { content: "🦌"; }
+        .fa-ogilby-duiker::before { content: "🦌"; }
+        .fa-peters-duiker::before { content: "🦌"; }
+        .fa-red-forest-duiker::before { content: "🦌"; }
+        .fa-white-bellied-duiker::before { content: "🦌"; }
+        .fa-yellow-backed-duiker::before { content: "🦌"; }
+        .fa-zebra-duiker::before { content: "🦌"; }
+        
         /* Modern Gradients */
         .gradient-bg {
             background: linear-gradient(135deg, #6f42c1 0%, #007bff 100%);
@@ -517,6 +753,17 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Mobile Menu Info -->
+                        <div class="mobile-menu-info mt-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-user-circle text-gray-600 text-lg"></i>
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">{{ session.get('user_email', 'Kullanıcı').split('@')[0] }}</div>
+                                    <div class="text-xs text-gray-500">Mobile Menü</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -601,38 +848,147 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Mobile Menu (Outside Layout) -->
-    <div id="mobile-menu" class="lg:hidden hidden bg-white/95 backdrop-blur-lg border-t border-gray-200/50">
-        <div class="px-6 py-4 space-y-2">
-            <div class="flex items-center space-x-3 px-3 py-3 bg-gray-50 rounded-lg mb-4">
-                <i class="fas fa-user-circle text-gray-600 text-lg"></i>
-                <div class="flex-1">
-                    <div class="font-medium text-gray-900">{{ session.get('user_email', 'Kullanıcı').split('@')[0] }}</div>
-                    <div class="text-xs text-gray-500">Mobile Menü</div>
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{% if category == 'success' %}success{% elif category == 'error' %}danger{% elif category == 'warning' %}warning{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-triangle{% elif category == 'warning' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
                 </div>
-            </div>
-        </div>
+            {% endif %}
+        {% endwith %}
     </div>
 
-    <!-- Flash Messages (Outside Layout) -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="container mt-3">
-                {% for category, message in messages %}
-                    <div class="alert alert-{% if category == 'success' %}success{% elif category == 'error' %}danger{% elif category == 'warning' %}warning{% else %}info{% endif %} alert-dismissible fade show" role="alert">
-                        <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-triangle{% elif category == 'warning' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS - CDN Fallback Sistemi -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js';"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';"></script>
+    
+    <!-- Bootstrap Fallback JavaScript -->
+    <script>
+        // Bootstrap fallback - CDN yüklenemezse temel işlevsellik sağla
+        if (typeof bootstrap === 'undefined') {
+            console.log('Bootstrap CDN yüklenemedi, fallback sistemi aktif');
+            
+            // Temel dropdown işlevselliği
+            window.bootstrap = {
+                Dropdown: function(element, options) {
+                    this.element = element;
+                    this.options = options || {};
+                    this.isShown = false;
+                    
+                    this.show = function() {
+                        this.element.classList.add('show');
+                        this.isShown = true;
+                    };
+                    
+                    this.hide = function() {
+                        this.element.classList.remove('show');
+                        this.isShown = false;
+                    };
+                    
+                    this.toggle = function() {
+                        if (this.isShown) {
+                            this.hide();
+                        } else {
+                            this.show();
+                        }
+                    };
+                },
+                
+                Modal: function(element, options) {
+                    this.element = element;
+                    this.options = options || {};
+                    this.isShown = false;
+                    
+                    this.show = function() {
+                        this.element.classList.add('show');
+                        this.element.style.display = 'block';
+                        this.isShown = true;
+                    };
+                    
+                    this.hide = function() {
+                        this.element.classList.remove('show');
+                        this.element.style.display = 'none';
+                        this.isShown = false;
+                    };
+                },
+                
+                Toast: function(element, options) {
+                    this.element = element;
+                    this.options = options || {};
+                    this.isShown = false;
+                    
+                    this.show = function() {
+                        this.element.classList.add('show');
+                        this.isShown = true;
+                    };
+                    
+                    this.hide = function() {
+                        this.element.classList.remove('show');
+                        this.isShown = false;
+                    };
+                }
+            };
+            
+            // Temel Bootstrap sınıflarını ekle
+            document.addEventListener('DOMContentLoaded', function() {
+                // Dropdown işlevselliği
+                const dropdowns = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+                dropdowns.forEach(function(dropdown) {
+                    dropdown.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('data-bs-target') || this.getAttribute('href'));
+                        if (target) {
+                            target.classList.toggle('show');
+                        }
+                    });
+                });
+                
+                // Modal işlevselliği
+                const modals = document.querySelectorAll('[data-bs-toggle="modal"]');
+                modals.forEach(function(modal) {
+                    modal.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('data-bs-target') || this.getAttribute('href'));
+                        if (target) {
+                            target.classList.add('show');
+                            target.style.display = 'block';
+                        }
+                    });
+                });
+                
+                // Modal kapatma
+                const modalCloses = document.querySelectorAll('[data-bs-dismiss="modal"]');
+                modalCloses.forEach(function(close) {
+                    close.addEventListener('click', function() {
+                        const modal = this.closest('.modal');
+                        if (modal) {
+                            modal.classList.remove('show');
+                            modal.style.display = 'none';
+                        }
+                    });
+                });
+                
+                // Toast işlevselliği
+                const toasts = document.querySelectorAll('[data-bs-toggle="toast"]');
+                toasts.forEach(function(toast) {
+                    toast.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('data-bs-target') || this.getAttribute('href'));
+                        if (target) {
+                            target.classList.add('show');
+                        }
+                    });
+                });
+            });
+        }
+    </script>
     
     <!-- Scripts -->
     <script>
@@ -1022,6 +1378,6 @@
     
     {% block scripts %}{% endblock %}
     
-    <!-- End Twitter Layout -->
+    </div><!-- End Twitter Layout -->
 </body>
 </html>

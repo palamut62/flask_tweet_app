@@ -408,40 +408,48 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto space-y-8">
-    <!-- Sayfa Başlığı -->
-    <div class="text-center">
-        <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
-            📰 Haber Kaynakları Yönetimi
-        </h1>
-        <p class="text-gray-600">Özel haber kaynaklarınızı ekleyin ve yönetin. Sistem bu kaynaklardan otomatik olarak makale çekecek.</p>
+<!-- Twitter Feed Style -->
+<div class="twitter-feed">
+    <!-- Header -->
+    <div class="feed-header">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="feed-title">📰 Haber Kaynakları Yönetimi</h1>
+                <p class="feed-subtitle">Özel haber kaynaklarınızı ekleyin ve yönetin. Sistem bu kaynaklardan otomatik olarak makale çekecek.</p>
+            </div>
+            <div>
+                <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- İstatistikler -->
     {% if stats %}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="card-modern bg-gradient-to-r from-purple-500 to-blue-600 text-white">
+        <div class="tweet-card bg-gradient-to-r from-purple-500 to-blue-600 text-white">
             <div class="p-6 text-center">
                 <i class="fas fa-newspaper text-3xl mb-3"></i>
                 <h3 class="text-2xl font-bold">{{ stats.total_sources }}</h3>
                 <p class="text-purple-100">Toplam Kaynak</p>
             </div>
         </div>
-        <div class="card-modern bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+        <div class="tweet-card bg-gradient-to-r from-green-500 to-emerald-600 text-white">
             <div class="p-6 text-center">
                 <i class="fas fa-check-circle text-3xl mb-3"></i>
                 <h3 class="text-2xl font-bold">{{ stats.enabled_sources }}</h3>
                 <p class="text-green-100">Aktif Kaynak</p>
             </div>
         </div>
-        <div class="card-modern bg-gradient-to-r from-yellow-500 to-orange-600 text-white">
+        <div class="tweet-card bg-gradient-to-r from-yellow-500 to-orange-600 text-white">
             <div class="p-6 text-center">
                 <i class="fas fa-pause-circle text-3xl mb-3"></i>
                 <h3 class="text-2xl font-bold">{{ stats.disabled_sources }}</h3>
                 <p class="text-yellow-100">Pasif Kaynak</p>
             </div>
         </div>
-        <div class="card-modern bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
+        <div class="tweet-card bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
             <div class="p-6 text-center">
                 <i class="fas fa-chart-line text-3xl mb-3"></i>
                 <h3 class="text-2xl font-bold">{{ stats.average_success_rate }}%</h3>
@@ -452,7 +460,7 @@
     {% endif %}
 
     <!-- Yeni Kaynak Ekleme -->
-    <div class="card-modern">
+    <div class="tweet-card">
         <div class="p-8">
             <div class="flex items-center space-x-3 mb-6">
                 <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
@@ -1214,6 +1222,105 @@
 </div>
 
 <script>
+// Toast notification system
+function showToast(message, type = 'info') {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        `;
+        document.body.appendChild(toastContainer);
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    const icon = getToastIcon(type);
+    const title = getToastTitle(type);
+    
+    toast.className = `toast toast-${type}`;
+    toast.style.cssText = `
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        animation: slideIn 0.3s ease-out;
+        max-width: 400px;
+    `;
+    
+    toast.innerHTML = `
+        <div style="flex-shrink: 0; font-size: 20px;">${icon}</div>
+        <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 4px; color: #374151;">${title}</div>
+            <div style="color: #6b7280; font-size: 14px;">${message}</div>
+        </div>
+        <button onclick="this.parentElement.remove()" style="
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+            margin-left: 8px;
+        ">&times;</button>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 5000);
+}
+
+function getToastIcon(type) {
+    const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
+    return icons[type] || icons.info;
+}
+
+function getToastTitle(type) {
+    const titles = {
+        success: 'Başarılı',
+        error: 'Hata',
+        warning: 'Uyarı',
+        info: 'Bilgi'
+    };
+    return titles[type] || titles.info;
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
 // Debug fonksiyonu
 function debugToggle() {
     const debugInfo = document.getElementById('debugInfo');
@@ -1335,7 +1442,7 @@ function analyzePageSource() {
     const url = document.getElementById('url').value.trim();
     
     if (!url) {
-        alert('Lütfen önce bir URL girin');
+        showToast('Lütfen önce bir URL girin', 'warning');
         return;
     }
     
@@ -1549,7 +1656,7 @@ function applyDetectedSelectors() {
     const selectorElements = aiAnalysisContent.querySelectorAll('code');
     
     if (selectorElements.length === 0) {
-        alert('Henüz selector analizi yapılmamış');
+        showToast('Henüz selector analizi yapılmamış', 'warning');
         return;
     }
     
@@ -1738,12 +1845,12 @@ function testManualSelectors() {
     const baseUrl = document.getElementById('base_url').value.trim();
     
     if (!url) {
-        alert('Önce URL girin!');
+        showToast('Önce URL girin!', 'warning');
         return;
     }
     
     if (!articleContainer || !titleSelector || !linkSelector) {
-        alert('Konteyner, başlık ve link selector\'ları zorunludur!');
+        showToast('Konteyner, başlık ve link selector\'ları zorunludur!', 'warning');
         return;
     }
     
@@ -2031,11 +2138,11 @@ function debugAddSource() {
     .then(response => response.json())
     .then(data => {
         console.log('Debug sonucu:', data);
-                                alert('Debug tamamlandı! Console loglarını kontrol edin.');
+        showToast('Debug tamamlandı! Console loglarını kontrol edin.', 'info');
     })
     .catch(error => {
         console.error('Debug hatası:', error);
-        alert('Debug hatası: ' + error);
+        showToast('Debug hatası: ' + error, 'error');
     });
 }
 

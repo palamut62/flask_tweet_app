@@ -3,17 +3,25 @@
 {% block title %}AI Tweet Bot - Güvenlik Kontrolü{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto space-y-8">
-    <!-- Sayfa Başlığı -->
-    <div class="text-center">
-        <h1 class="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2">
-            🔒 Güvenlik Kontrolü
-        </h1>
-        <p class="text-gray-600">Uygulamanızın güvenlik yapılandırmasını kontrol edin</p>
+<!-- Twitter Feed Style -->
+<div class="twitter-feed">
+    <!-- Header -->
+    <div class="feed-header">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="feed-title">🔒 Güvenlik Kontrolü</h1>
+                <p class="feed-subtitle">Uygulamanızın güvenlik yapılandırmasını kontrol edin</p>
+            </div>
+            <div>
+                <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Güvenlik Durumu -->
-    <div class="card-modern">
+    <div class="tweet-card">
         <div class="p-8">
             {% if security %}
                 <!-- Genel Durum -->

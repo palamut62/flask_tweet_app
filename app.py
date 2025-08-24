@@ -19,6 +19,13 @@ import uuid
 # .env dosyasını yükle
 load_dotenv()
 
+# PythonAnywhere konfigürasyonu
+try:
+    from pythonanywhere_config import configure_for_pythonanywhere
+    is_pythonanywhere = configure_for_pythonanywhere()
+except ImportError:
+    is_pythonanywhere = False
+
 # Debug mode kontrolü
 DEBUG_MODE = os.environ.get('DEBUG', 'True').lower() == 'true'
 
@@ -44,11 +51,11 @@ from utils import (
 APP_VERSION = "1.4.1"
 APP_RELEASE_DATE = "2025-08-24"
 VERSION_CHANGELOG = {
-    "1.4.1": "Sistem kontrolü ve doğrulama, Otomatik version tracking sistemi, Duplicate kontrol iyileştirmeleri",
-    "1.4.0": "OpenRouter OCR entegrasyonu, Çok katmanlı fallback sistemi, Gelişmiş hata yönetimi",
-    "1.3.0": "GitHub kaldırıldı, Footer düzeltildi, Navbar yenilendi",
-    "1.2.0": "UI iyileştirmeleri ve performans optimizasyonları", 
-    "1.1.0": "Otomatik tweet sistemi ve AI entegrasyonu"
+    "1.4.1": "🔧 Sistem Kontrolü ve İyileştirmeleri - Duplicate kontrol sistemi kapsamlı kontrol ve doğrulama, Toplu tweet sistemi güvenlik kontrolleri, Haber çekme sistemi multi-source duplicate prevention, Version tracking sistemi otomatik güncelleme",
+    "1.4.0": "🚀 OpenRouter OCR Entegrasyonu - Ücretsiz vision modelleri ile gelişmiş OCR sistemi, Çok katmanlı fallback sistemi, Gelişmiş hata yönetimi, OCR test sistemi, Kapsamlı dokümantasyon",
+    "1.3.0": "🔄 GitHub modülü kaldırıldı, Footer düzeltildi, Navbar yenilendi",
+    "1.2.0": "✨ UI iyileştirmeleri ve performans optimizasyonları", 
+    "1.1.0": "🚀 Otomatik tweet sistemi ve AI entegrasyonu"
 }
 
 app = Flask(__name__)
@@ -105,7 +112,9 @@ def favicon():
 def inject_globals():
     return {
         'app_version': APP_VERSION,
-        'version_changelog': VERSION_CHANGELOG
+        'version_changelog': VERSION_CHANGELOG,
+        'is_pythonanywhere': is_pythonanywhere,
+        'use_local_assets': os.environ.get('USE_LOCAL_ASSETS', 'false').lower() == 'true'
     }
 
 # Global değişkenler ve sabitler
@@ -438,10 +447,17 @@ def index():
         
         # Tweet içeriklerini düzenle
         for tweet in pending_tweets:
+            # Tweet metnini bul - farklı alan isimleri dene
+            tweet_text = ''
             if 'tweet_data' in tweet and 'tweet' in tweet['tweet_data']:
-                tweet['content'] = tweet['tweet_data']['tweet']
-            elif 'content' not in tweet and 'article' in tweet:
-                tweet['content'] = tweet['article'].get('title', 'İçerik bulunamadı')
+                tweet_text = tweet['tweet_data']['tweet']
+            elif 'content' in tweet:
+                tweet_text = tweet['content']
+            elif 'article' in tweet:
+                tweet_text = tweet['article'].get('title', 'İçerik bulunamadı')
+            
+            # Tweet content alanını ayarla
+            tweet['content'] = tweet_text
             
             # Başlık ve URL bilgilerini ekle
             tweet['title'] = tweet['article'].get('title', 'Başlık bulunamadı') if 'article' in tweet else tweet.get('content', 'Başlık bulunamadı')
@@ -487,21 +503,64 @@ def index():
             terminal_log(f"⚠️ Otomasyon ayarları yüklenemedi: {str(e)}", "warning")
             settings = {}
         
-        return render_template('index_simple.html', 
+        # Gelişmiş özellikler için gerekli verileri hazırla
+        try:
+            # API durumu kontrolü
+            api_check = {
+                'openrouter_api_available': bool(os.getenv('OPENROUTER_API_KEY')),
+                'twitter_api_available': bool(os.getenv('TWITTER_API_KEY') and os.getenv('TWITTER_API_SECRET')),
+                'google_api_available': bool(os.getenv('GOOGLE_API_KEY')),
+                'telegram_available': bool(os.getenv('TELEGRAM_BOT_TOKEN'))
+            }
+        except:
+            api_check = {}
+        
+        # Versiyon bilgisi
+        app_version = APP_VERSION
+        app_release_date = APP_RELEASE_DATE
+        
+        # İstatistikler
+        stats = {
+            'today_articles': len(articles),
+            'today_pending': len(pending_tweets),
+            'today_total_activity': len(articles) + len(pending_tweets)
+        }
+        
+        # Otomasyon durumu
+        automation_status = {
+            'auto_mode': True,
+            'check_interval_hours': 1,
+            'min_score_threshold': 7,
+            'max_articles_per_run': 5
+        }
+        
+        # Haber sayısı
+        news_count = len(pending_tweets)
+        
+        return render_template('index.html', 
                              pending_tweets=pending_tweets[:20],  # Maksimum 20 pending tweet
                              posted_count=len(articles),
-                             rejected_count=len(rejected_articles))
+                             rejected_count=len(rejected_articles),
+                             rejected_articles=rejected_articles[:10],  # İlk 10 reddedilen makale
+                             api_check=api_check,
+                             app_version=app_version,
+                             app_release_date=app_release_date,
+                             stats=stats,
+                             automation_status=automation_status,
+                             news_count=news_count)
                              
     except Exception as e:
         safe_log(f"Ana sayfa hatası: {str(e)}", "ERROR")
-        return render_template('index_simple.html', 
+        return render_template('index.html', 
                              pending_tweets=[],
                              posted_count=0,
                              rejected_count=0,
+                             rejected_articles=[],
                              stats={},
                              automation_status={},
                              api_check={},
-                             settings={},
+                             app_version=APP_VERSION,
+                             app_release_date=APP_RELEASE_DATE,
                              news_count=0,
                              error=str(e))
 
@@ -6402,6 +6461,121 @@ def remove_from_rejected():
         
     except Exception as e:
         terminal_log(f"❌ Reddedilen makale kaldırma hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/bulk_convert_rejected', methods=['POST'])
+@login_required
+def bulk_convert_rejected():
+    """Toplu olarak reddedilen makaleleri tweet'e çevir"""
+    try:
+        data = request.get_json()
+        urls = data.get('urls', [])
+        
+        if not urls:
+            return jsonify({"success": False, "error": "URL listesi gerekli"})
+        
+        # Reddedilen makaleleri yükle
+        rejected_articles = load_json("rejected_articles.json", [])
+        pending_tweets = load_json("pending_tweets.json", [])
+        
+        converted_count = 0
+        errors = []
+        
+        for url in urls:
+            try:
+                # İlgili makaleyi bul
+                article = next((a for a in rejected_articles if a.get('url') == url), None)
+                
+                if article:
+                    # Tweet içeriği oluştur
+                    tweet_content = f"🤖 {article.get('title', 'Haber')}\n\n📰 Kaynak: {article.get('source', 'Bilinmeyen')}\n🔗 Detaylar: {url}\n\n#AI #Haber #Teknoloji"
+                    
+                    # Pending tweets'e ekle
+                    new_tweet = {
+                        'id': len(pending_tweets) + 1,
+                        'content': tweet_content,
+                        'article': article,
+                        'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                        'source_type': 'rejected_converted'
+                    }
+                    
+                    pending_tweets.append(new_tweet)
+                    converted_count += 1
+                    
+                    # Reddedilen listesinden kaldır
+                    rejected_articles = [a for a in rejected_articles if a.get('url') != url]
+                    
+                    terminal_log(f"🔄 Makale tweet'e çevrildi: {article.get('title', 'Bilinmeyen')[:50]}...", "success")
+                else:
+                    errors.append(f"Makale bulunamadı: {url}")
+                    
+            except Exception as e:
+                errors.append(f"Hata ({url}): {str(e)}")
+        
+        # Güncellenmiş listeleri kaydet
+        save_json("pending_tweets.json", pending_tweets)
+        save_json("rejected_articles.json", rejected_articles)
+        
+        terminal_log(f"✅ {converted_count} makale başarıyla tweet'e çevrildi", "success")
+        
+        return jsonify({
+            "success": True,
+            "converted_count": converted_count,
+            "errors": errors,
+            "message": f"{converted_count} makale başarıyla tweet'e çevrildi"
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Toplu dönüştürme hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/bulk_remove_rejected', methods=['POST'])
+@login_required
+def bulk_remove_rejected():
+    """Toplu olarak reddedilen makaleleri sil"""
+    try:
+        data = request.get_json()
+        urls = data.get('urls', [])
+        
+        if not urls:
+            return jsonify({"success": False, "error": "URL listesi gerekli"})
+        
+        # Reddedilen makaleleri yükle
+        rejected_articles = load_json("rejected_articles.json", [])
+        
+        original_count = len(rejected_articles)
+        removed_count = 0
+        errors = []
+        
+        for url in urls:
+            try:
+                # İlgili makaleyi bul ve kaldır
+                article = next((a for a in rejected_articles if a.get('url') == url), None)
+                
+                if article:
+                    rejected_articles = [a for a in rejected_articles if a.get('url') != url]
+                    removed_count += 1
+                    terminal_log(f"🗑️ Makale kalıcı olarak silindi: {article.get('title', 'Bilinmeyen')[:50]}...", "info")
+                else:
+                    errors.append(f"Makale bulunamadı: {url}")
+                    
+            except Exception as e:
+                errors.append(f"Hata ({url}): {str(e)}")
+        
+        # Güncellenmiş listeyi kaydet
+        save_json("rejected_articles.json", rejected_articles)
+        
+        terminal_log(f"✅ {removed_count} makale başarıyla silindi", "success")
+        
+        return jsonify({
+            "success": True,
+            "removed_count": removed_count,
+            "errors": errors,
+            "message": f"{removed_count} makale başarıyla silindi"
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Toplu silme hatası: {e}", "error")
         return jsonify({"success": False, "error": str(e)})
 
 @app.route('/api/get_pending_tweets', methods=['GET'])

@@ -3,19 +3,26 @@
 {% block title %}Silinmiş Tweetler - AI Tweet Bot{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-    <!-- Başlık -->
-    <div class="text-center">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">
-            <i class="fas fa-trash text-red-500 mr-3"></i>
-            Silinmiş Tweetler
-        </h1>
-        <p class="text-lg text-gray-600">Manuel olarak silinen veya reddedilen tweet'lerin listesi</p>
+<!-- Twitter Feed Style -->
+<div class="twitter-feed">
+    <!-- Header -->
+    <div class="feed-header">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="feed-title">Silinmiş Tweetler</h1>
+                <p class="feed-subtitle">Manuel olarak silinen veya reddedilen tweet'lerin listesi</p>
+            </div>
+            <div>
+                <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- İstatistikler -->
     {% if stats %}
-    <div class="card-modern gradient-bg text-white">
+    <div class="tweet-card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
         <div class="p-6">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="text-center">
@@ -41,7 +48,7 @@
 
     <!-- Hata Mesajı -->
     {% if error %}
-    <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+    <div class="tweet-card bg-red-50 border border-red-200 p-4">
         <div class="flex items-center space-x-3">
             <i class="fas fa-exclamation-triangle text-red-500"></i>
             <div>
@@ -68,7 +75,7 @@
     {% if deleted_articles %}
     <div class="space-y-6">
         {% for article in deleted_articles %}
-        <div class="card-modern border-l-4 border-red-500 bg-red-50/30 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+        <div class="tweet-card border-l-4 border-red-500 bg-red-50/30 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             <div class="p-6">
                 <!-- Başlık ve Tarih -->
                 <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-4 space-y-2 md:space-y-0">
@@ -219,6 +226,105 @@
 </div>
 
 <script>
+// Toast notification system
+function showToast(message, type = 'info') {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        `;
+        document.body.appendChild(toastContainer);
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    const icon = getToastIcon(type);
+    const title = getToastTitle(type);
+    
+    toast.className = `toast toast-${type}`;
+    toast.style.cssText = `
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        animation: slideIn 0.3s ease-out;
+        max-width: 400px;
+    `;
+    
+    toast.innerHTML = `
+        <div style="flex-shrink: 0; font-size: 20px;">${icon}</div>
+        <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 4px; color: #374151;">${title}</div>
+            <div style="color: #6b7280; font-size: 14px;">${message}</div>
+        </div>
+        <button onclick="this.parentElement.remove()" style="
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+            margin-left: 8px;
+        ">&times;</button>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 5000);
+}
+
+function getToastIcon(type) {
+    const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
+    return icons[type] || icons.info;
+}
+
+function getToastTitle(type) {
+    const titles = {
+        success: 'Başarılı',
+        error: 'Hata',
+        warning: 'Uyarı',
+        info: 'Bilgi'
+    };
+    return titles[type] || titles.info;
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
 // Sayfa yüklendiğinde animasyon
 document.addEventListener('DOMContentLoaded', function() {
     const cards = document.querySelectorAll('.card-modern');
@@ -302,7 +408,7 @@ function restoreDeletedTweet(articleHash) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Geri yükleme sırasında bir hata oluştu!');
+        showToast('Geri yükleme sırasında bir hata oluştu!', 'error');
     });
 }
 </script>

@@ -63,5 +63,20 @@
     "post_methods": {
       "otomatik": 4
     }
+  },
+  "2025-08-24": {
+    "total_posts": 10,
+    "automatic_posts": 0,
+    "manual_posts": 0,
+    "bulk_posts": 10,
+    "github_posts": 0,
+    "news_posts": 10,
+    "quality_scores": [],
+    "sources": {
+      "": 10
+    },
+    "post_methods": {
+      "toplu": 10
+    }
   }
 }

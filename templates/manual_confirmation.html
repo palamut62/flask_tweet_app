@@ -148,6 +148,105 @@
 </div>
 
 <script>
+// Toast notification system
+function showToast(message, type = 'info') {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        `;
+        document.body.appendChild(toastContainer);
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    const icon = getToastIcon(type);
+    const title = getToastTitle(type);
+    
+    toast.className = `toast toast-${type}`;
+    toast.style.cssText = `
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        animation: slideIn 0.3s ease-out;
+        max-width: 400px;
+    `;
+    
+    toast.innerHTML = `
+        <div style="flex-shrink: 0; font-size: 20px;">${icon}</div>
+        <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 4px; color: #374151;">${title}</div>
+            <div style="color: #6b7280; font-size: 14px;">${message}</div>
+        </div>
+        <button onclick="this.parentElement.remove()" style="
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+            margin-left: 8px;
+        ">&times;</button>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 5000);
+}
+
+function getToastIcon(type) {
+    const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
+    return icons[type] || icons.info;
+}
+
+function getToastTitle(type) {
+    const titles = {
+        success: 'Başarılı',
+        error: 'Hata',
+        warning: 'Uyarı',
+        info: 'Bilgi'
+    };
+    return titles[type] || titles.info;
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
 function confirmManualPost(tweetId, confirmed) {
     console.log('confirmManualPost çağrıldı:', { tweetId, confirmed, parsedId: parseInt(tweetId) });
     
@@ -170,19 +269,19 @@ function confirmManualPost(tweetId, confirmed) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('✅ Tweet başarıyla onaylandı ve sistemden kaldırıldı!');
+                showToast('✅ Tweet başarıyla onaylandı ve sistemden kaldırıldı!', 'success');
                 // Ana sayfaya dön ve dinamik güncelleme yap
                 window.location.href = '/?refresh=true';
             } else {
-                alert('❌ Hata: ' + data.error);
+                showToast('❌ Hata: ' + data.error, 'error');
             }
         })
         .catch(error => {
-            alert('❌ Bağlantı hatası: ' + error);
+            showToast('❌ Bağlantı hatası: ' + error, 'error');
         });
     } else {
         // Hayır - Tweet paylaşılmadı
-        alert('Tweet pending listesinde kalacak. Daha sonra tekrar deneyebilirsiniz.');
+        showToast('Tweet pending listesinde kalacak. Daha sonra tekrar deneyebilirsiniz.', 'info');
         window.location.href = '/';
     }
 }

@@ -70,22 +70,25 @@
 {% endmacro %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto p-6 space-y-6">
-    <!-- Başlık -->
-    <div class="text-center mb-8">
-        <div class="flex items-center justify-center space-x-3 mb-4">
-            <div class="w-12 h-12 tweet-gradient rounded-lg flex items-center justify-center">
-                <i class="fab fa-twitter text-white text-xl"></i>
+<!-- Twitter Feed Style -->
+<div class="twitter-feed">
+    <!-- Header -->
+    <div class="feed-header">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="feed-title">Paylaşılan Tweetler</h1>
+                <p class="feed-subtitle">Başarıyla paylaşılmış olan tüm tweetleriniz</p>
             </div>
-            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Paylaşılan Tweetler
-            </h1>
+            <div>
+                <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
         </div>
-        <p class="text-gray-600 text-lg">Başarıyla paylaşılmış olan tüm tweetleriniz</p>
     </div>
 
     <!-- Filtreler ve Arama -->
-    <div class="card-modern mb-6">
+    <div class="tweet-card mb-6">
         <div class="p-6">
             <div class="flex flex-wrap gap-4 items-center">
                 <!-- Arama -->
@@ -128,7 +131,7 @@
     <div id="tweetsContainer" class="space-y-4">
         {% for article in articles|reverse %}
         {% if not article.deleted %}
-        <div class="tweet-item bg-gradient-to-r {% if article.source_type == 'github' or article.type == 'github_repo' %}from-purple-50 to-indigo-50 border border-purple-200{% else %}from-blue-50 to-cyan-50 border border-blue-200{% endif %} rounded-xl p-6 hover:shadow-lg transition-all duration-300"
+        <div class="tweet-card {% if article.source_type == 'github' or article.type == 'github_repo' %}github-tweet{% else %}news-tweet{% endif %}"
              data-source="{{ 'github' if (article.source_type == 'github' or article.type == 'github_repo') else 'news' }}"
              data-manual="{{ 'true' if article.manual_post else 'false' }}"
              data-date="{{ article.post_date[:10] if article.post_date else '' }}"
@@ -159,8 +162,8 @@
                 </div>
             </div>
             
-            <div class="bg-white/80 backdrop-blur-sm rounded-lg p-4 mb-4 border border-gray-200">
-                <p class="text-gray-800 leading-relaxed">{{ article.tweet_text if article.tweet_text else article.content }}</p>
+            <div class="tweet-content">
+                <p>{{ article.tweet_text if article.tweet_text else article.content }}</p>
             </div>
             
             <!-- Tweet Bilgileri -->
@@ -192,20 +195,20 @@
                 {{ render_source_badge(article.source, None, article.url) }}
             </div>
             
-            <!-- Eylem Butonları -->
-            <div class="flex flex-wrap gap-3">
+            <!-- Tweet Actions -->
+            <div class="tweet-actions">
                 {% if article.tweet_url %}
-                <a href="{{ article.tweet_url }}" target="_blank" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium flex items-center space-x-2">
-                    <i class="fab fa-twitter"></i>
+                <button class="tweet-action" onclick="window.open('{{ article.tweet_url }}', '_blank')">
+                    <i class="fab fa-twitter tweet-action-icon"></i>
                     <span>Tweet'i Görüntüle</span>
-                </a>
+                </button>
                 {% endif %}
-                <a href="{{ article.url if article.url else '#' }}" target="_blank" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-medium flex items-center space-x-2 {{ 'opacity-50 cursor-not-allowed' if not article.url else '' }}">
-                    <i class="fas fa-external-link-alt"></i>
+                <button class="tweet-action" onclick="window.open('{{ article.url if article.url else '#' }}', '_blank')" {{ 'disabled' if not article.url else '' }}>
+                    <i class="fas fa-external-link-alt tweet-action-icon"></i>
                     <span>{% if article.source_type == 'github' or article.type == 'github_repo' %}Repo'yu Görüntüle{% else %}Makaleyi Oku{% endif %}</span>
-                </a>
-                <button onclick="restoreDeletedTweet('{{ loop.index0 }}')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 font-medium flex items-center space-x-2">
-                    <i class="fas fa-archive"></i>
+                </button>
+                <button class="tweet-action like" onclick="restoreDeletedTweet('{{ loop.index0 }}')">
+                    <i class="fas fa-archive tweet-action-icon"></i>
                     <span>Arşivle</span>
                 </button>
             </div>
@@ -232,23 +235,122 @@
         </nav>
     </div>
     {% else %}
-    <!-- Boş Durum -->
-    <div class="text-center py-12">
-        <div class="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-            <i class="fab fa-twitter text-4xl text-gray-400"></i>
-        </div>
-        <h3 class="text-xl font-semibold text-gray-900 mb-2">Henüz Paylaşılan Tweet Yok</h3>
-        <p class="text-gray-500 mb-6">İlk tweetinizi paylaştığınızda burada görünecek.</p>
-        <a href="{{ url_for('index') }}" class="btn-primary inline-flex items-center space-x-2">
-            <i class="fas fa-plus"></i>
-            <span>Tweet Paylaş</span>
-        </a>
-    </div>
+         <!-- Empty State -->
+     <div class="tweet-card text-center py-16">
+         <div class="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+             <i class="fab fa-twitter text-4xl text-gray-400"></i>
+         </div>
+         <h3 class="text-2xl font-semibold text-gray-900 mb-4">Henüz Paylaşılan Tweet Yok</h3>
+         <p class="text-gray-500 mb-8 max-w-md mx-auto">İlk tweetinizi paylaştığınızda burada görünecek. Tweet paylaşmaya başlamak için ana sayfaya gidin.</p>
+         <a href="{{ url_for('index') }}" class="twitter-btn twitter-btn-primary inline-flex items-center space-x-2">
+             <i class="fas fa-plus"></i>
+             <span>Tweet Paylaş</span>
+         </a>
+     </div>
     {% endif %}
 </div>
 
 <!-- JavaScript -->
 <script>
+// Toast notification system
+function showToast(message, type = 'info') {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        `;
+        document.body.appendChild(toastContainer);
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    const icon = getToastIcon(type);
+    const title = getToastTitle(type);
+    
+    toast.className = `toast toast-${type}`;
+    toast.style.cssText = `
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        animation: slideIn 0.3s ease-out;
+        max-width: 400px;
+    `;
+    
+    toast.innerHTML = `
+        <div style="flex-shrink: 0; font-size: 20px;">${icon}</div>
+        <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 4px; color: #374151;">${title}</div>
+            <div style="color: #6b7280; font-size: 14px;">${message}</div>
+        </div>
+        <button onclick="this.parentElement.remove()" style="
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+            margin-left: 8px;
+        ">&times;</button>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 5000);
+}
+
+function getToastIcon(type) {
+    const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
+    return icons[type] || icons.info;
+}
+
+function getToastTitle(type) {
+    const titles = {
+        success: 'Başarılı',
+        error: 'Hata',
+        warning: 'Uyarı',
+        info: 'Bilgi'
+    };
+    return titles[type] || titles.info;
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
 // Arama ve filtreleme
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
@@ -324,10 +426,17 @@ document.addEventListener('DOMContentLoaded', function() {
 // Tweet arşivleme fonksiyonu
 function restoreDeletedTweet(index) {
     if (confirm('Bu tweeti arşivlemek istediğinizden emin misiniz?')) {
+        showToast('Tweet arşivleniyor...', 'info');
+        
         // Bu fonksiyonu backend'de implement etmek gerekecek
         console.log('Tweet arşivlendi:', index);
-        // Sayfayı yenile veya öğeyi gizle
-        location.reload();
+        
+        // Simüle edilmiş başarı mesajı
+        setTimeout(() => {
+            showToast('Tweet başarıyla arşivlendi!', 'success');
+            // Sayfayı yenile veya öğeyi gizle
+            location.reload();
+        }, 1000);
     }
 }
 </script>

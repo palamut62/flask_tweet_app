@@ -1,345 +1,201 @@
-# AI Tweet Bot - PythonAnywhere Kurulum Rehberi
+# PythonAnywhere Kurulum ve Sorun Giderme Rehberi
 
-Bu rehber, AI Tweet Bot uygulamasını PythonAnywhere'de nasıl kuracağınızı adım adım açıklar.
+## 🚀 PythonAnywhere'de Uygulama Kurulumu
 
-## 📋 Ön Gereksinimler
-
-- PythonAnywhere hesabı (ücretsiz veya ücretli)
-- GitHub hesabı ve bu projenin repository'si
-- Gerekli API anahtarları (Twitter, Google, OpenRouter, vb.)
-
-## 🚀 Kurulum Adımları
-
-### 1. PythonAnywhere'de Bash Console Açın
-
-1. PythonAnywhere dashboard'a girin
-2. **"Tasks"** sekmesine tıklayın
-3. **"Bash"** console açın
-
-### 2. Projeyi GitHub'dan Klonlayın
-
+### 1. Dosya Yükleme
 ```bash
-# Ana dizine gidin
-cd ~
-
-# Projeyi klonlayın
-git clone https://github.com/KULLANICI_ADINIZ/ai_tweet_bot_pythonanywhere.git flask_tweet_app
-
-# Proje dizinine gidin
-cd flask_tweet_app
+# PythonAnywhere Files sekmesinde:
+# - Tüm proje dosyalarını yükleyin
+# - static/ klasörünün doğru yüklendiğinden emin olun
+# - templates/ klasörünün doğru yüklendiğinden emin olun
 ```
 
-### 3. Virtual Environment Oluşturun
-
+### 2. Python Paketleri Kurulumu
 ```bash
-# Mevcut Python sürümlerini kontrol edin
-ls /usr/bin/python*
-
-# Virtual environment oluşturun (python3.10 önerilen)
-python3.10 -m venv venv
-
-# Virtual environment'ı aktifleştirin
-source venv/bin/activate
-
-# Pip'i güncelleyin
-pip install --upgrade pip
+# PythonAnywhere Bash Console'da:
+pip install --user flask
+pip install --user python-dotenv
+pip install --user tweepy
+pip install --user beautifulsoup4
+pip install --user requests
+pip install --user feedparser
 ```
 
-### 4. Dependencies Yükleyin
-
-```bash
-# Requirements dosyasından paketleri yükleyin
-pip install -r requirements.txt
-
-# Eğer hata alırsanız, tek tek yükleyin:
-pip install flask python-dotenv requests beautifulsoup4 tweepy
-pip install google-generativeai openai selenium webdriver-manager
-pip install feedparser python-telegram-bot schedule
-```
-
-### 5. Environment Variables Ayarlayın
-
-```bash
-# .env dosyası oluşturun
-nano .env
-```
-
-`.env` dosyasına şu içeriği ekleyin:
-
-```env
-# Flask Configuration
-SECRET_KEY=your-super-secret-key-here
-FLASK_ENV=production
-DEBUG=False
-
-# Google Gemini API
-GOOGLE_API_KEY=your-google-api-key
-
-# OpenRouter API
-OPENROUTER_API_KEY=your-openrouter-api-key
-
-# Twitter API v2
-TWITTER_BEARER_TOKEN=your-twitter-bearer-token
-TWITTER_API_KEY=your-twitter-api-key
-TWITTER_API_SECRET=your-twitter-api-secret
-TWITTER_ACCESS_TOKEN=your-twitter-access-token
-TWITTER_ACCESS_TOKEN_SECRET=your-twitter-access-token-secret
-
-# Telegram Bot (Opsiyonel)
-TELEGRAM_BOT_TOKEN=your-telegram-bot-token
-TELEGRAM_CHAT_ID=your-telegram-chat-id
-
-# Gmail Notifications (Opsiyonel)
-GMAIL_EMAIL=your-gmail@gmail.com
-GMAIL_APP_PASSWORD=your-gmail-app-password
-
-# Admin Email (Giriş için)
-ADMIN_EMAIL=your-admin@email.com
-EMAIL_ADDRESS=your-email@gmail.com
-EMAIL_PASSWORD=your-email-app-password
-
-# GitHub API (Opsiyonel)
-GITHUB_TOKEN=your-github-token
-```
-
-**Ctrl+X** → **Y** → **Enter** ile kaydedin.
-
-### 6. Gerekli Dizinleri Oluşturun
-
-```bash
-# Log dizini oluşturun
-mkdir -p logs
-
-# Static uploads dizini oluşturun
-mkdir -p static/uploads
-
-# JSON dosyalarını oluşturun
-touch posted_articles.json
-touch pending_tweets.json
-touch automation_settings.json
-touch news_sources.json
-
-# Boş JSON dosyalarını başlatın
-echo "[]" > posted_articles.json
-echo "[]" > pending_tweets.json
-echo "{}" > automation_settings.json
-echo '{"sources": [], "rss_sources": []}' > news_sources.json
-```
-
-### 7. Web App Oluşturun
-
-1. PythonAnywhere dashboard'da **"Web"** sekmesine gidin
-2. **"Add a new web app"** tıklayın
-3. **"Manual configuration"** seçin
-4. **"Python 3.10"** seçin
-5. **"Next"** tıklayın
-
-### 8. WSGI Dosyasını Yapılandırın
-
-1. Web sekmesinde **"WSGI configuration file"** linkine tıklayın
-2. Dosyanın içeriğini tamamen silin
-3. Aşağıdaki içeriği yapıştırın:
-
+### 3. Web App Konfigürasyonu
 ```python
-#!/usr/bin/python3
+# PythonAnywhere Web sekmesinde:
+# Source code: /home/kullaniciadi/flask_tweet_app
+# Working directory: /home/kullaniciadi/flask_tweet_app
+# WSGI configuration file: /var/www/kullaniciadi_pythonanywhere_com_wsgi.py
+```
+
+### 4. WSGI Dosyası Düzenleme
+```python
+# /var/www/kullaniciadi_pythonanywhere_com_wsgi.py dosyasını düzenleyin:
 
 import sys
 import os
-from dotenv import load_dotenv
 
-# Add your project directory to the Python path
-project_home = '/home/umutins62/flask_tweet_app'
-if project_home not in sys.path:
-    sys.path = [project_home] + sys.path
+# Proje dizinini Python path'ine ekle
+path = '/home/kullaniciadi/flask_tweet_app'
+if path not in sys.path:
+    sys.path.append(path)
 
-# Add the virtual environment site-packages to the Python path
-venv_path = '/home/umutins62/flask_tweet_app/venv/lib/python3.10/site-packages'
-if venv_path not in sys.path:
-    sys.path = [venv_path] + sys.path
+# Environment variables
+os.environ['PYTHONANYWHERE_SITE'] = 'true'
+os.environ['USE_LOCAL_ASSETS'] = 'true'
+os.environ['DEBUG'] = 'False'
 
-# Load environment variables
-env_path = os.path.join(project_home, '.env')
-if os.path.exists(env_path):
-    load_dotenv(env_path)
-
-# Set Flask environment
-os.environ.setdefault('FLASK_ENV', 'production')
-os.environ.setdefault('FLASK_DEBUG', 'False')
-
-# Change to project directory
-os.chdir(project_home)
-
-# Import Flask application
+# Flask app'i import et
 from app import app as application
 
-# Configure application for production
-application.config['DEBUG'] = False
-application.config['TESTING'] = False
+# Production ayarları
+application.config['PREFERRED_URL_SCHEME'] = 'https'
+application.config['SESSION_COOKIE_SECURE'] = True
+application.config['SESSION_COOKIE_HTTPONLY'] = True
 ```
 
-4. **"Save"** tıklayın
+## 🔧 Yaygın Sorunlar ve Çözümleri
 
-### 9. Static Files Yapılandırın
+### 1. CDN Erişim Sorunları
+**Sorun:** Bootstrap/Font Awesome yüklenmiyor
+**Çözüm:** 
+- CDN fallback sistemi otomatik olarak devreye girer
+- Eğer hala sorun varsa, local assets kullanın
 
-Web sekmesinde **"Static files"** bölümünde:
-
-- **URL**: `/static/`
-- **Directory**: `/home/umutins62/flask_tweet_app/static/`
-
-**"Save"** tıklayın.
-
-### 10. Virtual Environment Ayarlayın
-
-Web sekmesinde **"Virtualenv"** bölümünde:
-
-- **Path**: `/home/umutins62/flask_tweet_app/venv/`
-
-**"Save"** tıklayın.
-
-### 11. Uygulamayı Başlatın
-
-1. Web sekmesinde **"Reload"** butonuna tıklayın
-2. **"Configuration"** sekmesinde yeşil **"Reload"** butonuna tıklayın
-3. Uygulamanızın URL'sine gidin: `https://umutins62.pythonanywhere.com`
-
-## 🔧 Sorun Giderme
-
-### Yaygın Hatalar ve Çözümleri
-
-#### 1. "ModuleNotFoundError"
+### 2. Static Dosya Sorunları
+**Sorun:** CSS/JS dosyaları yüklenmiyor
+**Çözüm:**
 ```bash
-# Virtual environment'ı aktifleştirin
-source ~/flask_tweet_app/venv/bin/activate
-
-# Eksik modülü yükleyin
-pip install module-name
+# PythonAnywhere Files sekmesinde:
+# static/ klasörünün doğru konumda olduğunu kontrol edin
+# Dosya izinlerini kontrol edin (644)
 ```
 
-#### 2. "Permission Denied"
-```bash
-# Dosya izinlerini düzeltin
-chmod +x ~/flask_tweet_app/app.py
-chmod +x ~/flask_tweet_app/wsgi_config.py
+### 3. Environment Variables
+**Sorun:** .env dosyası çalışmıyor
+**Çözüm:**
+```python
+# WSGI dosyasında environment variables'ları manuel olarak set edin:
+os.environ['TWITTER_BEARER_TOKEN'] = 'your_token_here'
+os.environ['OPENROUTER_API_KEY'] = 'your_key_here'
+# ... diğer API anahtarları
 ```
 
-#### 3. ".env dosyası bulunamadı"
+### 4. Database/JSON Dosya Sorunları
+**Sorun:** JSON dosyaları yazılamıyor
+**Çözüm:**
 ```bash
-# .env dosyasının varlığını kontrol edin
-ls -la ~/flask_tweet_app/.env
-
-# Yoksa oluşturun
-touch ~/flask_tweet_app/.env
+# Dosya izinlerini kontrol edin:
+chmod 644 *.json
+chmod 755 /home/kullaniciadi/flask_tweet_app
 ```
 
-#### 4. "Static files yüklenmiyor"
-- Web sekmesinde Static files ayarlarını kontrol edin
-- Directory path'in doğru olduğundan emin olun
+## 📁 Dosya Yapısı Kontrolü
 
-### Error Log Kontrolü
-
-```bash
-# Uygulama loglarını kontrol edin
-tail -f ~/flask_tweet_app/logs/app.log
-
-# PythonAnywhere error loglarını kontrol edin
-tail -f /var/log/umutins62.pythonanywhere.com.error.log
+PythonAnywhere'de dosya yapınız şöyle olmalı:
+```
+/home/kullaniciadi/flask_tweet_app/
+├── app.py
+├── utils.py
+├── pythonanywhere_config.py
+├── requirements.txt
+├── .env
+├── static/
+│   ├── css/
+│   │   └── twitter-style.css
+│   ├── favicon.ico
+│   └── ...
+├── templates/
+│   ├── base.html
+│   ├── index.html
+│   ├── login.html
+│   └── ...
+└── *.json (veri dosyaları)
 ```
 
-### Manuel Test
+## 🔒 Güvenlik Ayarları
 
+### 1. HTTPS Zorunluluğu
+```python
+# app.py'de:
+if is_pythonanywhere:
+    app.config['PREFERRED_URL_SCHEME'] = 'https'
+    app.config['SESSION_COOKIE_SECURE'] = True
+```
+
+### 2. Environment Variables
 ```bash
-# Bash console'da uygulamayı test edin
-cd ~/flask_tweet_app
-source venv/bin/activate
-python app.py
+# Hassas bilgileri .env dosyasında saklayın:
+TWITTER_BEARER_TOKEN=your_token
+OPENROUTER_API_KEY=your_key
+SECRET_KEY=your_secret_key
+```
+
+## 🚀 Performans Optimizasyonu
+
+### 1. Static Dosya Caching
+```python
+# app.py'de:
+@app.after_request
+def add_header(response):
+    if 'Cache-Control' not in response.headers:
+        response.headers['Cache-Control'] = 'public, max-age=31536000'
+    return response
+```
+
+### 2. Gzip Compression
+```python
+# PythonAnywhere otomatik olarak gzip compression sağlar
+# Ek konfigürasyon gerekmez
+```
+
+## 📊 Monitoring ve Debugging
+
+### 1. Error Logs
+```bash
+# PythonAnywhere Web sekmesinde:
+# Error log'ları kontrol edin
+# Server log'ları kontrol edin
+```
+
+### 2. Debug Mode
+```python
+# Production'da debug mode'u kapatın:
+DEBUG_MODE = False
 ```
 
 ## 🔄 Güncelleme Süreci
 
-Uygulamanızı güncellemek için:
-
+### 1. Kod Güncellemesi
 ```bash
-# Proje dizinine gidin
-cd ~/flask_tweet_app
-
-# Git'ten güncellemeleri çekin
-git pull origin main
-
-# Virtual environment'ı aktifleştirin
-source venv/bin/activate
-
-# Yeni dependencies varsa yükleyin
-pip install -r requirements.txt
-
-# Web app'i yeniden başlatın (PythonAnywhere dashboard'dan)
+# 1. Yeni dosyaları yükleyin
+# 2. Web app'i reload edin
+# 3. Error log'ları kontrol edin
 ```
 
-## 🌐 Domain ve SSL
-
-### Özel Domain (Ücretli hesap gerekli)
-1. Web sekmesinde **"Add a new web app"**
-2. Kendi domain'inizi girin
-3. DNS ayarlarını yapılandırın
-
-### SSL Sertifikası
-- PythonAnywhere otomatik olarak Let's Encrypt SSL sağlar
-- Özel domain için manuel SSL yapılandırması gerekebilir
-
-## 📊 Performans Optimizasyonu
-
-### 1. Caching
-```python
-# app.py'de cache ayarları
-from flask_caching import Cache
-
-cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+### 2. Paket Güncellemesi
+```bash
+# Bash Console'da:
+pip install --user --upgrade package_name
 ```
-
-### 2. Database Optimizasyonu
-- JSON dosyaları yerine SQLite kullanmayı düşünün
-- Büyük veriler için PostgreSQL (ücretli hesap)
-
-### 3. Background Tasks
-- PythonAnywhere'de scheduled tasks kullanın
-- Celery ile asenkron işlemler (ücretli hesap)
-
-## 🔒 Güvenlik
-
-### 1. Environment Variables
-- Hassas bilgileri asla kod'a yazmayın
-- .env dosyasını .gitignore'a ekleyin
-
-### 2. Secret Key
-- Güçlü bir SECRET_KEY kullanın
-- Production'da farklı key kullanın
-
-### 3. API Rate Limits
-- API çağrılarını sınırlayın
-- Error handling ekleyin
 
 ## 📞 Destek
 
 Sorun yaşarsanız:
+1. PythonAnywhere Error Log'larını kontrol edin
+2. Console'da test edin
+3. Dosya izinlerini kontrol edin
+4. Environment variables'ları kontrol edin
 
-1. **PythonAnywhere Help**: https://help.pythonanywhere.com/
-2. **Error Logs**: Web sekmesinde error log linkini kontrol edin
-3. **Forum**: PythonAnywhere forum'da soru sorun
-4. **GitHub Issues**: Proje repository'sinde issue açın
+## ✅ Kontrol Listesi
 
-## ✅ Kurulum Kontrol Listesi
-
-- [ ] GitHub'dan proje klonlandı
-- [ ] Virtual environment oluşturuldu
-- [ ] Dependencies yüklendi
-- [ ] .env dosyası oluşturuldu ve dolduruldu
-- [ ] Gerekli dizinler oluşturuldu
-- [ ] JSON dosyaları başlatıldı
-- [ ] Web app oluşturuldu
-- [ ] WSGI dosyası yapılandırıldı
-- [ ] Static files ayarlandı
-- [ ] Virtual environment path ayarlandı
-- [ ] Uygulama başarıyla yüklendi
-- [ ] Giriş sistemi test edildi
-- [ ] API'ler test edildi
-
-Kurulum tamamlandıktan sonra uygulamanız `https://umutins62.pythonanywhere.com` adresinde çalışacaktır! 
+- [ ] Tüm dosyalar doğru yüklendi
+- [ ] Python paketleri kuruldu
+- [ ] WSGI dosyası düzenlendi
+- [ ] Environment variables set edildi
+- [ ] Web app reload edildi
+- [ ] Error log'ları kontrol edildi
+- [ ] HTTPS çalışıyor
+- [ ] Static dosyalar yükleniyor
+- [ ] CDN fallback sistemi çalışıyor 

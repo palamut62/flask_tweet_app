@@ -3,38 +3,35 @@
 {% block title %}GitHub Repoları - AI Tweet Bot{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-    <!-- Başlık ve İstatistikler -->
-    <div class="bg-white rounded-xl shadow-lg p-6">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+<!-- Twitter Feed Style -->
+<div class="twitter-feed">
+    <!-- Header -->
+    <div class="feed-header">
+        <div class="d-flex align-items-center justify-content-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                    <i class="fab fa-github text-gray-800 mr-3"></i>
-                    GitHub Repoları
-                </h1>
-                <p class="text-gray-600">Trend GitHub repolarını keşfedin ve tweet olarak paylaşın</p>
+                <h1 class="feed-title">GitHub Repoları</h1>
+                <p class="feed-subtitle">Trend GitHub repolarını keşfedin ve tweet olarak paylaşın</p>
             </div>
-            
-            <!-- GitHub API Test Butonu -->
-            <div class="mt-4 lg:mt-0 flex flex-wrap gap-2">
-                <a href="{{ url_for('github_settings') }}" class="btn-secondary">
-                    <i class="fas fa-cog mr-2"></i>
-                    Ayarlar
+            <div>
+                <a href="{{ url_for('github_settings') }}" class="twitter-btn twitter-btn-secondary me-2">
+                    <i class="fas fa-cog"></i>
                 </a>
-                <button onclick="testGitHubAPI()" class="btn-secondary">
-                    <i class="fas fa-flask mr-2"></i>
-                    API Test
+                <button onclick="testGitHubAPI()" class="twitter-btn twitter-btn-secondary me-2">
+                    <i class="fas fa-flask"></i>
                 </button>
-                <button onclick="showFetchModal()" class="btn-primary">
-                    <i class="fas fa-download mr-2"></i>
-                    Repo Çek
+                <button onclick="showFetchModal()" class="twitter-btn twitter-btn-primary me-2">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
+                    <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
         </div>
+    </div>
         
         <!-- İstatistik Kartları -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-4 text-white">
+            <div class="tweet-card bg-gradient-to-r from-blue-500 to-blue-600 p-4 text-white">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-blue-100 text-sm">Toplam Repo</p>
@@ -44,7 +41,7 @@
                 </div>
             </div>
             
-            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-4 text-white">
+            <div class="tweet-card bg-gradient-to-r from-green-500 to-green-600 p-4 text-white">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-green-100 text-sm">Bu Hafta</p>
@@ -54,7 +51,7 @@
                 </div>
             </div>
             
-            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-4 text-white">
+            <div class="tweet-card bg-gradient-to-r from-purple-500 to-purple-600 p-4 text-white">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-purple-100 text-sm">Dil Çeşidi</p>
@@ -68,7 +65,7 @@
     
     <!-- Dil Dağılımı -->
     {% if stats.languages %}
-    <div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="tweet-card">
         <h2 class="text-xl font-bold text-gray-900 mb-4">
             <i class="fas fa-chart-pie text-purple-600 mr-2"></i>
             Programlama Dili Dağılımı
@@ -85,7 +82,7 @@
     {% endif %}
     
     <!-- Son GitHub Repoları -->
-    <div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="tweet-card">
         <h2 class="text-xl font-bold text-gray-900 mb-4">
             <i class="fas fa-history text-blue-600 mr-2"></i>
             Son Paylaşılan GitHub Repoları

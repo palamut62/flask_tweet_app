@@ -3,13 +3,87 @@
 {% block title %}Tweet Oluştur{% endblock %}
 
 {% block content %}
+<!-- Twitter Feed Style -->
+<div class="twitter-feed">
+    <!-- Header -->
+    <div class="feed-header">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="feed-title">Tweet Oluştur</h1>
+                <p class="feed-subtitle">Yeni tweet oluşturun ve AI ile optimize edin</p>
+            </div>
+            <div>
+                <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
+    <!-- Tweet Compose Box -->
+    <div class="tweet-compose">
+        <div class="compose-header">
+            <div class="compose-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="compose-content">
+                <textarea class="compose-textarea" placeholder="Ne oluyor?" maxlength="280" rows="3"></textarea>
+                
+                <!-- Compose Actions -->
+                <div class="compose-actions">
+                    <div class="compose-options">
+                        <button class="compose-option" title="Metin Tweet">
+                            <i class="fas fa-font"></i>
+                        </button>
+                        <button class="compose-option" title="Link Ekle">
+                            <i class="fas fa-link"></i>
+                        </button>
+                        <button class="compose-option" title="Resim Ekle">
+                            <i class="fas fa-image"></i>
+                        </button>
+                    </div>
+                    <div class="compose-submit">
+                        <span class="character-count">0/280</span>
+                        <button class="twitter-btn compose-tweet-btn" disabled>Tweet</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="flex justify-center items-center min-h-[60vh]">
-  <div class="w-full max-w-4xl bg-white/90 rounded-2xl shadow-2xl p-8 border border-blue-100">
-    <h2 class="text-2xl font-bold mb-2 text-center text-blue-700 flex items-center justify-center gap-2">
-      <i class="fas fa-pen-nib"></i> Tweet Oluştur
-    </h2>
+    <!-- Tweet Compose Box -->
+    <div class="tweet-compose">
+        <div class="compose-header">
+            <div class="compose-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="compose-content">
+                <textarea class="compose-textarea" placeholder="Ne oluyor?" maxlength="280" rows="3"></textarea>
+                
+                <!-- Compose Actions -->
+                <div class="compose-actions">
+                    <div class="compose-options">
+                        <button class="compose-option" title="Metin Tweet">
+                            <i class="fas fa-font"></i>
+                        </button>
+                        <button class="compose-option" title="Link Ekle">
+                            <i class="fas fa-link"></i>
+                        </button>
+                        <button class="compose-option" title="Resim Ekle">
+                            <i class="fas fa-image"></i>
+                        </button>
+                    </div>
+                    <div class="compose-submit">
+                        <span class="character-count">0/280</span>
+                        <button class="twitter-btn compose-tweet-btn" disabled>Tweet</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tweet Oluşturma Formu -->
+    <div class="tweet-card">
     
     <!-- Tweet Tema Seçimi -->
     <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -517,7 +591,7 @@ function previewImage(input) {
     
     // Dosya boyutu kontrolü (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('Dosya boyutu 5MB\'dan büyük olamaz!');
+      showToast('Dosya boyutu 5MB\'dan büyük olamaz!', 'error');
       input.value = '';
       return;
     }
@@ -616,10 +690,10 @@ function hideLoadingModal() {
 // Tweet kopyalama
 function copyTweet() {
   const tweetElement = document.querySelector('.bg-green-50 .bg-white p');
-  if (!tweetElement) {
-    alert('Kopyalanacak tweet bulunamadı!');
-    return;
-  }
+      if (!tweetElement) {
+      showToast('Kopyalanacak tweet bulunamadı!', 'error');
+      return;
+    }
   
   const tweetText = tweetElement.textContent.trim();
   
@@ -637,7 +711,7 @@ function copyTweet() {
       button.classList.add('bg-green-600', 'hover:bg-green-700');
     }, 2000);
   }).catch(function(err) {
-    alert('Kopyalama başarısız: ' + err);
+    showToast('Kopyalama başarısız: ' + err, 'error');
   });
 }
 
@@ -645,7 +719,7 @@ function copyTweet() {
 function editTweet() {
   const tweetElement = document.querySelector('.bg-green-50 .bg-white p');
   if (!tweetElement) {
-    alert('Düzenlenecek tweet bulunamadı!');
+    showToast('Düzenlenecek tweet bulunamadı!', 'error');
     return;
   }
   
@@ -659,12 +733,161 @@ function editTweet() {
   document.querySelector('h2').scrollIntoView({ behavior: 'smooth' });
 }
 
+// Modern Confirm Dialog Sistemi
+function showConfirmDialog(message, onConfirm, onCancel = null, title = 'Onay Gerekli', type = 'warning') {
+    // Mevcut dialog varsa kaldır
+    const existingDialog = document.getElementById('confirm-dialog');
+    if (existingDialog) {
+        existingDialog.remove();
+    }
+    
+    const dialog = document.createElement('div');
+    dialog.id = 'confirm-dialog';
+    dialog.className = 'confirm-dialog-overlay';
+    dialog.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.2s ease-out;
+    `;
+    
+    const icon = type === 'danger' ? 'exclamation-triangle' : 
+                 type === 'success' ? 'check-circle' : 
+                 type === 'info' ? 'info-circle' : 'question-circle';
+    
+    const iconColor = type === 'danger' ? '#dc3545' : 
+                      type === 'success' ? '#28a745' : 
+                      type === 'info' ? '#17a2b8' : '#ffc107';
+    
+    dialog.innerHTML = `
+        <div class="confirm-dialog" style="
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.3s ease-out;
+        ">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <i class="fas fa-${icon}" style="font-size: 48px; color: ${iconColor}; margin-bottom: 16px;"></i>
+                <h3 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">${title}</h3>
+            </div>
+            <div style="
+                color: #666;
+                line-height: 1.5;
+                margin-bottom: 24px;
+                text-align: center;
+                white-space: pre-line;
+            ">${message}</div>
+            <div style="
+                display: flex;
+                gap: 12px;
+                justify-content: center;
+            ">
+                <button id="confirm-cancel" style="
+                    padding: 10px 20px;
+                    border: 1px solid #ddd;
+                    background: white;
+                    color: #666;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    transition: all 0.2s;
+                " onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+                    İptal
+                </button>
+                <button id="confirm-ok" style="
+                    padding: 10px 20px;
+                    border: none;
+                    background: ${iconColor};
+                    color: white;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 500;
+                    transition: all 0.2s;
+                " onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                    Onayla
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(dialog);
+    
+    // Event listeners
+    const cancelBtn = dialog.querySelector('#confirm-cancel');
+    const okBtn = dialog.querySelector('#confirm-ok');
+    
+    const closeDialog = () => {
+        dialog.style.animation = 'fadeOut 0.2s ease-in';
+        setTimeout(() => dialog.remove(), 200);
+    };
+    
+    cancelBtn.addEventListener('click', () => {
+        closeDialog();
+        if (onCancel) onCancel();
+    });
+    
+    okBtn.addEventListener('click', () => {
+        closeDialog();
+        if (onConfirm) onConfirm();
+    });
+    
+    // ESC tuşu ile kapatma
+    const handleEsc = (e) => {
+        if (e.key === 'Escape') {
+            document.removeEventListener('keydown', handleEsc);
+            closeDialog();
+            if (onCancel) onCancel();
+        }
+    };
+    document.addEventListener('keydown', handleEsc);
+    
+    // Dışarı tıklayarak kapatma
+    dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+            closeDialog();
+            if (onCancel) onCancel();
+        }
+    });
+}
+
+// CSS Animasyonları
+const confirmDialogStyle = document.createElement('style');
+confirmDialogStyle.textContent = `
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+    @keyframes slideIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+`;
+document.head.appendChild(confirmDialogStyle);
+
 // Farklı varyasyon oluştur
 function generateVariation() {
-  if (confirm('Aynı içerik için farklı bir tweet varyasyonu oluşturmak istiyor musunuz?')) {
-    // Form'u tekrar gönder
-    document.getElementById('tweet-form').submit();
-  }
+  showConfirmDialog(
+    'Aynı içerik için farklı bir tweet varyasyonu oluşturmak istiyor musunuz?',
+    () => document.getElementById('tweet-form').submit(),
+    null,
+    'Varyasyon Oluştur',
+    'info'
+  );
 }
 
 // Sayfa yüklendiğinde loading modal'ı gizle
@@ -679,76 +902,125 @@ window.addEventListener('load', function() {
 // Manuel tweet'i paylaş
 function postManualTweet(tweetId) {
   if (!tweetId) {
-    alert('Tweet ID bulunamadı!');
+    showToast('Tweet ID bulunamadı!', 'error');
     return;
   }
   
-  if (!confirm('Bu tweet\'i API ile paylaşmak istediğinizden emin misiniz?')) {
-    return;
-  }
-  
-  // Loading göster
-  const button = event.target.closest('button');
-  const originalContent = button.innerHTML;
-  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Paylaşılıyor...';
-  button.disabled = true;
-  
-  fetch(`/api/manual_tweets/${tweetId}/post`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      alert('✅ Tweet başarıyla paylaşıldı!');
+  showConfirmDialog(
+    'Bu tweet\'i API ile paylaşmak istediğinizden emin misiniz?',
+    () => {
+      // Loading göster
+      const button = event.target.closest('button');
+      const originalContent = button.innerHTML;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Paylaşılıyor...';
+      button.disabled = true;
       
-      // Sayfayı yenile veya elementi güncelle
-      if (data.tweet_url) {
-        window.open(data.tweet_url, '_blank');
-      }
-      
-      // Dinamik güncelleme - sayfa yenilemesi yok
-      setTimeout(() => {
-        // Tweet listesini güncelle
-        if (typeof refreshPendingTweets === 'function') {
-          refreshPendingTweets();
+      fetch(`/api/manual_tweets/${tweetId}/post`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         }
-        // Sayfa ana sayfaya yönlendir
-        window.location.href = '/';
-      }, 1000);
-      
-    } else {
-      alert('❌ Hata: ' + data.error);
-      
-      // Rate limit durumunda özel mesaj
-      if (data.rate_limited) {
-        alert('⏰ Twitter API rate limit\'e takıldı. Lütfen daha sonra tekrar deneyin.');
-      }
-    }
-  })
-  .catch(error => {
-    console.error('Tweet paylaşım hatası:', error);
-    alert('❌ Bir hata oluştu: ' + error.message);
-  })
-  .finally(() => {
-    // Button'u eski haline getir
-    button.innerHTML = originalContent;
-    button.disabled = false;
-  });
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showToast('✅ Tweet başarıyla paylaşıldı!', 'success');
+          
+          // Sayfayı yenile veya elementi güncelle
+          if (data.tweet_url) {
+            window.open(data.tweet_url, '_blank');
+          }
+          
+          // Dinamik güncelleme - sayfa yenilemesi yok
+          setTimeout(() => {
+            // Tweet listesini güncelle
+            if (typeof refreshPendingTweets === 'function') {
+              refreshPendingTweets();
+            }
+            // Sayfa ana sayfaya yönlendir
+            window.location.href = '/';
+          }, 1000);
+          
+        } else {
+          showToast('❌ Hata: ' + data.error, 'error');
+          
+          // Rate limit durumunda özel mesaj
+          if (data.rate_limited) {
+            showToast('⏰ Twitter API rate limit\'e takıldı. Lütfen daha sonra tekrar deneyin.', 'warning');
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Tweet paylaşım hatası:', error);
+        showToast('❌ Bir hata oluştu: ' + error.message, 'error');
+      })
+      .finally(() => {
+        // Button'u eski haline getir
+        button.innerHTML = originalContent;
+        button.disabled = false;
+      });
+    },
+    null,
+    'Tweet Paylaşımı',
+    'warning'
+  );
 }
 
 // Manuel tweet'i sil
 function deleteManualTweet(tweetId) {
   if (!tweetId) {
-    alert('Tweet ID bulunamadı!');
+    showToast('Tweet ID bulunamadı!', 'error');
     return;
   }
   
-  if (!confirm('Bu tweet\'i silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) {
-    return;
-  }
+  showConfirmDialog(
+    'Bu tweet\'i silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+    () => {
+      // Loading göster
+      const button = event.target.closest('button');
+      const originalContent = button.innerHTML;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Siliniyor...';
+      button.disabled = true;
+      
+      fetch(`/api/manual_tweets/${tweetId}/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showToast('✅ Tweet başarıyla silindi!', 'success');
+          
+          // Sayfayı yenile veya elementi kaldır
+          setTimeout(() => {
+            if (typeof refreshPendingTweets === 'function') {
+              refreshPendingTweets();
+            } else {
+              location.reload();
+            }
+          }, 1000);
+          
+        } else {
+          showToast('❌ Hata: ' + data.error, 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Tweet silme hatası:', error);
+        showToast('❌ Bir hata oluştu: ' + error.message, 'error');
+      })
+      .finally(() => {
+        // Button'u eski haline getir
+        button.innerHTML = originalContent;
+        button.disabled = false;
+      });
+    },
+    null,
+    'Tweet Silme',
+    'danger'
+  );
+  return;
   
   // Loading göster
   const button = event.target.closest('button');
@@ -765,7 +1037,7 @@ function deleteManualTweet(tweetId) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      alert('✅ Tweet başarıyla silindi!');
+      showToast('✅ Tweet başarıyla silindi!', 'success');
       
       // Elementi DOM'dan kaldır
       const tweetElement = button.closest('.bg-white');
@@ -780,12 +1052,12 @@ function deleteManualTweet(tweetId) {
       }
       
     } else {
-      alert('❌ Hata: ' + data.error);
+      showToast('❌ Hata: ' + data.error, 'error');
     }
   })
   .catch(error => {
     console.error('Tweet silme hatası:', error);
-    alert('❌ Bir hata oluştu: ' + error.message);
+    showToast('❌ Bir hata oluştu: ' + error.message, 'error');
   })
   .finally(() => {
     // Button'u eski haline getir
@@ -797,7 +1069,7 @@ function deleteManualTweet(tweetId) {
 // Tweet detaylarını görüntüle
 function viewTweetDetails(tweetId) {
   if (!tweetId) {
-    alert('Tweet ID bulunamadı!');
+    showToast('Tweet ID bulunamadı!', 'error');
     return;
   }
   
@@ -811,12 +1083,12 @@ function viewTweetDetails(tweetId) {
       showTweetDetailsModal(tweet);
       
     } else {
-      alert('❌ Tweet detayları alınamadı: ' + data.error);
+      showToast('❌ Tweet detayları alınamadı: ' + data.error, 'error');
     }
   })
   .catch(error => {
     console.error('Tweet detay hatası:', error);
-    alert('❌ Bir hata oluştu: ' + error.message);
+    showToast('❌ Bir hata oluştu: ' + error.message, 'error');
   });
 }
 
@@ -960,12 +1232,12 @@ function loadAllManualTweets() {
     if (data.success) {
       showAllTweetsModal(data.tweets, data.stats);
     } else {
-      alert('❌ Tweetler yüklenemedi: ' + data.error);
+      showToast('❌ Tweetler yüklenemedi: ' + data.error, 'error');
     }
   })
   .catch(error => {
     console.error('Tweet yükleme hatası:', error);
-    alert('❌ Bir hata oluştu: ' + error.message);
+    showToast('❌ Bir hata oluştu: ' + error.message, 'error');
   });
 }
 
@@ -1075,12 +1347,12 @@ function confirmManualPost(tweetId) {
     if (data.success) {
       showManualPostConfirmModal(data.tweet);
     } else {
-      alert('❌ Tweet bilgileri alınamadı: ' + data.error);
+      showToast('❌ Tweet bilgileri alınamadı: ' + data.error, 'error');
     }
   })
   .catch(error => {
     console.error('Tweet bilgileri alma hatası:', error);
-    alert('❌ Bir hata oluştu: ' + error.message);
+    showToast('❌ Bir hata oluştu: ' + error.message, 'error');
   });
 }
 
@@ -1143,7 +1415,7 @@ function closeManualPostConfirmModal() {
 
 function executeManualPost() {
   if (!currentTweetIdToPost) {
-    alert('❌ Tweet ID bulunamadı!');
+    showToast('❌ Tweet ID bulunamadı!', 'error');
     return;
   }
   
@@ -1162,12 +1434,12 @@ function executeManualPost() {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      alert('✅ Tweet başarıyla paylaşıldı!');
+      showToast('✅ Tweet başarıyla paylaşıldı!', 'success');
       closeManualPostConfirmModal();
       // Sayfayı yenile
       window.location.reload();
     } else {
-      alert('❌ Tweet paylaşılamadı: ' + data.error);
+      showToast('❌ Tweet paylaşılamadı: ' + data.error, 'error');
       if (button) {
         button.innerHTML = '<i class="fab fa-twitter"></i> Paylaş';
         button.disabled = false;
@@ -1176,7 +1448,7 @@ function executeManualPost() {
   })
   .catch(error => {
     console.error('Tweet paylaşım hatası:', error);
-    alert('❌ Bir hata oluştu: ' + error.message);
+    showToast('❌ Bir hata oluştu: ' + error.message, 'error');
     if (button) {
       button.innerHTML = '<i class="fab fa-twitter"></i> Paylaş';
       button.disabled = false;
@@ -1228,7 +1500,7 @@ function manualPostTweetFromCreate(tweetId) {
           
           // Kullanıcıya bilgi ver
           setTimeout(() => {
-            alert('✅ Tweet manuel olarak paylaşıldı ve kaydedildi!');
+            showToast('✅ Tweet manuel olarak paylaşıldı ve kaydedildi!', 'success');
           }, 500);
           
         } else {
@@ -1237,7 +1509,7 @@ function manualPostTweetFromCreate(tweetId) {
             tweetElement.style.opacity = '1';
             tweetElement.style.pointerEvents = 'auto';
           }
-          alert('❌ Manuel paylaşım hatası: ' + manualData.error);
+          showToast('❌ Manuel paylaşım hatası: ' + manualData.error, 'error');
         }
       })
       .catch(error => {
@@ -1247,7 +1519,7 @@ function manualPostTweetFromCreate(tweetId) {
           tweetElement.style.opacity = '1';
           tweetElement.style.pointerEvents = 'auto';
         }
-        alert('❌ Manuel paylaşım sırasında bir hata oluştu!');
+        showToast('❌ Manuel paylaşım sırasında bir hata oluştu!', 'error');
       });
       
     } else {
@@ -1256,7 +1528,7 @@ function manualPostTweetFromCreate(tweetId) {
         tweetElement.style.opacity = '1';
         tweetElement.style.pointerEvents = 'auto';
       }
-      alert('❌ Tweet bilgileri alınamadı: ' + data.error);
+      showToast('❌ Tweet bilgileri alınamadı: ' + data.error, 'error');
     }
   })
   .catch(error => {
@@ -1266,9 +1538,108 @@ function manualPostTweetFromCreate(tweetId) {
       tweetElement.style.opacity = '1';
       tweetElement.style.pointerEvents = 'auto';
     }
-    alert('❌ Bir hata oluştu: ' + error.message);
+    showToast('❌ Bir hata oluştu: ' + error.message, 'error');
   });
 }
+
+// Toast notification system
+function showToast(message, type = 'info') {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        `;
+        document.body.appendChild(toastContainer);
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    const icon = getToastIcon(type);
+    const title = getToastTitle(type);
+    
+    toast.className = `toast toast-${type}`;
+    toast.style.cssText = `
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        animation: slideIn 0.3s ease-out;
+        max-width: 400px;
+    `;
+    
+    toast.innerHTML = `
+        <div style="flex-shrink: 0; font-size: 20px;">${icon}</div>
+        <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 4px; color: #374151;">${title}</div>
+            <div style="color: #6b7280; font-size: 14px;">${message}</div>
+        </div>
+        <button onclick="this.parentElement.remove()" style="
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+            margin-left: 8px;
+        ">&times;</button>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 5000);
+}
+
+function getToastIcon(type) {
+    const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+    };
+    return icons[type] || icons.info;
+}
+
+function getToastTitle(type) {
+    const titles = {
+        success: 'Başarılı',
+        error: 'Hata',
+        warning: 'Uyarı',
+        info: 'Bilgi'
+    };
+    return titles[type] || titles.info;
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
 
 // ESC tuşu ile modal'ları kapat
 document.addEventListener('keydown', function(event) {
