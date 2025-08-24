@@ -19,13 +19,25 @@
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     
-    <!-- Bootstrap CSS - CDN Fallback Sistemi -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css';">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://unpkg.com/bootstrap@5.3.0/dist/css/bootstrap.min.css';">
+    <!-- Bootstrap CSS - PythonAnywhere Optimized -->
+    {% if is_pythonanywhere %}
+        <!-- PythonAnywhere için local fallback -->
+        <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    {% else %}
+        <!-- CDN Fallback Sistemi -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css';">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://unpkg.com/bootstrap@5.3.0/dist/css/bootstrap.min.css';">
+    {% endif %}
     
-    <!-- Font Awesome - CDN Fallback Sistemi -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css';">
-    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://unpkg.com/@fortawesome/fontawesome-free@6.4.0/css/all.min.css';">
+    <!-- Font Awesome - PythonAnywhere Optimized -->
+    {% if is_pythonanywhere %}
+        <!-- PythonAnywhere için local fallback -->
+        <link href="{{ url_for('static', filename='css/all.min.css') }}" rel="stylesheet">
+    {% else %}
+        <!-- CDN Fallback Sistemi -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css';">
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://unpkg.com/@fortawesome/fontawesome-free@6.4.0/css/all.min.css';">
+    {% endif %}
     
     <!-- Twitter Style CSS -->
     <link href="{{ url_for('static', filename='css/twitter-style.css') }}" rel="stylesheet">
@@ -865,9 +877,15 @@
         {% endwith %}
     </div>
 
-    <!-- Bootstrap JS - CDN Fallback Sistemi -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js';"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';"></script>
+    <!-- Bootstrap JS - PythonAnywhere Optimized -->
+    {% if is_pythonanywhere %}
+        <!-- PythonAnywhere için local fallback -->
+        <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    {% else %}
+        <!-- CDN Fallback Sistemi -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js';"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';"></script>
+    {% endif %}
     
     <!-- Bootstrap Fallback JavaScript -->
     <script>
