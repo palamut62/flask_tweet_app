@@ -19,12 +19,24 @@ cd flask_tweet_app
 pip install --user -r requirements.txt
 ```
 
-### 4. **Static Dosyaları İndirme**
+### 4. **Otomatik Kurulum Scripti Çalıştırma**
+```bash
+python setup_pythonanywhere.py
+```
+
+Bu script otomatik olarak:
+- Gerekli paketleri yükler
+- Static dosyaları indirir
+- Environment dosyası oluşturur
+- Test scripti oluşturur
+- Tüm kontrolleri yapar
+
+### 5. **Manuel Static Dosyaları İndirme (Alternatif)**
 ```bash
 python download_static_files.py
 ```
 
-### 5. **Environment Variables Ayarlama**
+### 6. **Environment Variables Ayarlama**
 PythonAnywhere konsolunda:
 ```bash
 # .env dosyası oluştur
@@ -43,7 +55,7 @@ TELEGRAM_BOT_TOKEN=your-telegram-bot-token
 USE_LOCAL_ASSETS=true
 ```
 
-### 6. **WSGI Dosyası Ayarlama**
+### 7. **WSGI Dosyası Ayarlama**
 PythonAnywhere Web sekmesinde:
 - **Source code**: `/home/yourusername/flask_tweet_app`
 - **Working directory**: `/home/yourusername/flask_tweet_app`
@@ -69,12 +81,12 @@ if __name__ == "__main__":
     application.run()
 ```
 
-### 7. **Static Files Ayarlama**
+### 8. **Static Files Ayarlama**
 PythonAnywhere Web sekmesinde:
 - **URL**: `/static/`
 - **Directory**: `/home/yourusername/flask_tweet_app/static`
 
-### 8. **Uygulamayı Başlatma**
+### 9. **Uygulamayı Başlatma**
 - **Reload** butonuna tıklayın
 - Uygulama `https://yourusername.pythonanywhere.com` adresinde çalışacak
 
@@ -116,8 +128,8 @@ flask_tweet_app/
 
 ## ✅ Kontrol Listesi
 - [ ] Git repository klonlandı
-- [ ] Requirements yüklendi
-- [ ] Static dosyalar indirildi
+- [ ] Otomatik kurulum scripti çalıştırıldı (`python setup_pythonanywhere.py`)
+- [ ] Test scripti başarılı (`python test_pythonanywhere.py`)
 - [ ] Environment variables ayarlandı
 - [ ] WSGI dosyası düzenlendi
 - [ ] Static files mapping yapıldı
