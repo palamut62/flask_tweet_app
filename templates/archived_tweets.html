@@ -2,6 +2,73 @@
 
 {% block title %}Arşivlenen Tweetler{% endblock %}
 
+<!-- Haber kaynağı gösterimi için makro -->
+{% macro render_source_badge(source, source_id, url, badge_type='primary') %}
+    {% if source %}
+        {% set source_class = 'source-badge-' + badge_type %}
+        {% if 'techcrunch' in source.lower() %}
+            {% set source_class = 'source-techcrunch' %}
+        {% elif 'venturebeat' in source.lower() %}
+            {% set source_class = 'source-venturebeat' %}
+        {% elif 'wired' in source.lower() %}
+            {% set source_class = 'source-wired' %}
+        {% elif 'reddit' in source.lower() %}
+            {% set source_class = 'source-reddit' %}
+        {% elif 'economist' in source.lower() %}
+            {% set source_class = 'source-economist' %}
+        {% elif 'atlantic' in source.lower() %}
+            {% set source_class = 'source-atlantic' %}
+        {% elif 'guardian' in source.lower() %}
+            {% set source_class = 'source-guardian' %}
+        {% elif 'apple' in source.lower() %}
+            {% set source_class = 'source-apple' %}
+        {% elif 'hacker news' in source.lower() %}
+            {% set source_class = 'source-hackernews' %}
+        {% endif %}
+        
+        <div class="mb-4">
+            <div class="source-badge {{ source_class }}">
+                <i class="fas fa-newspaper source-icon"></i>
+                <span>Kaynak:</span>
+                <span class="source-name">{{ source }}</span>
+                {% if source_id %}
+                <span class="source-id">{{ source_id }}</span>
+                {% endif %}
+            </div>
+        </div>
+    {% elif url %}
+        <!-- Fallback: URL'den kaynak adını çıkar -->
+        {% set fallback_source = '' %}
+        {% set fallback_class = 'source-badge-fallback' %}
+        
+        {% if 'techcrunch.com' in url %}
+            {% set fallback_source = 'TechCrunch' %}
+            {% set fallback_class = 'source-techcrunch' %}
+        {% elif 'venturebeat.com' in url %}
+            {% set fallback_source = 'VentureBeat' %}
+            {% set fallback_class = 'source-venturebeat' %}
+        {% elif 'wired.com' in url %}
+            {% set fallback_source = 'Wired' %}
+            {% set fallback_class = 'source-wired' %}
+        {% elif 'reddit.com' in url %}
+            {% set fallback_source = 'Reddit' %}
+            {% set fallback_class = 'source-reddit' %}
+        {% elif 'github.com' in url %}
+            {% set fallback_source = 'GitHub' %}
+            {% set fallback_class = 'source-badge-dark' %}
+        {% endif %}
+        
+        {% if fallback_source %}
+        <div class="mb-4">
+            <div class="source-badge {{ fallback_class }}">
+                <i class="fas fa-link source-icon"></i>
+                <span>{{ fallback_source }}</span>
+            </div>
+        </div>
+        {% endif %}
+    {% endif %}
+{% endmacro %}
+
 {% block content %}
 <!-- Twitter Feed Style -->
 <div class="twitter-feed">

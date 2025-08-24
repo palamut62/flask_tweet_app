@@ -693,6 +693,13 @@
                             <span class="twitter-nav-text">Silinmiş Tweetler</span>
                         </a>
                         
+                        <a class="twitter-nav-item {% if request.endpoint == 'archived_tweets' %}active{% endif %}" href="{{ url_for('archived_tweets') }}">
+                            <div class="twitter-nav-icon">
+                                <i class="fas fa-archive"></i>
+                            </div>
+                            <span class="twitter-nav-text">Arşivlenen Tweetler</span>
+                        </a>
+                        
                         <a class="twitter-nav-item {% if request.endpoint == 'rejected_articles' %}active{% endif %}" href="{{ url_for('rejected_articles') }}">
                             <div class="twitter-nav-icon">
                                 <i class="fas fa-ban"></i>

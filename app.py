@@ -6777,6 +6777,63 @@ def restore_archived_tweet_api():
         terminal_log(f"❌ Tweet geri yükleme hatası: {e}", "error")
         return jsonify({"success": False, "error": str(e)})
 
+@app.route('/api/bulk_archive_tweets', methods=['POST'])
+@login_required
+def bulk_archive_tweets_api():
+    """Toplu tweet arşivleme endpoint'i"""
+    try:
+        data = request.get_json()
+        tweet_ids = data.get('tweet_ids', [])
+        archive_reason = data.get('archive_reason', 'bulk_archive')
+        
+        if not tweet_ids:
+            return jsonify({"success": False, "error": "Tweet ID listesi gerekli"})
+        
+        if len(tweet_ids) > 1000:  # Güvenlik sınırı
+            return jsonify({"success": False, "error": "Maksimum 1000 tweet arşivlenebilir"})
+        
+        # Paylaşılan tweet'leri yükle
+        articles = load_json("posted_articles.json", [])
+        
+        # Arşivlenecek tweet'leri bul
+        tweets_to_archive = []
+        for article in articles:
+            if (str(article.get('hash', '')) in tweet_ids or 
+                str(article.get('id', '')) in tweet_ids or
+                str(article.get('tweet_id', '')) in tweet_ids):
+                tweets_to_archive.append(article)
+        
+        if not tweets_to_archive:
+            return jsonify({"success": False, "error": "Arşivlenecek tweet bulunamadı"})
+        
+        # Arşivleme bilgilerini ekle
+        for tweet in tweets_to_archive:
+            tweet['archived'] = True
+            tweet['archived_at'] = datetime.now().isoformat()
+            tweet['archive_reason'] = archive_reason
+        
+        # Arşivlenen tweet'leri ayrı dosyaya kaydet
+        archived_articles = load_json("archived_articles.json", [])
+        archived_articles.extend(tweets_to_archive)
+        save_json("archived_articles.json", archived_articles)
+        
+        # Ana listeden kaldır
+        articles = [article for article in articles if article not in tweets_to_archive]
+        save_json("posted_articles.json", articles)
+        
+        terminal_log(f"✅ {len(tweets_to_archive)} tweet toplu arşivlendi", "info")
+        
+        return jsonify({
+            "success": True,
+            "message": f"{len(tweets_to_archive)} tweet başarıyla arşivlendi",
+            "archived_count": len(tweets_to_archive),
+            "archived_tweets": tweets_to_archive
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Toplu tweet arşivleme hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
 if __name__ == '__main__':
     # Arka plan zamanlayıcısını başlat
     start_background_scheduler()

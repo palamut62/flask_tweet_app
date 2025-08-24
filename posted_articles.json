@@ -315,19 +315,6 @@
     "is_posted": false
   },
   {
-    "title": "Claude for Financial Services",
-    "url": "https://www.anthropic.com/news/claude-for-financial-services",
-    "content": "🎯⚡ Claude now empowers finance! Tailored AI understands complex data, enabling faster insights & smarter decisions. #AI #Tech #Claude #FinTech\n\n🔗 https://www.anthropic.com/news/claude-for-financial-services",
-    "source": "",
-    "source_type": "news",
-    "published_date": "2025-07-16T04:05:39.414317",
-    "posted_date": "2025-07-16T04:14:19.889010",
-    "hash": "ecaf28f7d2cdc746d11cc6a8bd01290d",
-    "tweet_id": "1945336162890956989",
-    "tweet_url": "",
-    "is_posted": true
-  },
-  {
     "title": "Google Discover adds AI summaries, threatening publishers with further traffic declines",
     "url": "https://techcrunch.com/2025/07/15/google-discover-adds-ai-summaries-threatening-publishers-with-further-traffic-declines/",
     "content": "📊📈 Google Discover now summarizes news with AI, citing multiple sources. Get key info faster, but publishers face... #AI #Tech #GoogleDiscover #AISummaries\n\n🔗 https://techcrunch.com/2025/07/15/google-discover-adds-ai-summaries-threatening-publishers-with-further-traffic-declines/",
@@ -682,19 +669,6 @@
     "is_posted": true
   },
   {
-    "title": "Mistral’s Le Chat chatbot gets a productivity push with new ‘deep research’ mode",
-    "url": "https://techcrunch.com/2025/07/17/mistrals-le-chat-chatbot-gets-a-productivity-push-with-new-deep-research-mode/",
-    "content": "📊⚡ Mistral's Le Chat chatbot gains deep research mode! It autonomously plans, searches, and synthesizes info, boosting productivity... #AI #Tech #Chatbot #MistralAI\n\n🔗 https://techcrunch.com/2025/07/17/mistrals-le-chat-chatbot-gets-a-productivity-push-with-new-deep-research-mode/",
-    "source": "",
-    "source_type": "news",
-    "published_date": "2025-07-17T17:48:56.394789",
-    "posted_date": "2025-07-17T17:51:44.197842",
-    "hash": "b9e47dd9fb9f79e63054c97900c5c1bb",
-    "tweet_id": "1945904259104399361",
-    "tweet_url": "",
-    "is_posted": true
-  },
-  {
     "title": "OpenAI launches a general purpose agent in ChatGPT",
     "url": "https://techcrunch.com/2025/07/17/openai-launches-a-general-purpose-agent-in-chatgpt/",
     "content": "⚡💡 OpenAI's ChatGPT now navigates the web, synthesizes info, and executes code – all-in-one! This unlocks powerful, general-purpose AI agents. #AI #Tech #ChatGPT #AIagent\n\n🔗 https://techcrunch.com/2025/07/17/openai-launches-a-general-purpose-agent-in-chatgpt/",
@@ -944,19 +918,6 @@
     "is_posted": true
   },
   {
-    "title": "Windsurf CEO opens up about ‘very bleak’ mood before Cognition deal",
-    "url": "https://techcrunch.com/2025/07/19/windsurf-ceo-opens-up-about-very-bleak-mood-before-cognition-deal/",
-    "content": "📈📊 Windsurf CEO reveals near collapse before Cognition deal. Licensing tech & hiring key personnel marks a reverse acquihire trend in AI. #AI #Tech #Acquisition #Startups\n\n🔗 https://techcrunch.com/2025/07/19/windsurf-ceo-opens-up-about-very-bleak-mood-before-cognition-deal/",
-    "source": "",
-    "source_type": "news",
-    "published_date": "2025-07-20T04:49:24.378911",
-    "posted_date": "2025-07-20T05:01:53.926346",
-    "hash": "3c167bbc9941a39f1613f43cb6611a7d",
-    "tweet_id": "1946797686436336037",
-    "tweet_url": "",
-    "is_posted": true
-  },
-  {
     "title": "Death by AI",
     "url": "https://davebarry.substack.com/p/death-by-ai",
     "content": "💡📈 AI identifies cancerous lung nodules with 90% accuracy, exceeding human radiologists in early detection. Faster diagnosis means earlier treatment! #AI #Tech #ArtificialIntelligence #Ethics\n\n🔗 https://davebarry.substack.com/p/death-by-ai",
@@ -1058,19 +1019,6 @@
     "posted_date": "2025-07-21T14:42:58.263499",
     "hash": "f81629760ea6db81160ec4584bf70eee",
     "tweet_id": "1947306305028288677",
-    "tweet_url": "",
-    "is_posted": true
-  },
-  {
-    "title": "Dia launches a skill gallery, Perplexity to add tasks to Comet",
-    "url": "https://techcrunch.com/2025/07/21/dia-launches-a-skill-gallery-perplexity-to-add-tasks-to-comet/",
-    "content": "🔍📈 AI browsers evolve! Dia launches a skill gallery & Perplexity adds tasks to Comet. Reusable AI skills streamline complex commands, saving ti... #AI #Tech #AIBrowsers #DiaBrowser\n\n🔗 https://techcrunch.com/2025/07/21/dia-launches-a-skill-gallery-perplexity-to-add-tasks-to-comet/",
-    "source": "",
-    "source_type": "news",
-    "published_date": "2025-07-21T14:41:35.412184",
-    "posted_date": "2025-07-21T14:43:05.741989",
-    "hash": "80a752bca755369b3816d24516013c68",
-    "tweet_id": "1947306335894134896",
     "tweet_url": "",
     "is_posted": true
   },
@@ -1345,19 +1293,6 @@
     "posted_date": "2025-07-23T04:59:24.186821",
     "hash": "235aa68342dc36a82a8c08e32a2bb8e7",
     "tweet_id": "1947884222246470017",
-    "tweet_url": "",
-    "is_posted": true
-  },
-  {
-    "title": "Amazon acquires Bee, the AI wearable that records everything you say",
-    "url": "https://techcrunch.com/2025/07/22/amazon-acquires-bee-the-ai-wearable-that-records-everything-you-say/",
-    "content": "🎯💡 Amazon acquires Bee! The AI wearable records everything, auto-generating reminders. Never forget anything again. #AI #Tech #AIWearable #AmazonAcquisition\n\n🔗 https://techcrunch.com/2025/07/22/amazon-acquires-bee-the-ai-wearable-that-records-everything-you-say/",
-    "source": "",
-    "source_type": "news",
-    "published_date": "2025-07-23T04:57:52.520250",
-    "posted_date": "2025-07-23T04:59:30.646089",
-    "hash": "d6aea974cc0ea050eb3429ec6cba25eb",
-    "tweet_id": "1947884247261258036",
     "tweet_url": "",
     "is_posted": true
   },
@@ -2160,19 +2095,6 @@
     "is_posted": true
   },
   {
-    "title": "Anthropic unveils new rate limits to curb Claude Code power users",
-    "url": "https://techcrunch.com/2025/07/28/anthropic-unveils-new-rate-limits-to-curb-claude-code-power-users/",
-    "content": "🎯📈 Anthropic now limits Claude Pro/Max weekly usage. This prevents 24/7 access & account sharing, ensuring fairer resource allocation for all ... #AI #Tech #Anthropic #ClaudeAI\n\n🔗 https://techcrunch.com/2025/07/28/anthropic-unveils-new-rate-limits-to-curb-claude-code-power-users/",
-    "source": "",
-    "source_type": "news",
-    "published_date": "2025-07-29T07:40:35.978036",
-    "posted_date": "2025-07-29T07:41:54.519012",
-    "hash": "48c168e1fad50bdfa3ac86ced0fed16f",
-    "tweet_id": "1950099445355249848",
-    "tweet_url": "",
-    "is_posted": true
-  },
-  {
     "title": "Microsoft Edge is now an AI browser with launch of ‘Copilot Mode’",
     "url": "https://techcrunch.com/2025/07/28/microsoft-edge-is-now-an-ai-browser-with-launch-of-copilot-mode/",
     "content": "⚡🔍 Microsoft Edge transforms into an AI browser with ‘Copilot Mode,’ integrating real-time research assistance and predictive tools to stre... #AI #Tech #MicrosoftEdge #AICopilot\n\n🔗 https://techcrunch.com/2025/07/28/microsoft-edge-is-now-an-ai-browser-with-launch-of-copilot-mode/",
@@ -2474,19 +2396,6 @@
     "post_method": "manuel",
     "tweet_text": "📊💡 AgentGuard introduces AgentGuard automatically stops AI agents from overspending by prematurely killing processes exhibiti #AI #Tech #ArtificialIntelligence #MachineLearning\n\n🔗 https://github.com/dipampaul17/AgentGuard",
     "manual_posted_at": "2025-07-31T09:52:22.140916"
-  },
-  {
-    "title": "Apple plans to ‘significantly’ grow AI investments, Cook says",
-    "url": "https://techcrunch.com/2025/07/31/apple-plans-to-significantly-grow-ai-investments-cook-says/",
-    "content": "🔍📈 Apple boosts AI investment, shifting resources to deeply integrate AI. Expect smarter features and innovation coming soon. #AI #Tech #Apple #TimCook\n\n🔗 https://techcrunch.com/2025/07/31/apple-plans-to-significantly-grow-ai-investments-cook-says/",
-    "source": "",
-    "source_type": "news",
-    "published_date": "2025-08-01T06:15:35.315054",
-    "posted_date": "2025-08-01T06:17:29.065828",
-    "hash": "bc2734e52bd6ac6d300ba02157b8f54f",
-    "tweet_id": "1951165356476661823",
-    "tweet_url": "",
-    "is_posted": true
   },
   {
     "title": "Reddit revenue soars as it bets on AI and advertising",
@@ -3248,18 +3157,6 @@
     "tweet_url": "https://x.com/i/status/1953672022904525122",
     "manual_post": false,
     "post_method": "api"
-  },
-  {
-    "title": "High costs and thin margins threatening AI coding startups",
-    "url": "https://techcrunch.com/2025/08/07/the-high-costs-and-thin-margins-threatening-ai-coding-startups/",
-    "hash": "900c7fdd7ead035d8fb19c8038eafd9a",
-    "posted_date": "2025-08-08T04:21:01.424069",
-    "tweet_id": "1",
-    "tweet_url": "",
-    "manual_post": true,
-    "post_method": "manuel",
-    "tweet_text": "📈📊 Windsurf introduces AI coding assistants like Windsurf achieve human-level pair-programming quality, but the real breakt #AI #Tech #AICoding #Startups\n\n🔗 https://techcrunch.com/2025/08/07/the-high-costs-and-thin-margins-threatening-ai-coding-startups/",
-    "manual_posted_at": "2025-08-08T04:21:01.413808"
   },
   {
     "title": "OpenAI’s GPT-5 is here",
@@ -4262,25 +4159,6 @@
     "is_posted": true
   },
   {
-    "title": "GPT-5 is supposed to be nicer now",
-    "url": "https://techcrunch.com/2025/08/17/gpt-5-is-supposed-to-be-nicer-now/",
-    "content": "OpenAI announced late Friday that it’s updating its latest model to be “warmer and friendlier.”",
-    "source": "RSS - TechCrunch RSS",
-    "source_type": "news",
-    "hash": "ef6e03044b3f0a13ff1622efe963fdc6",
-    "posted_date": "2025-08-18T11:14:41.307152",
-    "tweet_id": "1957400749563888068",
-    "tweet_url": "https://x.com/i/status/1957400749563888068",
-    "tweet_text": "",
-    "manual_post": false,
-    "bulk_operation": false,
-    "post_method": "otomatik",
-    "quality_score": 0,
-    "tags": [],
-    "category": "ai_general",
-    "is_posted": true
-  },
-  {
     "title": "‘Stranger Things’ creators may be leaving Netflix",
     "url": "https://techcrunch.com/2025/08/17/stranger-things-creators-may-be-leaving-netflix/",
     "content": "Netflix could soon lose the creative team behind one of its biggest hits, with the Duffer Brothers reportedly signing an exclusive deal with Paramount.",
@@ -4624,27 +4502,6 @@
     "category": "ai_general",
     "is_posted": true,
     "manual_posted_at": "2025-08-20T12:03:18.435741",
-    "manual_approval": false
-  },
-  {
-    "title": "Meta rolls out AI-powered translations to creators globally, starting with English and Spanish",
-    "url": "https://techcrunch.com/2025/08/19/meta-rolls-out-ai-powered-translations-to-creators-globally-starting-with-english-and-spanish/",
-    "content": "The new feature, which is available in any market where Meta AI is available, allows creators to translate content into other languages for a broader audience.",
-    "source": "RSS - TechCrunch RSS",
-    "source_type": "news",
-    "hash": "d16a93ca3b11682fb50001b187658737",
-    "posted_date": "2025-08-20T12:03:41.093802",
-    "tweet_id": "2",
-    "tweet_url": "",
-    "tweet_text": "Meta launches AI translations for creators worldwide, starting with English-Spanish... #AI #Tech #ArtificialIntelligence #Automation #MachineLearning\n\nhttps://techcrunch.com/2025/08/19/meta-rolls-out-ai-powered-translations-to-creators-globally-starting-with-english-and-spanish/",
-    "manual_post": true,
-    "bulk_operation": false,
-    "post_method": "manuel",
-    "quality_score": 0,
-    "tags": [],
-    "category": "ai_general",
-    "is_posted": true,
-    "manual_posted_at": "2025-08-20T12:03:41.085947",
     "manual_approval": false
   },
   {

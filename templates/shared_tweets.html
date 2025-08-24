@@ -80,6 +80,10 @@
                 <p class="feed-subtitle">Başarıyla paylaşılmış olan tüm tweetleriniz</p>
             </div>
             <div class="feed-header-right">
+                <button onclick="bulkArchiveAll()" class="twitter-btn twitter-btn-danger" id="bulkArchiveAllBtn" style="display: none;">
+                    <i class="fas fa-archive"></i>
+                    Tümünü Arşivle
+                </button>
                 <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
                     <i class="fas fa-sync-alt"></i>
                     Yenile
@@ -129,6 +133,25 @@
 
     <!-- Paylaşılan Tweetler -->
     {% if articles %}
+    <!-- Toplu İşlemler -->
+    {% if articles|length > 1 %}
+    <div class="tweet-card bulk-actions-section">
+        <div class="bulk-actions-content">
+            <div class="bulk-actions-left">
+                <label class="bulk-checkbox-wrapper">
+                    <input type="checkbox" id="selectAllCheckbox" class="bulk-checkbox" onchange="toggleSelectAll()">
+                    <span class="bulk-checkbox-label">Tümünü Seç</span>
+                </label>
+            </div>
+            <div class="bulk-actions-right">
+                <span class="bulk-count" id="bulkCount" style="display: none;">
+                    <span id="selectedCount">0</span> tweet seçildi
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
     <div id="tweetsContainer" class="tweets-container">
         {% for article in articles|reverse %}
         {% if not article.deleted and not article.archived %}
@@ -139,10 +162,14 @@
              data-title="{{ article.title|lower }}"
              data-content="{{ article.tweet_text|lower if article.tweet_text else article.content|lower }}"
              data-index="{{ loop.index0 }}"
-             data-tweet-id="{{ article.hash if article.hash else article.id if article.id else loop.index0 }}">
+             data-tweet-id="{{ article.hash if article.hash else article.id if article.id else loop.index0 }}"
+             data-article-id="{{ loop.index0 }}">
             
             <!-- Tweet Header -->
             <div class="tweet-header">
+                <div class="tweet-checkbox-wrapper">
+                    <input type="checkbox" class="tweet-select-checkbox" onchange="updateBulkButtons()">
+                </div>
                 <div class="tweet-avatar">
                     <i class="fas fa-robot"></i>
                 </div>
@@ -541,6 +568,10 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('input', filterTweets);
     sourceFilter.addEventListener('change', filterTweets);
     dateFilter.addEventListener('change', filterTweets);
+    
+    // Debug: Tweet sayısını kontrol et
+    console.log('Toplam tweet sayısı:', tweetItems.length);
+    console.log('Tweet ID\'leri:', Array.from(tweetItems).map(item => item.dataset.tweetId));
 });
 
 // Tweet arşivleme fonksiyonu
@@ -607,6 +638,230 @@ function updateTotalCount() {
     if (totalCountElement) {
         totalCountElement.textContent = visibleCount;
     }
+}
+
+// Toplu işlem fonksiyonları
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const tweetCheckboxes = document.querySelectorAll('.tweet-select-checkbox');
+    
+    if (!selectAllCheckbox || !tweetCheckboxes.length) return;
+    
+    const isChecked = selectAllCheckbox.checked;
+    tweetCheckboxes.forEach(checkbox => {
+        checkbox.checked = isChecked;
+    });
+    
+    updateBulkButtons();
+}
+
+function updateBulkButtons() {
+    const tweetCheckboxes = document.querySelectorAll('.tweet-select-checkbox');
+    const selectedCheckboxes = document.querySelectorAll('.tweet-select-checkbox:checked');
+    const bulkArchiveAllBtn = document.getElementById('bulkArchiveAllBtn');
+    const bulkCount = document.getElementById('bulkCount');
+    const selectedCount = document.getElementById('selectedCount');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    
+    const selectedCountValue = selectedCheckboxes.length;
+    
+    // Tümünü seç checkbox'ını güncelle
+    if (selectAllCheckbox) {
+        selectAllCheckbox.checked = selectedCountValue === tweetCheckboxes.length && tweetCheckboxes.length > 0;
+        selectAllCheckbox.indeterminate = selectedCountValue > 0 && selectedCountValue < tweetCheckboxes.length;
+    }
+    
+    // Toplu arşivle butonunu göster/gizle
+    if (bulkArchiveAllBtn) {
+        if (selectedCountValue > 0) {
+            bulkArchiveAllBtn.style.display = 'inline-flex';
+            bulkArchiveAllBtn.innerHTML = `<i class="fas fa-archive"></i> ${selectedCountValue} Tweet Arşivle`;
+        } else {
+            bulkArchiveAllBtn.style.display = 'none';
+        }
+    }
+    
+    // Seçim sayısını göster/gizle
+    if (bulkCount && selectedCount) {
+        if (selectedCountValue > 0) {
+            bulkCount.style.display = 'inline';
+            selectedCount.textContent = selectedCountValue;
+        } else {
+            bulkCount.style.display = 'none';
+        }
+    }
+}
+
+function bulkArchiveAll() {
+    const selectedCheckboxes = document.querySelectorAll('.tweet-select-checkbox:checked');
+    const selectedCount = selectedCheckboxes.length;
+    
+    if (selectedCount === 0) {
+        showToast('Lütfen arşivlenecek tweet\'leri seçin!', 'warning');
+        return;
+    }
+    
+    showConfirmDialog(
+        'Toplu Arşivleme',
+        `${selectedCount} tweet'i arşivlemek istediğinizden emin misiniz? Bu işlem geri alınabilir.`,
+        () => {
+            // Seçili tweet'leri arşivle
+            const selectedTweets = [];
+            selectedCheckboxes.forEach(checkbox => {
+                const tweetCard = checkbox.closest('.tweet-card');
+                if (tweetCard) {
+                    const tweetId = tweetCard.dataset.tweetId;
+                    if (tweetId) {
+                        selectedTweets.push(tweetId);
+                    }
+                }
+            });
+            
+            if (selectedTweets.length === 0) {
+                showToast('Arşivlenecek tweet bulunamadı!', 'error');
+                return;
+            }
+            
+            // Toplu arşivleme API çağrısı
+            bulkArchiveTweetsOptimized(selectedTweets);
+        }
+    );
+}
+
+function bulkArchiveTweets(tweetIds) {
+    showToast(`${tweetIds.length} tweet arşivleniyor...`, 'info');
+    
+    // Batch işleme için ayarlar
+    const BATCH_SIZE = 10; // Her seferde 10 tweet işle
+    const DELAY_BETWEEN_BATCHES = 500; // 500ms bekle
+    
+    let completedCount = 0;
+    let errorCount = 0;
+    let currentBatch = 0;
+    
+    function processBatch() {
+        const startIndex = currentBatch * BATCH_SIZE;
+        const endIndex = Math.min(startIndex + BATCH_SIZE, tweetIds.length);
+        const currentBatchIds = tweetIds.slice(startIndex, endIndex);
+        
+        if (currentBatchIds.length === 0) {
+            // Tüm batch'ler tamamlandı
+            if (errorCount === 0) {
+                showToast(`${completedCount} tweet başarıyla arşivlendi!`, 'success');
+            } else {
+                showToast(`${completedCount} tweet arşivlendi, ${errorCount} tweet arşivlenemedi!`, 'warning');
+            }
+            
+            // Toplam sayıyı güncelle
+            updateTotalCount();
+            // Toplu işlem butonlarını sıfırla
+            updateBulkButtons();
+            return;
+        }
+        
+        // Progress güncelle
+        const progress = Math.round(((completedCount + errorCount) / tweetIds.length) * 100);
+        showToast(`${tweetIds.length} tweet arşivleniyor... ${progress}% tamamlandı`, 'info');
+        
+        // Bu batch'teki tweet'leri işle
+        let batchCompleted = 0;
+        let batchErrors = 0;
+        
+        currentBatchIds.forEach((tweetId, batchIndex) => {
+            fetch('/api/archive_tweet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tweet_id: tweetId,
+                    archive_reason: 'bulk_archive'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    completedCount++;
+                    // Tweet'i gizle
+                    const tweetCard = document.querySelector(`[data-tweet-id="${tweetId}"]`);
+                    if (tweetCard) {
+                        tweetCard.style.display = 'none';
+                    }
+                } else {
+                    errorCount++;
+                    batchErrors++;
+                }
+                
+                batchCompleted++;
+                
+                // Bu batch tamamlandı mı?
+                if (batchCompleted === currentBatchIds.length) {
+                    // Sonraki batch'e geç
+                    currentBatch++;
+                    setTimeout(processBatch, DELAY_BETWEEN_BATCHES);
+                }
+            })
+            .catch(error => {
+                errorCount++;
+                batchErrors++;
+                console.error('Arşivleme hatası:', error);
+                
+                batchCompleted++;
+                
+                // Bu batch tamamlandı mı?
+                if (batchCompleted === currentBatchIds.length) {
+                    // Sonraki batch'e geç
+                    currentBatch++;
+                    setTimeout(processBatch, DELAY_BETWEEN_BATCHES);
+                }
+            });
+        });
+    }
+    
+    // İlk batch'i başlat
+    processBatch();
+}
+
+// Optimize edilmiş toplu arşivleme fonksiyonu
+function bulkArchiveTweetsOptimized(tweetIds) {
+    showToast(`${tweetIds.length} tweet arşivleniyor...`, 'info');
+    
+    // Tek seferde tüm tweet'leri arşivle
+    fetch('/api/bulk_archive_tweets', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            tweet_ids: tweetIds,
+            archive_reason: 'bulk_archive'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(`${data.archived_count} tweet başarıyla arşivlendi!`, 'success');
+            
+            // Arşivlenen tweet'leri gizle
+            tweetIds.forEach(tweetId => {
+                const tweetCard = document.querySelector(`[data-tweet-id="${tweetId}"]`);
+                if (tweetCard) {
+                    tweetCard.style.display = 'none';
+                }
+            });
+            
+            // Toplam sayıyı güncelle
+            updateTotalCount();
+            // Toplu işlem butonlarını sıfırla
+            updateBulkButtons();
+        } else {
+            showToast('Arşivleme hatası: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Toplu arşivleme hatası:', error);
+        showToast('Bir hata oluştu: ' + error.message, 'error');
+    });
 }
 </script>
 {% endblock %}
