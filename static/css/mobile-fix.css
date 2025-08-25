@@ -259,10 +259,7 @@
         border-top: 1px solid #eee !important;
     }
     
-    /* Right sidebar tamamen gizle */
-    .twitter-sidebar-right {
-        display: none !important;
-    }
+
     
     /* Main content - Tam genişlik */
     .twitter-main {

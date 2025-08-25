@@ -1224,5 +1224,69 @@
     "created_at": "2025-08-25T09:33:52.357574",
     "status": "pending",
     "id": 18
+  },
+  {
+    "article": {
+      "title": "Artificial Intelligence and Relationships: 1 in 4 Young Adults Believe AI Partners Could Replace Real-life Romance.",
+      "url": "https://ifstudies.org/blog/artificial-intelligence-and-relationships-1-in-4-young-adults-believe-ai-partners-could-replace-real-life-romance",
+      "content": "Highlights:\n\nAccording to a new IFS/YouGov survey, 25% of young adults believe that AI has the potential to replace real-life romantic relationships.\n\nHeavy porn users are the most open to romantic relationships with AI of any group and are also the most open to AI friendships in general, per a new IFS research brief.  \n\nAbout half of young adults under age 40 (55%) view AI technology as either threatening or concerning, while 45% view it as either intriguing or exciting.\n\n \nConclusion\n\nIn sum, ",
+      "score": 199,
+      "hash": "3f93de5367f14caf3c491d4bf28546d5",
+      "source": "Reddit - r/singularity",
+      "fetch_date": "2025-08-25T12:06:45.101660",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "PythonAnywhere",
+      "method_icon": "🐍",
+      "method_color": "green"
+    },
+    "tweet_data": {
+      "tweet": "Survey finds 25% of 18-30 year-olds believe AI companions can replace hum... #AI #Tech #ArtificialIntelligence #AIAssistant #GenerativeAI\n\nhttps://ifstudies.org/blog/artificial-intelligence-and-relationships-1-in-4-young-adults-believe-ai-partners-could-replace-real-life-romance",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Artificial Intelligence and Relationships 1 in 4 Young Adults Believe AI Partner...",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-25T12:06:58.910623",
+    "created_at": "2025-08-25T12:06:58.910623",
+    "status": "pending",
+    "id": 19
   }
 ]

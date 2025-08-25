@@ -70,8 +70,10 @@
 {% endmacro %}
 
 {% block content %}
-<!-- Twitter Feed Style -->
-<div class="twitter-feed">
+<!-- Shared Tweets Container with Scrollbar -->
+<div class="shared-tweets-container">
+    <!-- Twitter Feed Style -->
+    <div class="twitter-feed">
     <!-- Header -->
     <div class="feed-header">
         <div class="feed-header-content">
@@ -864,4 +866,6 @@ function bulkArchiveTweetsOptimized(tweetIds) {
     });
 }
 </script>
+    </div>
+</div>
 {% endblock %}

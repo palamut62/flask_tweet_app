@@ -3,8 +3,10 @@
 {% block title %}Silinmiş Tweetler{% endblock %}
 
 {% block content %}
-<!-- Twitter Feed Style -->
-<div class="twitter-feed">
+<!-- Deleted Tweets Container with Scrollbar -->
+<div class="deleted-tweets-container">
+    <!-- Twitter Feed Style -->
+    <div class="twitter-feed">
     <!-- Header -->
     <div class="feed-header">
         <div class="feed-header-content">
@@ -332,4 +334,6 @@ function restoreDeletedTweet(articleHash) {
     });
 }
 </script>
+    </div>
+</div>
 {% endblock %} 

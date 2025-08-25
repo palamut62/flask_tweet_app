@@ -85,7 +85,6 @@ html body .twitter-layout > .twitter-sidebar::-webkit-scrollbar {
 html body .twitter-layout > .twitter-main {
     flex: 1 1 auto !important;
     min-width: 0 !important;
-    border-right: 1px solid var(--twitter-border) !important;
     height: 100vh !important;
     background-color: var(--twitter-background);
     display: flex !important;
@@ -97,26 +96,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
 }
 
-html body .twitter-layout > .twitter-sidebar-right {
-    flex: 0 0 350px !important;
-    width: 350px !important;
-    min-width: 350px !important;
-    position: sticky !important;
-    top: 0 !important;
-    height: 100vh !important;
-    padding: 0 12px !important;
-    overflow-y: auto !important;
-    background-color: var(--twitter-background);
-    align-self: flex-start !important;
-    
-    /* Hide scrollbar */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
-}
 
-html body .twitter-layout > .twitter-sidebar-right::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
-}
 
 /* Remove Bootstrap interference */
 .twitter-layout,
@@ -157,15 +137,11 @@ html body .twitter-layout > .twitter-sidebar-right::-webkit-scrollbar {
 .twitter-layout > .twitter-main {
     flex: 1 1 auto !important;
     min-width: 0 !important;
-    width: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
 }
 
-.twitter-layout > .twitter-sidebar-right {
-    flex: 0 0 350px !important;
-    width: 350px !important;
-    min-width: 350px !important;
-    max-width: 350px !important;
-}
+
 
 .right-sidebar-content {
     padding: 12px 0;
@@ -696,9 +672,7 @@ html body .twitter-layout > .twitter-sidebar-right::-webkit-scrollbar {
         left: 0 !important;
     }
     
-    .twitter-sidebar-right {
-        display: none;
-    }
+
     
     .twitter-main {
         border-right: none;
@@ -4871,6 +4845,8 @@ html body .twitter-layout > .twitter-sidebar-right::-webkit-scrollbar {
     border-radius: 16px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    width: 100%;
+    max-width: 100%;
 }
 
 .settings-card-header {
@@ -4923,7 +4899,7 @@ html body .twitter-layout > .twitter-sidebar-right::-webkit-scrollbar {
 
 .settings-controls-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 1.5rem;
 }
 
@@ -5015,7 +4991,7 @@ html body .twitter-layout > .twitter-sidebar-right::-webkit-scrollbar {
 
 .settings-inputs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 1.5rem;
 }
 
@@ -5039,6 +5015,8 @@ html body .twitter-layout > .twitter-sidebar-right::-webkit-scrollbar {
     font-size: 0.875rem;
     transition: all 0.2s ease;
     background: white;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .settings-input:focus,
@@ -5056,7 +5034,7 @@ html body .twitter-layout > .twitter-sidebar-right::-webkit-scrollbar {
 
 .settings-methods-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 1rem;
     margin-bottom: 1.5rem;
 }
@@ -5420,6 +5398,205 @@ html body .twitter-layout > .twitter-sidebar-right::-webkit-scrollbar {
     font-family: 'Courier New', monospace;
     font-size: 0.875rem;
     line-height: 1.4;
+}
+
+/* API Form Kartları için ek stiller */
+.settings-api-form-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.settings-api-form-card:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.settings-api-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.settings-api-form-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.settings-api-form-title h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+    color: #111827;
+}
+
+.settings-api-form-title i {
+    font-size: 1.25rem;
+    color: #6b7280;
+}
+
+.settings-api-form-status {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+}
+
+.settings-api-form-status-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.settings-api-form-status-error {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.settings-api-form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.settings-api-form-content .settings-inputs-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+/* API Grid için ek stiller */
+.settings-api-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.settings-api-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.settings-api-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.settings-api-success {
+    border-color: #10b981;
+    background: #f0fdf4;
+}
+
+.settings-api-warning {
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.settings-api-error {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+.settings-api-neutral {
+    border-color: #6b7280;
+    background: #f9fafb;
+}
+
+.settings-api-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    color: #6b7280;
+}
+
+.settings-api-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #111827;
+}
+
+.settings-api-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.settings-api-status-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.settings-api-status-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.settings-api-status-error {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.settings-api-status-neutral {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.settings-api-actions {
+    margin-top: 1rem;
+}
+
+/* Test sonuçları için stiller */
+.settings-test-results {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.settings-rate-limit-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Responsive düzenlemeler */
+@media (max-width: 768px) {
+    .settings-controls-grid,
+    .settings-inputs-grid,
+    .settings-methods-grid,
+    .settings-api-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .settings-api-form-content .settings-inputs-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .settings-card {
+        margin: 0 0.5rem;
+    }
+    
+    .settings-form {
+        padding: 1rem;
+    }
+    
+    .settings-card-header {
+        padding: 1.5rem;
+    }
 }
 
 /* API Durumu Grid */
@@ -8310,4 +8487,518 @@ html body .twitter-layout > .twitter-sidebar-right::-webkit-scrollbar {
         top: 65px !important;
         padding: 10px !important;
     }
+}
+
+/* ===== SCROLLBAR FUNCTIONALITY FOR ALL PAGES ===== */
+
+/* Main content area scrollbar for all pages */
+.twitter-main {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: 100vh !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+    -ms-overflow-style: auto !important;
+}
+
+/* Webkit scrollbar styling for all pages */
+.twitter-main::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.twitter-main::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.twitter-main::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+    transition: background 0.2s ease !important;
+}
+
+.twitter-main::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Page-specific content containers */
+.twitter-main > div {
+    min-height: 100vh !important;
+    padding: 20px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* Settings page scrollbar */
+.settings-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.settings-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.settings-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.settings-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.settings-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* News sources page scrollbar */
+.news-sources-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.news-sources-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.news-sources-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.news-sources-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.news-sources-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Create tweet page scrollbar */
+.create-tweet-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.create-tweet-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.create-tweet-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.create-tweet-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.create-tweet-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Statistics page scrollbar */
+.statistics-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.statistics-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.statistics-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.statistics-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.statistics-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Shared tweets page scrollbar */
+.shared-tweets-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.shared-tweets-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.shared-tweets-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.shared-tweets-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.shared-tweets-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Deleted tweets page scrollbar */
+.deleted-tweets-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.deleted-tweets-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.deleted-tweets-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.deleted-tweets-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.deleted-tweets-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Archived tweets page scrollbar */
+.archived-tweets-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.archived-tweets-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.archived-tweets-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.archived-tweets-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.archived-tweets-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Rejected articles page scrollbar */
+.rejected-articles-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.rejected-articles-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.rejected-articles-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.rejected-articles-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.rejected-articles-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* AI keywords page scrollbar */
+.ai-keywords-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.ai-keywords-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.ai-keywords-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.ai-keywords-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.ai-keywords-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Security check page scrollbar */
+.security-check-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.security-check-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.security-check-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.security-check-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.security-check-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Changelog page scrollbar */
+.changelog-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.changelog-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.changelog-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.changelog-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.changelog-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* GitHub pages scrollbar */
+.github-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.github-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.github-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.github-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.github-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Manual confirmation pages scrollbar */
+.manual-confirmation-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.manual-confirmation-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.manual-confirmation-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.manual-confirmation-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.manual-confirmation-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Test pages scrollbar */
+.test-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.test-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.test-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.test-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.test-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Login page scrollbar */
+.login-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100vh - 40px) !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #cbd5e0 #f7fafc !important;
+}
+
+.login-container::-webkit-scrollbar {
+    width: 8px !important;
+    display: block !important;
+}
+
+.login-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.login-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+}
+
+.login-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Mobile responsive scrollbar adjustments */
+@media (max-width: 768px) {
+    .twitter-main {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        height: 100vh !important;
+        padding: 10px !important;
+    }
+    
+    .twitter-main > div {
+        min-height: auto !important;
+        padding: 10px !important;
+    }
+    
+    /* Ensure all containers are scrollable on mobile */
+    .settings-container,
+    .news-sources-container,
+    .create-tweet-container,
+    .statistics-container,
+    .shared-tweets-container,
+    .deleted-tweets-container,
+    .archived-tweets-container,
+    .rejected-articles-container,
+    .ai-keywords-container,
+    .security-check-container,
+    .changelog-container,
+    .github-container,
+    .manual-confirmation-container,
+    .test-container,
+    .login-container {
+        max-height: calc(100vh - 20px) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+}
+
+/* Dark mode scrollbar support */
+[data-theme="dark"] .twitter-main::-webkit-scrollbar-track {
+    background: #2d3748 !important;
+}
+
+[data-theme="dark"] .twitter-main::-webkit-scrollbar-thumb {
+    background: #4a5568 !important;
+}
+
+[data-theme="dark"] .twitter-main::-webkit-scrollbar-thumb:hover {
+    background: #718096 !important;
+}
+
+[data-theme="dark"] .twitter-main {
+    scrollbar-color: #4a5568 #2d3748 !important;
 }
