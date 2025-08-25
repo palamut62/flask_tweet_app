@@ -39,14 +39,10 @@
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.js" rel="stylesheet" onerror="this.onerror=null;this.href='https://unpkg.com/@fortawesome/fontawesome-free@6.4.0/css/all.min.css';">
     {% endif %}
     
-    <!-- Twitter Style CSS -->
-    <link href="{{ url_for('static', filename='css/twitter-style.css') }}?v=20250825-1" rel="stylesheet">
-    
-    <!-- Mobile Emergency Fix CSS -->
-    <link href="{{ url_for('static', filename='css/mobile-fix.css') }}?v=20250825-1" rel="stylesheet">
-    
-    <!-- Minimal Components CSS -->
-    <link href="{{ url_for('static', filename='css/minimal-components.css') }}?v=20250825-1" rel="stylesheet">
+    <!-- Direct CSS Loading - No preload complexity -->
+    <link href="{{ url_for('static', filename='css/twitter-style.css') }}?v=20250825-2" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/mobile-fix.css') }}?v=20250825-2" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/minimal-components.css') }}?v=20250825-2" rel="stylesheet">
     
     <!-- CSS Debug - Minimal Components Check -->
     <style>
@@ -676,14 +672,59 @@
         
         <!-- CSS to show mobile menu on mobile devices -->
         <style>
-            /* Prevent layout flash during page transitions */
-            .twitter-layout {
-                opacity: 0;
-                transition: opacity 0.1s ease;
+            /* CRITICAL CSS - Inline to prevent any flash */
+            html body .twitter-layout {
+                display: flex !important;
+                flex-direction: row !important;
+                width: 100% !important;
+                height: 100vh !important;
+                flex-wrap: nowrap !important;
+                align-items: stretch !important;
+                margin: 0 auto !important;
+                max-width: 1300px !important;
+                background-color: #ffffff !important;
+                position: relative !important;
+                overflow-x: hidden !important;
             }
             
-            .twitter-layout.loaded {
-                opacity: 1;
+            html body .twitter-layout > .twitter-sidebar {
+                flex: 0 0 275px !important;
+                width: 275px !important;
+                min-width: 275px !important;
+                max-width: 275px !important;
+                height: 100vh !important;
+                position: sticky !important;
+                top: 0 !important;
+                padding: 0 12px !important;
+                border-right: 1px solid #eff3f4 !important;
+                overflow-y: auto !important;
+                background-color: #ffffff !important;
+                /* No hiding - always visible */
+            }
+            
+            html body .twitter-layout > .twitter-main {
+                flex: 1 1 auto !important;
+                min-width: 0 !important;
+                border-right: 1px solid #eff3f4 !important;
+                height: 100vh !important;
+                background-color: #ffffff !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+            }
+            
+            html body .twitter-layout > .twitter-sidebar-right {
+                flex: 0 0 350px !important;
+                width: 350px !important;
+                min-width: 350px !important;
+                max-width: 350px !important;
+                position: sticky !important;
+                top: 0 !important;
+                height: 100vh !important;
+                padding: 0 12px !important;
+                overflow-y: auto !important;
+                background-color: #ffffff !important;
+                align-self: flex-start !important;
             }
             
             @media (max-width: 768px) {
@@ -864,14 +905,8 @@
                     console.log('🎉 DESKTOP PROTECTION COMPLETE!');
                 }
                 
-                // Mark layout as loaded to prevent flicker
-                setTimeout(() => {
-                    const layout = document.querySelector('.twitter-layout');
-                    if (layout) {
-                        layout.classList.add('loaded');
-                        console.log('📐 Layout marked as loaded');
-                    }
-                }, 50);
+                // Simple and fast - no complex loading logic
+                console.log('📐 Layout ready');
             });
         </script>
 

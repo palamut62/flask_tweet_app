@@ -638,8 +638,10 @@ html body .twitter-layout > .twitter-sidebar-right::-webkit-scrollbar {
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-    .twitter-layout {
-        grid-template-columns: 88px 1fr 350px;
+    html body .twitter-layout > .twitter-sidebar {
+        flex: 0 0 88px !important;
+        width: 88px !important;
+        min-width: 88px !important;
     }
     
     .twitter-nav-text {
@@ -652,12 +654,8 @@ html body .twitter-layout > .twitter-sidebar-right::-webkit-scrollbar {
 }
 
 @media (max-width: 1000px) {
-    .twitter-layout {
-        grid-template-columns: 1fr 350px;
-    }
-    
-    .twitter-sidebar {
-        display: none;
+    html body .twitter-layout > .twitter-sidebar {
+        display: none !important;
     }
 }
 
