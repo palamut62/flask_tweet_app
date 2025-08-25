@@ -49,7 +49,7 @@ body {
 html body .twitter-layout {
     display: flex !important;
     flex-direction: row !important;
-    min-height: 100vh !important;
+    height: 100vh !important;
     max-width: 1300px !important;
     margin: 0 auto !important;
     width: 100% !important;
