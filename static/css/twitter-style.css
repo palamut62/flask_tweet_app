@@ -799,14 +799,17 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 }
 
 .feed-header {
-    position: sticky;
-    top: 0;
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--twitter-border);
-    padding: 16px 16px;
-    z-index: 100;
-    flex-shrink: 0;
+    position: sticky !important;
+    top: 0 !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(12px) !important;
+    border-bottom: 1px solid var(--twitter-border) !important;
+    padding: 16px 16px !important;
+    z-index: 1000 !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .feed-content {
@@ -815,6 +818,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    padding-top: 0 !important; /* Remove any top padding since header is fixed */
 }
 
 .feed-content::-webkit-scrollbar {
@@ -837,7 +841,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 /* Flash Messages Container */
 .flash-messages-container {
     position: fixed;
-    top: 20px;
+    top: 20px; /* Reduced since header is now sticky */
     right: 20px;
     z-index: 9999;
     max-width: 400px;
@@ -8256,9 +8260,14 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     }
     
     .feed-header {
-        margin-left: -70px !important;
-        padding-left: 85px !important;
+        position: sticky !important;
+        top: 0 !important;
+        margin: 0 !important;
+        padding: 12px 16px !important;
         background-color: rgba(255, 255, 255, 0.95) !important;
+        z-index: 1000 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
     
     /* Tweet cards mobile optimization */
@@ -8293,9 +8302,14 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     }
     
     .feed-header {
-        margin-left: -65px !important;
-        padding-left: 75px !important;
+        position: sticky !important;
+        top: 0 !important;
+        margin: 0 !important;
+        padding: 10px 12px !important;
         font-size: 16px !important;
+        z-index: 1000 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
     
     .tweet-card {
@@ -8422,7 +8436,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
         margin: 0 !important;
         padding: 15px !important;
         position: sticky !important;
-        top: 70px !important;
+        top: 0 !important;
         background: rgba(255, 255, 255, 0.95) !important;
         backdrop-filter: blur(10px) !important;
         z-index: 100 !important;
@@ -8489,22 +8503,148 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     }
 }
 
-/* ===== SCROLLBAR FUNCTIONALITY FOR ALL PAGES ===== */
+/* ===== STICKY HEADER AND SCROLLBAR FUNCTIONALITY FOR ALL PAGES ===== */
 
-/* Main content area scrollbar for all pages */
+/* Sticky header styling for all pages - contained within main content */
+.feed-header {
+    position: sticky !important;
+    top: 0 !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(12px) !important;
+    border-bottom: 1px solid var(--twitter-border) !important;
+    padding: 16px 16px !important;
+    z-index: 1000 !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Ensure all page containers have proper scroll behavior */
+.twitter-feed,
+.settings-container,
+.statistics-container,
+.news-sources-container,
+.create-tweet-container,
+.ai-keywords-container,
+.github-repos-container,
+.archived-tweets-container,
+.deleted-tweets-container,
+.rejected-articles-container,
+.shared-tweets-container {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: 100vh !important;
+    scrollbar-width: none !important;
+    scrollbar-color: transparent transparent !important;
+    -ms-overflow-style: none !important;
+}
+
+/* Webkit scrollbar styling for all page containers */
+.twitter-feed::-webkit-scrollbar,
+.settings-container::-webkit-scrollbar,
+.statistics-container::-webkit-scrollbar,
+.news-sources-container::-webkit-scrollbar,
+.create-tweet-container::-webkit-scrollbar,
+.ai-keywords-container::-webkit-scrollbar,
+.github-repos-container::-webkit-scrollbar,
+.archived-tweets-container::-webkit-scrollbar,
+.deleted-tweets-container::-webkit-scrollbar,
+.rejected-articles-container::-webkit-scrollbar,
+.shared-tweets-container::-webkit-scrollbar {
+    display: none !important;
+}
+
+.twitter-feed::-webkit-scrollbar-track,
+.settings-container::-webkit-scrollbar-track,
+.statistics-container::-webkit-scrollbar-track,
+.news-sources-container::-webkit-scrollbar-track,
+.create-tweet-container::-webkit-scrollbar-track,
+.ai-keywords-container::-webkit-scrollbar-track,
+.github-repos-container::-webkit-scrollbar-track,
+.archived-tweets-container::-webkit-scrollbar-track,
+.deleted-tweets-container::-webkit-scrollbar-track,
+.rejected-articles-container::-webkit-scrollbar-track,
+.shared-tweets-container::-webkit-scrollbar-track {
+    background: #f7fafc !important;
+    border-radius: 4px !important;
+}
+
+.twitter-feed::-webkit-scrollbar-thumb,
+.settings-container::-webkit-scrollbar-thumb,
+.statistics-container::-webkit-scrollbar-thumb,
+.news-sources-container::-webkit-scrollbar-thumb,
+.create-tweet-container::-webkit-scrollbar-thumb,
+.ai-keywords-container::-webkit-scrollbar-thumb,
+.github-repos-container::-webkit-scrollbar-thumb,
+.archived-tweets-container::-webkit-scrollbar-thumb,
+.deleted-tweets-container::-webkit-scrollbar-thumb,
+.rejected-articles-container::-webkit-scrollbar-thumb,
+.shared-tweets-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0 !important;
+    border-radius: 4px !important;
+    transition: background 0.2s ease !important;
+}
+
+.twitter-feed::-webkit-scrollbar-thumb:hover,
+.settings-container::-webkit-scrollbar-thumb:hover,
+.statistics-container::-webkit-scrollbar-thumb:hover,
+.news-sources-container::-webkit-scrollbar-thumb:hover,
+.create-tweet-container::-webkit-scrollbar-thumb:hover,
+.ai-keywords-container::-webkit-scrollbar-thumb:hover,
+.github-repos-container::-webkit-scrollbar-thumb:hover,
+.archived-tweets-container::-webkit-scrollbar-thumb:hover,
+.deleted-tweets-container::-webkit-scrollbar-thumb:hover,
+.rejected-articles-container::-webkit-scrollbar-thumb:hover,
+.shared-tweets-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0 !important;
+}
+
+/* Adjust main content for sticky header */
 .twitter-main {
     overflow-y: auto !important;
     overflow-x: hidden !important;
     height: 100vh !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-    -ms-overflow-style: auto !important;
+    scrollbar-width: none !important;
+    scrollbar-color: transparent transparent !important;
+    -ms-overflow-style: none !important;
 }
 
-/* Webkit scrollbar styling for all pages */
+/* Webkit scrollbar styling for main content */
 .twitter-main::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
+    display: none !important;
+}
+
+/* Hide scrollbars when operations are complete */
+.hide-scrollbars .twitter-feed,
+.hide-scrollbars .settings-container,
+.hide-scrollbars .statistics-container,
+.hide-scrollbars .news-sources-container,
+.hide-scrollbars .create-tweet-container,
+.hide-scrollbars .ai-keywords-container,
+.hide-scrollbars .github-repos-container,
+.hide-scrollbars .archived-tweets-container,
+.hide-scrollbars .deleted-tweets-container,
+.hide-scrollbars .rejected-articles-container,
+.hide-scrollbars .shared-tweets-container,
+.hide-scrollbars .twitter-main {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.hide-scrollbars .twitter-feed::-webkit-scrollbar,
+.hide-scrollbars .settings-container::-webkit-scrollbar,
+.hide-scrollbars .statistics-container::-webkit-scrollbar,
+.hide-scrollbars .news-sources-container::-webkit-scrollbar,
+.hide-scrollbars .create-tweet-container::-webkit-scrollbar,
+.hide-scrollbars .ai-keywords-container::-webkit-scrollbar,
+.hide-scrollbars .github-repos-container::-webkit-scrollbar,
+.hide-scrollbars .archived-tweets-container::-webkit-scrollbar,
+.hide-scrollbars .deleted-tweets-container::-webkit-scrollbar,
+.hide-scrollbars .rejected-articles-container::-webkit-scrollbar,
+.hide-scrollbars .shared-tweets-container::-webkit-scrollbar,
+.hide-scrollbars .twitter-main::-webkit-scrollbar {
+    display: none !important;
 }
 
 .twitter-main::-webkit-scrollbar-track {
@@ -8530,433 +8670,25 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     overflow-x: hidden !important;
 }
 
-/* Settings page scrollbar */
-.settings-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.settings-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.settings-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.settings-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.settings-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* News sources page scrollbar */
-.news-sources-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.news-sources-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.news-sources-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.news-sources-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.news-sources-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* Create tweet page scrollbar */
-.create-tweet-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.create-tweet-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.create-tweet-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.create-tweet-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.create-tweet-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* Statistics page scrollbar */
-.statistics-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.statistics-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.statistics-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.statistics-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.statistics-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* Shared tweets page scrollbar */
-.shared-tweets-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.shared-tweets-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.shared-tweets-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.shared-tweets-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.shared-tweets-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* Deleted tweets page scrollbar */
-.deleted-tweets-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.deleted-tweets-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.deleted-tweets-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.deleted-tweets-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.deleted-tweets-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* Archived tweets page scrollbar */
-.archived-tweets-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.archived-tweets-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.archived-tweets-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.archived-tweets-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.archived-tweets-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* Rejected articles page scrollbar */
-.rejected-articles-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.rejected-articles-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.rejected-articles-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.rejected-articles-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.rejected-articles-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* AI keywords page scrollbar */
-.ai-keywords-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.ai-keywords-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.ai-keywords-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.ai-keywords-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.ai-keywords-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* Security check page scrollbar */
-.security-check-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.security-check-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.security-check-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.security-check-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.security-check-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* Changelog page scrollbar */
-.changelog-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.changelog-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.changelog-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.changelog-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.changelog-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* GitHub pages scrollbar */
-.github-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.github-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.github-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.github-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.github-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* Manual confirmation pages scrollbar */
-.manual-confirmation-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.manual-confirmation-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.manual-confirmation-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.manual-confirmation-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.manual-confirmation-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* Test pages scrollbar */
-.test-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.test-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.test-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.test-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.test-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
-/* Login page scrollbar */
-.login-container {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    max-height: calc(100vh - 40px) !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #cbd5e0 #f7fafc !important;
-}
-
-.login-container::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-
-.login-container::-webkit-scrollbar-track {
-    background: #f7fafc !important;
-    border-radius: 4px !important;
-}
-
-.login-container::-webkit-scrollbar-thumb {
-    background: #cbd5e0 !important;
-    border-radius: 4px !important;
-}
-
-.login-container::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0 !important;
-}
-
 /* Mobile responsive scrollbar adjustments */
 @media (max-width: 768px) {
+    .feed-header {
+        position: sticky !important;
+        top: 0 !important;
+        padding: 12px 16px !important;
+        z-index: 1000 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
     .twitter-main {
         overflow-y: auto !important;
         overflow-x: hidden !important;
         height: 100vh !important;
-        padding: 10px !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        padding-bottom: 10px !important;
     }
     
     .twitter-main > div {
@@ -8983,6 +8715,28 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
         max-height: calc(100vh - 20px) !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
+        scrollbar-width: none !important;
+        scrollbar-color: transparent transparent !important;
+        -ms-overflow-style: none !important;
+    }
+    
+    /* Hide webkit scrollbars on mobile */
+    .settings-container::-webkit-scrollbar,
+    .news-sources-container::-webkit-scrollbar,
+    .create-tweet-container::-webkit-scrollbar,
+    .statistics-container::-webkit-scrollbar,
+    .shared-tweets-container::-webkit-scrollbar,
+    .deleted-tweets-container::-webkit-scrollbar,
+    .archived-tweets-container::-webkit-scrollbar,
+    .rejected-articles-container::-webkit-scrollbar,
+    .ai-keywords-container::-webkit-scrollbar,
+    .security-check-container::-webkit-scrollbar,
+    .changelog-container::-webkit-scrollbar,
+    .github-container::-webkit-scrollbar,
+    .manual-confirmation-container::-webkit-scrollbar,
+    .test-container::-webkit-scrollbar,
+    .login-container::-webkit-scrollbar {
+        display: none !important;
     }
 }
 

@@ -334,14 +334,15 @@
     .feed-header {
         display: block !important;
         position: sticky !important;
-        top: 70px !important;
+        top: 0 !important;
         width: 100% !important;
         background: rgba(255, 255, 255, 0.95) !important;
         backdrop-filter: blur(10px) !important;
         border-bottom: 1px solid #eee !important;
-        padding: 15px !important;
-        margin: 0 0 20px 0 !important;
-        z-index: 100 !important;
+        padding: 12px 15px !important;
+        margin: 0 !important;
+        z-index: 1000 !important;
+        box-sizing: border-box !important;
     }
     
     .feed-title {
@@ -444,7 +445,7 @@
     /* Flash messages mobil için */
     .flash-messages-container {
         position: fixed !important;
-        top: 80px !important;
+        top: 20px !important; /* Reduced since header is now sticky */
         left: 10px !important;
         right: 10px !important;
         z-index: 10000 !important;
@@ -502,8 +503,12 @@
     }
     
     .feed-header {
-        top: 60px !important;
+        position: sticky !important;
+        top: 0 !important;
         padding: 10px !important;
+        z-index: 1000 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
     
     .tweet-card {
