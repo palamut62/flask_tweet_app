@@ -655,8 +655,48 @@
                 .mobile-menu-toggle {
                     display: block !important;
                 }
+                
+                /* Ensure content is visible on mobile */
+                .twitter-main {
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
             }
         </style>
+        
+        <!-- Mobile Debug Script -->
+        <script>
+            // Debug mobile layout issues
+            document.addEventListener('DOMContentLoaded', function() {
+                if (window.innerWidth <= 768) {
+                    console.log('Mobile device detected:', window.innerWidth);
+                    
+                    const mainContent = document.querySelector('.twitter-main');
+                    const twitterLayout = document.querySelector('.twitter-layout');
+                    const mobileToggle = document.querySelector('.mobile-menu-toggle');
+                    
+                    if (mainContent) {
+                        mainContent.style.display = 'block';
+                        mainContent.style.visibility = 'visible';
+                        mainContent.style.opacity = '1';
+                        mainContent.style.width = '100%';
+                        console.log('Main content forced visible');
+                    }
+                    
+                    if (twitterLayout) {
+                        twitterLayout.style.display = 'block';
+                        twitterLayout.style.width = '100%';
+                        console.log('Twitter layout adjusted for mobile');
+                    }
+                    
+                    if (mobileToggle) {
+                        mobileToggle.style.display = 'block';
+                        console.log('Mobile toggle visible');
+                    }
+                }
+            });
+        </script>
 
         <!-- Left Sidebar -->
         <div class="twitter-sidebar" id="twitterSidebar">
