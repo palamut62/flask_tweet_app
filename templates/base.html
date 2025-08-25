@@ -40,13 +40,32 @@
     {% endif %}
     
     <!-- Twitter Style CSS -->
-    <link href="{{ url_for('static', filename='css/twitter-style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/twitter-style.css') }}?v=20250825-1" rel="stylesheet">
     
     <!-- Mobile Emergency Fix CSS -->
-    <link href="{{ url_for('static', filename='css/mobile-fix.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/mobile-fix.css') }}?v=20250825-1" rel="stylesheet">
     
     <!-- Minimal Components CSS -->
-    <link href="{{ url_for('static', filename='css/minimal-components.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/minimal-components.css') }}?v=20250825-1" rel="stylesheet">
+    
+    <!-- CSS Debug - Minimal Components Check -->
+    <style>
+        /* Debug: Minimal components loaded indicator */
+        body::after {
+            content: "Minimal CSS v20250825-1 Loaded";
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+            background: var(--minimal-success, #16a34a);
+            color: white;
+            padding: 2px 6px;
+            font-size: 10px;
+            border-radius: 3px;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+    </style>
     
     <!-- Fallback CSS - CDN'ler yüklenemezse kullanılacak -->
     <style>

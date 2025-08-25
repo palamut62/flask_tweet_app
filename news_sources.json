@@ -15,7 +15,7 @@
         "excerpt": ".loop-card__content"
       },
       "added_date": "2025-01-08T10:00:00",
-      "last_checked": "2025-08-25T09:42:47.483186",
+      "last_checked": "2025-08-25T09:51:34.161849",
       "article_count": 5,
       "success_rate": 0
     }
@@ -25,7 +25,7 @@
     "check_all_sources": true,
     "source_timeout": 30,
     "articles_per_source": 5,
-    "last_updated": "2025-08-25T09:42:46.433510"
+    "last_updated": "2025-08-25T09:51:33.026069"
   },
   "rss_sources": [
     {
@@ -35,7 +35,7 @@
       "description": "TechCrunch genel RSS feed",
       "enabled": true,
       "added_date": "2025-06-18T14:00:00",
-      "last_checked": "2025-08-25T09:42:47.953264",
+      "last_checked": "2025-08-25T09:51:34.577311",
       "article_count": 5,
       "success_rate": 100
     },
@@ -46,7 +46,7 @@
       "description": "The Verge genel RSS feed",
       "enabled": true,
       "added_date": "2025-06-18T14:00:00",
-      "last_checked": "2025-08-25T09:42:48.369645",
+      "last_checked": "2025-08-25T09:51:34.944160",
       "article_count": 3,
       "success_rate": 100
     },
@@ -57,7 +57,7 @@
       "description": "VentureBeat AI RSS feed",
       "enabled": true,
       "added_date": "2025-06-18T14:00:00",
-      "last_checked": "2025-08-25T09:42:48.816009",
+      "last_checked": "2025-08-25T09:51:35.379730",
       "article_count": 1,
       "success_rate": 100
     }
