@@ -654,6 +654,16 @@
         
         <!-- CSS to show mobile menu on mobile devices -->
         <style>
+            /* Prevent layout flash during page transitions */
+            .twitter-layout {
+                opacity: 0;
+                transition: opacity 0.1s ease;
+            }
+            
+            .twitter-layout.loaded {
+                opacity: 1;
+            }
+            
             @media (max-width: 768px) {
                 .mobile-menu-toggle {
                     display: block !important;
@@ -666,15 +676,36 @@
                     opacity: 1 !important;
                 }
             }
+            
+            @media (min-width: 769px) {
+                /* Desktop protection */
+                .twitter-layout {
+                    display: flex !important;
+                    flex-direction: row !important;
+                }
+                
+                .twitter-sidebar {
+                    display: block !important;
+                    position: sticky !important;
+                    flex: 0 0 275px !important;
+                    width: 275px !important;
+                }
+                
+                .mobile-menu-toggle,
+                .mobile-overlay {
+                    display: none !important;
+                }
+            }
         </style>
         
         <!-- Mobile Emergency Fix Script -->
         <script>
-            // Force mobile layout to work
+            // Force mobile layout to work, protect desktop
             document.addEventListener('DOMContentLoaded', function() {
-                console.log('Screen width:', window.innerWidth);
+                const screenWidth = window.innerWidth;
+                console.log('Screen width:', screenWidth);
                 
-                if (window.innerWidth <= 768) {
+                if (screenWidth <= 768) {
                     console.log('🔥 MOBILE MODE ACTIVATED');
                     
                     // Force show all important elements
@@ -753,7 +784,72 @@
                     }
                     
                     console.log('🎉 MOBILE FIX COMPLETE!');
+                } else {
+                    console.log('💻 DESKTOP MODE - Protecting layout');
+                    
+                    // Ensure desktop layout stays intact
+                    const elements = {
+                        layout: document.querySelector('.twitter-layout'),
+                        sidebar: document.querySelector('.twitter-sidebar'),
+                        main: document.querySelector('.twitter-main'),
+                        toggle: document.querySelector('.mobile-menu-toggle'),
+                        overlay: document.querySelector('.mobile-overlay')
+                    };
+                    
+                    // Force desktop flex layout
+                    if (elements.layout) {
+                        elements.layout.style.display = 'flex';
+                        elements.layout.style.flexDirection = 'row';
+                        console.log('✅ Desktop layout protected');
+                    }
+                    
+                    // Ensure sidebar is visible and positioned correctly
+                    if (elements.sidebar) {
+                        elements.sidebar.style.cssText = `
+                            display: block !important;
+                            position: sticky !important;
+                            top: 0 !important;
+                            left: auto !important;
+                            transform: none !important;
+                            width: 275px !important;
+                            flex: 0 0 275px !important;
+                            height: 100vh !important;
+                            background: var(--twitter-background) !important;
+                        `;
+                        elements.sidebar.classList.remove('mobile-open');
+                        console.log('✅ Desktop sidebar protected');
+                    }
+                    
+                    // Ensure main content flex
+                    if (elements.main) {
+                        elements.main.style.cssText = `
+                            display: block !important;
+                            flex: 1 1 auto !important;
+                            min-width: 0 !important;
+                        `;
+                        console.log('✅ Desktop main content protected');
+                    }
+                    
+                    // Hide mobile elements
+                    if (elements.toggle) {
+                        elements.toggle.style.display = 'none';
+                    }
+                    
+                    if (elements.overlay) {
+                        elements.overlay.style.display = 'none';
+                    }
+                    
+                    console.log('🎉 DESKTOP PROTECTION COMPLETE!');
                 }
+                
+                // Mark layout as loaded to prevent flicker
+                setTimeout(() => {
+                    const layout = document.querySelector('.twitter-layout');
+                    if (layout) {
+                        layout.classList.add('loaded');
+                        console.log('📐 Layout marked as loaded');
+                    }
+                }, 50);
             });
         </script>
 
@@ -1566,8 +1662,76 @@
                         overflow-y: auto !important;
                         transition: transform 0.3s ease !important;
                         transform: translateX(0) !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
                     `;
                     twitterSidebar.classList.add('mobile-open');
+                    
+                    // Force show all sidebar content
+                    const sidebarContent = twitterSidebar.querySelector('.sidebar-content');
+                    if (sidebarContent) {
+                        sidebarContent.style.cssText = `
+                            display: block !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
+                            height: 100% !important;
+                            padding: 20px 15px !important;
+                            background: white !important;
+                        `;
+                    }
+                    
+                    // Force show navigation items
+                    const navItems = twitterSidebar.querySelectorAll('.twitter-nav-item');
+                    navItems.forEach(item => {
+                        item.style.cssText = `
+                            display: flex !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
+                            align-items: center !important;
+                            padding: 16px 15px !important;
+                            margin: 3px 0 !important;
+                            border-radius: 12px !important;
+                            color: #333 !important;
+                            text-decoration: none !important;
+                            font-size: 16px !important;
+                            font-weight: 500 !important;
+                            min-height: 50px !important;
+                        `;
+                    });
+                    
+                    // Force show navigation text
+                    const navTexts = twitterSidebar.querySelectorAll('.twitter-nav-text');
+                    navTexts.forEach(text => {
+                        text.style.cssText = `
+                            display: inline-block !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
+                            font-size: 16px !important;
+                            color: inherit !important;
+                        `;
+                    });
+                    
+                    // Force show navigation icons
+                    const navIcons = twitterSidebar.querySelectorAll('.twitter-nav-icon');
+                    navIcons.forEach(icon => {
+                        icon.style.cssText = `
+                            display: inline-flex !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
+                            margin-right: 15px !important;
+                            width: 24px !important;
+                            font-size: 18px !important;
+                            color: inherit !important;
+                        `;
+                    });
+                    
+                    console.log('📝 Sidebar content forced visible');
+                    console.log('📊 Menu content stats:', {
+                        sidebarContent: !!sidebarContent,
+                        navItemsCount: navItems.length,
+                        navTextsCount: navTexts.length,
+                        navIconsCount: navIcons.length
+                    });
                 }
                 
                 if (mobileOverlay) {
