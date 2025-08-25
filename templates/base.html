@@ -1528,41 +1528,152 @@
     
     {% block scripts %}{% endblock %}
     
-    <!-- Mobile Menu JavaScript -->
+    <!-- Mobile Menu JavaScript - FIXED -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 Setting up mobile menu...');
+            
             const mobileMenuToggle = document.getElementById('mobileMenuToggle');
             const mobileCloseBtn = document.getElementById('mobileCloseBtn');
             const twitterSidebar = document.getElementById('twitterSidebar');
             const mobileOverlay = document.getElementById('mobileOverlay');
             
-            // Mobile menu toggle
+            console.log('Elements found:', {
+                toggle: !!mobileMenuToggle,
+                close: !!mobileCloseBtn,
+                sidebar: !!twitterSidebar,
+                overlay: !!mobileOverlay
+            });
+            
+            // Mobile menu toggle functions
             function openMobileMenu() {
-                twitterSidebar.classList.add('mobile-open');
-                mobileOverlay.classList.add('active');
+                console.log('🔥 Opening mobile menu...');
+                
+                if (twitterSidebar) {
+                    // Force show and animate sidebar
+                    twitterSidebar.style.cssText = `
+                        display: block !important;
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 85% !important;
+                        max-width: 320px !important;
+                        height: 100vh !important;
+                        background: white !important;
+                        z-index: 9999 !important;
+                        border-right: 1px solid #ccc !important;
+                        box-shadow: 2px 0 10px rgba(0,0,0,0.3) !important;
+                        overflow-y: auto !important;
+                        transition: transform 0.3s ease !important;
+                        transform: translateX(0) !important;
+                    `;
+                    twitterSidebar.classList.add('mobile-open');
+                }
+                
+                if (mobileOverlay) {
+                    // Show overlay
+                    mobileOverlay.style.cssText = `
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                        background: rgba(0, 0, 0, 0.6) !important;
+                        z-index: 9998 !important;
+                        display: block !important;
+                        opacity: 1 !important;
+                    `;
+                    mobileOverlay.classList.add('active');
+                }
+                
+                // Prevent body scroll
                 document.body.style.overflow = 'hidden';
+                console.log('✅ Mobile menu opened!');
             }
             
             function closeMobileMenu() {
-                twitterSidebar.classList.remove('mobile-open');
-                mobileOverlay.classList.remove('active');
+                console.log('🔒 Closing mobile menu...');
+                
+                if (twitterSidebar) {
+                    // Hide sidebar
+                    twitterSidebar.style.cssText = `
+                        display: none !important;
+                        position: fixed !important;
+                        left: -100% !important;
+                        top: 0 !important;
+                        width: 280px !important;
+                        height: 100vh !important;
+                        background: white !important;
+                        z-index: 9999 !important;
+                        transform: translateX(-100%) !important;
+                    `;
+                    twitterSidebar.classList.remove('mobile-open');
+                }
+                
+                if (mobileOverlay) {
+                    // Hide overlay
+                    mobileOverlay.style.cssText = `
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                        background: rgba(0, 0, 0, 0.6) !important;
+                        z-index: 9998 !important;
+                        display: none !important;
+                        opacity: 0 !important;
+                    `;
+                    mobileOverlay.classList.remove('active');
+                }
+                
+                // Restore body scroll
                 document.body.style.overflow = '';
+                console.log('✅ Mobile menu closed!');
             }
             
-            // Event listeners
-            mobileMenuToggle.addEventListener('click', openMobileMenu);
-            mobileCloseBtn.addEventListener('click', closeMobileMenu);
-            mobileOverlay.addEventListener('click', closeMobileMenu);
+            // Event listeners with better error handling
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('🔘 Menu toggle clicked!');
+                    openMobileMenu();
+                });
+                console.log('✅ Toggle button listener added');
+            } else {
+                console.log('❌ Mobile toggle button not found!');
+            }
+            
+            if (mobileCloseBtn) {
+                mobileCloseBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('❌ Close button clicked!');
+                    closeMobileMenu();
+                });
+                console.log('✅ Close button listener added');
+            }
+            
+            if (mobileOverlay) {
+                mobileOverlay.addEventListener('click', function(e) {
+                    console.log('🔘 Overlay clicked!');
+                    closeMobileMenu();
+                });
+                console.log('✅ Overlay listener added');
+            }
             
             // Close menu when clicking on navigation items
             const navItems = document.querySelectorAll('.twitter-nav-item');
+            console.log('🔗 Found nav items:', navItems.length);
             navItems.forEach(item => {
-                item.addEventListener('click', closeMobileMenu);
+                item.addEventListener('click', function() {
+                    console.log('🔗 Nav item clicked, closing menu');
+                    closeMobileMenu();
+                });
             });
             
             // Close menu on window resize (if screen becomes larger)
             window.addEventListener('resize', function() {
                 if (window.innerWidth > 768) {
+                    console.log('📱 Screen resized to desktop, closing menu');
                     closeMobileMenu();
                 }
             });
@@ -1570,9 +1681,12 @@
             // Close menu on escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
+                    console.log('⌨️ Escape key pressed, closing menu');
                     closeMobileMenu();
                 }
             });
+            
+            console.log('🎉 Mobile menu setup complete!');
         });
     </script>
     
