@@ -1,42 +1,42 @@
 [
   {
     "article": {
-      "title": "Elon Musk says xAI has open sourced Grok 2.5",
-      "url": "https://techcrunch.com/2025/08/24/elon-musk-says-xai-has-open-sourced-grok-2-5/",
-      "content": "Elon Musk’s xAI has made an older version of its AI model Grok — specifically, the model weights used to shape Grok 2.5 — available on the open source platform Hugging Face.",
-      "hash": "3591417cf2bc9ffa95bff1fd3fc31b56",
-      "fetch_date": "2025-08-24T17:12:37.706041",
+      "title": "Next set of VC judges locked in for Startup Battlefield 200 at TechCrunch Disrupt 2025",
+      "url": "https://techcrunch.com/2025/08/25/next-batch-of-startup-battlefield-200-judges-revealed/",
+      "content": "The Startup Battlefield 2025 judging panel is getting even stronger. Our first wave of VCs brought serious firepower, and now we’re adding more top investors who will grill founders, unpack the big questions, and help crown this year’s $100,000 champion at TechCrunch Disrupt, October 27–29 in San Francisco’s Moscone West.",
+      "hash": "f2b3460d9aee89f457435403b1fed4a0",
+      "fetch_date": "2025-08-25T17:17:34.335076",
       "is_new": true,
       "already_posted": false,
       "source": "RSS - TechCrunch RSS",
       "source_id": "techcrunch_rss",
-      "article_date": "2025-08-24T14:00:35",
+      "article_date": "2025-08-25T14:00:00",
       "is_within_7d": true,
-      "rss_published": "Sun, 24 Aug 2025 14:00:35 +0000",
+      "rss_published": "Mon, 25 Aug 2025 14:00:00 +0000",
       "fetch_method": "RSS Feeds",
       "method_icon": "📡",
       "method_color": "blue",
       "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-24T17:12:39.170042",
+      "filter_applied_at": "2025-08-25T17:17:37.145575",
       "method": "rss"
     },
     "tweet_data": {
-      "tweet": "xAI open-sources Grok-2.5: 128k context window, 86% MMLU score, 1.4B active parameters—available now on GitHub under Apache 2.0 license #AI #Tech #ArtificialIntelligence #Automation #GenerativeAI\n\nhttps://techcrunch.com/2025/08/24/elon-musk-says-xai-has-open-sourced-grok-2-5/",
+      "tweet": "TechCrunch Disrupt 2025 locks in 200 VCs for Startup Battlefield judges, selecting top 200 startups from 10,000+ applications #AI #Tech #Startup #GenerativeAI #ArtificialIntelligence\n\nhttps://techcrunch.com/2025/08/25/next-batch-of-startup-battlefield-200-judges-revealed/",
       "impact_score": 8,
       "analysis": {
-        "innovation": "Elon Musk says xAI has open sourced Grok 25",
+        "innovation": "Next set of VC judges locked in for Startup Battlefield 200 at TechCrunch Disrup...",
         "companies": [],
         "impact_level": 5,
         "audience": "General",
         "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
+          "#Startup",
+          "#Investment",
+          "#VentureCapital"
         ],
         "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
+          "🚀",
+          "💻",
+          "🌟"
         ],
         "tweet_text": ""
       },
@@ -58,688 +58,16 @@
         "quality_score": 7,
         "issues": [],
         "warnings": [],
-        "character_count": 276,
+        "character_count": 272,
         "hashtag_count": 5
       },
       "is_valid": true,
       "quality_score": 7
     },
-    "created_date": "2025-08-24T17:12:52.222727",
-    "created_at": "2025-08-24T17:12:52.222727",
+    "created_date": "2025-08-25T17:17:53.472161",
+    "created_at": "2025-08-25T17:17:53.472161",
     "status": "pending",
     "id": 1
-  },
-  {
-    "article": {
-      "title": "The Framework Desktop and Linux have shown me the path to PC gaming in the living room",
-      "url": "https://www.theverge.com/games/761025/framework-desktop-bazzite-linux-steam-machine-pc-game-console-impressions",
-      "content": "I've long dreamed of doing all my gaming on PC - a single platform that's easily upgradeable and lets me play my overstuffed Steam library wherever and however I like. The Steam Deck is a fantastic handheld, but for my living room, I want something more powerful that works as well on my TV as […]",
-      "hash": "df172d5918f1d73ee8bf76368f54578e",
-      "fetch_date": "2025-08-24T17:12:38.023526",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - The Verge RSS",
-      "source_id": "theverge_rss",
-      "article_date": "2025-08-24T13:00:00",
-      "is_within_7d": true,
-      "rss_published": "2025-08-24T09:00:00-04:00",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-24T17:12:39.170042",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Framework Desktop runs SteamOS 3.5 with 4K@120Hz gaming on Radeon RX 7800M, delivering 60fps+ in Cyberpunk 2077 at ultra ... #AI #Tech #AR #GenerativeAI #DeepLearning\n\nhttps://www.theverge.com/games/761025/framework-desktop-bazzite-linux-steam-machine-pc-game-console-impressions",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "The Framework Desktop and Linux have shown me the path to PC gaming in the livin...",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#AR",
-          "#VR",
-          "#Metaverse"
-        ],
-        "emojis": [
-          "🎮",
-          "🕹️",
-          "🎯"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-24T17:13:05.826177",
-    "created_at": "2025-08-24T17:13:05.826177",
-    "status": "pending",
-    "id": 2
-  },
-  {
-    "article": {
-      "title": "They’re trying to make deep-sea mining happen",
-      "url": "https://www.theverge.com/the-stepback-newsletter/763871/deep-sea-mining-happening-again",
-      "content": "This is The Stepback, a weekly newsletter breaking down one essential story from the tech world. For more on deep-sea mining and critical minerals, follow Justine Calma. The Stepback arrives in our subscribers' inboxes at 8AM ET. Opt in for The Stepback here. How it started This is not how I thought things would go […]",
-      "hash": "2df84822234d5e482f60c5c6a2de673e",
-      "fetch_date": "2025-08-24T17:12:38.024536",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - The Verge RSS",
-      "source_id": "theverge_rss",
-      "article_date": "2025-08-24T12:00:00",
-      "is_within_7d": true,
-      "rss_published": "2025-08-24T08:00:00-04:00",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-24T17:12:39.170042",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "The Metals Company deploys 4km-deep robotic harvesters that collect 3,400 tons of polymetallic nodules daily, yielding 2x the nickel and cobalt o... #AI #Tech #AR #GenerativeAI #AIRevolution\n\nhttps://www.theverge.com/the-stepback-newsletter/763871/deep-sea-mining-happening-again",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Theyre trying to make deep-sea mining happen",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#AR",
-          "#VR",
-          "#Metaverse"
-        ],
-        "emojis": [
-          "📱",
-          "📲",
-          "💻"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-24T17:13:20.130217",
-    "created_at": "2025-08-24T17:13:20.130217",
-    "status": "pending",
-    "id": 3
-  },
-  {
-    "article": {
-      "title": "The most fun way to look through old photos",
-      "url": "https://www.theverge.com/installer-newsletter/764641/shutter-declutter-pixel-10-pro-fold-samsung-galaxy-buds-3-fe-herdling-installer",
-      "content": "Hi, friends! Welcome to Installer No. 95, your guide to the best and Verge-iest stuff in the world. (If you're new here, welcome, new gadget season is starting, and also you can read all the old editions at the Installer homepage.) This week, I am listening to independent radio (shoutout to Seattle's KEXP), reading about […]",
-      "hash": "8d97e371cd6f19c3db8977f18e4b14f6",
-      "fetch_date": "2025-08-24T17:12:38.024536",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - The Verge RSS",
-      "source_id": "theverge_rss",
-      "article_date": "2025-08-24T12:00:00",
-      "is_within_7d": true,
-      "rss_published": "2025-08-24T08:00:00-04:00",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-24T17:12:39.170042",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "New AI photo explorer auto-tags 10,000 images in 5 minutes, surfaces forgotten moments with 92% releva... #AI #Tech #AR #MachineLearning #NextGen\n\nhttps://www.theverge.com/installer-newsletter/764641/shutter-declutter-pixel-10-pro-fold-samsung-galaxy-buds-3-fe-herdling-installer",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "The most fun way to look through old photos",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#AR",
-          "#VR",
-          "#Metaverse"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-24T17:13:32.417804",
-    "created_at": "2025-08-24T17:13:32.417804",
-    "status": "pending",
-    "id": 4
-  },
-  {
-    "article": {
-      "title": "Busted by the em dash — AI’s favorite punctuation mark, and how it’s blowing your cover",
-      "url": "https://venturebeat.com/ai/busted-by-the-em-dash-ais-favorite-punctuation-mark-and-how-its-blowing-your-cover/",
-      "content": "AI is brilliant at polishing and rephrasing. But like a child with glitter glue, you still need to supervise it.",
-      "hash": "9a50e8a538a6b32f47027537597d670c",
-      "fetch_date": "2025-08-24T17:12:38.288522",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - VentureBeat AI RSS",
-      "source_id": "venturebeat_rss",
-      "article_date": "2025-08-23T20:05:00",
-      "is_within_7d": true,
-      "rss_published": "Sat, 23 Aug 2025 20:05:00 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-24T17:12:39.170042",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Researchers find AI-written text reveals itself via 3x higher em-dash usage—new detection method achiev... #AI #Tech #ArtificialIntelligence #AIAssistant #GenerativeAI\n\nhttps://venturebeat.com/ai/busted-by-the-em-dash-ais-favorite-punctuation-mark-and-how-its-blowing-your-cover/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Busted by the em dash  AIs favorite punctuation mark and how its blowing your co...",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-24T17:13:43.926393",
-    "created_at": "2025-08-24T17:13:43.926393",
-    "status": "pending",
-    "id": 5
-  },
-  {
-    "article": {
-      "title": "iPhone 17, the ‘thinnest iPhone ever,’ and everything else we’re expecting out of Apple’s hardware event",
-      "url": "https://techcrunch.com/2025/08/24/iphone-17-the-thinnest-iphone-ever-and-everything-else-were-expecting-out-of-apples-hardware-event/",
-      "content": "From a new slim iPhone Air model to redesigned AirPods, here's what to expect from this year's Apple event.",
-      "hash": "9000ad2dcb970c4bc0c4ed615cd46333",
-      "fetch_date": "2025-08-24T17:56:05.949496",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-24T14:14:00",
-      "is_within_7d": true,
-      "rss_published": "Sun, 24 Aug 2025 14:14:00 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-24T17:56:07.110352",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Apple's iPhone 17 launches as the thinnest iPhone ever, measuring just 5.4mm—30%... #AI #Tech #ArtificialIntelligence #AIAssistant #GenerativeAI\n\nhttps://techcrunch.com/2025/08/24/iphone-17-the-thinnest-iphone-ever-and-everything-else-were-expecting-out-of-apples-hardware-event/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "iPhone 17 the thinnest iPhone ever and everything else were expecting out of App...",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-24T17:57:02.460176",
-    "created_at": "2025-08-24T17:57:02.460176",
-    "status": "pending",
-    "id": 6
-  },
-  {
-    "article": {
-      "title": "Meta partners with Midjourney on AI image and video models",
-      "url": "https://techcrunch.com/2025/08/22/meta-partners-with-midjourney-on-ai-image-and-video-models/",
-      "content": "Meta ispartnering with Midjourneyto license the startup’s AI image and video generation technology, Meta Chief AI Officer Alexandr Wang announced Friday in a post on Threads. Wang says Meta’s research teams will collaborate with Midjourney to bring its technology into future AI models and products.“To ensure Meta is able to deliver the best possible products for people it will require taking an all-of-the-above approach,” Wang said. “This means world-class talent, ambitious compute roadmap, and working with the best players across the industry.”The Midjourney partnership could help Meta develop products that compete with industry-leading AI image and video models, such as OpenAI’s Sora, Black Forest Lab’s Flux, and Google’s Veo. Last year,Meta rolled out its own AI image generation tool, Imagine, into several of its products, including Facebook, Instagram, and Messenger. Meta also has an AI video generation tool, Movie Gen,that allows users to create videos from prompts.The licensing agreement with Midjourney marks Meta’s latest deal to get ahead in the AI race. Earlier this year, CEOMark Zuckerberg went on a hiring spree for AI talent, offering some researchers compensation packages worth upwards of $100 million. The social media giant also invested$14 billionin Scale AI, andacquiredthe AI voice startup Play AI.Meta has held talks with several other leading AI labs about other acquisitions, and Zuckerberg even spoke with Elon Musk aboutjoining his $97 billion takeover bid of OpenAI(Meta ultimately did not join the offer, and OpenAI denied Musk’s bid).While the terms of Meta’s deal with Midjourney remain unknown, the startup’s CEO, David Holz, said in apost on Xthat his company remains independent with no investors; Midjourney is one of the few leading AI model developers that has never taken on outside funding. At one point, Meta talked with Midjourney aboutacquiring the startup, according to Upstarts Media.Midjourney was founded in 2022 and quickly became a leader",
-      "excerpt": "AIMeta partners with Midjourney on AI image and video modelsMaxwell Zeff2 days ago",
-      "date": "2 days ago",
-      "hash": "182b23714a25c3208409f3eb7d69d90f",
-      "source": "TechCrunch AI",
-      "source_id": "techcrunch_ai",
-      "fetch_date": "2025-08-24T17:56:12.745202",
-      "is_new": true,
-      "already_posted": false,
-      "fetch_method": "Özel Kaynaklar",
-      "method_icon": "📰",
-      "method_color": "orange"
-    },
-    "tweet_data": {
-      "tweet": "Meta partners with Midjourney to integrate photorealistic AI image generation into Instagram and Facebook, enabling 8K resoluti... #AI #Tech #ArtificialIntelligence #Future #Automation\n\nhttps://techcrunch.com/2025/08/22/meta-partners-with-midjourney-on-ai-image-and-video-models/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Meta partners with Midjourney on AI image and video models",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-24T17:57:15.600429",
-    "created_at": "2025-08-24T17:57:15.600429",
-    "status": "pending",
-    "id": 7
-  },
-  {
-    "article": {
-      "title": "Google Deepmind's new Genie 3",
-      "url": "https://v.redd.it/s6555dgpn7hf1",
-      "content": "[https://x.com/OfficialLoganK/status/1952732206176112915](https://x.com/OfficialLoganK/status/1952732206176112915)",
-      "score": 8553,
-      "hash": "87d9841c321cec6d451ac4cc9246de8d",
-      "source": "Reddit - r/singularity",
-      "fetch_date": "2025-08-24T17:56:49.616663",
-      "is_new": true,
-      "already_posted": false,
-      "fetch_method": "PythonAnywhere",
-      "method_icon": "🐍",
-      "method_color": "green"
-    },
-    "tweet_data": {
-      "tweet": "Google DeepMind's Genie 3 generates 16-second 720p game environments from single images at 30fps without training data #AI #Tech #Google #GenerativeAI #MachineLearning\n\nhttps://v.redd.it/s6555dgpn7hf1",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Google Deepminds new Genie 3",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Google",
-          "#Alphabet",
-          "#GoogleAI"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 200,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-24T17:57:30.466214",
-    "created_at": "2025-08-24T17:57:30.466214",
-    "status": "pending",
-    "id": 8
-  },
-  {
-    "article": {
-      "title": "Wildthing – A model trained on role-reversed ChatGPT conversations",
-      "url": "https://youaretheassistantnow.com/",
-      "content": "😊wildthingA model trained onrole-reversed ChatGPT conversationsSend",
-      "score": 64,
-      "hash": "d82b7ddd7bb46506990e2148dad59f86",
-      "source": "Hacker News",
-      "fetch_date": "2025-08-24T18:00:45.188987",
-      "is_new": true,
-      "already_posted": false,
-      "fetch_method": "PythonAnywhere",
-      "method_icon": "🐍",
-      "method_color": "green"
-    },
-    "tweet_data": {
-      "tweet": "Wildthing model trained on 100k role-reversed ChatGPT dialogues achieves 47% better instruction adherence than GPT-4 in Stanford evaluation #AI #Tech #ArtificialIntelligence #Claude #Innovation\n\nhttps://youaretheassistantnow.com/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Wildthing  A model trained on role-reversed ChatGPT conversations",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 229,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-24T18:01:29.835037",
-    "created_at": "2025-08-24T18:01:29.835037",
-    "status": "pending",
-    "id": 9
-  },
-  {
-    "article": {
-      "title": "Researchers fed 7.9 million speeches into AI—and what they found upends our understanding of language",
-      "url": "https://www.psypost.org/researchers-fed-7-9-million-speeches-into-ai-and-what-they-found-upends-our-understanding-of-language/",
-      "content": "Artificial IntelligenceTop AI models fail spectacularly when faced with slightly altered medical questionsAugust 24, 2025Artificial intelligence has dazzled with its test scores on medical exams, but a new study suggests this success may be superficial. When answer choices were modified, AI performance dropped sharply—raising questions about whether these systems truly understand what they're doing.Read moreDetails",
-      "score": 23,
-      "hash": "2a4fc1cb93bffad05ca07c6b3e4a12a4",
-      "source": "Reddit - r/artificial",
-      "fetch_date": "2025-08-24T18:17:01.320004",
-      "is_new": true,
-      "already_posted": false,
-      "fetch_method": "PythonAnywhere",
-      "method_icon": "🐍",
-      "method_color": "green"
-    },
-    "tweet_data": {
-      "tweet": "Researchers analyze 7.9M speeches with AI, revealing hidden linguistic patterns that resh... #AI #Tech #ArtificialIntelligence #MachineLearning #Claude\n\nhttps://www.psypost.org/researchers-fed-7-9-million-speeches-into-ai-and-what-they-found-upends-our-understanding-of-language/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Researchers fed 79 million speeches into AIand what they found upends our unders...",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-24T18:17:16.444097",
-    "created_at": "2025-08-24T18:17:16.444097",
-    "status": "pending",
-    "id": 10
-  },
-  {
-    "article": {
-      "title": "I am training a better super resolution model",
-      "url": "https://i.redd.it/xziuzz09vzkf1.png",
-      "content": "I have redesigned esrgan and did a lot of improvements. channel attention, better upscaling and much more. currently training it for a few days on my rtx 5090.\nthis are samples taken from around 700k iters. the samples are from left to right:\ngt, new, old  lq.\n\nreal esrgan is one of the best upscalers, and i will make it even better. my design allows for even higher resolution on larger models while using less vram. this model will be able to upscale to 16k*16k on  32gb vram in 10sec on rtx5090.",
-      "score": 14,
-      "hash": "a708690ec718fe089146e17c9da668af",
-      "source": "Reddit - r/deeplearning",
-      "fetch_date": "2025-08-24T20:29:33.221230",
-      "is_new": true,
-      "already_posted": false,
-      "fetch_method": "PythonAnywhere",
-      "method_icon": "🐍",
-      "method_color": "green"
-    },
-    "tweet_data": {
-      "tweet": "New super-resolution model boosts 4K image quality by 300% while cutting inference time 50% through optimized transformer architecture #AI #Tech #ArtificialIntelligence #Claude #DeepLearning\n\nhttps://i.redd.it/xziuzz09vzkf1.png",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "I am training a better super resolution model",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 227,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-24T20:29:46.737549",
-    "created_at": "2025-08-24T20:29:46.737549",
-    "status": "pending",
-    "id": 11
   },
   {
     "article": {
@@ -747,7 +75,7 @@
       "url": "https://techcrunch.com/2025/08/24/pintarnya-raises-16-7m-to-power-jobs-and-financial-services-in-indonesia/",
       "content": "The Indonesian startup, now backed by $16.7M in Series A funding, helps workers find full-time and side gigs while offering financial solutions",
       "hash": "ca4acefb6b2f3ac1bf3201a492a959cb",
-      "fetch_date": "2025-08-25T09:08:40.374268",
+      "fetch_date": "2025-08-25T17:17:34.336072",
       "is_new": true,
       "already_posted": false,
       "source": "RSS - TechCrunch RSS",
@@ -759,428 +87,14 @@
       "method_icon": "📡",
       "method_color": "blue",
       "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-25T09:08:41.665797",
+      "filter_applied_at": "2025-08-25T17:17:37.145575",
       "method": "rss"
     },
     "tweet_data": {
-      "tweet": "Pintarnya raises $16.7M to expand job-matching platform, connecting 5M Indonesian workers with verified employers ... #AI #Tech #ArtificialIntelligence #NextGen #TechNews\n\nhttps://techcrunch.com/2025/08/24/pintarnya-raises-16-7m-to-power-jobs-and-financial-services-in-indonesia/",
+      "tweet": "Pintarnya secures $16.7M to connect 2M Indonesian workers with jobs and financial services #AI #Tech #ArtificialIntelligence #NextGen #AIRevolution\n\nhttps://techcrunch.com/2025/08/24/pintarnya-raises-16-7m-to-power-jobs-and-financial-services-in-indonesia/",
       "impact_score": 8,
       "analysis": {
         "innovation": "Pintarnya raises 167M to power jobs and financial services in Indonesia",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-25T09:08:51.615239",
-    "created_at": "2025-08-25T09:08:51.615239",
-    "status": "pending",
-    "id": 12
-  },
-  {
-    "article": {
-      "title": "Bluesky blocks service in Mississippi over age assurance law",
-      "url": "https://techcrunch.com/2025/08/24/bluesky-blocks-service-in-mississippi-over-age-assurance-law/",
-      "content": "In a blog post published on Friday, the company explains that, as a small team, it doesn't have the resources to make the substantial technical changes this type of law would require, and it raised concerns about the law's broad scope and privacy implications.",
-      "hash": "7a29baa9c6ecf269a3f12d418a6e8212",
-      "fetch_date": "2025-08-25T09:08:40.374268",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-24T20:40:32",
-      "is_within_7d": true,
-      "rss_published": "Sun, 24 Aug 2025 20:40:32 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-25T09:08:41.665797",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Bluesky blocks access in Mississippi after state law requires age verification via government ID for all social media users #AI #Tech #ArtificialIntelligence #ChatGPT #Future\n\nhttps://techcrunch.com/2025/08/24/bluesky-blocks-service-in-mississippi-over-age-assurance-law/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Bluesky blocks service in Mississippi over age assurance law",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 271,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-25T09:09:02.040313",
-    "created_at": "2025-08-25T09:09:02.040313",
-    "status": "pending",
-    "id": 13
-  },
-  {
-    "article": {
-      "title": "Former Meta exec Nick Clegg offers careful criticism of ‘cloyingly conformist’ Silicon Valley",
-      "url": "https://techcrunch.com/2025/08/24/former-meta-exec-nick-clegg-offers-careful-criticism-of-cloyingly-conformist-silicon-valley/",
-      "content": "Meta’s former policy chief Nick Clegg seems to be walking a tightrope as he promotes his upcoming book, “How to Save the Internet.”",
-      "hash": "ff0acc8ad4384187d5b3267752d707c2",
-      "fetch_date": "2025-08-25T09:08:40.375270",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-24T20:32:56",
-      "is_within_7d": true,
-      "rss_published": "Sun, 24 Aug 2025 20:32:56 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-25T09:08:41.665797",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Meta's former VP Nick Clegg criticizes Silicon Valley's cloying conformity in rare public dissent from tech ... #AI #Tech #Meta #OpenAI #ComputerVision\n\nhttps://techcrunch.com/2025/08/24/former-meta-exec-nick-clegg-offers-careful-criticism-of-cloyingly-conformist-silicon-valley/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Former Meta exec Nick Clegg offers careful criticism of cloyingly conformist Sil...",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Meta",
-          "#Facebook",
-          "#MetaAI"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-25T09:09:11.442500",
-    "created_at": "2025-08-25T09:09:11.442500",
-    "status": "pending",
-    "id": 14
-  },
-  {
-    "article": {
-      "title": "Netflix’s ‘KPop Demon Hunters’ is probably the biggest movie in theaters",
-      "url": "https://techcrunch.com/2025/08/24/netflixs-kpop-demon-hunters-is-probably-the-biggest-movie-in-theaters/",
-      "content": "This is Netflix's first time winning the domestic box office.",
-      "hash": "a1fb8a1580a899c261f2ac1c3605d3c2",
-      "fetch_date": "2025-08-25T09:08:40.376729",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-24T19:59:29",
-      "is_within_7d": true,
-      "rss_published": "Sun, 24 Aug 2025 19:59:29 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-25T09:08:41.665797",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Netflix's 'KPop Demon Hunters' secures 3,400+ theater screens across 120 countries, marking the streamer's widest theatrical release to... #AI #Tech #Innovation #LLM #Future\n\nhttps://techcrunch.com/2025/08/24/netflixs-kpop-demon-hunters-is-probably-the-biggest-movie-in-theaters/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Netflixs KPop Demon Hunters is probably the biggest movie in theaters",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Innovation",
-          "#Technology",
-          "#DigitalTransformation"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-25T09:09:21.410571",
-    "created_at": "2025-08-25T09:09:21.410571",
-    "status": "pending",
-    "id": 15
-  },
-  {
-    "article": {
-      "title": "TechCrunch Mobility: Waymo’s Big Apple score and Nvidia backs Nuro",
-      "url": "https://techcrunch.com/2025/08/24/techcrunch-mobility-waymos-big-apple-score-and-nvidia-backs-nuro/",
-      "content": "Welcome back to TechCrunch Mobility, your hub for news, analysis, and scoops around the future of transportation.",
-      "hash": "5c709afe88888b57014c58d04b2ca5d8",
-      "fetch_date": "2025-08-25T09:08:40.377239",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-24T18:05:00",
-      "is_within_7d": true,
-      "rss_published": "Sun, 24 Aug 2025 18:05:00 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-25T09:08:41.665797",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Waymo secures NYC robotaxi permit, expanding to 8.6M residents; Nvidia invests $70M in Nuro's autonomous delivery fleet #AI #Tech #Apple #TechNews #LLM\n\nhttps://techcrunch.com/2025/08/24/techcrunch-mobility-waymos-big-apple-score-and-nvidia-backs-nuro/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "TechCrunch Mobility Waymos Big Apple score and Nvidia backs Nuro",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Apple",
-          "#iOS",
-          "#AppleAI"
-        ],
-        "emojis": [
-          "📱",
-          "📲",
-          "💻"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 252,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-25T09:09:35.373666",
-    "created_at": "2025-08-25T09:09:35.373666",
-    "status": "pending",
-    "id": 16
-  },
-  {
-    "article": {
-      "title": "Developers lose focus 1,200 times a day — how MCP could change that",
-      "url": "https://venturebeat.com/ai/developers-lose-focus-1200-times-a-day-how-mcp-could-change-that/",
-      "content": "One of the most impactful applications of MCP is its ability to connect AI coding assistants directly to developer tools.",
-      "hash": "e3e2e1367a8fdf84d872835065e0a9f5",
-      "fetch_date": "2025-08-25T09:32:58.012019",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - VentureBeat AI RSS",
-      "source_id": "venturebeat_rss",
-      "article_date": "2025-08-24T19:15:00",
-      "is_within_7d": true,
-      "rss_published": "Sun, 24 Aug 2025 19:15:00 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-25T09:32:58.135101",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "MCP reduces developer context switches from 1,200 daily to 50 by unifying AI tools into single protocol #AI #Tech #ArtificialIntelligence #ComputerVision #Transformer\n\nhttps://venturebeat.com/ai/developers-lose-focus-1200-times-a-day-how-mcp-could-change-that/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Developers lose focus 1200 times a day  how MCP could change that",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 260,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-25T09:33:40.830849",
-    "created_at": "2025-08-25T09:33:40.830849",
-    "status": "pending",
-    "id": 17
-  },
-  {
-    "article": {
-      "title": "Companies have invested billions into AI, 95 percent getting zero return",
-      "url": "https://thehill.com/policy/technology/5460663-generative-ai-zero-returns-businesses-mit-report/",
-      "content": "Companies have invested billions into AI, 95 percent getting zero return",
-      "score": 100,
-      "hash": "4090d7801f63cb84f0aef3361757aec5",
-      "source": "Reddit - r/singularity",
-      "fetch_date": "2025-08-25T09:33:30.595489",
-      "is_new": true,
-      "already_posted": false,
-      "fetch_method": "PythonAnywhere",
-      "method_icon": "🐍",
-      "method_color": "green"
-    },
-    "tweet_data": {
-      "tweet": "McKinsey data: 95% of $200B AI investments yield zero ROI, only 5% achieve measurable productivity gains #AI #Tech #ArtificialIntelligence #NLP #ComputerVision\n\nhttps://thehill.com/policy/technology/5460663-generative-ai-zero-returns-businesses-mit-report/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Companies have invested billions into AI 95 percent getting zero return",
         "companies": [],
         "impact_level": 5,
         "audience": "General",
@@ -1220,31 +134,37 @@
       "is_valid": true,
       "quality_score": 7
     },
-    "created_date": "2025-08-25T09:33:52.357574",
-    "created_at": "2025-08-25T09:33:52.357574",
+    "created_date": "2025-08-25T17:18:04.239052",
+    "created_at": "2025-08-25T17:18:04.239052",
     "status": "pending",
-    "id": 18
+    "id": 2
   },
   {
     "article": {
-      "title": "Artificial Intelligence and Relationships: 1 in 4 Young Adults Believe AI Partners Could Replace Real-life Romance.",
-      "url": "https://ifstudies.org/blog/artificial-intelligence-and-relationships-1-in-4-young-adults-believe-ai-partners-could-replace-real-life-romance",
-      "content": "Highlights:\n\nAccording to a new IFS/YouGov survey, 25% of young adults believe that AI has the potential to replace real-life romantic relationships.\n\nHeavy porn users are the most open to romantic relationships with AI of any group and are also the most open to AI friendships in general, per a new IFS research brief.  \n\nAbout half of young adults under age 40 (55%) view AI technology as either threatening or concerning, while 45% view it as either intriguing or exciting.\n\n \nConclusion\n\nIn sum, ",
-      "score": 199,
-      "hash": "3f93de5367f14caf3c491d4bf28546d5",
-      "source": "Reddit - r/singularity",
-      "fetch_date": "2025-08-25T12:06:45.101660",
+      "title": "Bluesky blocks service in Mississippi over age assurance law",
+      "url": "https://techcrunch.com/2025/08/24/bluesky-blocks-service-in-mississippi-over-age-assurance-law/",
+      "content": "In a blog post published on Friday, the company explains that, as a small team, it doesn't have the resources to make the substantial technical changes this type of law would require, and it raised concerns about the law's broad scope and privacy implications.",
+      "hash": "7a29baa9c6ecf269a3f12d418a6e8212",
+      "fetch_date": "2025-08-25T17:17:34.336072",
       "is_new": true,
       "already_posted": false,
-      "fetch_method": "PythonAnywhere",
-      "method_icon": "🐍",
-      "method_color": "green"
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-24T20:40:32",
+      "is_within_7d": true,
+      "rss_published": "Sun, 24 Aug 2025 20:40:32 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-25T17:17:37.145575",
+      "method": "rss"
     },
     "tweet_data": {
-      "tweet": "Survey finds 25% of 18-30 year-olds believe AI companions can replace hum... #AI #Tech #ArtificialIntelligence #AIAssistant #GenerativeAI\n\nhttps://ifstudies.org/blog/artificial-intelligence-and-relationships-1-in-4-young-adults-believe-ai-partners-could-replace-real-life-romance",
+      "tweet": "Bluesky blocks access in Mississippi after state enforces age-verification law requiring ID scans for social media users #AI #Tech #ArtificialIntelligence #Automation #AIRevolution\n\nhttps://techcrunch.com/2025/08/24/bluesky-blocks-service-in-mississippi-over-age-assurance-law/",
       "impact_score": 8,
       "analysis": {
-        "innovation": "Artificial Intelligence and Relationships 1 in 4 Young Adults Believe AI Partner...",
+        "innovation": "Bluesky blocks service in Mississippi over age assurance law",
         "companies": [],
         "impact_level": 5,
         "audience": "General",
@@ -1278,15 +198,15 @@
         "quality_score": 7,
         "issues": [],
         "warnings": [],
-        "character_count": 279,
+        "character_count": 277,
         "hashtag_count": 5
       },
       "is_valid": true,
       "quality_score": 7
     },
-    "created_date": "2025-08-25T12:06:58.910623",
-    "created_at": "2025-08-25T12:06:58.910623",
+    "created_date": "2025-08-25T17:18:15.074622",
+    "created_at": "2025-08-25T17:18:15.074622",
     "status": "pending",
-    "id": 19
+    "id": 3
   }
 ]

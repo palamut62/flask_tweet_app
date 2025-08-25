@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+import threading
+import time
 import os
 import json
 import time
@@ -122,6 +124,57 @@ HISTORY_FILE = "posted_articles.json"
 last_check_time = None
 automation_running = False
 background_scheduler_running = False
+
+# Global ilerleme durumu değişkenleri
+progress_status = {
+    'is_running': False,
+    'current_step': '',
+    'total_steps': 0,
+    'current_step_number': 0,
+    'message': '',
+    'start_time': None,
+    'estimated_time': 0
+}
+progress_lock = threading.Lock()
+
+def update_progress(step, message, step_number=None, total_steps=None):
+    """İlerleme durumunu güncelle"""
+    global progress_status
+    with progress_lock:
+        progress_status['current_step'] = step
+        progress_status['message'] = message
+        if step_number is not None:
+            progress_status['current_step_number'] = step_number
+        if total_steps is not None:
+            progress_status['total_steps'] = total_steps
+        
+        # Tahmini süre hesapla
+        if progress_status['start_time']:
+            elapsed = time.time() - progress_status['start_time']
+            if step_number and total_steps and step_number > 0:
+                avg_time_per_step = elapsed / step_number
+                remaining_steps = total_steps - step_number
+                progress_status['estimated_time'] = avg_time_per_step * remaining_steps
+
+def start_progress():
+    """İlerleme takibini başlat"""
+    global progress_status
+    with progress_lock:
+        progress_status['is_running'] = True
+        progress_status['current_step'] = 'Başlatılıyor...'
+        progress_status['message'] = 'Sistem hazırlanıyor...'
+        progress_status['current_step_number'] = 0
+        progress_status['total_steps'] = 0
+        progress_status['start_time'] = time.time()
+        progress_status['estimated_time'] = 0
+
+def end_progress():
+    """İlerleme takibini sonlandır"""
+    global progress_status
+    with progress_lock:
+        progress_status['is_running'] = False
+        progress_status['current_step'] = 'Tamamlandı'
+        progress_status['message'] = 'İşlem başarıyla tamamlandı'
 
 def ensure_tweet_ids(pending_tweets):
     """Pending tweets'lerin ID'lerini güvenli şekilde kontrol et ve düzelt"""
@@ -564,7 +617,15 @@ def index():
                              news_count=0,
                              error=str(e))
 
-@app.route('/check_articles')
+@app.route('/api/progress')
+@login_required
+def get_progress():
+    """İlerleme durumunu döndür"""
+    global progress_status
+    with progress_lock:
+        return jsonify(progress_status)
+
+@app.route('/check_articles', methods=['GET', 'POST'])
 @login_required
 def check_articles():
     """Manuel makale kontrolü"""
@@ -751,9 +812,14 @@ def fetch_latest_ai_articles_with_mcp():
 def check_and_post_articles():
     """Makale kontrol ve paylaşım fonksiyonu - MCP Firecrawl entegrasyonlu"""
     try:
+        # İlerleme takibini başlat
+        start_progress()
+        update_progress("Sistem Başlatılıyor", "Makale kontrol sistemi hazırlanıyor...", 1, 8)
+        
         safe_log("Yeni makaleler kontrol ediliyor...", "INFO")
         
         # Ayarları yükle
+        update_progress("Ayarlar Yükleniyor", "Sistem ayarları kontrol ediliyor...", 2, 8)
         settings = load_automation_settings()
         # AI API anahtarı opsiyonel olmalı: OpenRouter öncelikli, Google yedek, yoksa yerel fallback
         api_key = os.environ.get('OPENROUTER_API_KEY') or ""
@@ -762,10 +828,21 @@ def check_and_post_articles():
             terminal_log("⚠️ Hiçbir AI API anahtarı bulunamadı – fallback tweet oluşturma kullanılacak", "warning")
         
         # Yeni makaleleri çek (akıllı sistem ile)
-        from utils import fetch_latest_ai_articles_smart
-        articles = fetch_latest_ai_articles_smart()
+        update_progress("Haberler Çekiliyor", "Güncel haberler toplanıyor...", 3, 8)
+        try:
+            from utils import fetch_latest_ai_articles_smart
+            terminal_log("🔍 Akıllı haber çekme sistemi başlatılıyor...", "info")
+            articles = fetch_latest_ai_articles_smart()
+            terminal_log(f"📊 {len(articles) if articles else 0} makale bulundu", "info")
+        except Exception as fetch_error:
+            terminal_log(f"❌ Haber çekme hatası: {fetch_error}", "error")
+            import traceback
+            terminal_log(f"🔍 Hata detayı: {traceback.format_exc()}", "error")
+            end_progress()
+            return {"success": False, "message": f"Haber çekme hatası: {str(fetch_error)}"}
         
         if not articles:
+            end_progress()
             return {"success": True, "message": "Yeni makale bulunamadı"}
         
         posted_count = 0
@@ -779,8 +856,12 @@ def check_and_post_articles():
         posted_articles = load_json("posted_articles.json")
         pending_tweets = load_json("pending_tweets.json")
         
-        for article in articles[:max_articles]:
+        update_progress("Makaleler İşleniyor", f"{len(articles[:max_articles])} makale işleniyor...", 4, 8)
+        
+        for i, article in enumerate(articles[:max_articles]):
             try:
+                # İlerleme güncelle - makale işleme aşaması
+                update_progress("Makale İşleniyor", f"Makale {i+1}/{len(articles[:max_articles])}: {article.get('title', '')[:50]}...", 4 + i, 4 + len(articles[:max_articles]))
                 # Önce makale içeriğinin kaliteli olup olmadığını kontrol et
                 from utils import is_article_content_valid
                 is_valid, reason = is_article_content_valid(article)
@@ -866,6 +947,7 @@ def check_and_post_articles():
                     continue
                 
                 # Tweet oluştur - tema ile
+                update_progress("Tweet Oluşturuluyor", f"AI ile tweet oluşturuluyor: {article['title'][:50]}...", 4 + i, 4 + len(articles[:max_articles]))
                 theme = settings.get('tweet_theme', 'bilgilendirici')
                 terminal_log(f"🤖 Tweet oluşturuluyor (tema: {theme}): {article['title'][:50]}...", "info")
                 tweet_data = generate_ai_tweet_with_content(article, api_key, theme)
@@ -888,6 +970,7 @@ def check_and_post_articles():
                     continue
                 
                 # Tweet kalite kontrolü - OTOMATIK SİSTEMDE KALİTELİ TWEET ZORUNLULUĞU
+                update_progress("Kalite Kontrolü", f"Tweet kalitesi değerlendiriliyor: {article['title'][:50]}...", 4 + i, 4 + len(articles[:max_articles]))
                 if tweet_data.get('is_valid') == False:
                     quality_issues = tweet_data.get('quality_analysis', {}).get('issues', [])
                     terminal_log(f"❌ Tweet kalite kontrolünden geçemedi: {', '.join(quality_issues[:2])}", "error")
@@ -913,6 +996,7 @@ def check_and_post_articles():
                 
                 if auto_post and not manual_approval:
                     # Direkt paylaş
+                    update_progress("Tweet Paylaşılıyor", f"Tweet paylaşılıyor: {article['title'][:50]}...", 4 + i, 4 + len(articles[:max_articles]))
                     tweet_result = post_tweet(tweet_data['tweet'], article['title'])
                     
                     if tweet_result.get('success'):
@@ -1074,6 +1158,7 @@ def check_and_post_articles():
                     
                     if not is_duplicate:
                         # ID ekle
+                        update_progress("Tweet Kaydediliyor", f"Tweet onay listesine ekleniyor: {article['title'][:50]}...", 4 + i, 4 + len(articles[:max_articles]))
                         new_tweet['id'] = len(pending_tweets) + 1
                         pending_tweets.append(new_tweet)
                         save_json("pending_tweets.json", pending_tweets)
@@ -1097,10 +1182,12 @@ def check_and_post_articles():
             message = f"{len(articles)} makale bulundu, ancak hiçbiri tweet haline dönüştürülemedi"
         
         terminal_log(f"✅ Otomatik kontrol tamamlandı: {message}", "success")
+        end_progress()
         return {"success": True, "message": message, "posted_count": posted_count, "pending_count": pending_count}
         
     except Exception as e:
         terminal_log(f"❌ Makale kontrol hatası: {e}", "error")
+        end_progress()
         return {"success": False, "message": str(e)}
 
 @app.route('/post_tweet', methods=['POST'])

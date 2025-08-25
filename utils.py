@@ -4796,7 +4796,13 @@ def fetch_articles_from_custom_sources():
                 terminal_log(f"📰 {source['name']} kaynağı kontrol ediliyor...", "info")
                 
                 # Kaynak URL'sini çek
-                articles = fetch_articles_from_single_source(source)
+                try:
+                    articles = fetch_articles_from_single_source(source)
+                except Exception as source_error:
+                    terminal_log(f"❌ {source['name']} kaynak hatası: {source_error}", "error")
+                    source["success_rate"] = max(0, source.get("success_rate", 100) - 30)
+                    source["last_checked"] = datetime.now().isoformat()
+                    continue
                 
                 if articles:
                     all_articles.extend(articles)
@@ -5153,10 +5159,18 @@ def fetch_articles_from_single_source(source):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
         
-        response = requests.get(url, headers=headers, timeout=30)
-        response.raise_for_status()
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as req_error:
+            safe_print(f"❌ HTTP istek hatası ({source_name}): {req_error}")
+            return []
         
-        soup = BeautifulSoup(response.content, 'html.parser')
+        try:
+            soup = BeautifulSoup(response.content, 'html.parser')
+        except Exception as soup_error:
+            safe_print(f"❌ HTML parse hatası ({source_name}): {soup_error}")
+            return []
         articles = []
         
         # Eğer selector_type auto_detect ise veya mevcut selector'lar çalışmıyorsa
@@ -6835,8 +6849,15 @@ def fetch_articles_with_rss_only():
                 safe_print(f"🔍 RSS çekiliyor: {rss_source['name']}")
                 
                 # RSS feed'i parse et
-                import feedparser
-                feed = feedparser.parse(rss_source['url'])
+                try:
+                    import feedparser
+                    feed = feedparser.parse(rss_source['url'])
+                except ImportError as import_error:
+                    safe_print(f"❌ feedparser kütüphanesi yüklü değil: {import_error}")
+                    continue
+                except Exception as feed_error:
+                    safe_print(f"❌ RSS feed parse hatası ({rss_source['name']}): {feed_error}")
+                    continue
                 
                 if not feed.entries:
                     safe_print(f"⚠️ {rss_source['name']}: RSS feed'de entry bulunamadı")
@@ -7454,12 +7475,22 @@ def fetch_latest_ai_articles_smart():
         MAX_EXECUTION_TIME = 45  # 45 saniye maksimum çalışma süresi (daha hızlı)
         
         # Otomasyon ayarlarını yükle
-        settings = load_automation_settings()
-        max_articles = settings.get('max_articles_per_run', 5)  # Varsayılan 5 makale
+        try:
+            settings = load_automation_settings()
+            max_articles = settings.get('max_articles_per_run', 5)  # Varsayılan 5 makale
+        except Exception as settings_error:
+            safe_print(f"⚠️ Ayarlar yükleme hatası: {settings_error}")
+            settings = {}
+            max_articles = 5
         
-        method_info = get_news_fetching_method()
-        method = method_info['method']
-        mcp_enabled = method_info['mcp_enabled']
+        try:
+            method_info = get_news_fetching_method()
+            method = method_info['method']
+            mcp_enabled = method_info['mcp_enabled']
+        except Exception as method_error:
+            safe_print(f"⚠️ Yöntem bilgisi alma hatası: {method_error}")
+            method = 'auto'
+            mcp_enabled = False
         
         safe_print(f"[HEDEF] Haber çekme yöntemi: {method} (MCP: {'Aktif' if mcp_enabled else 'Pasif'})")
         safe_print(f"[BILGI] Maksimum makale limiti: {max_articles}")

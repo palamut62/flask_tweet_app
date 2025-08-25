@@ -232,8 +232,22 @@
             <button id="check-articles-btn" onclick="startArticleCheck()" class="btn-minimal btn-minimal-primary btn-minimal-sm">
                 <i class="fas fa-sync-alt"></i>
                 <span id="check-text">Şimdi Kontrol Et</span>
-                                </button>
-                            </div>
+            </button>
+            
+            <!-- İlerleme Çubuğu -->
+            <div id="progress-container" class="mt-3" style="display: none;">
+                <div class="progress-info d-flex justify-content-between align-items-center mb-2">
+                    <span id="progress-step" class="text-primary fw-bold">Hazırlanıyor...</span>
+                    <span id="progress-percentage" class="text-muted small">0%</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%"></div>
+                </div>
+                <div id="progress-message" class="text-muted small mt-1">Sistem başlatılıyor...</div>
+                <div id="progress-time" class="text-muted small">Tahmini süre: --</div>
+            </div>
+        </div>
                         </div>
 
     <!-- Bekleyen Tweet'ler Başlığı -->
@@ -817,10 +831,17 @@ function deleteTweet(tweetId) {
 function startArticleCheck() {
     const button = document.getElementById('check-articles-btn');
     const originalText = button.innerHTML;
+    const progressContainer = document.getElementById('progress-container');
     
     // Loading state
     button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Kontrol Ediliyor...';
     button.disabled = true;
+    
+    // İlerleme çubuğunu göster
+    progressContainer.style.display = 'block';
+    
+    // İlerleme takibini başlat
+    let progressInterval = setInterval(updateProgressUI, 500);
     
     fetch('/check_articles', {
         method: 'POST',
@@ -831,6 +852,10 @@ function startArticleCheck() {
     })
     .then(response => response.json())
     .then(data => {
+        // İlerleme takibini durdur
+        clearInterval(progressInterval);
+        progressContainer.style.display = 'none';
+        
         if (data.success) {
             showToast(data.message, 'success');
             if (data.should_refresh) {
@@ -838,16 +863,61 @@ function startArticleCheck() {
             }
         } else {
             showToast(`Hata: ${data.error || 'Bilinmeyen hata oluştu'}`, 'error');
-            }
+        }
         button.innerHTML = originalText;
         button.disabled = false;
     })
     .catch(error => {
+        // İlerleme takibini durdur
+        clearInterval(progressInterval);
+        progressContainer.style.display = 'none';
+        
         console.error('Error:', error);
         showToast('Kontrol sırasında hata oluştu!', 'error');
         button.innerHTML = originalText;
         button.disabled = false;
     });
+}
+
+// İlerleme UI'sını güncelle
+function updateProgressUI() {
+    fetch('/api/progress')
+        .then(response => response.json())
+        .then(data => {
+            const progressStep = document.getElementById('progress-step');
+            const progressPercentage = document.getElementById('progress-percentage');
+            const progressBar = document.getElementById('progress-bar');
+            const progressMessage = document.getElementById('progress-message');
+            const progressTime = document.getElementById('progress-time');
+            
+            if (data.is_running) {
+                // İlerleme yüzdesini hesapla
+                let percentage = 0;
+                if (data.total_steps > 0 && data.current_step_number > 0) {
+                    percentage = Math.round((data.current_step_number / data.total_steps) * 100);
+                }
+                
+                // UI'ı güncelle
+                progressStep.textContent = data.current_step;
+                progressPercentage.textContent = `${percentage}%`;
+                progressBar.style.width = `${percentage}%`;
+                progressMessage.textContent = data.message;
+                
+                // Tahmini süreyi göster
+                if (data.estimated_time > 0) {
+                    const minutes = Math.ceil(data.estimated_time / 60);
+                    progressTime.textContent = `Tahmini süre: ${minutes} dakika`;
+                } else {
+                    progressTime.textContent = 'Tahmini süre: --';
+                }
+            } else {
+                // İşlem tamamlandıysa gizle
+                document.getElementById('progress-container').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Progress update error:', error);
+        });
 }
 
 // Reddedilen makaleler fonksiyonları
