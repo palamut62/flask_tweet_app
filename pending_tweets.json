@@ -740,5 +740,355 @@
     "created_at": "2025-08-24T20:29:46.737549",
     "status": "pending",
     "id": 11
+  },
+  {
+    "article": {
+      "title": "Pintarnya raises $16.7M to power jobs and financial services in Indonesia",
+      "url": "https://techcrunch.com/2025/08/24/pintarnya-raises-16-7m-to-power-jobs-and-financial-services-in-indonesia/",
+      "content": "The Indonesian startup, now backed by $16.7M in Series A funding, helps workers find full-time and side gigs while offering financial solutions",
+      "hash": "ca4acefb6b2f3ac1bf3201a492a959cb",
+      "fetch_date": "2025-08-25T09:08:40.374268",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-24T22:00:00",
+      "is_within_7d": true,
+      "rss_published": "Sun, 24 Aug 2025 22:00:00 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-25T09:08:41.665797",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Pintarnya raises $16.7M to expand job-matching platform, connecting 5M Indonesian workers with verified employers ... #AI #Tech #ArtificialIntelligence #NextGen #TechNews\n\nhttps://techcrunch.com/2025/08/24/pintarnya-raises-16-7m-to-power-jobs-and-financial-services-in-indonesia/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Pintarnya raises 167M to power jobs and financial services in Indonesia",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-25T09:08:51.615239",
+    "created_at": "2025-08-25T09:08:51.615239",
+    "status": "pending",
+    "id": 12
+  },
+  {
+    "article": {
+      "title": "Bluesky blocks service in Mississippi over age assurance law",
+      "url": "https://techcrunch.com/2025/08/24/bluesky-blocks-service-in-mississippi-over-age-assurance-law/",
+      "content": "In a blog post published on Friday, the company explains that, as a small team, it doesn't have the resources to make the substantial technical changes this type of law would require, and it raised concerns about the law's broad scope and privacy implications.",
+      "hash": "7a29baa9c6ecf269a3f12d418a6e8212",
+      "fetch_date": "2025-08-25T09:08:40.374268",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-24T20:40:32",
+      "is_within_7d": true,
+      "rss_published": "Sun, 24 Aug 2025 20:40:32 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-25T09:08:41.665797",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Bluesky blocks access in Mississippi after state law requires age verification via government ID for all social media users #AI #Tech #ArtificialIntelligence #ChatGPT #Future\n\nhttps://techcrunch.com/2025/08/24/bluesky-blocks-service-in-mississippi-over-age-assurance-law/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Bluesky blocks service in Mississippi over age assurance law",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 271,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-25T09:09:02.040313",
+    "created_at": "2025-08-25T09:09:02.040313",
+    "status": "pending",
+    "id": 13
+  },
+  {
+    "article": {
+      "title": "Former Meta exec Nick Clegg offers careful criticism of ‘cloyingly conformist’ Silicon Valley",
+      "url": "https://techcrunch.com/2025/08/24/former-meta-exec-nick-clegg-offers-careful-criticism-of-cloyingly-conformist-silicon-valley/",
+      "content": "Meta’s former policy chief Nick Clegg seems to be walking a tightrope as he promotes his upcoming book, “How to Save the Internet.”",
+      "hash": "ff0acc8ad4384187d5b3267752d707c2",
+      "fetch_date": "2025-08-25T09:08:40.375270",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-24T20:32:56",
+      "is_within_7d": true,
+      "rss_published": "Sun, 24 Aug 2025 20:32:56 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-25T09:08:41.665797",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Meta's former VP Nick Clegg criticizes Silicon Valley's cloying conformity in rare public dissent from tech ... #AI #Tech #Meta #OpenAI #ComputerVision\n\nhttps://techcrunch.com/2025/08/24/former-meta-exec-nick-clegg-offers-careful-criticism-of-cloyingly-conformist-silicon-valley/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Former Meta exec Nick Clegg offers careful criticism of cloyingly conformist Sil...",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Meta",
+          "#Facebook",
+          "#MetaAI"
+        ],
+        "emojis": [
+          "🚀",
+          "💻",
+          "🌟"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-25T09:09:11.442500",
+    "created_at": "2025-08-25T09:09:11.442500",
+    "status": "pending",
+    "id": 14
+  },
+  {
+    "article": {
+      "title": "Netflix’s ‘KPop Demon Hunters’ is probably the biggest movie in theaters",
+      "url": "https://techcrunch.com/2025/08/24/netflixs-kpop-demon-hunters-is-probably-the-biggest-movie-in-theaters/",
+      "content": "This is Netflix's first time winning the domestic box office.",
+      "hash": "a1fb8a1580a899c261f2ac1c3605d3c2",
+      "fetch_date": "2025-08-25T09:08:40.376729",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-24T19:59:29",
+      "is_within_7d": true,
+      "rss_published": "Sun, 24 Aug 2025 19:59:29 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-25T09:08:41.665797",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Netflix's 'KPop Demon Hunters' secures 3,400+ theater screens across 120 countries, marking the streamer's widest theatrical release to... #AI #Tech #Innovation #LLM #Future\n\nhttps://techcrunch.com/2025/08/24/netflixs-kpop-demon-hunters-is-probably-the-biggest-movie-in-theaters/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Netflixs KPop Demon Hunters is probably the biggest movie in theaters",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Innovation",
+          "#Technology",
+          "#DigitalTransformation"
+        ],
+        "emojis": [
+          "🚀",
+          "💻",
+          "🌟"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-25T09:09:21.410571",
+    "created_at": "2025-08-25T09:09:21.410571",
+    "status": "pending",
+    "id": 15
+  },
+  {
+    "article": {
+      "title": "TechCrunch Mobility: Waymo’s Big Apple score and Nvidia backs Nuro",
+      "url": "https://techcrunch.com/2025/08/24/techcrunch-mobility-waymos-big-apple-score-and-nvidia-backs-nuro/",
+      "content": "Welcome back to TechCrunch Mobility, your hub for news, analysis, and scoops around the future of transportation.",
+      "hash": "5c709afe88888b57014c58d04b2ca5d8",
+      "fetch_date": "2025-08-25T09:08:40.377239",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-24T18:05:00",
+      "is_within_7d": true,
+      "rss_published": "Sun, 24 Aug 2025 18:05:00 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-25T09:08:41.665797",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Waymo secures NYC robotaxi permit, expanding to 8.6M residents; Nvidia invests $70M in Nuro's autonomous delivery fleet #AI #Tech #Apple #TechNews #LLM\n\nhttps://techcrunch.com/2025/08/24/techcrunch-mobility-waymos-big-apple-score-and-nvidia-backs-nuro/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "TechCrunch Mobility Waymos Big Apple score and Nvidia backs Nuro",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Apple",
+          "#iOS",
+          "#AppleAI"
+        ],
+        "emojis": [
+          "📱",
+          "📲",
+          "💻"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 252,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-25T09:09:35.373666",
+    "created_at": "2025-08-25T09:09:35.373666",
+    "status": "pending",
+    "id": 16
   }
 ]

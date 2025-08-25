@@ -642,12 +642,21 @@
     <!-- Twitter Style Layout -->
     <div class="twitter-layout">
 
-        <!-- Mobile Menu Toggle Button -->
-        <div class="mobile-menu-toggle">
+        <!-- Mobile Menu Toggle Button - Always visible on mobile -->
+        <div class="mobile-menu-toggle" style="display: none;">
             <button id="mobileMenuToggle" class="mobile-menu-btn">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
+        
+        <!-- CSS to show mobile menu on mobile devices -->
+        <style>
+            @media (max-width: 768px) {
+                .mobile-menu-toggle {
+                    display: block !important;
+                }
+            }
+        </style>
 
         <!-- Left Sidebar -->
         <div class="twitter-sidebar" id="twitterSidebar">
