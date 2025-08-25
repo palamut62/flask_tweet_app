@@ -1333,7 +1333,8 @@ def post_tweet_route():
             return jsonify({
                 "success": True, 
                 "message": "Tweet başarıyla paylaşıldı",
-                "tweet_url": tweet_result.get('tweet_url', '')
+                "tweet_url": tweet_result.get('tweet_url', ''),
+                "should_refresh": True
             })
         else:
             # Rate limit kontrolü
@@ -1466,7 +1467,11 @@ def delete_tweet_route():
             pending_tweets.pop(tweet_index)
             save_json("pending_tweets.json", pending_tweets)
         
-        return jsonify({"success": True, "message": "Tweet silindi ve makale bir daha gösterilmeyecek"})
+        return jsonify({
+            "success": True, 
+            "message": "Tweet silindi ve makale bir daha gösterilmeyecek",
+            "should_refresh": True
+        })
         
     except Exception as e:
         terminal_log(f"❌ Tweet silme hatası: {e}", "error")

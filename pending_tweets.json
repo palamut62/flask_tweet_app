@@ -208,5 +208,145 @@
     "created_at": "2025-08-25T17:18:15.074622",
     "status": "pending",
     "id": 3
+  },
+  {
+    "article": {
+      "title": "Former Meta exec Nick Clegg offers careful criticism of ‘cloyingly conformist’ Silicon Valley",
+      "url": "https://techcrunch.com/2025/08/24/former-meta-exec-nick-clegg-offers-careful-criticism-of-cloyingly-conformist-silicon-valley/",
+      "content": "Meta’s former policy chief Nick Clegg seems to be walking a tightrope as he promotes his upcoming book, “How to Save the Internet.”",
+      "hash": "ff0acc8ad4384187d5b3267752d707c2",
+      "fetch_date": "2025-08-25T17:17:34.337066",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-24T20:32:56",
+      "is_within_7d": true,
+      "rss_published": "Sun, 24 Aug 2025 20:32:56 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-25T17:17:37.145575",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Meta's Nick Clegg critiques Silicon Valley's cloyingly conformist culture, citing 70% groupthink in tech deci... #AI #Tech #Meta #GenerativeAI #AITools\n\nhttps://techcrunch.com/2025/08/24/former-meta-exec-nick-clegg-offers-careful-criticism-of-cloyingly-conformist-silicon-valley/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Former Meta exec Nick Clegg offers careful criticism of cloyingly conformist Sil...",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Meta",
+          "#Facebook",
+          "#MetaAI"
+        ],
+        "emojis": [
+          "🚀",
+          "💻",
+          "🌟"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-25T17:18:23.127396",
+    "created_at": "2025-08-25T17:18:23.127396",
+    "status": "pending",
+    "id": 4
+  },
+  {
+    "article": {
+      "title": "Netflix’s ‘KPop Demon Hunters’ is probably the biggest movie in theaters",
+      "url": "https://techcrunch.com/2025/08/24/netflixs-kpop-demon-hunters-is-probably-the-biggest-movie-in-theaters/",
+      "content": "This is Netflix's first time winning the domestic box office.",
+      "hash": "a1fb8a1580a899c261f2ac1c3605d3c2",
+      "fetch_date": "2025-08-25T17:17:34.337066",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-24T19:59:29",
+      "is_within_7d": true,
+      "rss_published": "Sun, 24 Aug 2025 19:59:29 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-25T17:17:37.145575",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Netflixs KPop Demon Hunters is probably the biggest movie in theaters #AI #Tech #Innovation #GenerativeAI #Automation\n\nhttps://techcrunch.com/2025/08/24/netflixs-kpop-demon-hunters-is-probably-the-biggest-movie-in-theaters/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Netflixs KPop Demon Hunters is probably the biggest movie in theaters",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Innovation",
+          "#Technology",
+          "#DigitalTransformation"
+        ],
+        "emojis": [
+          "🚀",
+          "💻",
+          "🌟"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 223,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-25T17:18:28.285512",
+    "created_at": "2025-08-25T17:18:28.285512",
+    "status": "pending",
+    "id": 5
   }
 ]

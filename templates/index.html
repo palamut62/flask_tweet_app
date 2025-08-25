@@ -746,10 +746,12 @@ function postTweet(tweetId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-                    showToast('Tweet başarıyla onaylandı!', 'success');
-            setTimeout(() => location.reload(), 1000);
+            showToast(data.message || 'Tweet başarıyla onaylandı!', 'success');
+            if (data.should_refresh) {
+                setTimeout(() => location.reload(), 1500);
+            }
         } else {
-                    showToast(`Hata: ${data.error || 'Bilinmeyen hata oluştu'}`, 'error');
+            showToast(`Hata: ${data.error || 'Bilinmeyen hata oluştu'}`, 'error');
         }
     })
     .catch(error => {
@@ -778,10 +780,12 @@ function manualPostTweet(tweetId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                    showToast('Tweet manuel olarak paylaşıldı!', 'success');
-                    setTimeout(() => location.reload(), 1000);
+                showToast(data.message || 'Tweet manuel olarak paylaşıldı!', 'success');
+                if (data.should_refresh) {
+                    setTimeout(() => location.reload(), 1500);
+                }
             } else {
-                    showToast(`Hata: ${data.error || 'Bilinmeyen hata oluştu'}`, 'error');
+                showToast(`Hata: ${data.error || 'Bilinmeyen hata oluştu'}`, 'error');
             }
         })
         .catch(error => {
@@ -810,10 +814,12 @@ function deleteTweet(tweetId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                    showToast('Tweet reddedildi!', 'success');
-                    setTimeout(() => location.reload(), 1000);
+                showToast(data.message || 'Tweet reddedildi!', 'success');
+                if (data.should_refresh) {
+                    setTimeout(() => location.reload(), 1500);
+                }
             } else {
-                    showToast(`Hata: ${data.error || 'Bilinmeyen hata oluştu'}`, 'error');
+                showToast(`Hata: ${data.error || 'Bilinmeyen hata oluştu'}`, 'error');
             }
         })
         .catch(error => {
