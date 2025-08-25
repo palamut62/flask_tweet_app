@@ -42,6 +42,9 @@
     <!-- Twitter Style CSS -->
     <link href="{{ url_for('static', filename='css/twitter-style.css') }}" rel="stylesheet">
     
+    <!-- Mobile Emergency Fix CSS -->
+    <link href="{{ url_for('static', filename='css/mobile-fix.css') }}" rel="stylesheet">
+    
     <!-- Fallback CSS - CDN'ler yüklenemezse kullanılacak -->
     <style>
         /* Bootstrap Fallback Styles */
@@ -665,35 +668,91 @@
             }
         </style>
         
-        <!-- Mobile Debug Script -->
+        <!-- Mobile Emergency Fix Script -->
         <script>
-            // Debug mobile layout issues
+            // Force mobile layout to work
             document.addEventListener('DOMContentLoaded', function() {
+                console.log('Screen width:', window.innerWidth);
+                
                 if (window.innerWidth <= 768) {
-                    console.log('Mobile device detected:', window.innerWidth);
+                    console.log('🔥 MOBILE MODE ACTIVATED');
                     
-                    const mainContent = document.querySelector('.twitter-main');
-                    const twitterLayout = document.querySelector('.twitter-layout');
-                    const mobileToggle = document.querySelector('.mobile-menu-toggle');
+                    // Force show all important elements
+                    const elements = {
+                        layout: document.querySelector('.twitter-layout'),
+                        main: document.querySelector('.twitter-main'),
+                        feed: document.querySelector('.twitter-feed'),
+                        toggle: document.querySelector('.mobile-menu-toggle'),
+                        sidebar: document.querySelector('.twitter-sidebar')
+                    };
                     
-                    if (mainContent) {
-                        mainContent.style.display = 'block';
-                        mainContent.style.visibility = 'visible';
-                        mainContent.style.opacity = '1';
-                        mainContent.style.width = '100%';
-                        console.log('Main content forced visible');
+                    // Twitter Layout
+                    if (elements.layout) {
+                        elements.layout.style.cssText = `
+                            display: block !important;
+                            width: 100% !important;
+                            max-width: 100% !important;
+                            position: relative !important;
+                            overflow: visible !important;
+                            background: white !important;
+                        `;
+                        console.log('✅ Layout fixed');
                     }
                     
-                    if (twitterLayout) {
-                        twitterLayout.style.display = 'block';
-                        twitterLayout.style.width = '100%';
-                        console.log('Twitter layout adjusted for mobile');
+                    // Main Content
+                    if (elements.main) {
+                        elements.main.style.cssText = `
+                            display: block !important;
+                            width: 100% !important;
+                            max-width: 100% !important;
+                            position: relative !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
+                            background: white !important;
+                            overflow: visible !important;
+                        `;
+                        console.log('✅ Main content fixed');
                     }
                     
-                    if (mobileToggle) {
-                        mobileToggle.style.display = 'block';
-                        console.log('Mobile toggle visible');
+                    // Feed
+                    if (elements.feed) {
+                        elements.feed.style.cssText = `
+                            display: block !important;
+                            width: 100% !important;
+                            padding: 80px 15px 20px 15px !important;
+                            background: white !important;
+                        `;
+                        console.log('✅ Feed fixed');
                     }
+                    
+                    // Mobile Toggle
+                    if (elements.toggle) {
+                        elements.toggle.style.cssText = `
+                            display: block !important;
+                            position: fixed !important;
+                            top: 15px !important;
+                            left: 15px !important;
+                            z-index: 99999 !important;
+                        `;
+                        console.log('✅ Mobile toggle fixed');
+                    }
+                    
+                    // Hide sidebar initially
+                    if (elements.sidebar) {
+                        elements.sidebar.style.cssText = `
+                            display: none !important;
+                            position: fixed !important;
+                            left: -100% !important;
+                            top: 0 !important;
+                            width: 280px !important;
+                            height: 100vh !important;
+                            background: white !important;
+                            z-index: 9999 !important;
+                        `;
+                        console.log('✅ Sidebar hidden');
+                    }
+                    
+                    console.log('🎉 MOBILE FIX COMPLETE!');
                 }
             });
         </script>
