@@ -192,7 +192,7 @@ postcss.config.js
 
 # CSS Build output (generated files - bu dosyalar build ile oluşur)
 static/css/tailwind.css
-static/css/*.css
+# static/css/*.css - Bu satırı kaldırdık çünkü manuel CSS dosyalarını da ignore ediyordu
 static/css/*.map
 
 # =============================================================================
@@ -208,9 +208,9 @@ static/css/*.map
 # tailwind.config.js
 # package.json
 
-# Minified files (generated)
-*.min.js
-*.min.css
+# Minified files (generated) - Sadece build ile oluşturulan minified dosyaları ignore et
+# *.min.js - Bu satırı kaldırdık çünkü static/js/ klasöründeki minified dosyaları da ignore ediyordu
+# *.min.css - Bu satırı kaldırdık çünkü static/css/ klasöründeki minified dosyaları da ignore ediyordu
 
 # =============================================================================
 # TEMPORARY TAILWIND FILES (artık kullanılmıyor)

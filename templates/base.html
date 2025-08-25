@@ -1017,15 +1017,6 @@
                         </div>
                         
                         <!-- Mobile Menu Info -->
-                        <div class="mobile-menu-info mt-3 p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-3">
-                                <i class="fas fa-user-circle text-gray-600 text-lg"></i>
-                                <div class="flex-1">
-                                    <div class="font-medium text-gray-900">{{ session.get('user_email', 'Kullanıcı').split('@')[0] }}</div>
-                                    <div class="text-xs text-gray-500">Mobile Menü</div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1072,14 +1063,17 @@
                         <div class="twitter-card-title">Hızlı İşlemler</div>
                     </div>
                     <div class="quick-actions">
-                        <a href="{{ url_for('create_tweet') }}" class="twitter-btn twitter-btn-secondary w-100 mb-2">
-                            <i class="fas fa-pen-nib me-2"></i>Yeni Tweet
+                        <a href="{{ url_for('create_tweet') }}" class="btn-minimal btn-minimal-secondary btn-minimal-sm w-100 mb-2">
+                            <i class="fas fa-pen-nib"></i>
+                            <span>Yeni Tweet</span>
                         </a>
-                        <a href="{{ url_for('check_articles') }}" class="twitter-btn twitter-btn-secondary w-100 mb-2">
-                            <i class="fas fa-sync-alt me-2"></i>Haberleri Kontrol Et
+                        <a href="{{ url_for('check_articles') }}" class="btn-minimal btn-minimal-secondary btn-minimal-sm w-100 mb-2">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Haberleri Kontrol Et</span>
                         </a>
-                        <a href="{{ url_for('statistics') }}" class="twitter-btn twitter-btn-secondary w-100">
-                            <i class="fas fa-chart-bar me-2"></i>İstatistikleri Görüntüle
+                        <a href="{{ url_for('statistics') }}" class="btn-minimal btn-minimal-secondary btn-minimal-sm w-100">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>İstatistikler</span>
                         </a>
                     </div>
                 </div>

@@ -1,0 +1,607 @@
+/* MINIMAL DESIGN COMPONENTS - Modern, Clean, App-Appropriate */
+/* Cache Busting Version: 20250825-1 */
+
+:root {
+    /* Minimal Color Palette */
+    --minimal-primary: #2563eb;
+    --minimal-primary-dark: #1d4ed8;
+    --minimal-primary-light: #3b82f6;
+    
+    --minimal-success: #16a34a;
+    --minimal-success-dark: #15803d;
+    --minimal-success-light: #22c55e;
+    
+    --minimal-warning: #d97706;
+    --minimal-warning-dark: #b45309;
+    --minimal-warning-light: #f59e0b;
+    
+    --minimal-danger: #dc2626;
+    --minimal-danger-dark: #b91c1c;
+    --minimal-danger-light: #ef4444;
+    
+    --minimal-gray-50: #f9fafb;
+    --minimal-gray-100: #f3f4f6;
+    --minimal-gray-200: #e5e7eb;
+    --minimal-gray-300: #d1d5db;
+    --minimal-gray-400: #9ca3af;
+    --minimal-gray-500: #6b7280;
+    --minimal-gray-600: #4b5563;
+    --minimal-gray-700: #374151;
+    --minimal-gray-800: #1f2937;
+    --minimal-gray-900: #111827;
+    
+    /* Minimal Spacing */
+    --minimal-space-xs: 0.25rem;
+    --minimal-space-sm: 0.5rem;
+    --minimal-space-md: 1rem;
+    --minimal-space-lg: 1.5rem;
+    --minimal-space-xl: 2rem;
+    --minimal-space-2xl: 3rem;
+    
+    /* Minimal Border Radius */
+    --minimal-radius-sm: 0.375rem;
+    --minimal-radius-md: 0.5rem;
+    --minimal-radius-lg: 0.75rem;
+    --minimal-radius-xl: 1rem;
+    
+    /* Minimal Shadows */
+    --minimal-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --minimal-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --minimal-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --minimal-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* Typography */
+    --minimal-font-size-xs: 0.75rem;
+    --minimal-font-size-sm: 0.875rem;
+    --minimal-font-size-base: 1rem;
+    --minimal-font-size-lg: 1.125rem;
+    --minimal-font-size-xl: 1.25rem;
+    --minimal-font-size-2xl: 1.5rem;
+    --minimal-font-size-3xl: 1.875rem;
+}
+
+/* MINIMAL BUTTONS */
+.btn-minimal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--minimal-space-sm);
+    padding: var(--minimal-space-sm) var(--minimal-space-md);
+    font-size: var(--minimal-font-size-sm);
+    font-weight: 500;
+    line-height: 1.5;
+    border: 1px solid transparent;
+    border-radius: var(--minimal-radius-md);
+    cursor: pointer;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    white-space: nowrap;
+    user-select: none;
+    outline: none;
+    background: none;
+    min-height: 36px;
+}
+
+.btn-minimal:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+/* Primary Button */
+.btn-minimal-primary {
+    background-color: var(--minimal-primary);
+    border-color: var(--minimal-primary);
+    color: white;
+}
+
+.btn-minimal-primary:hover:not(:disabled) {
+    background-color: var(--minimal-primary-dark);
+    border-color: var(--minimal-primary-dark);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--minimal-shadow-md);
+}
+
+.btn-minimal-primary:focus {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.btn-minimal-primary:active {
+    transform: translateY(0);
+    box-shadow: var(--minimal-shadow-sm);
+}
+
+/* Success Button */
+.btn-minimal-success {
+    background-color: var(--minimal-success);
+    border-color: var(--minimal-success);
+    color: white;
+}
+
+.btn-minimal-success:hover:not(:disabled) {
+    background-color: var(--minimal-success-dark);
+    border-color: var(--minimal-success-dark);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--minimal-shadow-md);
+}
+
+/* Warning Button */
+.btn-minimal-warning {
+    background-color: var(--minimal-warning);
+    border-color: var(--minimal-warning);
+    color: white;
+}
+
+.btn-minimal-warning:hover:not(:disabled) {
+    background-color: var(--minimal-warning-dark);
+    border-color: var(--minimal-warning-dark);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--minimal-shadow-md);
+}
+
+/* Danger Button */
+.btn-minimal-danger {
+    background-color: var(--minimal-danger);
+    border-color: var(--minimal-danger);
+    color: white;
+}
+
+.btn-minimal-danger:hover:not(:disabled) {
+    background-color: var(--minimal-danger-dark);
+    border-color: var(--minimal-danger-dark);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--minimal-shadow-md);
+}
+
+/* Secondary Button */
+.btn-minimal-secondary {
+    background-color: white;
+    border-color: var(--minimal-gray-300);
+    color: var(--minimal-gray-700);
+}
+
+.btn-minimal-secondary:hover:not(:disabled) {
+    background-color: var(--minimal-gray-50);
+    border-color: var(--minimal-gray-400);
+    color: var(--minimal-gray-800);
+    transform: translateY(-1px);
+    box-shadow: var(--minimal-shadow-md);
+}
+
+/* Ghost Button */
+.btn-minimal-ghost {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--minimal-gray-600);
+}
+
+.btn-minimal-ghost:hover:not(:disabled) {
+    background-color: var(--minimal-gray-100);
+    color: var(--minimal-gray-700);
+}
+
+/* Button Sizes */
+.btn-minimal-xs {
+    padding: 0.25rem 0.5rem;
+    font-size: var(--minimal-font-size-xs);
+    min-height: 28px;
+}
+
+.btn-minimal-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: var(--minimal-font-size-sm);
+    min-height: 32px;
+}
+
+.btn-minimal-md {
+    padding: 0.5rem 1rem;
+    font-size: var(--minimal-font-size-base);
+    min-height: 40px;
+}
+
+.btn-minimal-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: var(--minimal-font-size-lg);
+    min-height: 48px;
+}
+
+/* Button States */
+.btn-minimal:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.btn-minimal-loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn-minimal-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* MINIMAL CARDS */
+.card-minimal {
+    background: white;
+    border: 1px solid var(--minimal-gray-200);
+    border-radius: var(--minimal-radius-lg);
+    box-shadow: var(--minimal-shadow-sm);
+    overflow: hidden;
+    transition: all 0.15s ease;
+}
+
+.card-minimal:hover {
+    box-shadow: var(--minimal-shadow-md);
+    transform: translateY(-1px);
+}
+
+.card-minimal-header {
+    padding: var(--minimal-space-lg);
+    border-bottom: 1px solid var(--minimal-gray-200);
+    background: var(--minimal-gray-50);
+}
+
+.card-minimal-body {
+    padding: var(--minimal-space-lg);
+}
+
+.card-minimal-footer {
+    padding: var(--minimal-space-lg);
+    border-top: 1px solid var(--minimal-gray-200);
+    background: var(--minimal-gray-50);
+}
+
+/* MINIMAL FORM CONTROLS */
+.input-minimal {
+    display: block;
+    width: 100%;
+    padding: var(--minimal-space-sm) var(--minimal-space-md);
+    font-size: var(--minimal-font-size-base);
+    line-height: 1.5;
+    color: var(--minimal-gray-700);
+    background: white;
+    border: 1px solid var(--minimal-gray-300);
+    border-radius: var(--minimal-radius-md);
+    transition: all 0.15s ease;
+    min-height: 40px;
+}
+
+.input-minimal:focus {
+    outline: none;
+    border-color: var(--minimal-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.input-minimal:disabled {
+    background-color: var(--minimal-gray-100);
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Textarea specific */
+textarea.input-minimal {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Select specific */
+select.input-minimal {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+/* File input specific */
+input[type="file"].input-minimal {
+    padding: var(--minimal-space-sm);
+    background: var(--minimal-gray-50);
+    cursor: pointer;
+}
+
+/* MINIMAL TOGGLE SWITCH */
+.toggle-minimal {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle-minimal input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-minimal-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--minimal-gray-300);
+    transition: 0.15s ease;
+    border-radius: 24px;
+}
+
+.toggle-minimal-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.15s ease;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-minimal input:checked + .toggle-minimal-slider {
+    background-color: var(--minimal-primary);
+}
+
+.toggle-minimal input:checked + .toggle-minimal-slider:before {
+    transform: translateX(20px);
+}
+
+/* MINIMAL BADGES */
+.badge-minimal {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--minimal-space-xs);
+    padding: 0.25rem 0.5rem;
+    font-size: var(--minimal-font-size-xs);
+    font-weight: 500;
+    border-radius: var(--minimal-radius-sm);
+    white-space: nowrap;
+}
+
+.badge-minimal-primary {
+    background-color: rgba(37, 99, 235, 0.1);
+    color: var(--minimal-primary);
+}
+
+.badge-minimal-success {
+    background-color: rgba(22, 163, 74, 0.1);
+    color: var(--minimal-success);
+}
+
+.badge-minimal-warning {
+    background-color: rgba(217, 119, 6, 0.1);
+    color: var(--minimal-warning);
+}
+
+.badge-minimal-danger {
+    background-color: rgba(220, 38, 38, 0.1);
+    color: var(--minimal-danger);
+}
+
+.badge-minimal-gray {
+    background-color: var(--minimal-gray-100);
+    color: var(--minimal-gray-600);
+}
+
+/* MINIMAL ALERTS */
+.alert-minimal {
+    padding: var(--minimal-space-md);
+    border-radius: var(--minimal-radius-md);
+    border: 1px solid;
+    display: flex;
+    align-items: start;
+    gap: var(--minimal-space-sm);
+}
+
+.alert-minimal-primary {
+    background-color: rgba(37, 99, 235, 0.05);
+    border-color: rgba(37, 99, 235, 0.2);
+    color: var(--minimal-primary);
+}
+
+.alert-minimal-success {
+    background-color: rgba(22, 163, 74, 0.05);
+    border-color: rgba(22, 163, 74, 0.2);
+    color: var(--minimal-success);
+}
+
+.alert-minimal-warning {
+    background-color: rgba(217, 119, 6, 0.05);
+    border-color: rgba(217, 119, 6, 0.2);
+    color: var(--minimal-warning);
+}
+
+.alert-minimal-danger {
+    background-color: rgba(220, 38, 38, 0.05);
+    border-color: rgba(220, 38, 38, 0.2);
+    color: var(--minimal-danger);
+}
+
+/* MINIMAL LOADING STATES */
+.loading-minimal {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--minimal-gray-300);
+    border-top-color: var(--minimal-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* MINIMAL CHECKBOX */
+.checkbox-minimal {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-minimal input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkbox-minimal .checkmark {
+    height: 18px;
+    width: 18px;
+    border: 2px solid var(--minimal-gray-300);
+    border-radius: var(--minimal-radius-sm);
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    margin-right: var(--minimal-space-sm);
+}
+
+.checkbox-minimal input:checked ~ .checkmark {
+    background-color: var(--minimal-primary);
+    border-color: var(--minimal-primary);
+}
+
+.checkbox-minimal input:checked ~ .checkmark::after {
+    content: '✓';
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.checkbox-minimal:hover .checkmark {
+    border-color: var(--minimal-primary);
+}
+
+/* MINIMAL RADIO */
+.radio-minimal {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.radio-minimal input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.radio-minimal .radiomark {
+    height: 18px;
+    width: 18px;
+    border: 2px solid var(--minimal-gray-300);
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    margin-right: var(--minimal-space-sm);
+}
+
+.radio-minimal input:checked ~ .radiomark {
+    border-color: var(--minimal-primary);
+}
+
+.radio-minimal input:checked ~ .radiomark::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--minimal-primary);
+}
+
+/* MINIMAL FORM GROUPS */
+.form-group-minimal {
+    margin-bottom: var(--minimal-space-lg);
+}
+
+.form-label-minimal {
+    display: block;
+    font-size: var(--minimal-font-size-sm);
+    font-weight: 500;
+    color: var(--minimal-gray-700);
+    margin-bottom: var(--minimal-space-xs);
+}
+
+.form-help-minimal {
+    font-size: var(--minimal-font-size-xs);
+    color: var(--minimal-gray-500);
+    margin-top: var(--minimal-space-xs);
+}
+
+.form-error-minimal {
+    font-size: var(--minimal-font-size-xs);
+    color: var(--minimal-danger);
+    margin-top: var(--minimal-space-xs);
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 768px) {
+    .btn-minimal {
+        min-height: 44px; /* Touch-friendly size */
+        padding: var(--minimal-space-md) var(--minimal-space-lg);
+    }
+    
+    .btn-minimal-xs {
+        min-height: 36px;
+        padding: var(--minimal-space-sm) var(--minimal-space-md);
+    }
+    
+    .btn-minimal-sm {
+        min-height: 40px;
+        padding: var(--minimal-space-sm) var(--minimal-space-md);
+    }
+    
+    .input-minimal {
+        min-height: 44px;
+        font-size: 16px; /* Prevent zoom on iOS */
+        padding: var(--minimal-space-md);
+    }
+    
+    .card-minimal {
+        border-radius: var(--minimal-radius-md);
+        margin: var(--minimal-space-sm);
+    }
+    
+    .card-minimal-header,
+    .card-minimal-body,
+    .card-minimal-footer {
+        padding: var(--minimal-space-md);
+    }
+    
+    .checkbox-minimal .checkmark,
+    .radio-minimal .radiomark {
+        width: 20px;
+        height: 20px;
+    }
+}
