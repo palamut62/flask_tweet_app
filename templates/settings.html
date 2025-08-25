@@ -13,7 +13,7 @@
                 <p class="feed-subtitle">AI Tweet Bot'unuzun davranışını özelleştirin</p>
             </div>
             <div class="feed-header-right">
-                <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
+                <button onclick="location.reload();" class="btn-minimal btn-minimal-ghost btn-minimal-sm">
                     <i class="fas fa-sync-alt"></i>
                     Yenile
                 </button>
@@ -103,7 +103,7 @@
                             </label>
                             <input type="number" id="min_score_threshold" name="min_score_threshold" 
                                    value="{{ settings.min_score_threshold or 5 }}" min="1" max="10"
-                               class="settings-input">
+                               class="input-minimal">
                         <div class="settings-input-description">Bu skorun altındaki makaleler paylaşılmaz</div>
                         </div>
                         
@@ -111,7 +111,7 @@
                         <label for="tweet_theme" class="settings-input-label">
                                 Tweet Teması
                             </label>
-                        <select id="tweet_theme" name="tweet_theme" class="settings-select">
+                        <select id="tweet_theme" name="tweet_theme" class="input-minimal">
                                 <option value="bilgilendirici" {{ 'selected' if settings.tweet_theme == 'bilgilendirici' else '' }}>
                                     📊 Bilgilendirici (Profesyonel ve eğitici)
                                 </option>
@@ -145,7 +145,7 @@
                     <label for="news_fetching_method" class="settings-input-label">
                             Haber Çekme Yöntemi
                         </label>
-                    <select id="news_fetching_method" name="news_fetching_method" class="settings-select">
+                    <select id="news_fetching_method" name="news_fetching_method" class="input-minimal">
                             <option value="auto" {{ 'selected' if settings.news_fetching_method == 'auto' else '' }}>
                                 🎯 Otomatik (AI Keywords + Tüm yöntemleri dene)
                             </option>

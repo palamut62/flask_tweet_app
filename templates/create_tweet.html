@@ -13,7 +13,7 @@
                 <p class="feed-subtitle">Yeni tweet oluşturun ve AI ile optimize edin</p>
             </div>
             <div>
-                <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
+                <button onclick="location.reload();" class="btn-minimal btn-minimal-ghost btn-minimal-sm">
                     <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
@@ -31,7 +31,7 @@
                 <span class="section-title">Tweet Teması</span>
             </div>
             <div class="section-content">
-                <select id="tweet_theme" name="tweet_theme" class="form-select">
+                <select id="tweet_theme" name="tweet_theme" class="input-minimal">
          <option value="bilgilendirici" {% if default_theme == 'bilgilendirici' or not default_theme %}selected{% endif %}>📊 Bilgilendirici - Profesyonel ve eğitici</option>
          <option value="eğlenceli" {% if default_theme == 'eğlenceli' %}selected{% endif %}>🎉 Eğlenceli - Neşeli ve heyecanlı</option>
          <option value="mizahi" {% if default_theme == 'mizahi' %}selected{% endif %}>😂 Mizahi - Komik ve esprili</option>
@@ -47,15 +47,15 @@
 
         <div class="tweet-form-section expanded">
                 <div class="tweet-tabs">
-                    <button id="tab-text" class="tab-button active">
+                    <button id="tab-text" class="btn-minimal btn-minimal-primary btn-minimal-sm">
                         <i class="fas fa-keyboard"></i>
                         <span>Metinden Tweet</span>
             </button>
-                    <button id="tab-image" class="tab-button">
+                    <button id="tab-image" class="btn-minimal btn-minimal-secondary btn-minimal-sm">
                         <i class="fas fa-image"></i>
                         <span>Resimden Tweet</span>
             </button>
-                    <button id="tab-link" class="tab-button">
+                    <button id="tab-link" class="btn-minimal btn-minimal-secondary btn-minimal-sm">
                         <i class="fas fa-link"></i>
                         <span>Link'ten Tweet</span>
             </button>
@@ -75,7 +75,7 @@
                                          name="tweet_text" 
                      id="tweet_text" 
                      rows="4" 
-                                class="form-textarea"
+                                class="input-minimal"
                      placeholder="Tweet için metin girin... AI ile optimize edilecek."
                   ></textarea>
                             <div class="form-footer">
@@ -198,7 +198,7 @@
                 type="submit" 
                 name="action" 
                 value="preview"
-                            class="action-btn action-btn-primary"
+                            class="btn-minimal btn-minimal-primary btn-minimal-md"
               >
                 <i class="fas fa-magic"></i>
                 <span>Tweet Oluştur ve Önizle</span>
@@ -207,7 +207,7 @@
                 type="submit" 
                 name="action" 
                 value="direct_post"
-                            class="action-btn action-btn-success"
+                            class="btn-minimal btn-minimal-success btn-minimal-md"
               >
                 <i class="fas fa-rocket"></i>
                 <span>Oluştur ve Hemen Paylaş</span>

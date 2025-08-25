@@ -1090,5 +1090,139 @@
     "created_at": "2025-08-25T09:09:35.373666",
     "status": "pending",
     "id": 16
+  },
+  {
+    "article": {
+      "title": "Developers lose focus 1,200 times a day — how MCP could change that",
+      "url": "https://venturebeat.com/ai/developers-lose-focus-1200-times-a-day-how-mcp-could-change-that/",
+      "content": "One of the most impactful applications of MCP is its ability to connect AI coding assistants directly to developer tools.",
+      "hash": "e3e2e1367a8fdf84d872835065e0a9f5",
+      "fetch_date": "2025-08-25T09:32:58.012019",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - VentureBeat AI RSS",
+      "source_id": "venturebeat_rss",
+      "article_date": "2025-08-24T19:15:00",
+      "is_within_7d": true,
+      "rss_published": "Sun, 24 Aug 2025 19:15:00 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-25T09:32:58.135101",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "MCP reduces developer context switches from 1,200 daily to 50 by unifying AI tools into single protocol #AI #Tech #ArtificialIntelligence #ComputerVision #Transformer\n\nhttps://venturebeat.com/ai/developers-lose-focus-1200-times-a-day-how-mcp-could-change-that/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Developers lose focus 1200 times a day  how MCP could change that",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 260,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-25T09:33:40.830849",
+    "created_at": "2025-08-25T09:33:40.830849",
+    "status": "pending",
+    "id": 17
+  },
+  {
+    "article": {
+      "title": "Companies have invested billions into AI, 95 percent getting zero return",
+      "url": "https://thehill.com/policy/technology/5460663-generative-ai-zero-returns-businesses-mit-report/",
+      "content": "Companies have invested billions into AI, 95 percent getting zero return",
+      "score": 100,
+      "hash": "4090d7801f63cb84f0aef3361757aec5",
+      "source": "Reddit - r/singularity",
+      "fetch_date": "2025-08-25T09:33:30.595489",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "PythonAnywhere",
+      "method_icon": "🐍",
+      "method_color": "green"
+    },
+    "tweet_data": {
+      "tweet": "McKinsey data: 95% of $200B AI investments yield zero ROI, only 5% achieve measurable productivity gains #AI #Tech #ArtificialIntelligence #NLP #ComputerVision\n\nhttps://thehill.com/policy/technology/5460663-generative-ai-zero-returns-businesses-mit-report/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Companies have invested billions into AI 95 percent getting zero return",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 256,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-25T09:33:52.357574",
+    "created_at": "2025-08-25T09:33:52.357574",
+    "status": "pending",
+    "id": 18
   }
 ]

@@ -85,12 +85,12 @@
             <div>
                 <h1 class="feed-title">Ana Sayfa</h1>
         </div>
-        <div class="d-flex align-items-center">
-                <button onclick="toggleAutoRefresh()" class="twitter-btn twitter-btn-secondary me-2">
-                <i class="fas fa-sync me-1" id="refresh-icon"></i>
+        <div class="d-flex align-items-center gap-2">
+                <button onclick="toggleAutoRefresh()" class="btn-minimal btn-minimal-secondary btn-minimal-sm">
+                <i class="fas fa-sync" id="refresh-icon"></i>
                 <span id="refresh-text">Auto</span>
             </button>
-                <button onclick="location.reload();" class="twitter-btn twitter-btn-secondary">
+                <button onclick="location.reload();" class="btn-minimal btn-minimal-ghost btn-minimal-sm">
                     <i class="fas fa-sync-alt"></i>
             </button>
         </div>
@@ -226,8 +226,8 @@
             🔍 Yeni haberleri manuel olarak kontrol etmek için aşağıdaki butonu kullanın.
                         </div>
         <div class="tweet-actions">
-            <button id="check-articles-btn" onclick="startArticleCheck()" class="tweet-action">
-                <i class="fas fa-sync-alt tweet-action-icon"></i>
+            <button id="check-articles-btn" onclick="startArticleCheck()" class="btn-minimal btn-minimal-primary btn-minimal-sm">
+                <i class="fas fa-sync-alt"></i>
                 <span id="check-text">Şimdi Kontrol Et</span>
                                 </button>
                             </div>
@@ -264,11 +264,11 @@
                     <h5 class="mb-0 text-primary">Toplu İşlemler</h5>
                 </div>
                 <div class="d-flex gap-2">
-                    <button onclick="bulkApproveTweets()" class="twitter-btn twitter-btn-success" id="bulk-approve-btn" disabled>
-                        <i class="fas fa-check-double me-1"></i> Toplu Onayla
+                    <button onclick="bulkApproveTweets()" class="btn-minimal btn-minimal-success btn-minimal-sm" id="bulk-approve-btn" disabled>
+                        <i class="fas fa-check-double"></i> Toplu Onayla
                     </button>
-                    <button onclick="bulkRejectTweets()" class="twitter-btn twitter-btn-danger" id="bulk-reject-btn" disabled>
-                        <i class="fas fa-times-circle me-1"></i> Toplu Reddet
+                    <button onclick="bulkRejectTweets()" class="btn-minimal btn-minimal-danger btn-minimal-sm" id="bulk-reject-btn" disabled>
+                        <i class="fas fa-times-circle"></i> Toplu Reddet
                     </button>
                 </div>
             </div>
@@ -381,26 +381,26 @@
                     </div>
                             
                     <!-- Tweet Preview -->
-                    <div class="tweet-action">
-                        <i class="fas fa-eye tweet-action-icon"></i>
+                    <div class="btn-minimal btn-minimal-ghost btn-minimal-xs">
+                        <i class="fas fa-eye"></i>
                         <span>Önizleme</span>
                     </div>
                     
                 <!-- Onayla -->
-                <button class="tweet-action" onclick="postTweet('{{ tweet.id }}')" {{ 'disabled' if is_invalid_tweet }}>
-                    <i class="fas fa-check tweet-action-icon"></i>
+                <button class="btn-minimal btn-minimal-success btn-minimal-xs" onclick="postTweet('{{ tweet.id }}')" {{ 'disabled' if is_invalid_tweet }}>
+                    <i class="fas fa-check"></i>
                     <span>Onayla</span>
                 </button>
                 
                 <!-- Manuel Paylaş -->
-                <button class="tweet-action retweet" onclick="manualPostTweet('{{ tweet.id }}')" {{ 'disabled' if is_invalid_tweet }}>
-                    <i class="fas fa-external-link-alt tweet-action-icon"></i>
+                <button class="btn-minimal btn-minimal-primary btn-minimal-xs" onclick="manualPostTweet('{{ tweet.id }}')" {{ 'disabled' if is_invalid_tweet }}>
+                    <i class="fas fa-external-link-alt"></i>
                     <span>Manuel Paylaş</span>
                         </button>
                 
                 <!-- Reddet -->
-                <button class="tweet-action like" onclick="deleteTweet('{{ tweet.id }}')">
-                    <i class="fas fa-trash tweet-action-icon"></i>
+                <button class="btn-minimal btn-minimal-danger btn-minimal-xs" onclick="deleteTweet('{{ tweet.id }}')">
+                    <i class="fas fa-trash"></i>
                     <span>Reddet</span>
                         </button>
                     </div>
@@ -445,11 +445,11 @@
                         <h6 class="mb-0 text-danger">Toplu İşlemler</h6>
                                 </div>
                     <div class="d-flex gap-2">
-                        <button onclick="bulkConvertRejected()" class="twitter-btn twitter-btn-primary" id="bulk-convert-btn" disabled>
-                            <i class="fas fa-undo me-1"></i> Toplu Tweet'e Çevir
+                        <button onclick="bulkConvertRejected()" class="btn-minimal btn-minimal-primary btn-minimal-sm" id="bulk-convert-btn" disabled>
+                            <i class="fas fa-undo"></i> Tweet'e Çevir
                         </button>
-                        <button onclick="bulkRemoveRejected()" class="twitter-btn twitter-btn-danger" id="bulk-remove-btn" disabled>
-                            <i class="fas fa-trash me-1"></i> Toplu Kalıcı Sil
+                        <button onclick="bulkRemoveRejected()" class="btn-minimal btn-minimal-danger btn-minimal-sm" id="bulk-remove-btn" disabled>
+                            <i class="fas fa-trash"></i> Kalıcı Sil
                         </button>
                             </div>
                         </div>
@@ -481,11 +481,11 @@
                                 <span class="text-muted small">{{ article.source if article.source else 'Bilinmeyen' }}</span>
                                 <span class="text-muted small">• {{ article.created_at[:10] if article.created_at else 'Yeni' }}</span>
                             </div>
-                            <div class="article-actions">
-                                <button class="btn btn-sm btn-outline-primary convert-rejected-btn" data-url="{{ article.url }}" data-title="{{ article.title }}">
+                            <div class="article-actions d-flex gap-1">
+                                <button class="btn-minimal btn-minimal-primary btn-minimal-xs convert-rejected-btn" data-url="{{ article.url }}" data-title="{{ article.title }}">
                                     <i class="fas fa-undo"></i> Tweet'e Çevir
                             </button>
-                                <button class="btn btn-sm btn-outline-danger remove-rejected-btn" data-url="{{ article.url }}">
+                                <button class="btn-minimal btn-minimal-danger btn-minimal-xs remove-rejected-btn" data-url="{{ article.url }}">
                                     <i class="fas fa-trash"></i> Kalıcı Sil
                             </button>
                             </div>
