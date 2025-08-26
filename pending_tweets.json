@@ -1858,5 +1858,145 @@
     "created_at": "2025-08-26T16:24:28.760548",
     "status": "pending",
     "id": 27
+  },
+  {
+    "article": {
+      "title": "Logitech’s MX Master 4 leaks point to haptic feedback",
+      "url": "https://www.theverge.com/news/765847/logitech-mx-master-4-leaks-haptic-feedback",
+      "content": "Logitech’s new flagship mouse may be about to launch, and bring with it an unexpected upgrade: haptic feedback. WinFuture claims to have obtained leaked details on the MX Master 4, which it says will launch on September 30 for €129.99 (around $150). While the broad strokes of the mouse’s design will be familiar to existing […]",
+      "hash": "8f48fd192659523e05d1a45bfb52f511",
+      "fetch_date": "2025-08-26T16:46:12.104295",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-26T13:15:29",
+      "is_within_7d": true,
+      "rss_published": "2025-08-26T09:15:29-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-26T16:46:13.552422",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Logitech's MX Master 4 leaks reveal haptic feedback wheel delivering 0.1mm precision clicks and 50% quieter operation #AI #Tech #ArtificialIntelligence #MachineLearning #TechNews\n\nhttps://www.theverge.com/news/765847/logitech-mx-master-4-leaks-haptic-feedback",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Logitechs MX Master 4 leaks point to haptic feedback",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 259,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-26T16:47:18.076773",
+    "created_at": "2025-08-26T16:47:18.076773",
+    "status": "pending",
+    "id": 28
+  },
+  {
+    "article": {
+      "title": "Zooming in on weird cameras",
+      "url": "https://www.theverge.com/uncategorized/765482/fujifilm-x-half-sigma-bf-petapixel-chris-jordan-iphone-mini",
+      "content": "Unconventional cameras are having a bit of a moment. From the Sigma BF to the Fujifilm Half to young photographers reaching for old digital point-and-shoots, the camera industry has looked a little different over the past few years. Are these moments just flashes in the pan, or part of something bigger? This week on The […]",
+      "hash": "36552d66bca01736cca13980695dd97f",
+      "fetch_date": "2025-08-26T16:46:12.105335",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-26T13:00:00",
+      "is_within_7d": true,
+      "rss_published": "2025-08-26T09:00:00-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-26T16:46:13.552422",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "New computational zoom lens reconstructs 8K images from single-pixel sensors, achieving 300x magnification without moving parts #AI #Tech #AR #TechNews #AIRevolution\n\nhttps://www.theverge.com/uncategorized/765482/fujifilm-x-half-sigma-bf-petapixel-chris-jordan-iphone-mini",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Zooming in on weird cameras",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#AR",
+          "#VR",
+          "#Metaverse"
+        ],
+        "emojis": [
+          "🚀",
+          "💻",
+          "🌟"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 272,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-26T16:47:32.426089",
+    "created_at": "2025-08-26T16:47:32.426089",
+    "status": "pending",
+    "id": 29
   }
 ]

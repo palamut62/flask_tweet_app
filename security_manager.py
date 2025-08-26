@@ -23,44 +23,93 @@ class SecurityManager:
         self.cards_file = os.path.join(data_dir, "user_cards.json")
         self.access_codes_file = os.path.join(data_dir, "access_codes.json")
         
+        # PythonAnywhere için gelişmiş logging
+        self.debug_mode = os.environ.get('DEBUG', 'False').lower() == 'true'
+        self.is_pythonanywhere = 'PYTHONANYWHERE_SITE' in os.environ
+        
+        if self.debug_mode or self.is_pythonanywhere:
+            print(f"🔍 SecurityManager başlatıldı:")
+            print(f"   📁 Data dir: {self.data_dir}")
+            print(f"   📄 Passwords file: {self.passwords_file}")
+            print(f"   🌐 PythonAnywhere: {self.is_pythonanywhere}")
+            print(f"   🐛 Debug mode: {self.debug_mode}")
+        
+    def _log(self, message, level="info"):
+        """Gelişmiş logging sistemi"""
+        timestamp = datetime.now().strftime('%H:%M:%S')
+        prefix = f"[{timestamp}] [SecurityManager]"
+        
+        if level == "error":
+            print(f"❌ {prefix} {message}")
+        elif level == "warning":
+            print(f"⚠️ {prefix} {message}")
+        elif level == "success":
+            print(f"✅ {prefix} {message}")
+        else:
+            print(f"ℹ️ {prefix} {message}")
+    
     def _generate_key_from_password(self, password: str, salt: bytes) -> bytes:
         if not CRYPTOGRAPHY_AVAILABLE:
+            self._log("Cryptography kütüphanesi yüklü değil", "error")
             raise ImportError("Cryptography kütüphanesi yüklü değil")
         
-        kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
-            length=32,
-            salt=salt,
-            iterations=100000,
-        )
-        key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
-        return key
+        try:
+            kdf = PBKDF2HMAC(
+                algorithm=hashes.SHA256(),
+                length=32,
+                salt=salt,
+                iterations=100000,
+            )
+            key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+            self._log("Anahtar başarıyla oluşturuldu", "success")
+            return key
+        except Exception as e:
+            self._log(f"Anahtar oluşturma hatası: {e}", "error")
+            raise
     
     def _encrypt_data(self, data: str, password: str) -> dict:
         if not CRYPTOGRAPHY_AVAILABLE:
+            self._log("Cryptography kütüphanesi yüklü değil", "error")
             raise ImportError("Cryptography kütüphanesi yüklü değil")
         
-        salt = os.urandom(16)
-        key = self._generate_key_from_password(password, salt)
-        fernet = Fernet(key)
-        encrypted_data = fernet.encrypt(data.encode())
-        
-        return {
-            'encrypted_data': base64.b64encode(encrypted_data).decode(),
-            'salt': base64.b64encode(salt).decode(),
-            'created_at': datetime.now().isoformat()
-        }
+        try:
+            salt = os.urandom(16)
+            key = self._generate_key_from_password(password, salt)
+            fernet = Fernet(key)
+            encrypted_data = fernet.encrypt(data.encode())
+            
+            result = {
+                'encrypted_data': base64.b64encode(encrypted_data).decode(),
+                'salt': base64.b64encode(salt).decode(),
+                'created_at': datetime.now().isoformat()
+            }
+            
+            self._log("Veri başarıyla şifrelendi", "success")
+            return result
+            
+        except Exception as e:
+            self._log(f"Şifreleme hatası: {e}", "error")
+            raise
     
     def _decrypt_data(self, encrypted_dict: dict, password: str) -> str:
         try:
+            if not CRYPTOGRAPHY_AVAILABLE:
+                self._log("Cryptography kütüphanesi yüklü değil", "error")
+                raise ImportError("Cryptography kütüphanesi yüklü değil")
+            
+            encrypted_data = base64.b64decode(encrypted_dict['encrypted_data'])
             salt = base64.b64decode(encrypted_dict['salt'])
+            
             key = self._generate_key_from_password(password, salt)
             fernet = Fernet(key)
-            encrypted_data = base64.b64decode(encrypted_dict['encrypted_data'])
             decrypted_data = fernet.decrypt(encrypted_data)
+            
+            self._log("Veri başarıyla çözüldü", "success")
             return decrypted_data.decode()
+            
         except Exception as e:
-            raise ValueError("Şifre çözme hatası: Yanlış anahtar veya bozuk veri")
+            self._log(f"Şifre çözme hatası: {e}", "error")
+            raise
     
     def generate_one_time_code(self, user_session_id: str) -> str:
         code = secrets.token_hex(16)  # 32 karakter hex kod
@@ -571,17 +620,41 @@ class SecurityManager:
         try:
             if os.path.exists(filename):
                 with open(filename, 'r', encoding='utf-8') as f:
-                    return json.load(f)
+                    data = json.load(f)
+                self._log(f"{filename} başarıyla yüklendi", "success")
+                return data
+            else:
+                self._log(f"{filename} dosyası mevcut değil, varsayılan değer kullanılıyor", "warning")
+                return default
+        except json.JSONDecodeError as e:
+            self._log(f"JSON parse hatası ({filename}): {e}", "error")
             return default
         except Exception as e:
-            print(f"JSON yükleme hatası: {e}")
+            self._log(f"Dosya okuma hatası ({filename}): {e}", "error")
             return default
     
     def _save_json(self, filename: str, data: dict) -> bool:
         try:
-            with open(filename, 'w', encoding='utf-8') as f:
+            # PythonAnywhere için atomic write
+            temp_filename = f"{filename}.tmp"
+            
+            with open(temp_filename, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
+            
+            # Atomic move
+            os.replace(temp_filename, filename)
+            
+            self._log(f"{filename} başarıyla kaydedildi", "success")
             return True
+            
         except Exception as e:
-            print(f"JSON kaydetme hatası: {e}")
+            self._log(f"JSON kaydetme hatası ({filename}): {e}", "error")
+            
+            # Geçici dosyayı temizle
+            if os.path.exists(temp_filename):
+                try:
+                    os.remove(temp_filename)
+                except:
+                    pass
+            
             return False
