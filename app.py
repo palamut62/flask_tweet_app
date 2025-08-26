@@ -7269,15 +7269,32 @@ def get_password_status():
         return jsonify({"success": False, "error": str(e)})
 
 if __name__ == '__main__':
-    # Arka plan zamanlayıcısını başlat
-    start_background_scheduler()
-    
-    # Python Anywhere için production ayarları
-    port = int(os.environ.get('PORT', 5000))
-    debug = os.environ.get('FLASK_ENV') == 'development'
-    
-    terminal_log(f"Flask uygulaması başlatılıyor - Port: {port}, Debug: {debug}", "info")
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    # Sadece local development için çalıştır
+    # PythonAnywhere'de WSGI kullanılır
+    try:
+        # Arka plan zamanlayıcısını başlat
+        start_background_scheduler()
+        
+        # Python Anywhere için production ayarları
+        port = int(os.environ.get('PORT', 5000))
+        debug = os.environ.get('FLASK_ENV') == 'development'
+        
+        # PythonAnywhere kontrolü
+        is_pythonanywhere = (
+            'PYTHONANYWHERE_SITE' in os.environ or
+            'PYTHONANYWHERE_DOMAIN' in os.environ or
+            '/home/' in os.getcwd() or
+            'pythonanywhere' in os.getcwd().lower()
+        )
+        
+        if not is_pythonanywhere:
+            terminal_log(f"Flask uygulaması başlatılıyor - Port: {port}, Debug: {debug}", "info")
+            app.run(host='0.0.0.0', port=port, debug=debug)
+        else:
+            terminal_log("PythonAnywhere ortamında - WSGI kullanılıyor", "info")
+            
+    except Exception as e:
+        terminal_log(f"Uygulama başlatma hatası: {e}", "error")
 
 # WSGI altında (ör. PythonAnywhere) ilk istek geldiğinde zamanlayıcıyı başlat (opsiyonel)
 try:
