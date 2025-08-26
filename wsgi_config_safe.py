@@ -1,159 +1,137 @@
-#!/usr/bin/python3
-
+#!/usr/bin/env python3
 """
-WSGI config for AI Tweet Bot Flask application on PythonAnywhere.
-Safe version with error handling for logs directory.
+PythonAnywhere WSGI Güvenli Konfigürasyonu
+Bu dosya PythonAnywhere'de Flask uygulamasını çalıştırmak için kullanılır
+Hata durumlarını güvenli şekilde yönetir
 """
 
 import sys
 import os
-from dotenv import load_dotenv
+import traceback
 
-# ==============================================================================
-# PATH CONFIGURATION
-# ==============================================================================
-
-# Add your project directory to the Python path
-project_home = '/home/umutins62/flask_tweet_app'
+# Proje dizinini Python path'ine ekle
+project_home = os.path.dirname(os.path.abspath(__file__))
 if project_home not in sys.path:
-    sys.path = [project_home] + sys.path
+    sys.path.insert(0, project_home)
 
-# Add the virtual environment site-packages to the Python path
-venv_path = '/home/umutins62/flask_tweet_app/venv/lib/python3.10/site-packages'
-if venv_path not in sys.path:
-    sys.path = [venv_path] + sys.path
-
-# ==============================================================================
-# ENVIRONMENT VARIABLES
-# ==============================================================================
-
-# Load environment variables from .env file
-env_path = os.path.join(project_home, '.env')
-if os.path.exists(env_path):
-    load_dotenv(env_path)
-    print(f"✅ Environment variables loaded from: {env_path}")
-else:
-    print(f"⚠️ .env file not found at: {env_path}")
-
-# Set Flask environment
+# Environment değişkenlerini ayarla
 os.environ.setdefault('FLASK_ENV', 'production')
-os.environ.setdefault('FLASK_DEBUG', 'False')
+os.environ.setdefault('PYTHONANYWHERE_MODE', 'True')
+os.environ.setdefault('DEBUG', 'False')
 
-# ==============================================================================
-# SAFE LOGGING CONFIGURATION
-# ==============================================================================
-
-import logging
-
-# Create logs directory if it doesn't exist
-logs_dir = os.path.join(project_home, 'logs')
-try:
-    os.makedirs(logs_dir, exist_ok=True)
-    log_file = os.path.join(logs_dir, 'app.log')
+# Hata yakalama için wrapper fonksiyon
+def create_safe_application():
+    """Güvenli Flask uygulaması oluştur"""
     
-    # Test if we can write to the log file
-    with open(log_file, 'a') as f:
-        f.write('')  # Test write
-    
-    # Configure logging with file handler
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler(log_file),
-            logging.StreamHandler()
-        ]
-    )
-    print(f"✅ Logging configured with file: {log_file}")
-    
-except Exception as log_error:
-    # Fallback to console-only logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler()
-        ]
-    )
-    print(f"⚠️ File logging failed, using console only: {log_error}")
-
-# ==============================================================================
-# APPLICATION IMPORT AND CONFIGURATION
-# ==============================================================================
-
-try:
-    # Change to project directory
-    os.chdir(project_home)
-    print(f"📁 Changed to directory: {os.getcwd()}")
-    
-    # Import Flask application
-    from app import app as application
-    
-    # Configure application for production
-    application.config['DEBUG'] = False
-    application.config['TESTING'] = False
-    
-    # Ensure secret key is set
-    if not application.config.get('SECRET_KEY'):
-        application.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-production-secret-key-here')
-    
-    print("✅ Flask application loaded successfully")
-    print(f"🐍 Python path: {sys.path[:2]}...")  # Show first 2 paths
-    
-except Exception as e:
-    print(f"❌ Error loading Flask application: {e}")
-    import traceback
-    traceback.print_exc()
-    
-    # Create a simple error application
-    def application(environ, start_response):
-        status = '500 Internal Server Error'
-        headers = [('Content-type', 'text/html; charset=utf-8')]
-        start_response(status, headers)
-        
-        error_html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Application Error</title>
-            <meta charset="utf-8">
-            <style>
-                body {{ font-family: Arial, sans-serif; margin: 40px; }}
-                .error {{ background: #ffebee; padding: 20px; border-radius: 5px; }}
-                .code {{ background: #f5f5f5; padding: 10px; font-family: monospace; }}
-            </style>
-        </head>
-        <body>
-            <div class="error">
-                <h1>🚨 Application Error</h1>
-                <p>Failed to load the Flask application.</p>
-                <div class="code">Error: {str(e)}</div>
-                <p>Please check the error logs and WSGI configuration.</p>
-                <p><strong>Common solutions:</strong></p>
-                <ul>
-                    <li>Check if all required files exist</li>
-                    <li>Verify virtual environment path</li>
-                    <li>Ensure all dependencies are installed</li>
-                    <li>Check file permissions</li>
-                </ul>
-            </div>
-        </body>
-        </html>
-        """.encode('utf-8')
-        
-        return [error_html]
-
-# ==============================================================================
-# WSGI APPLICATION TEST
-# ==============================================================================
-
-if __name__ == '__main__':
-    # Test the WSGI application locally
-    print("🧪 Testing WSGI application...")
     try:
-        from werkzeug.serving import run_simple
-        run_simple('localhost', 8000, application, use_debugger=False, use_reloader=False)
-    except ImportError:
-        print("⚠️ Werkzeug not available for local testing")
+        # PythonAnywhere konfigürasyonunu yükle
+        try:
+            from pythonanywhere_config import configure_for_pythonanywhere
+            is_pythonanywhere = configure_for_pythonanywhere()
+            print(f"🐍 PythonAnywhere tespit edildi: {is_pythonanywhere}")
+        except ImportError as e:
+            print(f"ℹ️ PythonAnywhere konfigürasyonu bulunamadı: {e}")
+            is_pythonanywhere = False
+        except Exception as e:
+            print(f"⚠️ PythonAnywhere konfigürasyon hatası: {e}")
+            is_pythonanywhere = False
+
+        # Flask uygulamasını import et
+        try:
+            from app import app as flask_app
+            print("✅ Flask uygulaması başarıyla yüklendi")
+            return flask_app
+            
+        except ImportError as e:
+            print(f"❌ Flask uygulaması import hatası: {e}")
+            print(f"📁 Çalışma dizini: {os.getcwd()}")
+            print(f"🐍 Python path: {sys.path[:3]}...")
+            raise e
+            
+        except Exception as e:
+            print(f"❌ Flask uygulaması yükleme hatası: {e}")
+            print(f"🔍 Hata detayı: {traceback.format_exc()}")
+            raise e
+            
     except Exception as e:
-        print(f"❌ WSGI test error: {e}") 
+        print(f"❌ Kritik hata: {e}")
+        print(f"🔍 Tam hata: {traceback.format_exc()}")
+        
+        # Hata durumunda basit bir uygulama döndür
+        from flask import Flask
+        
+        error_app = Flask(__name__)
+        
+        @error_app.route('/')
+        def error_page():
+            return f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>❌ Uygulama Hatası</title>
+                <meta charset="utf-8">
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }}
+                    .error-container {{ background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                    .error-title {{ color: #d32f2f; font-size: 24px; margin-bottom: 20px; }}
+                    .error-details {{ background: #f8f8f8; padding: 15px; border-radius: 4px; font-family: monospace; font-size: 12px; overflow-x: auto; }}
+                    .solution {{ background: #e8f5e8; padding: 15px; border-radius: 4px; margin-top: 20px; }}
+                </style>
+            </head>
+            <body>
+                <div class="error-container">
+                    <div class="error-title">❌ Uygulama Yüklenemedi</div>
+                    <p><strong>Hata:</strong> {str(e)}</p>
+                    
+                    <div class="error-details">
+                        <strong>Hata Detayı:</strong><br>
+                        {traceback.format_exc().replace(chr(10), '<br>')}
+                    </div>
+                    
+                    <div class="solution">
+                        <strong>💡 Çözüm Adımları:</strong><br>
+                        1. PythonAnywhere konsolunda şu komutları çalıştırın:<br>
+                        <code>pip install --user -r requirements_pythonanywhere.txt</code><br><br>
+                        
+                        2. Eğer hala hata alıyorsanız:<br>
+                        <code>pip install --user flask python-dotenv requests beautifulsoup4 tweepy cryptography</code><br><br>
+                        
+                        3. Dosya izinlerini kontrol edin:<br>
+                        <code>ls -la</code><br><br>
+                        
+                        4. Python versiyonunu kontrol edin:<br>
+                        <code>python --version</code>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+        
+        @error_app.route('/health')
+        def health_check():
+            return {"status": "error", "message": str(e)}
+        
+        return error_app
+
+# Uygulamayı oluştur
+try:
+    application = create_safe_application()
+    print("🚀 Uygulama başarıyla başlatıldı")
+except Exception as e:
+    print(f"❌ Uygulama başlatma hatası: {e}")
+    # Son çare olarak basit bir uygulama
+    from flask import Flask
+    application = Flask(__name__)
+    
+    @application.route('/')
+    def fallback():
+        return "❌ Uygulama başlatılamadı. Lütfen PythonAnywhere konsolunda hata loglarını kontrol edin."
+
+# Debug bilgileri
+print("🔧 WSGI Konfigürasyonu Tamamlandı")
+print(f"📁 Çalışma dizini: {os.getcwd()}")
+print(f"🐍 Python versiyonu: {sys.version}")
+print(f"📦 Python path uzunluğu: {len(sys.path)}")
+
+if __name__ == "__main__":
+    application.run(debug=False, host='0.0.0.0', port=5000) 
