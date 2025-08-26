@@ -311,25 +311,55 @@ class SecurityManager:
     
     def save_password(self, user_session_id: str, site_name: str, username: str, password: str, master_password: str) -> bool:
         try:
-            passwords = self._load_json(self.passwords_file, {})
+            self._log(f"Şifre kaydetme başlatıldı - User: {user_session_id[:8]}..., Site: {site_name}", "info")
             
+            # Parametre kontrolü
+            if not all([user_session_id, site_name, username, password, master_password]):
+                self._log("Eksik parametreler", "error")
+                return False
+            
+            # JSON dosyasını yükle
+            self._log("JSON dosyası yükleniyor...", "info")
+            passwords = self._load_json(self.passwords_file, {})
+            self._log(f"JSON yüklendi - {len(passwords)} kullanıcı", "success")
+            
+            # Kullanıcı bölümünü oluştur
             if user_session_id not in passwords:
                 passwords[user_session_id] = {}
+                self._log("Yeni kullanıcı bölümü oluşturuldu", "info")
             
+            # Şifreleme işlemi
+            self._log("Şifreleme işlemi başlatılıyor...", "info")
+            encrypted_password = self._encrypt_data(password, master_password)
+            self._log("Şifreleme tamamlandı", "success")
+            
+            # Şifre verilerini hazırla
             password_data = {
                 'site_name': site_name,
                 'username': username,
-                'password': self._encrypt_data(password, master_password),
+                'password': encrypted_password,
                 'created_at': datetime.now().isoformat(),
                 'updated_at': datetime.now().isoformat()
             }
             
+            # Veriyi kaydet
             passwords[user_session_id][site_name] = password_data
-            self._save_json(self.passwords_file, passwords)
-            return True
+            self._log("Veri hazırlandı, JSON dosyasına kaydediliyor...", "info")
+            
+            # JSON dosyasına kaydet
+            save_success = self._save_json(self.passwords_file, passwords)
+            
+            if save_success:
+                self._log(f"Şifre başarıyla kaydedildi: {site_name}", "success")
+                return True
+            else:
+                self._log("JSON dosyasına kaydetme başarısız", "error")
+                return False
             
         except Exception as e:
-            print(f"Şifre kaydetme hatası: {e}")
+            self._log(f"Şifre kaydetme hatası: {e}", "error")
+            import traceback
+            self._log(f"Hata detayı: {traceback.format_exc()}", "error")
             return False
     
     def get_passwords(self, user_session_id: str, master_password: str = None) -> list:

@@ -7008,7 +7008,12 @@ def add_password():
         user_session_id = session.get('session_id')
         master_password = session.get('master_password')
         
+        # Debug bilgileri
+        terminal_log(f"🔍 Şifre ekleme başlatıldı - Session ID: {user_session_id[:8]}...", "info")
+        terminal_log(f"🔍 Master password mevcut: {bool(master_password)}", "info")
+        
         if not user_session_id or not master_password:
+            terminal_log("❌ Session ID veya master password eksik", "error")
             flash("Lütfen önce ana parolanızı ayarlayın.", "error")
             return redirect(url_for('password_manager'))
         
@@ -7016,21 +7021,45 @@ def add_password():
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
         
+        # Form verilerini kontrol et
+        terminal_log(f"🔍 Form verileri - Site: {site_name}, Username: {username}, Password: {'*' * len(password)}", "info")
+        
         if not site_name or not username or not password:
+            terminal_log("❌ Form verileri eksik", "error")
             flash("Tüm alanları doldurun.", "error")
             return redirect(url_for('password_manager'))
         
-        # Şifreyi kaydet
-        if security_manager.save_password(user_session_id, site_name, username, password, master_password):
-            flash(f"{site_name} için şifre başarıyla kaydedildi.", "success")
-            terminal_log(f"✅ Yeni şifre kaydedildi: {site_name}", "info")
-        else:
-            flash("Şifre kaydedilirken bir hata oluştu.", "error")
+        # SecurityManager'ı test et
+        try:
+            terminal_log("🔍 SecurityManager test ediliyor...", "info")
+            
+            # SecurityManager instance oluştur
+            sm = security_manager
+            terminal_log("✅ SecurityManager instance başarılı", "success")
+            
+            # Şifre kaydetme işlemi
+            terminal_log("🔐 Şifre kaydetme işlemi başlatılıyor...", "info")
+            success = sm.save_password(user_session_id, site_name, username, password, master_password)
+            
+            if success:
+                terminal_log(f"✅ Şifre başarıyla kaydedildi: {site_name}", "success")
+                flash(f"{site_name} için şifre başarıyla kaydedildi.", "success")
+            else:
+                terminal_log(f"❌ Şifre kaydetme başarısız: {site_name}", "error")
+                flash("Şifre kaydedilirken bir hata oluştu.", "error")
+            
+        except Exception as sm_error:
+            terminal_log(f"❌ SecurityManager hatası: {sm_error}", "error")
+            import traceback
+            terminal_log(f"🔍 SecurityManager hata detayı: {traceback.format_exc()}", "error")
+            flash("Şifre yöneticisi hatası oluştu.", "error")
         
         return redirect(url_for('password_manager'))
         
     except Exception as e:
-        terminal_log(f"❌ Şifre ekleme hatası: {e}", "error")
+        terminal_log(f"❌ Genel şifre ekleme hatası: {e}", "error")
+        import traceback
+        terminal_log(f"🔍 Genel hata detayı: {traceback.format_exc()}", "error")
         flash("Şifre eklenirken bir hata oluştu.", "error")
         return redirect(url_for('password_manager'))
 
