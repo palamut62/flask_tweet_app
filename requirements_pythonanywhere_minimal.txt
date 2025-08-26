@@ -19,6 +19,9 @@ lxml==4.9.3
 # Güvenlik için
 cryptography==41.0.7
 
+# PDF işlemleri için
+fpdf2==2.8.3
+
 # Jinja2 template engine (Flask ile birlikte gelir)
 Jinja2>=3.1.2
 MarkupSafe>=2.1.3

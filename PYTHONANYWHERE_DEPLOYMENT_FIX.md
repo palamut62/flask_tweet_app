@@ -11,12 +11,17 @@ Kullanıcı şu hataları bildirdi:
 - `Uncaught (in promise) The message port closed before a response was received`
 - `Failed to load resource: the server responded with a status of 500`
 
+**Tespit Edilen Sorun**: `fpdf` modülü eksik
+
 ## 🔧 Çözüm Adımları
 
 ### 1. PythonAnywhere Konsolunda Paket Yükleme
 
 ```bash
-# Minimal paketleri yükle
+# Önce eksik fpdf2 paketini yükle
+pip install --user fpdf2==2.8.3
+
+# Sonra minimal paketleri yükle
 pip install --user -r requirements_pythonanywhere_minimal.txt
 
 # Eğer yukarıdaki çalışmazsa, tek tek yükle
@@ -26,6 +31,7 @@ pip install --user requests==2.31.0
 pip install --user beautifulsoup4==4.12.2
 pip install --user tweepy==4.14.0
 pip install --user cryptography==41.0.7
+pip install --user fpdf2==2.8.3
 ```
 
 ### 2. WSGI Dosyasını Değiştirme
@@ -55,11 +61,11 @@ PythonAnywhere Web sekmesinde:
 ### 5. Test Script'ini Çalıştırma
 
 ```bash
-# Deployment test script'ini çalıştır
-python deploy_pythonanywhere.py
-
-# Uygulama test script'ini çalıştır
+# Test script'ini çalıştır
 python test_app_startup.py
+
+# Eğer hala hata varsa, hızlı düzeltme aracını çalıştır
+python fix_pythonanywhere.py
 ```
 
 ## 🛠️ Yeni Dosyalar
@@ -70,7 +76,7 @@ python test_app_startup.py
 - Detaylı hata mesajları
 
 ### requirements_pythonanywhere_minimal.txt
-- Sadece gerekli paketler
+- Sadece gerekli paketler (fpdf2 dahil)
 - Versiyon çakışmalarını önler
 - Minimal bağımlılık
 
@@ -84,6 +90,11 @@ python test_app_startup.py
 - Import kontrolü
 - Route testi
 
+### fix_pythonanywhere.py
+- Hızlı düzeltme aracı
+- Otomatik paket yükleme
+- Sorun giderme
+
 ## 🔍 Olası Hata Nedenleri
 
 ### 1. Paket Versiyon Uyumsuzluğu
@@ -92,13 +103,16 @@ python test_app_startup.py
 ### 2. Import Hataları
 - **Çözüm**: `wsgi_config_safe.py` kullanın
 
-### 3. Dosya İzinleri
+### 3. Eksik Paketler (fpdf2)
+- **Çözüm**: `pip install --user fpdf2==2.8.3`
+
+### 4. Dosya İzinleri
 - **Çözüm**: Dosya izinlerini kontrol edin
 
-### 4. Python Versiyonu
+### 5. Python Versiyonu
 - **Çözüm**: Python 3.8+ kullanın
 
-### 5. Environment Variables
+### 6. Environment Variables
 - **Çözüm**: `.env` dosyasını kontrol edin
 
 ## 📝 Adım Adım Deployment
@@ -112,7 +126,10 @@ cd flask_tweet_app
 
 ### Adım 2: Paketleri Yükle
 ```bash
-# Minimal paketleri yükle
+# Önce eksik fpdf2 paketini yükle
+pip install --user fpdf2==2.8.3
+
+# Sonra minimal paketleri yükle
 pip install --user -r requirements_pythonanywhere_minimal.txt
 ```
 
@@ -135,20 +152,25 @@ python test_app_startup.py
 
 Eğer hala 500 hatası alıyorsanız:
 
-1. **WSGI dosyasını değiştirin**:
+1. **Eksik paketi yükleyin**:
+   ```bash
+   pip install --user fpdf2==2.8.3
+   ```
+
+2. **WSGI dosyasını değiştirin**:
    ```python
    # wsgi.py yerine wsgi_config_safe.py kullanın
    ```
 
-2. **Paketleri yeniden yükleyin**:
+3. **Paketleri yeniden yükleyin**:
    ```bash
-   pip install --user flask==2.3.3 python-dotenv==1.0.0 requests==2.31.0
+   pip install --user flask==2.3.3 python-dotenv==1.0.0 requests==2.31.0 fpdf2==2.8.3
    ```
 
-3. **Reload yapın**:
+4. **Reload yapın**:
    - PythonAnywhere Web sekmesinde Reload butonuna tıklayın
 
-4. **Error log'ları kontrol edin**:
+5. **Error log'ları kontrol edin**:
    - Detaylı hata mesajlarını okuyun
 
 ## 📞 Destek
@@ -165,6 +187,7 @@ Deployment başarılı olduğunda:
 - ✅ Şifre yöneticisi sayfası çalışır
 - ✅ Static dosyalar yüklenir
 - ✅ Error log'ları temizdir
+- ✅ Tüm import'lar başarılı
 
 ## 🔄 Güncelleme Notları
 
@@ -172,3 +195,4 @@ Deployment başarılı olduğunda:
 - **v1.1**: wsgi_config_safe.py eklendi
 - **v1.2**: Minimal requirements eklendi
 - **v1.3**: Test script'leri eklendi
+- **v1.4**: fpdf2 paketi eklendi ve güvenli import'lar yapıldı

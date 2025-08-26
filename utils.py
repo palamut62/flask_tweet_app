@@ -2,7 +2,13 @@ import os
 import json
 import requests
 from bs4 import BeautifulSoup
-from fpdf import FPDF
+# PDF işlemleri için güvenli import
+try:
+    from fpdf import FPDF
+    FPDF_AVAILABLE = True
+except ImportError:
+    FPDF_AVAILABLE = False
+    FPDF = None
 import tweepy
 from datetime import datetime, timedelta
 import hashlib
@@ -2217,14 +2223,22 @@ def generate_ai_digest(summaries_with_links, api_key):
     return generate_ai_tweet_with_content(article_data, api_key)
 
 def create_pdf(summaries, filename="daily_digest.pdf"):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="AI Tweet Digest", ln=True, align='C')
-    for s in summaries:
-        pdf.multi_cell(0, 10, f"• {s}")
-    pdf.output(filename)
-    return filename
+    if not FPDF_AVAILABLE:
+        print("FPDF kütüphanesi yüklü değil, PDF oluşturulamıyor")
+        return None
+    
+    try:
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(200, 10, txt="AI Tweet Digest", ln=True, align='C')
+        for s in summaries:
+            pdf.multi_cell(0, 10, f"• {s}")
+        pdf.output(filename)
+        return filename
+    except Exception as e:
+        print(f"PDF oluşturma hatası: {e}")
+        return None
 
 def get_posted_articles_summary():
     """Paylaşılmış makalelerin özetini döndür - gelişmiş istatistiklerle"""

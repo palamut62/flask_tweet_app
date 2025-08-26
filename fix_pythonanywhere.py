@@ -45,7 +45,8 @@ def install_minimal_packages():
         "requests==2.31.0",
         "beautifulsoup4==4.12.2",
         "tweepy==4.14.0",
-        "cryptography==41.0.7"
+        "cryptography==41.0.7",
+        "fpdf2==2.8.3"
     ]
     
     success_count = 0
