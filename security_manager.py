@@ -3,9 +3,17 @@ import json
 import hashlib
 import secrets
 from datetime import datetime, timedelta
-from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+# Cryptography için güvenli import
+try:
+    from cryptography.fernet import Fernet
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+    CRYPTOGRAPHY_AVAILABLE = True
+except ImportError:
+    CRYPTOGRAPHY_AVAILABLE = False
+    Fernet = None
+    hashes = None
+    PBKDF2HMAC = None
 import base64
 
 class SecurityManager:
@@ -16,6 +24,9 @@ class SecurityManager:
         self.access_codes_file = os.path.join(data_dir, "access_codes.json")
         
     def _generate_key_from_password(self, password: str, salt: bytes) -> bytes:
+        if not CRYPTOGRAPHY_AVAILABLE:
+            raise ImportError("Cryptography kütüphanesi yüklü değil")
+        
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
@@ -26,6 +37,9 @@ class SecurityManager:
         return key
     
     def _encrypt_data(self, data: str, password: str) -> dict:
+        if not CRYPTOGRAPHY_AVAILABLE:
+            raise ImportError("Cryptography kütüphanesi yüklü değil")
+        
         salt = os.urandom(16)
         key = self._generate_key_from_password(password, salt)
         fernet = Fernet(key)

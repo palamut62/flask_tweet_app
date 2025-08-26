@@ -1,242 +1,179 @@
 #!/usr/bin/env python3
 """
-PythonAnywhere Durum Kontrol Scripti
-Bu script PythonAnywhere'deki sorunları tespit eder ve çözüm önerir
+PythonAnywhere Log Kontrol Scripti
+Bu script PythonAnywhere'de log durumunu kontrol eder
 """
 
 import os
 import sys
-import requests
-from pathlib import Path
+import subprocess
+from datetime import datetime
 
-def check_pythonanywhere_environment():
-    """PythonAnywhere ortamını kontrol et"""
-    print("🔍 PythonAnywhere Ortam Kontrolü")
-    print("=" * 40)
+def check_pythonanywhere_logs():
+    """PythonAnywhere log durumunu kontrol et"""
+    print("🔍 PythonAnywhere Log Kontrolü")
+    print("=" * 50)
     
-    # PythonAnywhere tespiti
-    is_pythonanywhere = (
-        'PYTHONANYWHERE_SITE' in os.environ or
-        'PYTHONANYWHERE_DOMAIN' in os.environ or
-        '/home/' in os.getcwd() or
-        'pythonanywhere' in os.getcwd().lower()
-    )
+    # 1. Çalışma dizini kontrolü
+    print(f"📁 Çalışma dizini: {os.getcwd()}")
     
-    print(f"🐍 PythonAnywhere Ortamı: {'✅ Evet' if is_pythonanywhere else '❌ Hayır'}")
-    print(f"📁 Çalışma Dizini: {os.getcwd()}")
-    print(f"🐍 Python Versiyonu: {sys.version}")
+    # 2. Python versiyonu
+    print(f"🐍 Python versiyonu: {sys.version}")
     
-    return is_pythonanywhere
-
-def check_static_files():
-    """Static dosyaları kontrol et"""
-    print("\n📁 Static Dosya Kontrolü")
-    print("=" * 40)
+    # 3. Environment değişkenleri
+    print("\n🔧 Environment Değişkenleri:")
+    env_vars = ['PYTHONANYWHERE_SITE', 'PYTHONANYWHERE_DOMAIN', 'FLASK_ENV', 'DEBUG']
+    for var in env_vars:
+        value = os.environ.get(var, 'Tanımlı değil')
+        print(f"  {var}: {value}")
     
-    static_files = {
-        "static/css/bootstrap.min.css": "Bootstrap CSS",
-        "static/css/all.min.css": "Font Awesome CSS", 
-        "static/css/twitter-style.css": "Twitter Style CSS",
-        "static/js/bootstrap.bundle.min.js": "Bootstrap JS",
-        "static/webfonts/fa-solid-900.woff2": "Font Awesome Solid",
-        "static/webfonts/fa-regular-400.woff2": "Font Awesome Regular",
-        "static/webfonts/fa-brands-400.woff2": "Font Awesome Brands"
-    }
-    
-    missing_files = []
-    existing_files = []
-    
-    for file_path, description in static_files.items():
-        if os.path.exists(file_path):
-            file_size = os.path.getsize(file_path)
-            existing_files.append((file_path, description, file_size))
-            print(f"✅ {description}: {file_path} ({file_size:,} bytes)")
+    # 4. WSGI dosyası kontrolü
+    wsgi_files = ['wsgi.py', 'wsgi_config_safe.py']
+    print("\n📄 WSGI Dosyaları:")
+    for wsgi_file in wsgi_files:
+        if os.path.exists(wsgi_file):
+            size = os.path.getsize(wsgi_file)
+            print(f"  ✅ {wsgi_file}: {size} bytes")
         else:
-            missing_files.append((file_path, description))
-            print(f"❌ {description}: {file_path} (BULUNAMADI)")
+            print(f"  ❌ {wsgi_file}: Bulunamadı")
     
-    return existing_files, missing_files
-
-def check_environment_variables():
-    """Environment variables'ları kontrol et"""
-    print("\n🔧 Environment Variables Kontrolü")
-    print("=" * 40)
-    
-    env_vars = {
-        'FLASK_ENV': 'Flask Environment',
-        'SECRET_KEY': 'Secret Key',
-        'USE_LOCAL_ASSETS': 'Use Local Assets',
-        'PYTHONANYWHERE_MODE': 'PythonAnywhere Mode',
-        'DEBUG': 'Debug Mode'
-    }
-    
-    missing_vars = []
-    existing_vars = []
-    
-    for var, description in env_vars.items():
-        value = os.environ.get(var)
-        if value:
-            existing_vars.append((var, description, value))
-            print(f"✅ {description}: {var} = {value}")
-        else:
-            missing_vars.append((var, description))
-            print(f"❌ {description}: {var} (AYARLANMAMIŞ)")
-    
-    return existing_vars, missing_vars
-
-def check_template_configuration():
-    """Template konfigürasyonunu kontrol et"""
-    print("\n📄 Template Konfigürasyon Kontrolü")
-    print("=" * 40)
-    
-    # base.html dosyasını kontrol et
-    base_html_path = "templates/base.html"
-    if os.path.exists(base_html_path):
-        with open(base_html_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        checks = [
-            ("Bootstrap CSS", "bootstrap.min.css" in content),
-            ("Font Awesome CSS", "all.min.css" in content),
-            ("Bootstrap JS", "bootstrap.bundle.min.js" in content),
-            ("PythonAnywhere Detection", "is_pythonanywhere" in content),
-            ("Local Assets", "USE_LOCAL_ASSETS" in content)
-        ]
-        
-        for check_name, result in checks:
-            status = "✅" if result else "❌"
-            print(f"{status} {check_name}: {'Mevcut' if result else 'Eksik'}")
-        
-        return True
-    else:
-        print("❌ templates/base.html bulunamadı!")
-        return False
-
-def check_wsgi_configuration():
-    """WSGI konfigürasyonunu kontrol et"""
-    print("\n⚙️ WSGI Konfigürasyon Kontrolü")
-    print("=" * 40)
-    
-    wsgi_path = "wsgi.py"
-    if os.path.exists(wsgi_path):
-        with open(wsgi_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        checks = [
-            ("PythonAnywhere Config Import", "pythonanywhere_config" in content),
-            ("Environment Variables", "FLASK_ENV" in content),
-            ("Error Handling", "ImportError" in content),
-            ("Debug Info", "PythonAnywhere" in content)
-        ]
-        
-        for check_name, result in checks:
-            status = "✅" if result else "❌"
-            print(f"{status} {check_name}: {'Mevcut' if result else 'Eksik'}")
-        
-        return True
-    else:
-        print("❌ wsgi.py bulunamadı!")
-        return False
-
-def generate_fix_commands():
-    """Düzeltme komutlarını oluştur"""
-    print("\n🔧 Düzeltme Komutları")
-    print("=" * 40)
-    
-    commands = [
-        "python setup_pythonanywhere.py",
-        "python download_static_files.py", 
-        "python test_pythonanywhere.py"
+    # 5. Log dosyaları kontrolü
+    print("\n📋 Log Dosyaları:")
+    log_files = [
+        'scheduler.log',
+        'app.log',
+        'error.log'
     ]
     
-    print("PythonAnywhere konsolunda şu komutları sırayla çalıştırın:")
-    for i, cmd in enumerate(commands, 1):
-        print(f"{i}. {cmd}")
-
-def check_web_access():
-    """Web erişimini kontrol et"""
-    print("\n🌐 Web Erişim Kontrolü")
-    print("=" * 40)
+    for log_file in log_files:
+        if os.path.exists(log_file):
+            size = os.path.getsize(log_file)
+            mtime = datetime.fromtimestamp(os.path.getmtime(log_file))
+            print(f"  ✅ {log_file}: {size} bytes (Son güncelleme: {mtime})")
+            
+            # Son 5 satırı göster
+            try:
+                with open(log_file, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                    if lines:
+                        print(f"    Son 5 satır:")
+                        for line in lines[-5:]:
+                            print(f"      {line.strip()}")
+            except Exception as e:
+                print(f"    ❌ Log okuma hatası: {e}")
+        else:
+            print(f"  ❌ {log_file}: Bulunamadı")
     
+    # 6. PythonAnywhere özel log yolları
+    print("\n🌐 PythonAnywhere Web Log Yolları:")
+    pythonanywhere_logs = [
+        '/var/log/umutins62_pythonanywhere_com.error.log',
+        '/var/log/umutins62_pythonanywhere_com.access.log',
+        '/var/log/umutins62_pythonanywhere_com.server.log'
+    ]
+    
+    for log_path in pythonanywhere_logs:
+        if os.path.exists(log_path):
+            size = os.path.getsize(log_path)
+            mtime = datetime.fromtimestamp(os.path.getmtime(log_path))
+            print(f"  ✅ {log_path}: {size} bytes (Son güncelleme: {mtime})")
+        else:
+            print(f"  ❌ {log_path}: Erişim yok veya bulunamadı")
+    
+    # 7. Flask uygulama durumu
+    print("\n🚀 Flask Uygulama Durumu:")
     try:
-        # PythonAnywhere'de static dosyalara erişimi test et
-        test_urls = [
-            "/static/css/bootstrap.min.css",
-            "/static/css/all.min.css",
-            "/static/js/bootstrap.bundle.min.js"
-        ]
-        
-        print("⚠️ Bu test PythonAnywhere'de çalıştırılmalıdır")
-        print("PythonAnywhere konsolunda şu komutu çalıştırın:")
-        print("python -c \"import requests; print(requests.get('https://yourusername.pythonanywhere.com/static/css/bootstrap.min.css').status_code)\"")
-        
+        import flask
+        print(f"  ✅ Flask versiyonu: {flask.__version__}")
+    except ImportError as e:
+        print(f"  ❌ Flask import hatası: {e}")
+    
+    # 8. WSGI test
+    print("\n🔧 WSGI Test:")
+    try:
+        sys.path.insert(0, os.getcwd())
+        from app import app
+        print("  ✅ Flask uygulaması başarıyla import edildi")
+        print(f"  📋 Debug modu: {app.debug}")
+        print(f"  🔑 Secret key ayarlı: {'Evet' if app.secret_key else 'Hayır'}")
     except Exception as e:
-        print(f"❌ Web erişim testi başarısız: {e}")
+        print(f"  ❌ WSGI test hatası: {e}")
+        print(f"  🔍 Hata detayı: {type(e).__name__}")
 
-def main():
-    """Ana kontrol fonksiyonu"""
-    print("🚀 PythonAnywhere Durum Kontrolü Başlatılıyor...")
-    print("=" * 50)
+def create_log_monitor():
+    """Log izleme scripti oluştur"""
+    monitor_script = '''#!/usr/bin/env python3
+"""
+PythonAnywhere Log İzleyici
+Bu script sürekli olarak log dosyalarını izler
+"""
+
+import os
+import time
+import subprocess
+from datetime import datetime
+
+def monitor_logs():
+    """Log dosyalarını sürekli izle"""
+    print("👀 Log İzleme Başlatıldı...")
+    print("Ctrl+C ile durdurun")
     
-    # Kontrolleri yap
-    is_pa = check_pythonanywhere_environment()
-    existing_files, missing_files = check_static_files()
-    existing_vars, missing_vars = check_environment_variables()
-    template_ok = check_template_configuration()
-    wsgi_ok = check_wsgi_configuration()
+    # İzlenecek dosyalar
+    log_files = [
+        'scheduler.log',
+        'app.log',
+        'error.log'
+    ]
     
-    # Sonuçları özetle
-    print("\n📊 ÖZET")
-    print("=" * 50)
+    # Dosya pozisyonları
+    positions = {}
     
-    total_checks = 0
-    passed_checks = 0
-    
-    # Dosya kontrolleri
-    total_checks += len(existing_files) + len(missing_files)
-    passed_checks += len(existing_files)
-    
-    # Environment kontrolleri
-    total_checks += len(existing_vars) + len(missing_vars)
-    passed_checks += len(existing_vars)
-    
-    # Template ve WSGI kontrolleri
-    total_checks += 2
-    if template_ok:
-        passed_checks += 1
-    if wsgi_ok:
-        passed_checks += 1
-    
-    print(f"✅ Başarılı Kontroller: {passed_checks}")
-    print(f"❌ Başarısız Kontroller: {total_checks - passed_checks}")
-    print(f"📊 Toplam Başarı Oranı: {(passed_checks/total_checks)*100:.1f}%")
-    
-    # Sorun tespiti
-    if missing_files:
-        print(f"\n⚠️ {len(missing_files)} static dosya eksik!")
-        print("Çözüm: python download_static_files.py")
-    
-    if missing_vars:
-        print(f"\n⚠️ {len(missing_vars)} environment variable eksik!")
-        print("Çözüm: .env dosyasını kontrol edin")
-    
-    if not is_pa:
-        print("\n⚠️ PythonAnywhere ortamı tespit edilemedi!")
-        print("Bu script PythonAnywhere'de çalıştırılmalıdır")
-    
-    # Düzeltme komutları
-    if missing_files or missing_vars:
-        generate_fix_commands()
-    
-    # Web erişim kontrolü
-    check_web_access()
-    
-    print("\n🎯 ÖNERİLER:")
-    print("1. PythonAnywhere'de bu scripti çalıştırın")
-    print("2. Eksik dosyalar varsa download_static_files.py çalıştırın")
-    print("3. Environment variables'ları kontrol edin")
-    print("4. PythonAnywhere Web sekmesinde Reload yapın")
-    print("5. Browser cache'ini temizleyin")
+    while True:
+        try:
+            for log_file in log_files:
+                if os.path.exists(log_file):
+                    current_size = os.path.getsize(log_file)
+                    
+                    if log_file not in positions:
+                        positions[log_file] = current_size
+                        print(f"📄 {log_file} izleniyor...")
+                    elif current_size > positions[log_file]:
+                        # Yeni içerik var
+                        with open(log_file, 'r', encoding='utf-8') as f:
+                            f.seek(positions[log_file])
+                            new_content = f.read()
+                            if new_content.strip():
+                                print(f"\\n🆕 {log_file} - {datetime.now()}:")
+                                print(new_content)
+                        
+                        positions[log_file] = current_size
+            
+            time.sleep(2)  # 2 saniye bekle
+            
+        except KeyboardInterrupt:
+            print("\\n⏹️ Log izleme durduruldu")
+            break
+        except Exception as e:
+            print(f"❌ Log izleme hatası: {e}")
+            time.sleep(5)
 
 if __name__ == "__main__":
-    main()
+    monitor_logs()
+'''
+    
+    with open('log_monitor.py', 'w', encoding='utf-8') as f:
+        f.write(monitor_script)
+    
+    print("✅ log_monitor.py oluşturuldu")
+    print("Kullanım: python log_monitor.py")
+
+if __name__ == "__main__":
+    check_pythonanywhere_logs()
+    print("\n" + "=" * 50)
+    create_log_monitor()
+    
+    print("\n📋 Öneriler:")
+    print("1. PythonAnywhere Web sekmesinde 'Log files' bölümünü kontrol edin")
+    print("2. 'Reload' butonuna basın ve hataları izleyin")
+    print("3. Konsol'da 'python log_monitor.py' çalıştırın")
+    print("4. WSGI dosyasını 'wsgi_config_safe.py' olarak değiştirin")
