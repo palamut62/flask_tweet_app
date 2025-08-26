@@ -1788,5 +1788,75 @@
     "created_at": "2025-08-26T15:04:12.618541",
     "status": "pending",
     "id": 26
+  },
+  {
+    "article": {
+      "title": "Eyebot gets $20M Series A to boost to expand eye care access",
+      "url": "https://techcrunch.com/2025/08/26/eyebot-gets-20m-series-a-to-boost-to-expand-eye-care-access/",
+      "content": "This vision care startup secures $20M Series A for 90-second prescription kiosk.",
+      "hash": "635e6277841ee2e94b22321c1bf3fbe8",
+      "fetch_date": "2025-08-26T16:24:15.049859",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-26T13:00:00",
+      "is_within_7d": true,
+      "rss_published": "Tue, 26 Aug 2025 13:00:00 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-26T16:24:18.198134",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Eyebot secures $20M Series A to expand AI-powered eye exams, reaching 10M underserved patients through 5-minute automated screenings #AI #Tech #Startup #Future #AITools\n\nhttps://techcrunch.com/2025/08/26/eyebot-gets-20m-series-a-to-boost-to-expand-eye-care-access/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Eyebot gets 20M Series A to boost to expand eye care access",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Startup",
+          "#Investment",
+          "#VentureCapital"
+        ],
+        "emojis": [
+          "🚀",
+          "💻",
+          "🌟"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 264,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-26T16:24:28.760548",
+    "created_at": "2025-08-26T16:24:28.760548",
+    "status": "pending",
+    "id": 27
   }
 ]
