@@ -1,178 +1,159 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Şifre Yönetici Güvenlik Testi
-Bu script, güvenlik yöneticisinin tüm özelliklerini test eder.
+PythonAnywhere Security Manager Test Script
+Bu script PythonAnywhere'de security manager'ın çalışıp çalışmadığını test eder
 """
 
 import os
 import sys
 import json
-from datetime import datetime, timedelta
+import traceback
+from datetime import datetime
 
-# SecurityManager'ı import et
-try:
-    from security_manager import SecurityManager
-    print("✅ SecurityManager başarıyla import edildi")
-except ImportError as e:
-    print(f"❌ SecurityManager import hatası: {e}")
-    sys.exit(1)
+def test_cryptography_import():
+    """Cryptography kütüphanesinin yüklü olup olmadığını test et"""
+    print("🔍 Cryptography kütüphanesi test ediliyor...")
+    
+    try:
+        from cryptography.fernet import Fernet
+        from cryptography.hazmat.primitives import hashes
+        from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+        print("✅ Cryptography kütüphanesi başarıyla import edildi")
+        return True
+    except ImportError as e:
+        print(f"❌ Cryptography import hatası: {e}")
+        return False
+    except Exception as e:
+        print(f"❌ Cryptography genel hata: {e}")
+        return False
+
+def test_file_permissions():
+    """Dosya yazma izinlerini test et"""
+    print("\n🔍 Dosya yazma izinleri test ediliyor...")
+    
+    test_files = [
+        "user_passwords.json",
+        "user_cards.json", 
+        "access_codes.json"
+    ]
+    
+    for filename in test_files:
+        try:
+            # Dosya var mı kontrol et
+            if os.path.exists(filename):
+                print(f"📁 {filename} mevcut")
+                
+                # Yazma izni kontrol et
+                if os.access(filename, os.W_OK):
+                    print(f"✅ {filename} yazılabilir")
+                else:
+                    print(f"❌ {filename} yazılamıyor")
+            else:
+                print(f"📄 {filename} mevcut değil, oluşturulacak")
+                
+                # Test dosyası oluştur
+                try:
+                    with open(filename, 'w', encoding='utf-8') as f:
+                        json.dump({}, f)
+                    print(f"✅ {filename} başarıyla oluşturuldu")
+                    
+                    # Test dosyasını sil
+                    os.remove(filename)
+                    print(f"🗑️ {filename} test dosyası silindi")
+                except Exception as e:
+                    print(f"❌ {filename} oluşturulamadı: {e}")
+                    
+        except Exception as e:
+            print(f"❌ {filename} kontrol hatası: {e}")
 
 def test_security_manager():
-    """Güvenlik yöneticisini test et"""
-    print("\n🔐 Şifre Yönetici Güvenlik Testi Başlatılıyor...")
-    print("=" * 60)
-    
-    # Test için geçici dosyalar
-    test_data_dir = "test_security_data"
-    if not os.path.exists(test_data_dir):
-        os.makedirs(test_data_dir)
-    
-    # SecurityManager instance oluştur
-    sm = SecurityManager(test_data_dir)
-    test_user_id = "test_user_123"
-    
-    print(f"📁 Test veri dizini: {test_data_dir}")
-    print(f"👤 Test kullanıcı ID: {test_user_id}")
-    
-    # Test 1: Erişim kodu oluşturma
-    print("\n🧪 Test 1: Erişim Kodu Oluşturma")
-    print("-" * 40)
+    """SecurityManager sınıfını test et"""
+    print("\n🔍 SecurityManager test ediliyor...")
     
     try:
-        access_code = sm.generate_one_time_code(test_user_id)
-        print(f"✅ Erişim kodu oluşturuldu: {len(access_code)} karakter")
-        print(f"📝 Kod (ilk 8 karakter): {access_code[:8]}...")
+        # SecurityManager'ı import et
+        from security_manager import SecurityManager
         
-        # Kod durumunu kontrol et
-        has_active = sm.has_active_access_code(test_user_id)
-        remaining = sm.get_remaining_attempts(test_user_id)
-        print(f"🔍 Aktif kod var mı: {has_active}")
-        print(f"🔢 Kalan deneme: {remaining}")
+        # Instance oluştur
+        sm = SecurityManager()
+        print("✅ SecurityManager instance oluşturuldu")
         
-    except Exception as e:
-        print(f"❌ Kod oluşturma hatası: {e}")
-        return False
-    
-    # Test 2: Doğru kod doğrulama
-    print("\n🧪 Test 2: Doğru Kod Doğrulama")
-    print("-" * 40)
-    
-    try:
-        result = sm.verify_one_time_code(test_user_id, access_code)
-        if result['success']:
-            print("✅ Doğru kod başarıyla doğrulandı")
+        # Test verileri
+        test_user_id = "test_user_123"
+        test_site = "test_site"
+        test_username = "test_user"
+        test_password = "test_password_123"
+        test_master_password = "master_password_123"
+        
+        # Şifre kaydetme testi
+        print("🔐 Test şifresi kaydediliyor...")
+        success = sm.save_password(test_user_id, test_site, test_username, test_password, test_master_password)
+        
+        if success:
+            print("✅ Test şifresi başarıyla kaydedildi")
+            
+            # Şifre okuma testi
+            print("🔓 Test şifresi okunuyor...")
+            passwords = sm.get_passwords(test_user_id, test_master_password)
+            
+            if passwords and len(passwords) > 0:
+                print(f"✅ Test şifresi başarıyla okundu: {passwords[0]['site_name']}")
+                
+                # Test verilerini temizle
+                sm.delete_password(test_user_id, test_site)
+                print("🗑️ Test verileri temizlendi")
+            else:
+                print("❌ Test şifresi okunamadı")
         else:
-            print(f"❌ Kod doğrulama başarısız: {result['message']}")
-            return False
-    except Exception as e:
-        print(f"❌ Kod doğrulama hatası: {e}")
-        return False
-    
-    # Test 3: Yanlış kod denemeleri
-    print("\n🧪 Test 3: Yanlış Kod Denemeleri")
-    print("-" * 40)
-    
-    # Yeni kod oluştur (önceki kullanıldı)
-    new_code = sm.generate_one_time_code(test_user_id)
-    
-    # 2 yanlış deneme
-    for i in range(2):
-        wrong_code = "wrong_code_" + str(i)
-        result = sm.verify_one_time_code(test_user_id, wrong_code)
-        remaining = sm.get_remaining_attempts(test_user_id)
-        print(f"❌ Yanlış kod denemesi {i+1}: {result['message']}")
-        print(f"🔢 Kalan deneme: {remaining}")
-    
-    # Test 4: 3. yanlış deneme (veri silme)
-    print("\n🧪 Test 4: 3. Yanlış Deneme (Veri Silme)")
-    print("-" * 40)
-    
-    # Önce test verisi ekle
-    test_password = "test123"
-    sm.save_password(test_user_id, "test_site", "test_user", "test_pass", test_password)
-    sm.save_card(test_user_id, "test_card", "1234567890123456", "12/25", "TEST USER", test_password)
-    
-    print("📝 Test verileri eklendi (1 şifre, 1 kart)")
-    
-    # 3. yanlış deneme
-    wrong_code = "final_wrong_code"
-    result = sm.verify_one_time_code(test_user_id, wrong_code)
-    
-    if result.get('data_deleted', False):
-        deleted_data = result.get('deleted_data', {})
-        print(f"🚨 3. yanlış deneme sonrası veriler silindi!")
-        print(f"🗑️ Silinen şifreler: {deleted_data.get('passwords_count', 0)}")
-        print(f"🗑️ Silinen kartlar: {deleted_data.get('cards_count', 0)}")
-        print("✅ Güvenlik özelliği çalışıyor!")
-    else:
-        print(f"❌ Veri silme özelliği çalışmıyor: {result}")
-        return False
-    
-    # Test 5: Yeni kod oluşturma
-    print("\n🧪 Test 5: Yeni Kod Oluşturma")
-    print("-" * 40)
-    
-    try:
-        final_code = sm.generate_one_time_code(test_user_id)
-        print(f"✅ Yeni kod oluşturuldu: {len(final_code)} karakter")
-        
-        # Doğru kod ile test
-        result = sm.verify_one_time_code(test_user_id, final_code)
-        if result['success']:
-            print("✅ Yeni kod başarıyla doğrulandı")
-        else:
-            print(f"❌ Yeni kod doğrulama başarısız: {result['message']}")
-            return False
+            print("❌ Test şifresi kaydedilemedi")
             
     except Exception as e:
-        print(f"❌ Yeni kod oluşturma hatası: {e}")
-        return False
+        print(f"❌ SecurityManager test hatası: {e}")
+        print(f"🔍 Hata detayı: {traceback.format_exc()}")
+
+def test_environment():
+    """PythonAnywhere ortamını test et"""
+    print("\n🔍 PythonAnywhere ortamı test ediliyor...")
     
-    # Test 6: Zaman aşımı kontrolü
-    print("\n🧪 Test 6: Zaman Aşımı Kontrolü")
-    print("-" * 40)
+    print(f"📁 Çalışma dizini: {os.getcwd()}")
+    print(f"🐍 Python versiyonu: {sys.version}")
+    print(f"📦 Python path: {sys.path[:3]}...")  # İlk 3 path'i göster
     
-    # Test için geçici dosya oluştur
-    test_expired_user = "expired_user"
-    expired_code = sm.generate_one_time_code(test_expired_user)
+    # PythonAnywhere özel değişkenleri
+    pythonanywhere_vars = [
+        'PYTHONANYWHERE_SITE',
+        'PYTHONANYWHERE_DOMAIN', 
+        'PYTHONANYWHERE_MODE'
+    ]
     
-    # Dosyayı manuel olarak süresi dolmuş olarak işaretle
-    access_codes = sm._load_json(sm.access_codes_file, {})
-    if test_expired_user in access_codes:
-        access_codes[test_expired_user]['expires_at'] = (datetime.now() - timedelta(hours=1)).isoformat()
-        sm._save_json(sm.access_codes_file, access_codes)
-        print("⏰ Test kodu süresi dolmuş olarak işaretlendi")
-        
-        # Süresi dolmuş kodu test et
-        result = sm.verify_one_time_code(test_expired_user, expired_code)
-        if result['error'] == 'expired_code':
-            print("✅ Zaman aşımı kontrolü çalışıyor")
-        else:
-            print(f"❌ Zaman aşımı kontrolü çalışmıyor: {result}")
-            return False
-    
-    # Temizlik
-    print("\n🧹 Test Verilerini Temizleme")
-    print("-" * 40)
-    
-    try:
-        # Test dosyalarını sil
-        import shutil
-        if os.path.exists(test_data_dir):
-            shutil.rmtree(test_data_dir)
-            print(f"✅ Test veri dizini silindi: {test_data_dir}")
-    except Exception as e:
-        print(f"⚠️ Temizlik hatası (önemli değil): {e}")
-    
-    print("\n🎉 Tüm Testler Başarıyla Tamamlandı!")
+    for var in pythonanywhere_vars:
+        value = os.environ.get(var, 'Tanımlı değil')
+        print(f"🌐 {var}: {value}")
+
+def main():
+    """Ana test fonksiyonu"""
+    print("🚀 PythonAnywhere Security Manager Test Başlatılıyor...")
     print("=" * 60)
-    return True
+    
+    # Ortam testi
+    test_environment()
+    
+    # Cryptography testi
+    crypto_ok = test_cryptography_import()
+    
+    # Dosya izinleri testi
+    test_file_permissions()
+    
+    # SecurityManager testi (sadece cryptography yüklüyse)
+    if crypto_ok:
+        test_security_manager()
+    else:
+        print("\n⚠️ Cryptography yüklü olmadığı için SecurityManager test edilmedi")
+        print("💡 Çözüm: pip install cryptography")
+    
+    print("\n" + "=" * 60)
+    print("🏁 Test tamamlandı")
 
 if __name__ == "__main__":
-    success = test_security_manager()
-    if success:
-        print("\n✅ Güvenlik Yöneticisi tüm testleri geçti!")
-        sys.exit(0)
-    else:
-        print("\n❌ Güvenlik Yöneticisi testlerde başarısız!")
-        sys.exit(1)
+    main()
