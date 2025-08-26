@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-PythonAnywhere SQLite Kurulum Scripti
-Bu script PythonAnywhere'de SQLite tabanlı şifre yönetimi sistemini kurar
+PythonAnywhere SQLite Basit Kurulum Scripti
 """
 
 import os
 import sys
 import subprocess
-import traceback
 from datetime import datetime
 
 def print_header():
@@ -36,7 +34,6 @@ def install_cryptography():
     print("\n📦 Cryptography Kütüphanesi Kurulumu:")
     
     try:
-        # Cryptography yükle
         print("📥 Cryptography yükleniyor...")
         result = subprocess.run([
             sys.executable, "-m", "pip", "install", 
@@ -48,24 +45,8 @@ def install_cryptography():
             return True
         else:
             print(f"❌ Cryptography yükleme hatası: {result.stderr}")
-            
-            # Alternatif yöntem dene
-            print("🔧 Alternatif yöntem deneniyor...")
-            result2 = subprocess.run([
-                sys.executable, "-m", "pip", "install", 
-                "cryptography", "--user", "--no-deps"
-            ], capture_output=True, text=True, timeout=300)
-            
-            if result2.returncode == 0:
-                print("✅ Cryptography alternatif yöntemle yüklendi")
-                return True
-            else:
-                print(f"❌ Alternatif yöntem de başarısız: {result2.stderr}")
-                return False
+            return False
                 
-    except subprocess.TimeoutExpired:
-        print("❌ Yükleme zaman aşımına uğradı")
-        return False
     except Exception as e:
         print(f"❌ Yükleme hatası: {e}")
         return False
@@ -77,10 +58,7 @@ def check_sqlite():
     try:
         import sqlite3
         print("✅ SQLite3 modülü mevcut")
-        
-        # SQLite versiyonu kontrol et
-        version = sqlite3.sqlite_version
-        print(f"📊 SQLite versiyonu: {version}")
+        print(f"📊 SQLite versiyonu: {sqlite3.sqlite_version}")
         
         # Test veritabanı oluştur
         test_db = "test_sqlite.db"
@@ -104,21 +82,16 @@ def check_sqlite():
         print(f"❌ SQLite test hatası: {e}")
         return False
 
-def create_sqlite_security_manager():
-    """SQLite SecurityManager dosyasını oluştur"""
-    print("\n📝 SQLite SecurityManager Dosyası Kontrolü:")
+def create_simple_sqlite_manager():
+    """Basit SQLite SecurityManager oluştur"""
+    print("\n📝 Basit SQLite SecurityManager Oluşturma:")
     
     if os.path.exists("sqlite_security_manager.py"):
         print("✅ sqlite_security_manager.py dosyası mevcut")
         return True
-    else:
-        print("❌ sqlite_security_manager.py dosyası bulunamadı")
-        print("🔧 Dosya oluşturuluyor...")
-        
-        # Basit SQLite SecurityManager oluştur
-        try:
-            with open("sqlite_security_manager.py", "w", encoding="utf-8") as f:
-                f.write('''#!/usr/bin/env python3
+    
+    try:
+        content = '''#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Basit SQLite Security Manager
@@ -126,13 +99,17 @@ Basit SQLite Security Manager
 
 import sqlite3
 import os
-import hashlib
-import secrets
-from datetime import datetime, timedelta
+from datetime import datetime
 
 class SQLiteSecurityManager:
     def __init__(self, db_path="passwords.db"):
         self.db_path = db_path
+        self.is_pythonanywhere = 'PYTHONANYWHERE_SITE' in os.environ
+        
+        if self.is_pythonanywhere:
+            self.db_path = os.path.join(os.getcwd(), "passwords.db")
+            print(f"🔍 PythonAnywhere SQLite DB: {self.db_path}")
+        
         self.init_database()
     
     def init_database(self):
@@ -149,6 +126,7 @@ class SQLiteSecurityManager:
                 )
             ''')
             conn.commit()
+            print("✅ Veritabanı başlatıldı")
     
     def save_password(self, user_id, site_name, username, password, master_password):
         try:
@@ -160,9 +138,10 @@ class SQLiteSecurityManager:
                     VALUES (?, ?, ?, ?)
                 ''', (user_id, site_name, username, password))
                 conn.commit()
+                print(f"✅ Şifre kaydedildi: {site_name}")
                 return True
         except Exception as e:
-            print(f"Şifre kaydetme hatası: {e}")
+            print(f"❌ Şifre kaydetme hatası: {e}")
             return False
     
     def get_passwords(self, user_id, master_password=None):
@@ -183,36 +162,41 @@ class SQLiteSecurityManager:
                         'password': row[2] if master_password else '****',
                         'created_at': row[3]
                     })
+                print(f"✅ {len(passwords)} şifre getirildi")
                 return passwords
         except Exception as e:
-            print(f"Şifre okuma hatası: {e}")
+            print(f"❌ Şifre okuma hatası: {e}")
             return []
-''')
-            print("✅ sqlite_security_manager.py dosyası oluşturuldu")
-            return True
-        except Exception as e:
-            print(f"❌ Dosya oluşturma hatası: {e}")
-            return False
-
-def update_app_py():
-    """app.py dosyasını SQLite kullanacak şekilde güncelle"""
-    print("\n🔧 App.py Güncelleme Kontrolü:")
     
-    try:
-        with open("app.py", "r", encoding="utf-8") as f:
-            content = f.read()
-        
-        # SQLite import kontrolü
-        if "from sqlite_security_manager import SQLiteSecurityManager" in content:
-            print("✅ App.py zaten SQLite kullanacak şekilde güncellenmiş")
-            return True
-        else:
-            print("⚠️ App.py SQLite kullanacak şekilde güncellenmemiş")
-            print("🔧 Manuel güncelleme gerekli")
+    def delete_password(self, user_id, site_name):
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    DELETE FROM passwords 
+                    WHERE user_id = ? AND site_name = ?
+                ''', (user_id, site_name))
+                conn.commit()
+                
+                if cursor.rowcount > 0:
+                    print(f"✅ Şifre silindi: {site_name}")
+                    return True
+                else:
+                    print(f"⚠️ Silinecek şifre bulunamadı: {site_name}")
+                    return False
+        except Exception as e:
+            print(f"❌ Şifre silme hatası: {e}")
             return False
-            
+'''
+        
+        with open("sqlite_security_manager.py", "w", encoding="utf-8") as f:
+            f.write(content)
+        
+        print("✅ sqlite_security_manager.py dosyası oluşturuldu")
+        return True
+        
     except Exception as e:
-        print(f"❌ App.py okuma hatası: {e}")
+        print(f"❌ Dosya oluşturma hatası: {e}")
         return False
 
 def test_sqlite_system():
@@ -255,37 +239,6 @@ def test_sqlite_system():
         
     except Exception as e:
         print(f"❌ SQLite test hatası: {e}")
-        print(f"🔍 Hata detayı: {traceback.format_exc()}")
-        return False
-
-def create_backup():
-    """Mevcut JSON dosyalarını yedekle"""
-    print("\n💾 Mevcut Verileri Yedekleme:")
-    
-    backup_files = [
-        "user_passwords.json",
-        "user_cards.json", 
-        "access_codes.json"
-    ]
-    
-    backup_dir = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-    
-    try:
-        os.makedirs(backup_dir, exist_ok=True)
-        
-        for file in backup_files:
-            if os.path.exists(file):
-                import shutil
-                shutil.copy2(file, os.path.join(backup_dir, file))
-                print(f"✅ {file} yedeklendi")
-            else:
-                print(f"⚠️ {file} bulunamadı (yedeklenmedi)")
-        
-        print(f"📁 Yedekler {backup_dir} klasörüne kaydedildi")
-        return True
-        
-    except Exception as e:
-        print(f"❌ Yedekleme hatası: {e}")
         return False
 
 def main():
@@ -297,9 +250,7 @@ def main():
         ("PythonAnywhere Ortam Kontrolü", check_pythonanywhere),
         ("SQLite Desteği Kontrolü", check_sqlite),
         ("Cryptography Kurulumu", install_cryptography),
-        ("SQLite SecurityManager Oluşturma", create_sqlite_security_manager),
-        ("App.py Güncelleme Kontrolü", update_app_py),
-        ("Mevcut Verileri Yedekleme", create_backup),
+        ("Basit SQLite SecurityManager Oluşturma", create_simple_sqlite_manager),
         ("SQLite Sistemi Testi", test_sqlite_system)
     ]
     
@@ -336,26 +287,15 @@ def main():
     
     print(f"\n📈 Başarı Oranı: {passed}/{total} ({passed/total*100:.1f}%)")
     
-    if passed >= total - 1:  # En az bir hata kabul edilebilir
+    if passed >= total - 1:
         print("\n🎉 SQLite kurulumu başarılı!")
         print("\n💡 Şimdi yapmanız gerekenler:")
         print("1. Web uygulamasını yeniden başlatın:")
         print("   - PythonAnywhere Console'da: touch /var/www/umutins62_pythonanywhere_com_wsgi.py")
         print("2. Şifre yöneticisini test edin")
         print("3. Yeni şifreler ekleyin")
-        print("4. Eski JSON verilerini kontrol edin")
-        
-        print("\n🔧 Manuel adımlar (gerekirse):")
-        print("1. app.py'de SecurityManager import'unu kontrol edin")
-        print("2. Cryptography kütüphanesini manuel yükleyin")
-        print("3. Dosya izinlerini kontrol edin")
-        
     else:
         print(f"\n❌ {total-passed} adım başarısız! Sorunları çözün.")
-        print("\n🔧 Çözüm önerileri:")
-        print("1. Cryptography kütüphanesini manuel yükleyin")
-        print("2. Dosya izinlerini kontrol edin")
-        print("3. PythonAnywhere desteğine başvurun")
     
     return passed >= total - 1
 
@@ -371,4 +311,3 @@ if __name__ == "__main__":
         print("\n\n⏹️ Kurulum kullanıcı tarafından durduruldu")
     except Exception as e:
         print(f"\n\n❌ Beklenmeyen hata: {e}")
-        print(f"🔍 Hata detayı: {traceback.format_exc()}")
