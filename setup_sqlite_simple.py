@@ -91,103 +91,107 @@ def create_simple_sqlite_manager():
         return True
     
     try:
-        content = '''#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Basit SQLite Security Manager
-"""
-
-import sqlite3
-import os
-from datetime import datetime
-
-class SQLiteSecurityManager:
-    def __init__(self, db_path="passwords.db"):
-        self.db_path = db_path
-        self.is_pythonanywhere = 'PYTHONANYWHERE_SITE' in os.environ
+        # SQLite SecurityManager içeriği
+        lines = [
+            "#!/usr/bin/env python3",
+            "# -*- coding: utf-8 -*-",
+            '"""',
+            "Basit SQLite Security Manager",
+            '"""',
+            "",
+            "import sqlite3",
+            "import os",
+            "from datetime import datetime",
+            "",
+            "class SQLiteSecurityManager:",
+            "    def __init__(self, db_path=\"passwords.db\"):",
+            "        self.db_path = db_path",
+            "        self.is_pythonanywhere = 'PYTHONANYWHERE_SITE' in os.environ",
+            "        ",
+            "        if self.is_pythonanywhere:",
+            "            self.db_path = os.path.join(os.getcwd(), \"passwords.db\")",
+            "            print(f\"🔍 PythonAnywhere SQLite DB: {self.db_path}\")",
+            "        ",
+            "        self.init_database()",
+            "    ",
+            "    def init_database(self):",
+            "        with sqlite3.connect(self.db_path) as conn:",
+            "            cursor = conn.cursor()",
+            "            cursor.execute('''",
+            "                CREATE TABLE IF NOT EXISTS passwords (",
+            "                    id INTEGER PRIMARY KEY AUTOINCREMENT,",
+            "                    user_id TEXT NOT NULL,",
+            "                    site_name TEXT NOT NULL,",
+            "                    username TEXT NOT NULL,",
+            "                    password TEXT NOT NULL,",
+            "                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+            "                )",
+            "            ''')",
+            "            conn.commit()",
+            "            print(\"✅ Veritabanı başlatıldı\")",
+            "    ",
+            "    def save_password(self, user_id, site_name, username, password, master_password):",
+            "        try:",
+            "            with sqlite3.connect(self.db_path) as conn:",
+            "                cursor = conn.cursor()",
+            "                cursor.execute('''",
+            "                    INSERT OR REPLACE INTO passwords ",
+            "                    (user_id, site_name, username, password)",
+            "                    VALUES (?, ?, ?, ?)",
+            "                ''', (user_id, site_name, username, password))",
+            "                conn.commit()",
+            "                print(f\"✅ Şifre kaydedildi: {site_name}\")",
+            "                return True",
+            "        except Exception as e:",
+            "            print(f\"❌ Şifre kaydetme hatası: {e}\")",
+            "            return False",
+            "    ",
+            "    def get_passwords(self, user_id, master_password=None):",
+            "        try:",
+            "            with sqlite3.connect(self.db_path) as conn:",
+            "                cursor = conn.cursor()",
+            "                cursor.execute('''",
+            "                    SELECT site_name, username, password, created_at",
+            "                    FROM passwords WHERE user_id = ?",
+            "                    ORDER BY created_at DESC",
+            "                ''', (user_id,))",
+            "                ",
+            "                passwords = []",
+            "                for row in cursor.fetchall():",
+            "                    passwords.append({",
+            "                        'site_name': row[0],",
+            "                        'username': row[1],",
+            "                        'password': row[2] if master_password else '****',",
+            "                        'created_at': row[3]",
+            "                    })",
+            "                print(f\"✅ {len(passwords)} şifre getirildi\")",
+            "                return passwords",
+            "        except Exception as e:",
+            "            print(f\"❌ Şifre okuma hatası: {e}\")",
+            "            return []",
+            "    ",
+            "    def delete_password(self, user_id, site_name):",
+            "        try:",
+            "            with sqlite3.connect(self.db_path) as conn:",
+            "                cursor = conn.cursor()",
+            "                cursor.execute('''",
+            "                    DELETE FROM passwords ",
+            "                    WHERE user_id = ? AND site_name = ?",
+            "                ''', (user_id, site_name))",
+            "                conn.commit()",
+            "                ",
+            "                if cursor.rowcount > 0:",
+            "                    print(f\"✅ Şifre silindi: {site_name}\")",
+            "                    return True",
+            "                else:",
+            "                    print(f\"⚠️ Silinecek şifre bulunamadı: {site_name}\")",
+            "                    return False",
+            "        except Exception as e:",
+            "            print(f\"❌ Şifre silme hatası: {e}\")",
+            "            return False"
+        ]
         
-        if self.is_pythonanywhere:
-            self.db_path = os.path.join(os.getcwd(), "passwords.db")
-            print(f"🔍 PythonAnywhere SQLite DB: {self.db_path}")
-        
-        self.init_database()
-    
-    def init_database(self):
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS passwords (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id TEXT NOT NULL,
-                    site_name TEXT NOT NULL,
-                    username TEXT NOT NULL,
-                    password TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            ''')
-            conn.commit()
-            print("✅ Veritabanı başlatıldı")
-    
-    def save_password(self, user_id, site_name, username, password, master_password):
-        try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    INSERT OR REPLACE INTO passwords 
-                    (user_id, site_name, username, password)
-                    VALUES (?, ?, ?, ?)
-                ''', (user_id, site_name, username, password))
-                conn.commit()
-                print(f"✅ Şifre kaydedildi: {site_name}")
-                return True
-        except Exception as e:
-            print(f"❌ Şifre kaydetme hatası: {e}")
-            return False
-    
-    def get_passwords(self, user_id, master_password=None):
-        try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    SELECT site_name, username, password, created_at
-                    FROM passwords WHERE user_id = ?
-                    ORDER BY created_at DESC
-                ''', (user_id,))
-                
-                passwords = []
-                for row in cursor.fetchall():
-                    passwords.append({
-                        'site_name': row[0],
-                        'username': row[1],
-                        'password': row[2] if master_password else '****',
-                        'created_at': row[3]
-                    })
-                print(f"✅ {len(passwords)} şifre getirildi")
-                return passwords
-        except Exception as e:
-            print(f"❌ Şifre okuma hatası: {e}")
-            return []
-    
-    def delete_password(self, user_id, site_name):
-        try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    DELETE FROM passwords 
-                    WHERE user_id = ? AND site_name = ?
-                ''', (user_id, site_name))
-                conn.commit()
-                
-                if cursor.rowcount > 0:
-                    print(f"✅ Şifre silindi: {site_name}")
-                    return True
-                else:
-                    print(f"⚠️ Silinecek şifre bulunamadı: {site_name}")
-                    return False
-        except Exception as e:
-            print(f"❌ Şifre silme hatası: {e}")
-            return False
-'''
+        content = "\n".join(lines)
         
         with open("sqlite_security_manager.py", "w", encoding="utf-8") as f:
             f.write(content)
