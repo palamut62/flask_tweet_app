@@ -66,9 +66,10 @@ Thumbs.db
 logs/
 
 # Database
-*.db
-*.sqlite
-*.sqlite3
+# *.db
+# *.sqlite
+# *.sqlite3
+# passwords.db dosyası Git'e gönderilecek
 
 # JSON Data Files (Opsiyonel - production'da tutmak isteyebilirsiniz)
 # posted_articles.json

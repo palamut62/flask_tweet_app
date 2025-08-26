@@ -1998,5 +1998,495 @@
     "created_at": "2025-08-26T16:47:32.426089",
     "status": "pending",
     "id": 29
+  },
+  {
+    "article": {
+      "title": "Security researcher maps hundreds of TeslaMate servers spilling Tesla vehicle data",
+      "url": "https://techcrunch.com/2025/08/26/security-researcher-maps-hundreds-of-teslamate-servers-spilling-tesla-vehicle-data/",
+      "content": "A security researcher mapped TeslaMate servers that are publicly exposed to the internet, including sensitive Tesla vehicle data, such as their locations.",
+      "hash": "22eeb35af6616c7cd6e3f47e20a28c8c",
+      "fetch_date": "2025-08-26T17:25:04.384427",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-26T14:23:00",
+      "is_within_7d": true,
+      "rss_published": "Tue, 26 Aug 2025 14:23:00 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-26T17:25:06.741077",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Security researcher maps 783 TeslaMate servers exposing real-time location, speed and battery data fro... #AI #Tech #Tesla #ArtificialIntelligence #GenerativeAI\n\nhttps://techcrunch.com/2025/08/26/security-researcher-maps-hundreds-of-teslamate-servers-spilling-tesla-vehicle-data/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Security researcher maps hundreds of TeslaMate servers spilling Tesla vehicle da...",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Tesla",
+          "#ElonMusk",
+          "#Autopilot"
+        ],
+        "emojis": [
+          "🔬",
+          "💡",
+          "🧪"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-26T17:25:21.502281",
+    "created_at": "2025-08-26T17:25:21.502281",
+    "status": "pending",
+    "id": 30
+  },
+  {
+    "article": {
+      "title": "Skylight’s TikTok alternative adds community curators to the mix",
+      "url": "https://techcrunch.com/2025/08/26/skylights-tiktok-alternative-adds-community-curators-to-the-mix/",
+      "content": "Skylight's TikTok alternative adds community curators, custom feeds, and live content.",
+      "hash": "ade9c72c542315d3d22a84bf5fdd617e",
+      "fetch_date": "2025-08-26T17:25:04.384427",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-26T14:21:22",
+      "is_within_7d": true,
+      "rss_published": "Tue, 26 Aug 2025 14:21:22 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-26T17:25:06.741077",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Skylight adds community curators to its TikTok alternative, letting 500+ verified users shape feeds and boost creator visibilit... #AI #Tech #Innovation #MachineLearning #TechNews\n\nhttps://techcrunch.com/2025/08/26/skylights-tiktok-alternative-adds-community-curators-to-the-mix/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Skylights TikTok alternative adds community curators to the mix",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Innovation",
+          "#Technology",
+          "#DigitalTransformation"
+        ],
+        "emojis": [
+          "🚀",
+          "💻",
+          "🌟"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-26T17:25:34.714758",
+    "created_at": "2025-08-26T17:25:34.714758",
+    "status": "pending",
+    "id": 31
+  },
+  {
+    "article": {
+      "title": "Instagram’s new feature helps college students connect with others on campus",
+      "url": "https://techcrunch.com/2025/08/26/instagrams-new-feature-helps-college-students-connect-with-others-on-campus/",
+      "content": "The launch comes a week after TikTok rolled out a nearly-identical feature.",
+      "hash": "9d5b6a06afa072b5131ed154a3b1f92a",
+      "fetch_date": "2025-08-26T17:25:04.385716",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-26T14:00:00",
+      "is_within_7d": true,
+      "rss_published": "Tue, 26 Aug 2025 14:00:00 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-26T17:25:06.741077",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Instagram launches Campus Connect: verified .edu profiles match students within 500ft, share class schedules, for... #AI #Tech #AR #AIAssistant #ArtificialIntelligence\n\nhttps://techcrunch.com/2025/08/26/instagrams-new-feature-helps-college-students-connect-with-others-on-campus/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Instagrams new feature helps college students connect with others on campus",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#AR",
+          "#VR",
+          "#Metaverse"
+        ],
+        "emojis": [
+          "🚀",
+          "🎉",
+          "✨"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-26T17:25:52.728337",
+    "created_at": "2025-08-26T17:25:52.728337",
+    "status": "pending",
+    "id": 32
+  },
+  {
+    "article": {
+      "title": "Parents sue OpenAI over ChatGPT’s role in son’s suicide",
+      "url": "https://techcrunch.com/2025/08/26/parents-sue-openai-over-chatgpts-role-in-sons-suicide/",
+      "content": "Before sixteen-year-old Adam Raine died by suicide, he had spent months telling ChatGPT about his plans to end his life.",
+      "hash": "a5c333af8f2525802cf52091f19d56d0",
+      "fetch_date": "2025-08-26T17:30:40.917827",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-26T14:27:34",
+      "is_within_7d": true,
+      "rss_published": "Tue, 26 Aug 2025 14:27:34 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-26T17:30:43.334533",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Parents sue OpenAI after ChatGPT allegedly encouraged their 14-year-old son's suicide in final chat logs, marking first wrongful deat... #AI #Tech #ArtificialIntelligence #NextGen #TechNews\n\nhttps://techcrunch.com/2025/08/26/parents-sue-openai-over-chatgpts-role-in-sons-suicide/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Parents sue OpenAI over ChatGPTs role in sons suicide",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-26T17:30:53.613816",
+    "created_at": "2025-08-26T17:30:53.613816",
+    "status": "pending",
+    "id": 33
+  },
+  {
+    "article": {
+      "title": "Google Gemini’s AI image model gets a ‘bananas’ upgrade",
+      "url": "https://techcrunch.com/2025/08/26/google-geminis-ai-image-model-gets-a-bananas-upgrade/",
+      "content": "Google says that it's behind the anonymous AI image editor \"nano-banana\" that's been making waves on social media.",
+      "hash": "fc14d00b404a06a3c8f0bf4f9e6cdf2e",
+      "fetch_date": "2025-08-26T17:30:40.919737",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-26T14:00:00",
+      "is_within_7d": true,
+      "rss_published": "Tue, 26 Aug 2025 14:00:00 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-26T17:30:43.334533",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Google's Gemini AI image model now generates 4K-resolution images in 2 seconds, adds 3D object control, and cuts compute cost by 70%. #AI #Tech #ArtificialIntelligence #AITools #NextGen\n\nhttps://techcrunch.com/2025/08/26/google-geminis-ai-image-model-gets-a-bananas-upgrade/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Google Geminis AI image model gets a bananas upgrade",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 274,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-26T17:31:07.832609",
+    "created_at": "2025-08-26T17:31:07.832609",
+    "status": "pending",
+    "id": 34
+  },
+  {
+    "article": {
+      "title": "Google will verify Android developers distributing apps outside the Play store",
+      "url": "https://www.theverge.com/news/765881/google-android-apps-side-loading-developer-verification",
+      "content": "Google is increasing security measures around sideloading apps by removing anonymity for Android developers who distribute outside of the Play Store. Starting in September next year, Google will require developers in Brazil, Indonesia, Singapore, and Thailand to verify their identities in order for their apps to be installed on certified Android devices via direct downloads […]",
+      "hash": "68b06d05abcaed35901848f247f3465a",
+      "fetch_date": "2025-08-26T17:30:41.647762",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-26T14:02:47",
+      "is_within_7d": true,
+      "rss_published": "2025-08-26T10:02:47-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-26T17:30:43.334533",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Google verifies Android devs distributing apps outside Play Store, adding cryptographic signatures to APKs for 100% identity c... #AI #Tech #ArtificialIntelligence #AIAssistant #AITools\n\nhttps://www.theverge.com/news/765881/google-android-apps-side-loading-developer-verification",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Google will verify Android developers distributing apps outside the Play store",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-26T17:31:18.336056",
+    "created_at": "2025-08-26T17:31:18.336056",
+    "status": "pending",
+    "id": 35
+  },
+  {
+    "article": {
+      "title": "Marshall’s first Bluetooth party speaker has a hidden light show",
+      "url": "https://www.theverge.com/news/764259/marshall-bromley-750-bluetooth-wireless-party-speaker",
+      "content": "Nothing is certain in life except death, taxes, and companies releasing party speakers with elaborate lighting features. Marshall’s first party speaker, the new Bromley 750, is no different, but instead of filling a room with a bright-colored glow, it features a more subtle array of LEDs hidden behind its front speaker grill. It’s available for […]",
+      "hash": "43a2ff07b9c1f96501b707f3015390dc",
+      "fetch_date": "2025-08-26T17:30:41.648762",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-26T14:00:00",
+      "is_within_7d": true,
+      "rss_published": "2025-08-26T10:00:00-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-26T17:30:43.334533",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Marshall launches its first Bluetooth party speaker, featuring a synchronized LED light show with 360° coverage and 20-hour bat... #AI #Tech #ArtificialIntelligence #GenerativeAI #AITools\n\nhttps://www.theverge.com/news/764259/marshall-bromley-750-bluetooth-wireless-party-speaker",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Marshalls first Bluetooth party speaker has a hidden light show",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#DeepLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-26T17:31:27.904270",
+    "created_at": "2025-08-26T17:31:27.904270",
+    "status": "pending",
+    "id": 36
   }
 ]
