@@ -1,0 +1,18 @@
+{
+  "241c5f16-d1a7-4bae-8459-b7a98ae3579a": {
+    "İş Bankası": {
+      "card_name": "İş Bankası",
+      "card_number": {
+        "encrypted_data": "Z0FBQUFBQm9yYWlaQm5pMmZJQW5aZ3JxNlUzNklNYXBvQWNraFdXUDV5YWJBLUx4aUcwVFFiU25RSHVMSzh4cVFaY3NHUG9qSnMzOUJqOF9HMjQtV01oNE9sdS1naXNTWHpLejEyeHc2d2FwU3ZuUjZFU3c4cDQ9",
+        "salt": "/3XV6nF+XfX1Dac/NOT3yw==",
+        "created_at": "2025-08-26T15:29:13.238349"
+      },
+      "masked_number": "**** **** **** 8777",
+      "expiry_date": "12/33",
+      "cardholder_name": "UMUT ÇELIK",
+      "notes": "",
+      "created_at": "2025-08-26T15:29:13.238349",
+      "updated_at": "2025-08-26T15:29:13.238349"
+    }
+  }
+}

@@ -72,10 +72,29 @@ html body .twitter-layout > .twitter-sidebar {
     border-right: 1px solid var(--twitter-border) !important;
     overflow-y: auto !important;
     background-color: var(--twitter-background);
+    z-index: 1000 !important;
     
     /* Hide scrollbar */
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Sidebar icon fix for password manager page */
+.password-manager-container ~ .twitter-sidebar .twitter-nav-icon i,
+.password-manager-container + .twitter-sidebar .twitter-nav-icon i {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
+    font-weight: 900 !important;
+    font-style: normal !important;
+    display: inline-block !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Specific fix for brand icons */
+.password-manager-container ~ .twitter-sidebar .twitter-nav-icon .fab,
+.password-manager-container + .twitter-sidebar .twitter-nav-icon .fab {
+    font-weight: 400 !important;
 }
 
 html body .twitter-layout > .twitter-sidebar::-webkit-scrollbar {
@@ -203,6 +222,26 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     align-items: center;
     justify-content: center;
     opacity: 0.9;
+}
+
+/* Force icon rendering for all sidebar icons */
+.twitter-nav-icon i {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 5 Free", "Font Awesome 5 Pro", "FontAwesome" !important;
+    font-weight: 900 !important;
+    font-style: normal !important;
+    display: inline-block !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    width: 20px !important;
+    height: 20px !important;
+    text-align: center !important;
+    line-height: 20px !important;
+}
+
+/* Brand icons specific weight */
+.twitter-nav-icon .fab {
+    font-weight: 400 !important;
 }
 
 /* Tweet Card Styles */
@@ -661,7 +700,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
         left: -275px !important;
         height: 100vh !important;
         width: 275px !important;
-        z-index: 1000 !important;
+        z-index: 9999 !important;
         background-color: var(--twitter-background) !important;
         border-right: 1px solid var(--twitter-border) !important;
         transition: left 0.3s ease !important;
@@ -690,7 +729,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
         position: fixed;
         top: 16px;
         left: 16px;
-        z-index: 1001;
+        z-index: 10000;
         display: block;
     }
     
@@ -724,7 +763,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
         position: absolute;
         top: 16px;
         right: 16px;
-        z-index: 1002;
+        z-index: 10001;
     }
     
     .close-btn {
@@ -8755,4 +8794,687 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 
 [data-theme="dark"] .twitter-main {
     scrollbar-color: #4a5568 #2d3748 !important;
+}
+
+/* ===== PASSWORD MANAGER - TWITTER STYLE ===== */
+
+/* Password Manager Container - Enhanced Twitter Style */
+.password-manager-container {
+    max-width: 800px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+    background-color: var(--twitter-background) !important;
+    min-height: 100vh !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Page Header - Enhanced Twitter Style */
+.password-manager-container .page-header {
+    text-align: left !important;
+    margin-bottom: 24px !important;
+    padding-bottom: 16px !important;
+    border-bottom: 1px solid var(--twitter-border) !important;
+}
+
+.password-manager-container .page-header h1 {
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    color: var(--twitter-text) !important;
+    margin: 0 0 8px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    letter-spacing: -0.5px !important;
+    opacity: 0.95 !important;
+}
+
+.password-manager-container .page-header .lead {
+    font-size: 16px !important;
+    color: var(--twitter-text-secondary) !important;
+    margin: 0 !important;
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+    opacity: 0.85 !important;
+}
+
+/* Status Cards - Twitter Style */
+.password-manager-container .glass-card {
+    background-color: var(--twitter-background) !important;
+    border: 1px solid var(--twitter-border) !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    margin-bottom: 16px !important;
+    box-shadow: var(--twitter-shadow) !important;
+    transition: all 0.2s ease !important;
+}
+
+.password-manager-container .glass-card:hover {
+    box-shadow: var(--twitter-shadow-hover) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Status Row - Twitter Grid */
+.password-manager-container .status-row {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    gap: 16px !important;
+    margin-bottom: 24px !important;
+}
+
+/* Status Items - Twitter Style */
+.password-manager-container .status-item {
+    text-align: left !important;
+    padding: 16px !important;
+    background-color: var(--twitter-secondary-bg) !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--twitter-border) !important;
+}
+
+.password-manager-container .status-item h4 {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: var(--twitter-text-secondary) !important;
+    margin-bottom: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+/* Status Badges - Twitter Style */
+.password-manager-container .status-badges {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+.password-manager-container .badge-status {
+    padding: 6px 12px !important;
+    border-radius: 20px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border: none !important;
+    transition: all 0.2s ease !important;
+}
+
+.password-manager-container .badge-unlocked {
+    background-color: var(--twitter-success) !important;
+    color: white !important;
+}
+
+.password-manager-container .badge-locked {
+    background-color: var(--twitter-error) !important;
+    color: white !important;
+}
+
+.password-manager-container .badge-active {
+    background-color: var(--twitter-blue) !important;
+    color: white !important;
+}
+
+.password-manager-container .badge-inactive {
+    background-color: var(--twitter-text-secondary) !important;
+    color: white !important;
+}
+
+.password-manager-container .badge-info {
+    background-color: var(--twitter-secondary-bg) !important;
+    color: var(--twitter-text) !important;
+    border: 1px solid var(--twitter-border) !important;
+}
+
+/* Buttons - Twitter Style */
+.password-manager-container .btn-glass,
+.password-manager-container .btn-primary-glass {
+    background-color: var(--twitter-blue) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 25px !important;
+    padding: 12px 24px !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.password-manager-container .btn-glass:hover,
+.password-manager-container .btn-primary-glass:hover {
+    background-color: var(--twitter-blue-hover) !important;
+    transform: translateY(-1px) !important;
+}
+
+.password-manager-container .btn-glass {
+    background-color: transparent !important;
+    color: var(--twitter-text) !important;
+    border: 1px solid var(--twitter-border) !important;
+}
+
+.password-manager-container .btn-glass:hover {
+    background-color: var(--twitter-hover) !important;
+}
+
+/* Access Code Display - Twitter Style */
+.password-manager-container .access-code-container {
+    text-align: center !important;
+    margin: 24px 0 !important;
+}
+
+.password-manager-container .access-code-display {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    background-color: var(--twitter-secondary-bg) !important;
+    color: var(--twitter-text) !important;
+    padding: 16px 20px !important;
+    border-radius: 12px !important;
+    border: 2px solid var(--twitter-border) !important;
+    letter-spacing: 2px !important;
+    margin: 12px 0 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    user-select: all !important;
+}
+
+.password-manager-container .access-code-display:hover {
+    border-color: var(--twitter-blue) !important;
+    background-color: var(--twitter-hover) !important;
+}
+
+.password-manager-container .access-code-timer {
+    position: absolute !important;
+    top: -8px !important;
+    right: -8px !important;
+    background-color: var(--twitter-error) !important;
+    color: white !important;
+    padding: 4px 8px !important;
+    border-radius: 12px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+
+/* Content Grid - Twitter Style */
+.password-manager-container .content-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 24px !important;
+    margin-top: 24px !important;
+}
+
+/* Content Sections - Twitter Style */
+.password-manager-container .content-section h3 {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: var(--twitter-text) !important;
+    margin-bottom: 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+.password-manager-container .item-count {
+    background-color: var(--twitter-secondary-bg) !important;
+    color: var(--twitter-text-secondary) !important;
+    padding: 4px 12px !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border: 1px solid var(--twitter-border) !important;
+}
+
+/* Password and Card Items - Twitter Style */
+.password-manager-container .password-card,
+.password-manager-container .card-item {
+    background-color: var(--twitter-background) !important;
+    border: 1px solid var(--twitter-border) !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    margin-bottom: 16px !important;
+    transition: all 0.2s ease !important;
+}
+
+.password-manager-container .password-card:hover,
+.password-manager-container .card-item:hover {
+    box-shadow: var(--twitter-shadow-hover) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Site Icons - Twitter Style */
+.password-manager-container .site-icon {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 20px !important;
+    margin-bottom: 16px !important;
+    background-color: var(--twitter-blue) !important;
+    color: white !important;
+}
+
+/* Site-specific icon colors */
+.password-manager-container .site-icon-facebook { background-color: #1877F2 !important; }
+.password-manager-container .site-icon-gmail,
+.password-manager-container .site-icon-google { background-color: #EA4335 !important; }
+.password-manager-container .site-icon-twitter { background-color: var(--twitter-blue) !important; }
+.password-manager-container .site-icon-instagram { background: linear-gradient(45deg, #E4405F, #5851DB) !important; }
+.password-manager-container .site-icon-linkedin { background-color: #0077B5 !important; }
+.password-manager-container .site-icon-github { background-color: #333 !important; }
+.password-manager-container .site-icon-netflix { background-color: #E50914 !important; }
+.password-manager-container .site-icon-spotify { background-color: #1DB954 !important; }
+.password-manager-container .site-icon-amazon { background-color: #FF9900 !important; }
+.password-manager-container .site-icon-youtube { background-color: #FF0000 !important; }
+.password-manager-container .site-icon-whatsapp { background-color: #25D366 !important; }
+.password-manager-container .site-icon-discord { background-color: #5865F2 !important; }
+.password-manager-container .site-icon-reddit { background-color: #FF4500 !important; }
+.password-manager-container .site-icon-pinterest { background-color: #BD081C !important; }
+.password-manager-container .site-icon-tiktok { background-color: #000000 !important; }
+
+/* Card Icons */
+.password-manager-container .card-icon-1 { background-color: #1a1f71 !important; }
+.password-manager-container .card-icon-2 { background-color: #eb001b !important; }
+.password-manager-container .card-icon-3 { background-color: #006fcf !important; }
+.password-manager-container .card-icon-4 { background-color: #667eea !important; }
+.password-manager-container .card-icon-5 { background-color: #f093fb !important; }
+.password-manager-container .card-icon-6 { background-color: #4facfe !important; }
+.password-manager-container .card-icon-7 { background-color: #43e97b !important; }
+.password-manager-container .card-icon-8 { background-color: #fa709a !important; }
+
+/* Password Details - Twitter Style */
+.password-manager-container .password-details p,
+.password-manager-container .card-details p {
+    margin-bottom: 12px !important;
+    font-size: 14px !important;
+    color: var(--twitter-text) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.password-manager-container .password-details strong,
+.password-manager-container .card-details strong {
+    font-weight: 600 !important;
+    color: var(--twitter-text-secondary) !important;
+    min-width: 80px !important;
+}
+
+.password-manager-container .password-details code,
+.password-manager-container .card-details code {
+    background-color: var(--twitter-secondary-bg) !important;
+    color: var(--twitter-text) !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace !important;
+    font-size: 13px !important;
+    border: 1px solid var(--twitter-border) !important;
+}
+
+/* Locked Content - Twitter Style */
+.password-manager-container .locked-content {
+    filter: blur(3px) !important;
+    pointer-events: none !important;
+    opacity: 0.6 !important;
+}
+
+.password-manager-container .locked-overlay::after {
+    content: '🔒 KİLİTLİ' !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    background-color: var(--twitter-background) !important;
+    color: var(--twitter-text) !important;
+    padding: 12px 20px !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    box-shadow: var(--twitter-shadow-hover) !important;
+    border: 1px solid var(--twitter-border) !important;
+}
+
+/* Floating Action Buttons - Twitter Style */
+.password-manager-container .fab-container {
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    z-index: 1000 !important;
+}
+
+.password-manager-container .fab {
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 50% !important;
+    border: none !important;
+    color: white !important;
+    font-size: 20px !important;
+    box-shadow: var(--twitter-shadow-hover) !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+}
+
+.password-manager-container .fab:hover {
+    transform: scale(1.1) !important;
+}
+
+.password-manager-container .fab-add-password {
+    background-color: var(--twitter-blue) !important;
+}
+
+.password-manager-container .fab-add-card {
+    background-color: var(--twitter-success) !important;
+}
+
+/* Debug Panel - Twitter Style */
+.password-manager-container .debug-panel {
+    background-color: var(--twitter-secondary-bg) !important;
+    color: var(--twitter-text-secondary) !important;
+    border: 1px solid var(--twitter-border) !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+    margin-top: 24px !important;
+}
+
+.password-manager-container .debug-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 12px !important;
+}
+
+.password-manager-container .debug-header h6 {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: var(--twitter-text) !important;
+    margin: 0 !important;
+}
+
+.password-manager-container .debug-content {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+    color: var(--twitter-text-secondary) !important;
+}
+
+/* Forms - Twitter Style */
+.password-manager-container .form-glass {
+    background-color: var(--twitter-background) !important;
+    border: 1px solid var(--twitter-border) !important;
+    border-radius: 8px !important;
+    color: var(--twitter-text) !important;
+    padding: 12px 16px !important;
+    font-size: 15px !important;
+    transition: all 0.2s ease !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.password-manager-container .form-glass:focus {
+    outline: none !important;
+    border-color: var(--twitter-blue) !important;
+    box-shadow: 0 0 0 2px rgba(29, 161, 242, 0.2) !important;
+}
+
+.password-manager-container .form-glass::placeholder {
+    color: var(--twitter-text-secondary) !important;
+}
+
+/* Alerts - Twitter Style */
+.password-manager-container .alert {
+    border-radius: 12px !important;
+    border: none !important;
+    padding: 16px !important;
+    margin-bottom: 16px !important;
+    font-size: 14px !important;
+}
+
+.password-manager-container .alert-success {
+    background-color: rgba(0, 186, 124, 0.1) !important;
+    color: var(--twitter-success) !important;
+    border-left: 4px solid var(--twitter-success) !important;
+}
+
+.password-manager-container .alert-danger {
+    background-color: rgba(244, 36, 94, 0.1) !important;
+    color: var(--twitter-error) !important;
+    border-left: 4px solid var(--twitter-error) !important;
+}
+
+.password-manager-container .alert-warning {
+    background-color: rgba(255, 215, 0, 0.1) !important;
+    color: var(--twitter-warning) !important;
+    border-left: 4px solid var(--twitter-warning) !important;
+}
+
+/* Dropdown - Twitter Style */
+.password-manager-container .dropdown-menu {
+    background-color: var(--twitter-background) !important;
+    border: 1px solid var(--twitter-border) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--twitter-shadow-hover) !important;
+    padding: 8px 0 !important;
+}
+
+.password-manager-container .dropdown-item {
+    padding: 12px 16px !important;
+    color: var(--twitter-text) !important;
+    font-size: 14px !important;
+    transition: all 0.2s ease !important;
+    border: none !important;
+    background: none !important;
+    width: 100% !important;
+    text-align: left !important;
+    cursor: pointer !important;
+}
+
+.password-manager-container .dropdown-item:hover {
+    background-color: var(--twitter-hover) !important;
+    color: var(--twitter-text) !important;
+}
+
+.password-manager-container .dropdown-item.text-danger {
+    color: var(--twitter-error) !important;
+}
+
+.password-manager-container .dropdown-item.text-danger:hover {
+    background-color: rgba(244, 36, 94, 0.1) !important;
+}
+
+/* Responsive Design - Twitter Style */
+@media (max-width: 768px) {
+    .password-manager-container {
+        padding: 16px !important;
+    }
+    
+    .password-manager-container .content-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    
+    .password-manager-container .status-row {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    
+    .password-manager-container .fab-container {
+        bottom: 16px !important;
+        right: 16px !important;
+    }
+    
+    .password-manager-container .fab {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 18px !important;
+    }
+    
+    .password-manager-container .access-code-display {
+        font-size: 16px !important;
+        padding: 12px 16px !important;
+        letter-spacing: 1px !important;
+    }
+}
+
+/* Dark Mode Support */
+[data-theme="dark"] .password-manager-container {
+    background-color: var(--twitter-background) !important;
+}
+
+[data-theme="dark"] .password-manager-container .glass-card,
+[data-theme="dark"] .password-manager-container .password-card,
+[data-theme="dark"] .password-manager-container .card-item {
+    background-color: var(--twitter-background) !important;
+    border-color: var(--twitter-border) !important;
+}
+
+[data-theme="dark"] .password-manager-container .status-item {
+    background-color: var(--twitter-secondary-bg) !important;
+}
+
+[data-theme="dark"] .password-manager-container .access-code-display {
+    background-color: var(--twitter-secondary-bg) !important;
+    color: var(--twitter-text) !important;
+}
+
+[data-theme="dark"] .password-manager-container .debug-panel {
+    background-color: var(--twitter-secondary-bg) !important;
+    border-color: var(--twitter-border) !important;
+}
+
+/* Password Manager Container for mobile scroll */
+.password-manager-container {
+    max-height: calc(100vh - 40px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: none !important;
+    scrollbar-color: transparent transparent !important;
+    -ms-overflow-style: none !important;
+}
+
+.password-manager-container::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* ===== CONFIRMATION SECTION STYLES ===== */
+.password-manager-container .data-warning-box {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 2px solid rgba(255, 193, 7, 0.3) !important;
+    border-radius: 15px !important;
+    padding: 20px !important;
+    margin: 10px 0 !important;
+    text-align: center !important;
+    transition: all 0.3s ease !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.password-manager-container .data-warning-box:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 193, 7, 0.5) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.2) !important;
+}
+
+.password-manager-container .data-count {
+    display: block !important;
+    margin-top: 8px !important;
+    font-family: 'Courier New', monospace !important;
+    text-shadow: 0 0 10px rgba(220, 53, 69, 0.5) !important;
+}
+
+.password-manager-container .warning-details {
+    animation: warningPulse 2s ease-in-out infinite !important;
+}
+
+@keyframes warningPulse {
+    0%, 100% { 
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4) !important;
+    }
+    50% { 
+        box-shadow: 0 0 0 10px rgba(255, 193, 7, 0) !important;
+    }
+}
+
+.password-manager-container .confirmation-actions {
+    margin: 25px 0 !important;
+}
+
+.password-manager-container .confirmation-actions .btn {
+    border-radius: 25px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.password-manager-container .confirmation-actions .btn::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+    transition: left 0.5s !important;
+}
+
+.password-manager-container .confirmation-actions .btn:hover::before {
+    left: 100% !important;
+}
+
+.password-manager-container .confirmation-actions .btn:hover {
+    transform: translateY(-3px) scale(1.05) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3) !important;
+}
+
+.password-manager-container .confirmation-actions .btn-danger {
+    background: linear-gradient(45deg, #dc3545, #c82333, #dc3545) !important;
+    background-size: 200% 200% !important;
+    animation: gradientShift 3s ease infinite !important;
+    border: none !important;
+}
+
+.password-manager-container .confirmation-actions .btn-danger:hover {
+    background: linear-gradient(45deg, #c82333, #a71e2a, #c82333) !important;
+    background-size: 200% 200% !important;
+}
+
+.password-manager-container .confirmation-actions .btn-secondary {
+    background: linear-gradient(45deg, #6c757d, #5a6268, #6c757d) !important;
+    background-size: 200% 200% !important;
+    animation: gradientShift 3s ease infinite !important;
+    border: none !important;
+}
+
+.password-manager-container .confirmation-actions .btn-secondary:hover {
+    background: linear-gradient(45deg, #5a6268, #495057, #5a6268) !important;
+    background-size: 200% 200% !important;
+}
+
+/* Responsive confirmation section */
+@media (max-width: 768px) {
+    .password-manager-container .confirmation-actions {
+        text-align: center !important;
+    }
+    
+    .password-manager-container .confirmation-actions .btn {
+        display: block !important;
+        width: 100% !important;
+        margin: 10px 0 !important;
+    }
+    
+    .password-manager-container .data-warning-box {
+        margin: 5px 0 !important;
+        padding: 15px !important;
+    }
 }

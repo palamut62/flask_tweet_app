@@ -49,10 +49,14 @@ from utils import (
 
 # GitHub modülü kaldırıldı
 
+# Security manager import
+from security_manager import SecurityManager
+
 # Version Information
-APP_VERSION = "1.4.1"
+APP_VERSION = "1.4.2"
 APP_RELEASE_DATE = "2025-08-24"
 VERSION_CHANGELOG = {
+    "1.4.2": "🔐 Şifre Yönetici Güvenlik İyileştirmeleri - 3 yanlış deneme sonrası otomatik veri silme, Gelişmiş session güvenliği, Detaylı hata yönetimi, Template güvenlik uyarıları, Kapsamlı test sistemi",
     "1.4.1": "🔧 Sistem Kontrolü ve İyileştirmeleri - Duplicate kontrol sistemi kapsamlı kontrol ve doğrulama, Toplu tweet sistemi güvenlik kontrolleri, Haber çekme sistemi multi-source duplicate prevention, Version tracking sistemi otomatik güncelleme",
     "1.4.0": "🚀 OpenRouter OCR Entegrasyonu - Ücretsiz vision modelleri ile gelişmiş OCR sistemi, Çok katmanlı fallback sistemi, Gelişmiş hata yönetimi, OCR test sistemi, Kapsamlı dokümantasyon",
     "1.3.0": "🔄 GitHub modülü kaldırıldı, Footer düzeltildi, Navbar yenilendi",
@@ -62,6 +66,9 @@ VERSION_CHANGELOG = {
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
+
+# Security Manager instance
+security_manager = SecurityManager()
 
 # Markdown filter for Jinja2 templates
 import re
@@ -4429,7 +4436,12 @@ def terminal_log(message, level='info'):
     reset = '\033[0m'
     timestamp = time.strftime('%H:%M:%S')
     
-    print(f"{color}[{timestamp}] [{level.upper()}] {message}{reset}")
+    try:
+        print(f"{color}[{timestamp}] [{level.upper()}] {message}{reset}")
+    except UnicodeEncodeError:
+        # Windows terminal encoding sorunu için emoji'leri kaldır
+        safe_message = message.encode('ascii', 'ignore').decode('ascii')
+        print(f"{color}[{timestamp}] [{level.upper()}] {safe_message}{reset}")
 
 @app.route('/test_twitter_connection')
 @login_required 
@@ -6924,6 +6936,336 @@ def bulk_archive_tweets_api():
         
     except Exception as e:
         terminal_log(f"❌ Toplu tweet arşivleme hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+# =============================================================================
+# PASSWORD MANAGER ROUTES
+# =============================================================================
+
+@app.route('/password_manager')
+@login_required
+def password_manager():
+    """Basit şifre yöneticisi ana sayfası"""
+    try:
+        user_session_id = session.get('session_id', str(uuid.uuid4()))
+        session['session_id'] = user_session_id
+        
+        # Ana parola kontrolü
+        master_password = session.get('master_password')
+        
+        # Şifreleri ve kartları yükle
+        passwords = []
+        cards = []
+        
+        if master_password:
+            passwords = security_manager.get_passwords(user_session_id, master_password)
+            cards = security_manager.get_cards(user_session_id, master_password)
+
+        return render_template('password_manager.html',
+                             master_password=master_password,
+                             passwords=passwords,
+                             cards=cards)
+                             
+    except Exception as e:
+        terminal_log(f"❌ Şifre yöneticisi hatası: {e}", "error")
+        flash("Şifre yöneticisi yüklenirken bir hata oluştu.", "error")
+        return redirect(url_for('index'))
+
+
+
+@app.route('/set_master_password', methods=['POST'])
+@login_required
+def set_master_password():
+    """Ana parolayı session'a kaydet"""
+    try:
+        master_password = request.form.get('master_password', '').strip()
+        
+        if not master_password:
+            flash("Lütfen ana parolayı girin.", "error")
+            return redirect(url_for('password_manager'))
+        
+        if len(master_password) < 6:
+            flash("Ana parola en az 6 karakter olmalıdır.", "error")
+            return redirect(url_for('password_manager'))
+        
+        # Ana parolayı session'a kaydet
+        session['master_password'] = master_password
+        flash("Ana parola başarıyla ayarlandı.", "success")
+        
+        terminal_log("✅ Ana parola başarıyla ayarlandı", "info")
+        return redirect(url_for('password_manager'))
+        
+    except Exception as e:
+        terminal_log(f"❌ Ana parola ayarlama hatası: {e}", "error")
+        flash("Ana parola ayarlanırken bir hata oluştu.", "error")
+        return redirect(url_for('password_manager'))
+
+@app.route('/add_password', methods=['POST'])
+@login_required
+def add_password():
+    """Yeni şifre ekle"""
+    try:
+        user_session_id = session.get('session_id')
+        master_password = session.get('master_password')
+        
+        if not user_session_id or not master_password:
+            flash("Lütfen önce ana parolanızı ayarlayın.", "error")
+            return redirect(url_for('password_manager'))
+        
+        site_name = request.form.get('site_name', '').strip()
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        if not site_name or not username or not password:
+            flash("Tüm alanları doldurun.", "error")
+            return redirect(url_for('password_manager'))
+        
+        # Şifreyi kaydet
+        if security_manager.save_password(user_session_id, site_name, username, password, master_password):
+            flash(f"{site_name} için şifre başarıyla kaydedildi.", "success")
+            terminal_log(f"✅ Yeni şifre kaydedildi: {site_name}", "info")
+        else:
+            flash("Şifre kaydedilirken bir hata oluştu.", "error")
+        
+        return redirect(url_for('password_manager'))
+        
+    except Exception as e:
+        terminal_log(f"❌ Şifre ekleme hatası: {e}", "error")
+        flash("Şifre eklenirken bir hata oluştu.", "error")
+        return redirect(url_for('password_manager'))
+
+@app.route('/add_card', methods=['POST'])
+@login_required
+def add_card():
+    """Yeni kart ekle"""
+    try:
+        user_session_id = session.get('session_id')
+        master_password = session.get('master_password')
+        
+        if not user_session_id or not master_password:
+            flash("Lütfen önce ana parolanızı ayarlayın.", "error")
+            return redirect(url_for('password_manager'))
+        
+        card_name = request.form.get('card_name', '').strip()
+        card_number = request.form.get('card_number', '').replace(' ', '').strip()
+        expiry_date = request.form.get('expiry_date', '').strip()
+        cardholder_name = request.form.get('cardholder_name', '').strip().upper()
+        notes = request.form.get('notes', '').strip()
+        
+        # Debug log
+        terminal_log(f"🔍 Kart ekleme - Ham veriler: card_name={card_name}, card_number={card_number}, expiry_date={expiry_date}, cardholder_name={cardholder_name}", "info")
+        
+        if not card_name or not card_number or not expiry_date or not cardholder_name:
+            flash("Tüm alanları doldurun.", "error")
+            return redirect(url_for('password_manager'))
+        
+        # Kart numarası validasyonu (sadece rakamlar)
+        card_number_clean = card_number.replace(' ', '').replace('-', '').replace('_', '')
+        if not card_number_clean.isdigit():
+            flash("Kart numarası sadece rakamlardan oluşmalıdır.", "error")
+            return redirect(url_for('password_manager'))
+        
+        if len(card_number_clean) < 13 or len(card_number_clean) > 20:
+            flash("Kart numarası 13-20 haneli olmalıdır.", "error")
+            return redirect(url_for('password_manager'))
+        
+        # Temizlenmiş kart numarasını kullan
+        card_number = card_number_clean
+        
+        # Debug log - temizlenmiş veriler
+        terminal_log(f"🔍 Kart ekleme - Temizlenmiş veriler: card_number={card_number}, length={len(card_number)}", "info")
+        
+        # Expiry date validasyonu
+        expiry_clean = expiry_date.replace('/', '').replace('-', '')
+        if not expiry_clean.isdigit() or len(expiry_clean) != 4:
+            flash("Son kullanma tarihi MM/YY formatında olmalıdır.", "error")
+            return redirect(url_for('password_manager'))
+        
+        month = int(expiry_clean[:2])
+        year = int(expiry_clean[2:])
+        current_year = datetime.now().year % 100
+        
+        if month < 1 or month > 12:
+            flash("Geçerli bir ay girin (01-12).", "error")
+            return redirect(url_for('password_manager'))
+        
+        if year < current_year or year > current_year + 20:
+            flash("Geçerli bir yıl girin.", "error")
+            return redirect(url_for('password_manager'))
+        
+        # CVV güvenlik nedeniyle kaydedilmez - None olarak gönder
+        cvv = None
+        
+        # Kartı kaydet (CVV olmadan)
+        if security_manager.save_card(user_session_id, card_name, card_number, expiry_date, cardholder_name, cvv, notes, master_password):
+            flash(f"{card_name} kartı başarıyla kaydedildi. (CVV güvenlik nedeniyle kaydedilmedi)", "success")
+            terminal_log(f"✅ Yeni kart kaydedildi: {card_name} (CVV kaydedilmedi)", "info")
+        else:
+            flash("Kart kaydedilirken bir hata oluştu.", "error")
+        
+        return redirect(url_for('password_manager'))
+        
+    except Exception as e:
+        terminal_log(f"❌ Kart ekleme hatası: {e}", "error")
+        flash("Kart eklenirken bir hata oluştu.", "error")
+        return redirect(url_for('password_manager'))
+
+@app.route('/delete_password', methods=['POST'])
+@login_required
+def delete_password():
+    """Şifre sil"""
+    try:
+        user_session_id = session.get('session_id')
+        site_name = request.form.get('site_name', '').strip()
+        
+        if not user_session_id or not site_name:
+            flash("Geçersiz istek.", "error")
+            return redirect(url_for('password_manager'))
+        
+        if security_manager.delete_password(user_session_id, site_name):
+            flash(f"{site_name} için şifre başarıyla silindi.", "success")
+            terminal_log(f"✅ Şifre silindi: {site_name}", "info")
+        else:
+            flash("Şifre silinirken bir hata oluştu.", "error")
+        
+        return redirect(url_for('password_manager'))
+        
+    except Exception as e:
+        terminal_log(f"❌ Şifre silme hatası: {e}", "error")
+        flash("Şifre silinirken bir hata oluştu.", "error")
+        return redirect(url_for('password_manager'))
+
+@app.route('/delete_card', methods=['POST'])
+@login_required
+def delete_card():
+    """Kart sil"""
+    try:
+        user_session_id = session.get('session_id')
+        card_name = request.form.get('card_name', '').strip()
+        
+        if not user_session_id or not card_name:
+            flash("Geçersiz istek.", "error")
+            return redirect(url_for('password_manager'))
+        
+        if security_manager.delete_card(user_session_id, card_name):
+            flash(f"{card_name} kartı başarıyla silindi.", "success")
+            terminal_log(f"✅ Kart silindi: {card_name}", "info")
+        else:
+            flash("Kart silinirken bir hata oluştu.", "error")
+        
+        return redirect(url_for('password_manager'))
+        
+    except Exception as e:
+        terminal_log(f"❌ Kart silme hatası: {e}", "error")
+        flash("Kart silinirken bir hata oluştu.", "error")
+        return redirect(url_for('password_manager'))
+
+@app.route('/generate_password_code', methods=['POST'])
+@login_required
+def generate_password_code():
+    """Belirli bir şifre için erişim kodu oluştur"""
+    try:
+        user_session_id = session.get('session_id')
+        password_id = request.form.get('password_id', '').strip()
+        
+        if not user_session_id or not password_id:
+            return jsonify({"success": False, "error": "Geçersiz istek"})
+        
+        # Şifre erişim kodu oluştur
+        access_code = security_manager.generate_password_access_code(user_session_id, password_id)
+        
+        terminal_log(f"🔐 Şifre erişim kodu oluşturuldu: {password_id[:8]}...", "info")
+        
+        return jsonify({
+            "success": True,
+            "access_code": access_code,
+            "message": "Şifre erişim kodu oluşturuldu"
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Şifre erişim kodu oluşturma hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/verify_password_code', methods=['POST'])
+@login_required
+def verify_password_code():
+    """Belirli bir şifre için erişim kodunu doğrula"""
+    try:
+        user_session_id = session.get('session_id')
+        password_id = request.form.get('password_id', '').strip()
+        access_code = request.form.get('access_code', '').strip()
+        
+        if not user_session_id or not password_id or not access_code:
+            return jsonify({"success": False, "error": "Tüm alanlar gerekli"})
+        
+        # Kodu doğrula
+        verification_result = security_manager.verify_password_access_code(user_session_id, password_id, access_code)
+        
+        if verification_result['success']:
+            # Başarılı doğrulama - şifreyi çöz ve döndür
+            master_password = session.get('master_password')
+            if not master_password:
+                return jsonify({"success": False, "error": "Ana parola gerekli"})
+            
+            # Şifreyi bul ve çöz
+            passwords = security_manager.get_passwords(user_session_id, master_password)
+            target_password = None
+            
+            for pwd in passwords:
+                if pwd.get('id') == password_id or pwd.get('site_name') == password_id:
+                    target_password = pwd
+                    break
+            
+            if target_password:
+                terminal_log(f"✅ Şifre erişim kodu doğrulandı: {password_id[:8]}...", "info")
+                return jsonify({
+                    "success": True,
+                    "password": target_password['password'],
+                    "message": "Şifre başarıyla gösterildi"
+                })
+            else:
+                return jsonify({"success": False, "error": "Şifre bulunamadı"})
+        else:
+            # Başarısız doğrulama
+            error_type = verification_result.get('error', 'unknown')
+            error_message = verification_result.get('message', 'Bilinmeyen hata')
+            
+            terminal_log(f"❌ Şifre erişim kodu hatası: {error_message}", "warning")
+            
+            return jsonify({
+                "success": False,
+                "error": error_message,
+                "remaining_attempts": verification_result.get('remaining_attempts', 0),
+                "code_blocked": verification_result.get('code_blocked', False)
+            })
+        
+    except Exception as e:
+        terminal_log(f"❌ Şifre erişim kodu doğrulama hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/get_password_status', methods=['POST'])
+@login_required
+def get_password_status():
+    """Belirli bir şifre için durum bilgisi al"""
+    try:
+        user_session_id = session.get('session_id')
+        password_id = request.form.get('password_id', '').strip()
+        
+        if not user_session_id or not password_id:
+            return jsonify({"success": False, "error": "Geçersiz istek"})
+        
+        # Şifre durumunu kontrol et
+        has_active_code = security_manager.has_active_password_code(user_session_id, password_id)
+        remaining_attempts = security_manager.get_password_remaining_attempts(user_session_id, password_id)
+        
+        return jsonify({
+            "success": True,
+            "has_active_code": has_active_code,
+            "remaining_attempts": remaining_attempts
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Şifre durum kontrolü hatası: {e}", "error")
         return jsonify({"success": False, "error": str(e)})
 
 if __name__ == '__main__':

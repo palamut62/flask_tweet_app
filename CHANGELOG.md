@@ -2,6 +2,51 @@
 
 Bu dosya, AI Tweet Bot Flask uygulamasındaki tüm önemli değişiklikleri takip eder.
 
+## [1.4.2] - 2025-08-24
+
+### 🔐 Şifre Yönetici Güvenlik İyileştirmeleri
+- **3 Yanlış Deneme Sonrası Veri Silme**: Güvenlik için otomatik veri temizleme sistemi
+  - 3 yanlış erişim kodu denemesi sonrası tüm şifreler ve kartlar silinir
+  - Kullanıcıya detaylı bilgilendirme mesajları gösterilir
+  - Terminal loglarında güvenlik olayları kaydedilir
+- **Gelişmiş Session Güvenliği**: 
+  - Sayfa yenileme durumunda otomatik session temizleme
+  - 5 dakika inaktivite sonrası otomatik lock
+  - Ana parola session'dan güvenli temizleme
+- **Detaylı Hata Yönetimi**:
+  - Kullanıcı dostu hata mesajları
+  - Kalan deneme sayısı gösterimi
+  - Veri silme durumunda detaylı bilgilendirme
+- **Template Güvenlik Uyarıları**:
+  - 3 deneme limiti uyarısı
+  - Kalan deneme sayısı badge'i
+  - Güvenlik önerileri
+
+### 🔧 Teknik İyileştirmeler
+- **SecurityManager.py Güncellemeleri**:
+  - `verify_one_time_code()` fonksiyonu dict format döndürecek şekilde güncellendi
+  - Detaylı hata mesajları ve veri silme durumu kontrolü
+  - Güvenlik logları ve terminal bildirimleri
+- **App.py Route Güncellemeleri**:
+  - `/verify_access_code` endpoint'i yeni hata sistemi ile güncellendi
+  - Session güvenlik kontrolleri iyileştirildi
+  - Veri silme durumunda kullanıcı bilgilendirmesi
+- **Template İyileştirmeleri**:
+  - Güvenlik uyarıları ve deneme sayısı gösterimi
+  - Kullanıcı dostu arayüz güncellemeleri
+
+### 🧪 Test Sistemi
+- **test_security_manager.py**: Kapsamlı güvenlik test script'i
+  - Erişim kodu oluşturma ve doğrulama testleri
+  - Yanlış deneme simülasyonu
+  - Veri silme özelliği testi
+  - Zaman aşımı kontrolü testi
+
+### 📝 Dokümantasyon
+- Güvenlik özelliklerinin detaylı açıklaması
+- Test script'i ve kullanım rehberi
+- Güvenlik best practices dokümantasyonu
+
 ## [1.4.1] - 2025-08-24
 
 ### 🔧 Sistem Kontrolü ve İyileştirmeleri

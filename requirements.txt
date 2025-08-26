@@ -22,6 +22,9 @@ google-generativeai==0.8.3
 # Configuration & Environment
 python-dotenv==1.0.0
 
+# Cryptography & Security
+cryptography>=41.0.0
+
 # Task Scheduling
 APScheduler==3.10.4
 schedule==1.2.0

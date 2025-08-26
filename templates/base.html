@@ -44,24 +44,10 @@
     <link href="{{ url_for('static', filename='css/mobile-fix.css') }}?v=20250825-2" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/minimal-components.css') }}?v=20250825-2" rel="stylesheet">
     
-    <!-- CSS Debug - Minimal Components Check -->
-    <style>
-        /* Debug: Minimal components loaded indicator */
-        body::after {
-            content: "Minimal CSS v20250825-1 Loaded";
-            position: fixed;
-            bottom: 5px;
-            right: 5px;
-            background: var(--minimal-success, #16a34a);
-            color: white;
-            padding: 2px 6px;
-            font-size: 10px;
-            border-radius: 3px;
-            z-index: 9999;
-            pointer-events: none;
-            opacity: 0.7;
-        }
-    </style>
+    <!-- Extra CSS Block for Page-Specific Styles -->
+    {% block extra_css %}{% endblock %}
+    
+
     
     <!-- Fallback CSS - CDN'ler yüklenemezse kullanılacak -->
     <style>
@@ -939,7 +925,7 @@
                         
                         <a class="twitter-nav-item {% if request.endpoint == 'shared_tweets' %}active{% endif %}" href="{{ url_for('shared_tweets') }}">
                             <div class="twitter-nav-icon">
-                                <i class="fab fa-twitter"></i>
+                                <i class="fas fa-share-alt"></i>
                             </div>
                             <span class="twitter-nav-text">Paylaşılanlar</span>
                         </a>
@@ -998,6 +984,13 @@
                                 <i class="fas fa-shield-alt"></i>
                             </div>
                             <span class="twitter-nav-text">Güvenlik</span>
+                        </a>
+                        
+                        <a class="twitter-nav-item {% if request.endpoint == 'password_manager' %}active{% endif %}" href="{{ url_for('password_manager') }}">
+                            <div class="twitter-nav-icon">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <span class="twitter-nav-text">Şifre Yöneticisi</span>
                         </a>
                         
                         <a class="twitter-nav-item {% if request.endpoint == 'changelog' %}active{% endif %}" href="{{ url_for('changelog') }}">
