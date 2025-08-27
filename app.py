@@ -6957,16 +6957,13 @@ def password_manager():
         user_session_id = session.get('session_id', str(uuid.uuid4()))
         session['session_id'] = user_session_id
         
-        # Ana parola kontrolü
-        master_password = session.get('master_password')
+        # Ana parola kontrolü kaldırıldı - direk kayıt modu
+        master_password = "default_master_password"
+        session['master_password'] = master_password
         
-        # Şifreleri ve kartları yükle
-        passwords = []
-        cards = []
-        
-        if master_password:
-            passwords = security_manager.get_passwords(user_session_id, master_password)
-            cards = security_manager.get_cards(user_session_id, master_password)
+        # Şifreleri ve kartları yükle (direk yükle)
+        passwords = security_manager.get_passwords(user_session_id, master_password)
+        cards = security_manager.get_cards(user_session_id, master_password)
 
         return render_template('password_manager.html',
                              master_password=master_password,
@@ -7013,16 +7010,18 @@ def add_password():
     """Yeni şifre ekle"""
     try:
         user_session_id = session.get('session_id')
-        master_password = session.get('master_password')
+        
+        # Ana parola kontrolü kaldırıldı - direk kayıt
+        if not user_session_id:
+            user_session_id = f"user_{secrets.token_hex(8)}"
+            session['session_id'] = user_session_id
+        
+        # Sabit master password kullan
+        master_password = "default_master_password"
         
         # Debug bilgileri
         terminal_log(f"🔍 Şifre ekleme başlatıldı - Session ID: {user_session_id[:8]}...", "info")
-        terminal_log(f"🔍 Master password mevcut: {bool(master_password)}", "info")
-        
-        if not user_session_id or not master_password:
-            terminal_log("❌ Session ID veya master password eksik", "error")
-            flash("Lütfen önce ana parolanızı ayarlayın.", "error")
-            return redirect(url_for('password_manager'))
+        terminal_log("🔍 Ana parola kontrolü atlandı - direk kayıt modu", "info")
         
         site_name = request.form.get('site_name', '').strip()
         username = request.form.get('username', '').strip()
