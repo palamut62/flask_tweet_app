@@ -786,66 +786,97 @@ def try_openrouter_fallback(prompt, max_tokens=100):
         safe_log(f"[HATA] OpenRouter yedek sistem hatası: {e}", "ERROR")
         return None
 def generate_smart_hashtags(title, content):
-    """Makale içeriğine göre akıllı hashtag oluşturma - 5 popüler hashtag"""
+    """Makale içeriğine göre akıllı hashtag oluşturma - İçeriğe özgü analiz"""
     combined_text = f"{title.lower()} {content.lower()}"
     hashtags = []
+    priority_hashtags = []  # Yüksek öncelikli hashtag'ler
     
-    # AI ve Machine Learning hashtag'leri
-    if any(keyword in combined_text for keyword in ["artificial intelligence", "ai", "machine learning", "ml", "neural", "deep learning"]):
-        hashtags.extend(["#ArtificialIntelligence", "#MachineLearning", "#DeepLearning", "#NeuralNetworks"])
+    # Makale başlığından anahtar kelimeleri çıkar
+    title_keywords = extract_article_keywords(title, content)
     
-    # Teknoloji ve yazılım hashtag'leri
-    if any(keyword in combined_text for keyword in ["software", "programming", "code", "developer", "api"]):
-        hashtags.extend(["#SoftwareDevelopment", "#Programming", "#Developer", "#API"])
+    # Başlıktan çıkarılan anahtar kelimeleri hashtag'e çevir
+    for keyword in title_keywords[:3]:  # En önemli 3 anahtar kelime
+        hashtag = create_hashtag_from_keyword(keyword)
+        if hashtag:
+            priority_hashtags.append(hashtag)
     
-    # Startup ve yatırım hashtag'leri
-    if any(keyword in combined_text for keyword in ["startup", "funding", "investment", "venture", "billion", "million"]):
-        hashtags.extend(["#Startup", "#Investment", "#VentureCapital", "#Funding", "#Business"])
-    
-    # Şirket özel hashtag'leri
+    # Şirket özel hashtag'leri (yüksek öncelik)
+    company_hashtags = []
     if "openai" in combined_text:
-        hashtags.extend(["#OpenAI", "#ChatGPT", "#GPT"])
+        company_hashtags.extend(["#OpenAI", "#ChatGPT", "#GPT"])
     if "google" in combined_text:
-        hashtags.extend(["#Google", "#Alphabet", "#GoogleAI"])
+        company_hashtags.extend(["#Google", "#GoogleAI", "#Gemini"])
     if "microsoft" in combined_text:
-        hashtags.extend(["#Microsoft", "#Azure", "#Copilot"])
+        company_hashtags.extend(["#Microsoft", "#Azure", "#Copilot"])
     if "meta" in combined_text:
-        hashtags.extend(["#Meta", "#Facebook", "#MetaAI"])
+        company_hashtags.extend(["#Meta", "#MetaAI", "#Llama"])
     if "apple" in combined_text:
-        hashtags.extend(["#Apple", "#iOS", "#AppleAI"])
+        company_hashtags.extend(["#Apple", "#iOS", "#AppleAI"])
     if "tesla" in combined_text:
-        hashtags.extend(["#Tesla", "#ElonMusk", "#Autopilot"])
+        company_hashtags.extend(["#Tesla", "#ElonMusk", "#Autopilot"])
     if "nvidia" in combined_text:
-        hashtags.extend(["#NVIDIA", "#GPU", "#CUDA"])
+        company_hashtags.extend(["#NVIDIA", "#GPU", "#CUDA"])
     if "anthropic" in combined_text:
-        hashtags.extend(["#Anthropic", "#Claude"])
+        company_hashtags.extend(["#Anthropic", "#Claude"])
+    if "amazon" in combined_text:
+        company_hashtags.extend(["#Amazon", "#AWS", "#Alexa"])
+    if "x.ai" in combined_text or "xai" in combined_text:
+        company_hashtags.extend(["#xAI", "#ElonMusk"])
     
-    # Teknoloji alanları
-    if any(keyword in combined_text for keyword in ["blockchain", "crypto", "bitcoin", "ethereum"]):
-        hashtags.extend(["#Blockchain", "#Cryptocurrency", "#Web3", "#DeFi"])
-    if any(keyword in combined_text for keyword in ["cloud", "aws", "azure", "gcp"]):
-        hashtags.extend(["#CloudComputing", "#AWS", "#Azure", "#CloudNative"])
-    if any(keyword in combined_text for keyword in ["cybersecurity", "security", "privacy", "encryption"]):
-        hashtags.extend(["#Cybersecurity", "#DataPrivacy", "#InfoSec"])
-    if any(keyword in combined_text for keyword in ["quantum", "quantum computing"]):
-        hashtags.extend(["#QuantumComputing", "#Quantum", "#QuantumTech"])
-    if any(keyword in combined_text for keyword in ["robotics", "robot", "automation"]):
-        hashtags.extend(["#Robotics", "#Automation", "#RoboticProcess"])
-    if any(keyword in combined_text for keyword in ["iot", "internet of things", "smart home"]):
-        hashtags.extend(["#IoT", "#SmartHome", "#ConnectedDevices"])
-    if any(keyword in combined_text for keyword in ["5g", "6g", "network", "connectivity"]):
-        hashtags.extend(["#5G", "#Connectivity", "#Telecommunications"])
-    if any(keyword in combined_text for keyword in ["ar", "vr", "augmented reality", "virtual reality", "metaverse"]):
-        hashtags.extend(["#AR", "#VR", "#Metaverse", "#XR"])
+    # Teknoloji alanları (orta öncelik)
+    tech_hashtags = []
+    if any(keyword in combined_text for keyword in ["artificial intelligence", "ai", "machine learning", "ml", "neural", "deep learning", "llm", "large language model"]):
+        tech_hashtags.extend(["#ArtificialIntelligence", "#MachineLearning", "#DeepLearning", "#LLM"])
+    if any(keyword in combined_text for keyword in ["robotics", "robot", "automation", "autonomous", "self-driving"]):
+        tech_hashtags.extend(["#Robotics", "#Automation", "#AutonomousVehicles"])
+    if any(keyword in combined_text for keyword in ["quantum", "quantum computing", "quantum supremacy"]):
+        tech_hashtags.extend(["#QuantumComputing", "#QuantumSupremacy", "#QuantumTech"])
+    if any(keyword in combined_text for keyword in ["blockchain", "crypto", "bitcoin", "ethereum", "web3", "nft"]):
+        tech_hashtags.extend(["#Blockchain", "#Cryptocurrency", "#Web3", "#NFT"])
+    if any(keyword in combined_text for keyword in ["ar", "vr", "augmented reality", "virtual reality", "metaverse", "mixed reality"]):
+        tech_hashtags.extend(["#AR", "#VR", "#Metaverse", "#MixedReality"])
+    if any(keyword in combined_text for keyword in ["cybersecurity", "security", "privacy", "encryption", "data breach"]):
+        tech_hashtags.extend(["#Cybersecurity", "#DataPrivacy", "#InfoSec"])
+    if any(keyword in combined_text for keyword in ["cloud", "aws", "azure", "gcp", "serverless"]):
+        tech_hashtags.extend(["#CloudComputing", "#ServerlessComputing", "#CloudNative"])
+    if any(keyword in combined_text for keyword in ["iot", "internet of things", "smart home", "smart city"]):
+        tech_hashtags.extend(["#IoT", "#SmartHome", "#SmartCity"])
+    if any(keyword in combined_text for keyword in ["5g", "6g", "network", "connectivity", "telecommunications"]):
+        tech_hashtags.extend(["#5G", "#6G", "#Telecommunications"])
+    if any(keyword in combined_text for keyword in ["biotech", "biotechnology", "medical ai", "healthcare ai"]):
+        tech_hashtags.extend(["#BioTech", "#MedicalAI", "#HealthTech"])
     
-    # Genel teknoloji hashtag'leri
-    general_hashtags = ["#Innovation", "#Technology", "#DigitalTransformation", "#FutureTech", "#TechNews"]
-    hashtags.extend(general_hashtags)
+    # İş ve finansal hashtag'ler
+    business_hashtags = []
+    if any(keyword in combined_text for keyword in ["startup", "funding", "investment", "venture", "ipo", "acquisition"]):
+        business_hashtags.extend(["#Startup", "#Investment", "#VentureCapital", "#IPO"])
+    if any(keyword in combined_text for keyword in ["billion", "million", "revenue", "valuation", "profit"]):
+        business_hashtags.extend(["#Business", "#Revenue", "#TechBusiness"])
     
-    # Tekrarları kaldır ve 5 tane seç
-    unique_hashtags = list(dict.fromkeys(hashtags))  # Sırayı koruyarak tekrarları kaldır
+    # Spesifik ürün/teknoloji hashtag'leri
+    product_hashtags = []
+    if any(keyword in combined_text for keyword in ["chatgpt", "gpt-4", "gpt-5"]):
+        product_hashtags.extend(["#ChatGPT", "#GPT4", "#GPT5"])
+    if any(keyword in combined_text for keyword in ["claude", "claude-3", "claude-4"]):
+        product_hashtags.extend(["#Claude", "#ClaudeAI"])
+    if any(keyword in combined_text for keyword in ["gemini", "bard", "palm"]):
+        product_hashtags.extend(["#Gemini", "#GoogleAI", "#PaLM"])
+    if any(keyword in combined_text for keyword in ["github copilot", "copilot", "code assistant"]):
+        product_hashtags.extend(["#GitHubCopilot", "#CodeAssistant"])
     
-    # En alakalı 5 hashtag seç
+    # Öncelik sırasına göre hashtag'leri birleştir
+    priority_hashtags.extend(company_hashtags[:2])  # En fazla 2 şirket hashtag'i
+    priority_hashtags.extend(product_hashtags[:1])   # En fazla 1 ürün hashtag'i
+    priority_hashtags.extend(tech_hashtags[:2])      # En fazla 2 teknoloji hashtag'i
+    priority_hashtags.extend(business_hashtags[:1])  # En fazla 1 iş hashtag'i
+    
+    # Genel teknoloji hashtag'leri (düşük öncelik)
+    general_hashtags = ["#Innovation", "#Technology", "#TechNews", "#AI", "#FutureTech"]
+    
+    # Tekrarları kaldır
+    unique_hashtags = list(dict.fromkeys(priority_hashtags))
+    
+    # En fazla 5 hashtag seç
     selected_hashtags = unique_hashtags[:5]
     
     # Eğer 5'ten az varsa, genel hashtag'lerle tamamla
@@ -854,6 +885,85 @@ def generate_smart_hashtags(title, content):
         selected_hashtags.extend(remaining_general[:5-len(selected_hashtags)])
     
     return selected_hashtags[:5]
+
+def extract_article_keywords(title, content):
+    """Makale başlığından anahtar kelimeleri çıkar"""
+    import re
+    
+    # Başlık ve içerikteki önemli kelimeleri bul
+    text = f"{title} {content[:500]}"
+    
+    # Teknoloji terimlerini önceliklendirme
+    tech_terms = [
+        'artificial intelligence', 'machine learning', 'deep learning', 'neural network',
+        'quantum computing', 'blockchain', 'cryptocurrency', 'robotics', 'automation',
+        'augmented reality', 'virtual reality', 'cloud computing', 'cybersecurity',
+        'internet of things', '5g', '6g', 'biotechnology', 'nanotechnology'
+    ]
+    
+    found_terms = []
+    for term in tech_terms:
+        if term.lower() in text.lower():
+            found_terms.append(term)
+    
+    # Şirket isimleri
+    companies = [
+        'OpenAI', 'Google', 'Microsoft', 'Apple', 'Meta', 'Tesla', 'NVIDIA', 
+        'Amazon', 'Anthropic', 'xAI', 'DeepMind', 'Hugging Face'
+    ]
+    
+    for company in companies:
+        if company.lower() in text.lower():
+            found_terms.append(company)
+    
+    # Önemli sayısal değerler
+    numbers = re.findall(r'\b(\d+(?:\.\d+)?)\s*(billion|million|percent|%|x|times)\b', text.lower())
+    if numbers:
+        found_terms.append(f"{numbers[0][0]}{numbers[0][1]}")
+    
+    return found_terms[:5]
+
+def create_hashtag_from_keyword(keyword):
+    """Anahtar kelimeden hashtag oluştur"""
+    if not keyword:
+        return None
+    
+    # Özel durumlar
+    keyword_mappings = {
+        'artificial intelligence': '#ArtificialIntelligence',
+        'machine learning': '#MachineLearning', 
+        'deep learning': '#DeepLearning',
+        'quantum computing': '#QuantumComputing',
+        'augmented reality': '#AugmentedReality',
+        'virtual reality': '#VirtualReality',
+        'cloud computing': '#CloudComputing',
+        'internet of things': '#IoT',
+        'neural network': '#NeuralNetworks',
+        'openai': '#OpenAI',
+        'chatgpt': '#ChatGPT',
+        'tesla': '#Tesla',
+        'nvidia': '#NVIDIA',
+        'google': '#Google',
+        'microsoft': '#Microsoft',
+        'apple': '#Apple',
+        'meta': '#Meta',
+        'anthropic': '#Anthropic'
+    }
+    
+    keyword_lower = keyword.lower()
+    if keyword_lower in keyword_mappings:
+        return keyword_mappings[keyword_lower]
+    
+    # Genel hashtag oluşturma kuralları
+    # Boşlukları kaldır ve her kelimenin ilk harfini büyüt
+    words = keyword.split()
+    if len(words) == 1:
+        return f"#{words[0].capitalize()}"
+    elif len(words) <= 3:
+        hashtag = ''.join([word.capitalize() for word in words])
+        return f"#{hashtag}"
+    
+    return None
 
 def generate_smart_emojis(title, content):
     """Makale içeriğine göre akıllı emoji seçimi"""
@@ -1350,14 +1460,43 @@ Tweet text:"""
         theme_hashtags = theme_info['hashtags']
         analysis_hashtags = analysis.get('hashtags', [])
         
-        # Hashtag'leri birleştir: tema hashtag'leri + analiz hashtag'leri + trending hashtag'ler
-        base_hashtags = theme_hashtags[:2]  # İlk 2 tema hashtag'i
-        for hashtag in analysis_hashtags:
-            if hashtag not in base_hashtags and len(base_hashtags) < 3:
-                base_hashtags.append(hashtag)
+        # Makale-özgü akıllı hashtag'leri oluştur
+        smart_hashtags = generate_smart_hashtags(title, content)
         
-        # Trending hashtag'lerle zenginleştir
-        combined_hashtags = enhance_hashtags_with_trending(base_hashtags, trending_hashtags, max_count=5)
+        # Hashtag'leri akıllı şekilde birleştir:
+        # 1. Makale-özgü hashtag'ler (öncelik 1) - 2 adet
+        # 2. Popüler/trending hashtag'ler (öncelik 2) - 2 adet  
+        # 3. Tema hashtag'leri (öncelik 3) - 1 adet
+        
+        final_hashtags = []
+        
+        # En önemli makale-özgü hashtag'leri ekle
+        for hashtag in smart_hashtags[:2]:
+            if hashtag not in final_hashtags:
+                final_hashtags.append(hashtag)
+        
+        # Popüler trending hashtag'leri ekle
+        for hashtag in trending_hashtags[:2]:
+            if hashtag not in final_hashtags and len(final_hashtags) < 4:
+                final_hashtags.append(hashtag)
+        
+        # AI analiz hashtag'lerinden ekle
+        for hashtag in analysis_hashtags[:1]:
+            if hashtag not in final_hashtags and len(final_hashtags) < 4:
+                final_hashtags.append(hashtag)
+        
+        # Tema hashtag'lerinden 1 tane ekle
+        for hashtag in theme_hashtags[:1]:
+            if hashtag not in final_hashtags and len(final_hashtags) < 5:
+                final_hashtags.append(hashtag)
+        
+        # Eğer hala yerimiz varsa kalan akıllı hashtag'leri ekle
+        for hashtag in smart_hashtags[2:]:
+            if hashtag not in final_hashtags and len(final_hashtags) < 5:
+                final_hashtags.append(hashtag)
+        
+        # Son olarak trending hashtag'lerle zenginleştir
+        combined_hashtags = enhance_hashtags_with_trending(final_hashtags, trending_hashtags, max_count=5)
         
         hashtag_text = " ".join(combined_hashtags)  # Maksimum 5 hashtag
         
@@ -1508,11 +1647,30 @@ def generate_ai_tweet_with_content_fallback(article_data, api_key, theme="bilgil
     TWITTER_LIMIT = 280
     URL_LENGTH = 25  # "\n\n🔗 " + URL kısaltması için
     
-    # Akıllı hashtag ve emoji oluştur
+    # Akıllı hashtag ve emoji oluştur + popüler hashtag'lerle birleştir
     smart_hashtags = generate_smart_hashtags(title, content)
+    trending_hashtags = get_trending_ai_hashtags()
     smart_emojis = generate_smart_emojis(title, content)
     
-    hashtag_text = " ".join(smart_hashtags).strip()
+    # Hashtag'leri birleştir: makale-özgü + popüler
+    final_hashtags = []
+    
+    # Makale-özgü hashtag'leri önce ekle (2 adet)
+    for hashtag in smart_hashtags[:2]:
+        if hashtag not in final_hashtags:
+            final_hashtags.append(hashtag)
+    
+    # Popüler hashtag'leri ekle (2 adet)
+    for hashtag in trending_hashtags[:2]:
+        if hashtag not in final_hashtags and len(final_hashtags) < 4:
+            final_hashtags.append(hashtag)
+    
+    # Kalan yerler için daha fazla akıllı hashtag ekle
+    for hashtag in smart_hashtags[2:]:
+        if hashtag not in final_hashtags and len(final_hashtags) < 5:
+            final_hashtags.append(hashtag)
+    
+    hashtag_text = " ".join(final_hashtags).strip()
     emoji_text = "".join(smart_emojis).strip()
     
     # Hashtag ve emoji için yer ayır

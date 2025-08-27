@@ -7314,6 +7314,8 @@ def get_tweets_for_manual_share():
         data = request.get_json()
         tweet_ids = data.get('tweet_ids', [])
         
+        terminal_log(f"🔍 DEBUG - İstenen tweet ID'leri: {tweet_ids}", "info")
+        
         if not tweet_ids:
             return jsonify({"success": False, "error": "Tweet ID listesi gerekli"})
         
@@ -7322,16 +7324,35 @@ def get_tweets_for_manual_share():
         
         # Bekleyen tweet'leri yükle
         pending_tweets = load_json("pending_tweets.json", [])
+        terminal_log(f"🔍 DEBUG - Toplam bekleyen tweet sayısı: {len(pending_tweets)}", "info")
         
         # İstenen tweet'leri bul
         selected_tweets = []
         for tweet in pending_tweets:
-            if str(tweet.get('id', '')) in tweet_ids:
-                selected_tweets.append({
+            tweet_id = str(tweet.get('id', ''))
+            terminal_log(f"🔍 DEBUG - Tweet kontrolü: {tweet_id} - Aranan: {tweet_ids}", "info")
+            
+            if tweet_id in tweet_ids:
+                tweet_content = tweet.get('content', '')
+                article_title = tweet.get('article', {}).get('title', '') if tweet.get('article') else ''
+                
+                # Eğer content boşsa title kullan
+                if not tweet_content and article_title:
+                    tweet_content = f"📰 {article_title}"
+                elif not tweet_content:
+                    tweet_content = "AI Haber paylaşımı"
+                
+                selected_tweet = {
                     'id': tweet.get('id'),
-                    'content': tweet.get('content', ''),
-                    'title': tweet.get('article', {}).get('title', '') if tweet.get('article') else ''
-                })
+                    'content': tweet_content,
+                    'title': article_title,
+                    'source': tweet.get('article', {}).get('source', '') if tweet.get('article') else ''
+                }
+                
+                selected_tweets.append(selected_tweet)
+                terminal_log(f"✅ DEBUG - Tweet eklendi: ID={tweet_id}, Content={tweet_content[:50]}...", "info")
+        
+        terminal_log(f"🔍 DEBUG - Bulunan tweet sayısı: {len(selected_tweets)}", "info")
         
         if not selected_tweets:
             return jsonify({"success": False, "error": "Seçilen tweet'ler bulunamadı"})
@@ -7346,6 +7367,8 @@ def get_tweets_for_manual_share():
         
     except Exception as e:
         terminal_log(f"❌ Manuel paylaşım tweet verisi alma hatası: {e}", "error")
+        import traceback
+        terminal_log(f"❌ DEBUG - Hata detayı: {traceback.format_exc()}", "error")
         return jsonify({"success": False, "error": str(e)})
 
 @app.route('/api/mark_tweets_as_posted', methods=['POST'])

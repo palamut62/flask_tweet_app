@@ -442,85 +442,30 @@
         {% endfor %}
                             {% endif %}
                             
-    <!-- Reddedilen Makaleler -->
-    {% if rejected_articles %}
+    <!-- Reddedilen Makaleler - Sadece Link Göster -->
+    {% if rejected_articles and rejected_articles|length > 0 %}
     <div class="tweet-card">
         <div class="tweet-header">
             <div class="tweet-avatar">
                 <i class="fas fa-ban"></i>
-                                    </div>
+            </div>
             <div class="tweet-user-info">
                 <span class="tweet-username">Reddedilen Makaleler</span>
                 <span class="tweet-handle">@rejected</span>
                 <span class="tweet-time">• {{ rejected_articles|length }} makale</span>
-                                        </div>
-                                        </div>
-        
-        <!-- Toplu İşlemler Paneli -->
-        <div class="tweet-card bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 mb-3">
-            <div class="p-3">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-tasks text-danger me-2"></i>
-                        <h6 class="mb-0 text-danger">Toplu İşlemler</h6>
-                                </div>
-                    <div class="d-flex gap-2">
-                        <button onclick="bulkConvertRejected()" class="btn-minimal btn-minimal-primary btn-minimal-sm" id="bulk-convert-btn" disabled>
-                            <i class="fas fa-undo"></i> Tweet'e Çevir
-                        </button>
-                        <button onclick="bulkRemoveRejected()" class="btn-minimal btn-minimal-danger btn-minimal-sm" id="bulk-remove-btn" disabled>
-                            <i class="fas fa-trash"></i> Kalıcı Sil
-                        </button>
-                            </div>
-                        </div>
-                <div class="d-flex align-items-center justify-content-between">
-                    <span class="text-muted small">Seçili makale sayısı: <span id="selected-rejected-count">0</span></span>
-                    {% if rejected_articles|length > 1 %}
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="select-all-rejected" onchange="toggleSelectAllRejected()">
-                        <label class="form-check-label small" for="select-all-rejected">
-                            Tümünü Seç
-                        </label>
-                            </div>
-                            {% endif %}
-                        </div>
-                            </div>
-                            </div>
-        
-        <div class="tweet-content">
-            <div class="rejected-articles-list">
-                {% for article in rejected_articles[:5] %}
-                <div class="rejected-article-item" data-article-url="{{ article.url }}">
-                    <div class="d-flex align-items-start">
-                        <div class="form-check me-2 mt-1">
-                            <input class="form-check-input rejected-checkbox" type="checkbox" value="{{ article.url }}" onchange="updateRejectedButtons()">
-                            </div>
-                        <div class="flex-grow-1">
-                            <div class="article-title">{{ article.title[:100] }}{% if article.title|length > 100 %}...{% endif %}</div>
-                            <div class="article-meta">
-                                <span class="text-muted small">{{ article.source if article.source else 'Bilinmeyen' }}</span>
-                                <span class="text-muted small">• {{ article.created_at[:10] if article.created_at else 'Yeni' }}</span>
-                            </div>
-                            <div class="article-actions d-flex gap-1">
-                                <button class="btn-minimal btn-minimal-primary btn-minimal-xs convert-rejected-btn" data-url="{{ article.url }}" data-title="{{ article.title }}">
-                                    <i class="fas fa-undo"></i> Tweet'e Çevir
-                            </button>
-                                <button class="btn-minimal btn-minimal-danger btn-minimal-xs remove-rejected-btn" data-url="{{ article.url }}">
-                                    <i class="fas fa-trash"></i> Kalıcı Sil
-                            </button>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
-                {% endfor %}
-                {% if rejected_articles|length > 5 %}
-                <div class="text-center mt-2">
-                    <span class="text-muted small">... ve {{ rejected_articles|length - 5 }} makale daha</span>
             </div>
-        {% endif %}
-                    </div>
-                </div>
-                </div>
+        </div>
+        <div class="tweet-content">
+            📋 Toplam {{ rejected_articles|length }} reddedilen makale bulunuyor.<br>
+            🔗 Bu makaleleri görüntülemek ve yönetmek için ayrı sayfayı ziyaret edin.
+        </div>
+        <div class="tweet-actions">
+            <a href="{{ url_for('rejected_articles') }}" class="btn-minimal btn-minimal-danger btn-minimal-sm">
+                <i class="fas fa-ban"></i>
+                <span>Reddedilen Makaleleri Görüntüle</span>
+            </a>
+        </div>
+    </div>
     {% endif %}
                 
     <!-- Mesaj -->
@@ -596,22 +541,6 @@ function stopAutoRefresh() {
 document.addEventListener('DOMContentLoaded', function() {
     updateBulkButtons();
     startAutoRefresh();
-    
-    // Event listeners for rejected article buttons
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.convert-rejected-btn')) {
-            const button = e.target.closest('.convert-rejected-btn');
-            const url = button.getAttribute('data-url');
-            const title = button.getAttribute('data-title');
-            convertRejectedToTweet(url, title);
-        }
-        
-        if (e.target.closest('.remove-rejected-btn')) {
-            const button = e.target.closest('.remove-rejected-btn');
-            const url = button.getAttribute('data-url');
-            removeFromRejected(url);
-        }
-    });
 });
 
 function updateBulkButtons() {
@@ -669,10 +598,10 @@ function bulkManualShare() {
     }
     
     showConfirmDialog(
-        `${tweetIds.length} tweet'i manuel olarak paylaşmak için her biri için ayrı Twitter sayfası açılacak.\n\n⚠️ Bu işlem ${tweetIds.length} yeni sekmede Twitter compose sayfası açacak.\n\nDevam etmek istediğinizden emin misiniz?`,
-        () => bulkManualShareTweets(tweetIds),
+        `${tweetIds.length} tweet'i manuel paylaşım için hazırlayalım.\n\n🌟 Popup blocker sorununu önlemek için her tweet için tıklanabilir butonlar oluşturacağız.\n\n📱 Her butona tek tek tıklayarak Twitter sayfalarını açabilirsiniz.`,
+        () => createManualShareInterface(tweetIds),
         null,
-        'Toplu Manuel Paylaşım',
+        'Popup Blocker Güvenli Paylaşım',
         'info'
     );
 }
@@ -695,17 +624,15 @@ function bulkRejectTweets() {
     );
 }
 
-function bulkManualShareTweets(tweetIds) {
+function createManualShareInterface(tweetIds) {
     const button = document.getElementById('bulk-manual-btn');
     const originalText = button.innerHTML;
     
     // Loading state
-    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Açılıyor...';
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Hazırlanıyor...';
     button.disabled = true;
     
-    showToast(`${tweetIds.length} Twitter sayfası açılıyor...`, 'info');
-    
-    // Get tweet data and open tabs
+    // Get tweet data first
     fetch('/api/get_tweets_for_manual_share', {
         method: 'POST',
         headers: {
@@ -716,25 +643,331 @@ function bulkManualShareTweets(tweetIds) {
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success && data.tweets) {
+        if (data.success && data.tweets && data.tweets.length > 0) {
+            showPopupBlockerSafeInterface(data.tweets, tweetIds);
+        } else {
+            showToast(`Hata: ${data.error || 'Tweet verileri alınamadı'}`, 'error');
+        }
+        
+        // Restore button
+        button.innerHTML = originalText;
+        button.disabled = false;
+    })
+    .catch(error => {
+        console.error('Manual share interface error:', error);
+        showToast('Tweet verileri alınırken hata oluştu!', 'error');
+        
+        // Restore button
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
+function showPopupBlockerSafeInterface(tweets, tweetIds) {
+    // Create full-screen modal interface
+    const modal = document.createElement('div');
+    modal.className = 'manual-share-interface';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        flex-direction: column;
+        z-index: 10002;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    `;
+    
+    const header = document.createElement('div');
+    header.style.cssText = `
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    `;
+    
+    header.innerHTML = `
+        <h2 style="margin: 0 0 10px 0; color: #333; font-size: 24px;">🚀 Manuel Twitter Paylaşım Interface</h2>
+        <p style="margin: 0; color: #666; font-size: 16px;">
+            ${tweets.length} tweet hazır! Her butona tıklayarak Twitter sayfalarını tek tek açabilirsiniz.
+        </p>
+        <div style="margin-top: 15px;">
+            <button id="closeInterface" style="
+                background: #ff6b6b;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                margin-right: 10px;
+            ">✕ Kapat</button>
+            <button id="markAllPosted" style="
+                background: #51cf66;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+            ">✅ Hepsini Paylaşıldı İşaretle</button>
+        </div>
+    `;
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 20px;
+        align-content: start;
+    `;
+    
+    tweets.forEach((tweet, index) => {
+        const tweetContent = tweet.content || `Tweet paylaşımı: ${tweet.title || 'Haber paylaşımı'}`;
+        const cleanTweetText = tweetContent.substring(0, 280);
+        const tweetText = encodeURIComponent(cleanTweetText);
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
+        
+        const tweetCard = document.createElement('div');
+        tweetCard.style.cssText = `
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        `;
+        
+        tweetCard.innerHTML = `
+            <div style="margin-bottom: 16px;">
+                <div style="
+                    background: linear-gradient(45deg, #1da1f2, #1991db);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    display: inline-block;
+                    font-weight: 600;
+                    font-size: 14px;
+                    margin-bottom: 12px;
+                ">
+                    📱 Tweet ${index + 1}
+                </div>
+            </div>
+            
+            <div style="
+                background: #f8f9fa;
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 20px;
+                border-left: 4px solid #1da1f2;
+            ">
+                <div style="
+                    font-size: 15px;
+                    line-height: 1.5;
+                    color: #333;
+                    max-height: 100px;
+                    overflow-y: auto;
+                ">
+                    ${cleanTweetText}
+                </div>
+                <div style="
+                    margin-top: 8px;
+                    font-size: 12px;
+                    color: #666;
+                ">
+                    ${cleanTweetText.length}/280 karakter
+                </div>
+            </div>
+            
+            <button class="open-twitter-btn" data-url="${twitterUrl}" data-index="${index}" style="
+                width: 100%;
+                background: linear-gradient(45deg, #1da1f2, #1991db);
+                color: white;
+                border: none;
+                padding: 16px;
+                border-radius: 12px;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            ">
+                🐦 Twitter'da Paylaş
+            </button>
+            
+            <div class="tweet-status" style="
+                margin-top: 12px;
+                text-align: center;
+                font-size: 14px;
+                color: #666;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            ">
+                ✅ Twitter sayfası açıldı!
+            </div>
+        `;
+        
+        content.appendChild(tweetCard);
+    });
+    
+    modal.appendChild(header);
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    
+    // Event listeners
+    modal.querySelector('#closeInterface').addEventListener('click', () => {
+        modal.remove();
+    });
+    
+    modal.querySelector('#markAllPosted').addEventListener('click', () => {
+        markTweetsAsPosted(tweetIds);
+        modal.remove();
+    });
+    
+    // Twitter button handlers
+    modal.querySelectorAll('.open-twitter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const url = btn.getAttribute('data-url');
+            const index = btn.getAttribute('data-index');
+            
+            // Open Twitter in new tab - this works because it's user initiated
+            window.open(url, `twitter_share_${index}`, 'width=600,height=600,scrollbars=yes,resizable=yes');
+            
+            // Update button state
+            btn.style.background = 'linear-gradient(45deg, #51cf66, #40c057)';
+            btn.innerHTML = '✅ Twitter Sayfası Açıldı!';
+            btn.disabled = true;
+            
+            // Show status message
+            const status = btn.parentElement.querySelector('.tweet-status');
+            status.style.opacity = '1';
+            
+            // Add hover effect
+            btn.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                btn.style.transform = 'scale(1)';
+            }, 150);
+        });
+        
+        // Hover effects
+        btn.addEventListener('mouseenter', () => {
+            if (!btn.disabled) {
+                btn.style.transform = 'translateY(-2px)';
+                btn.style.boxShadow = '0 8px 25px rgba(29, 161, 242, 0.3)';
+            }
+        });
+        
+        btn.addEventListener('mouseleave', () => {
+            if (!btn.disabled) {
+                btn.style.transform = 'translateY(0)';
+                btn.style.boxShadow = 'none';
+            }
+        });
+    });
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .manual-share-interface > div {
+            animation: slideInFromTop 0.6s ease-out forwards;
+        }
+        
+        .manual-share-interface > div:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function bulkManualShareTweets(tweetIds) {
+    const button = document.getElementById('bulk-manual-btn');
+    const originalText = button.innerHTML;
+    
+    // Loading state
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Açılıyor...';
+    button.disabled = true;
+    
+    showToast(`${tweetIds.length} Twitter sayfası açılıyor...`, 'info');
+    
+    console.log('🔍 Debug - Tweet IDs:', tweetIds); // Debug log
+    
+    // Get tweet data and open tabs
+    fetch('/api/get_tweets_for_manual_share', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ tweet_ids: tweetIds })
+    })
+    .then(response => {
+        console.log('🔍 Debug - Response status:', response.status); // Debug log
+        return response.json();
+    })
+    .then(data => {
+        console.log('🔍 Debug - Response data:', data); // Debug log
+        
+        if (data.success && data.tweets && data.tweets.length > 0) {
+            console.log(`🔍 Debug - Opening ${data.tweets.length} tabs`); // Debug log
+            
             // Open tabs with delay to avoid popup blocking
-            let delay = 0;
-            const DELAY_BETWEEN_TABS = 500; // 500ms delay between tabs
+            let delay = 100; // Start immediately
+            const DELAY_BETWEEN_TABS = 800; // Longer delay for better handling
             
             data.tweets.forEach((tweet, index) => {
                 setTimeout(() => {
-                    const tweetText = encodeURIComponent(tweet.content || 'Tweet metni bulunamadı');
+                    console.log(`🔍 Debug - Opening tab ${index + 1} for tweet:`, tweet); // Debug log
+                    
+                    // Ensure we have tweet content
+                    let tweetContent = tweet.content;
+                    if (!tweetContent || tweetContent.trim() === '') {
+                        tweetContent = `Tweet paylaşımı: ${tweet.title || 'Haber paylaşımı'}`;
+                    }
+                    
+                    // Clean and encode tweet text
+                    const cleanTweetText = tweetContent.substring(0, 280); // Twitter limit
+                    const tweetText = encodeURIComponent(cleanTweetText);
                     const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
                     
-                    // Open in new tab
-                    window.open(twitterUrl, '_blank');
+                    console.log(`🔍 Debug - Opening URL: ${twitterUrl.substring(0, 100)}...`); // Debug log
                     
-                    // Show progress
-                    if (index < data.tweets.length - 1) {
-                        showToast(`${index + 1}/${data.tweets.length} Twitter sayfası açıldı...`, 'info');
+                    // Open in new tab with specific window features to prevent blocking
+                    const newWindow = window.open(twitterUrl, `twitter_share_${index}`, 'width=600,height=400,scrollbars=yes,resizable=yes');
+                    
+                    if (newWindow) {
+                        console.log(`✅ Tab ${index + 1} opened successfully`);
+                        // Show progress
+                        if (index < data.tweets.length - 1) {
+                            showToast(`${index + 1}/${data.tweets.length} Twitter sayfası açıldı...`, 'info');
+                        } else {
+                            showToast(`Tüm ${data.tweets.length} Twitter sayfası açıldı!`, 'success');
+                        }
                     } else {
-                        showToast(`Tüm ${data.tweets.length} Twitter sayfası açıldı! Her birini manuel olarak paylaşabilirsiniz.`, 'success');
+                        console.error(`❌ Tab ${index + 1} blocked by popup blocker`);
+                        showToast(`Popup blocker ${index + 1}. sekmeyi engelledi`, 'warning');
                     }
+                    
                 }, delay);
                 delay += DELAY_BETWEEN_TABS;
             });
@@ -744,7 +977,7 @@ function bulkManualShareTweets(tweetIds) {
                 showConfirmDialog(
                     `${data.tweets.length} Twitter compose sayfası açıldı.\n\n📝 Her sayfada tweet metni otomatik dolduruldu.\n✅ Her sayfada "Tweet" butonuna tıklayarak paylaşabilirsiniz.\n\n🔄 Paylaştığınız tweetleri "paylaşıldı" olarak işaretlemek ister misiniz?`,
                     () => markTweetsAsPosted(tweetIds),
-                    null,
+                    () => showManualShareLinks(data.tweets), // Alternatif: Manuel linkler göster
                     'Tweetler Hazır',
                     'success'
                 );
@@ -752,6 +985,30 @@ function bulkManualShareTweets(tweetIds) {
             
         } else {
             showToast(`Hata: ${data.error || 'Tweet verileri alınamadı'}`, 'error');
+            
+            // If API failed, show alternative method
+            if (!data.tweets || data.tweets.length === 0) {
+                showConfirmDialog(
+                    'Tweet verileri alınamadı.\n\nAlternatif olarak manuel paylaşım linklerini görmek ister misiniz?',
+                    () => {
+                        // Create fallback tweets from selected checkboxes
+                        const checkboxes = document.querySelectorAll('.tweet-select-checkbox:checked');
+                        const fallbackTweets = Array.from(checkboxes).map((cb, index) => {
+                            const tweetCard = cb.closest('.tweet-card');
+                            const content = tweetCard.querySelector('.tweet-content p')?.textContent || `Tweet ${index + 1}`;
+                            return {
+                                id: cb.value,
+                                content: content,
+                                title: `Tweet ${index + 1}`
+                            };
+                        });
+                        showManualShareLinks(fallbackTweets);
+                    },
+                    null,
+                    'Alternatif Paylaşım',
+                    'info'
+                );
+            }
         }
         
         // Restore button
@@ -762,9 +1019,132 @@ function bulkManualShareTweets(tweetIds) {
         console.error('Bulk manual share error:', error);
         showToast('Tweet verileri alınırken hata oluştu!', 'error');
         
+        // Show alternative method on error
+        showConfirmDialog(
+            'Bağlantı hatası oluştu.\n\nAlternatif olarak manuel paylaşım linklerini görmek ister misiniz?',
+            () => {
+                // Create fallback tweets from selected checkboxes
+                const checkboxes = document.querySelectorAll('.tweet-select-checkbox:checked');
+                const fallbackTweets = Array.from(checkboxes).map((cb, index) => {
+                    const tweetCard = cb.closest('.tweet-card');
+                    const content = tweetCard.querySelector('.tweet-content p')?.textContent || `Tweet ${index + 1}`;
+                    return {
+                        id: cb.value,
+                        content: content,
+                        title: `Tweet ${index + 1}`
+                    };
+                });
+                showManualShareLinks(fallbackTweets);
+            },
+            null,
+            'Bağlantı Hatası',
+            'warning'
+        );
+        
         // Restore button
         button.innerHTML = originalText;
         button.disabled = false;
+    });
+}
+
+function showManualShareLinks(tweets) {
+    // Create a modal with direct Twitter links
+    const modal = document.createElement('div');
+    modal.className = 'manual-share-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+    `;
+    
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 70vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    `;
+    
+    let linksHtml = `
+        <h3 style="margin: 0 0 20px 0; color: #333;">🐦 Manuel Twitter Paylaşım Linkleri</h3>
+        <p style="color: #666; margin-bottom: 20px;">Her linke tıklayarak tweet'leri manuel olarak paylaşabilirsiniz:</p>
+        <div style="max-height: 300px; overflow-y: auto;">
+    `;
+    
+    tweets.forEach((tweet, index) => {
+        const tweetContent = tweet.content || `Tweet paylaşımı: ${tweet.title || 'Haber paylaşımı'}`;
+        const cleanTweetText = tweetContent.substring(0, 280);
+        const tweetText = encodeURIComponent(cleanTweetText);
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
+        
+        linksHtml += `
+            <div style="
+                padding: 12px;
+                border: 1px solid #e1e8ed;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                background: #f8f9fa;
+            ">
+                <div style="font-weight: 600; color: #333; margin-bottom: 8px;">Tweet ${index + 1}:</div>
+                <div style="font-size: 14px; color: #666; margin-bottom: 10px; line-height: 1.4;">
+                    ${cleanTweetText}
+                </div>
+                <a href="${twitterUrl}" target="_blank" style="
+                    display: inline-block;
+                    background: #1da1f2;
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    text-decoration: none;
+                    font-size: 14px;
+                    font-weight: 500;
+                ">
+                    🐦 Twitter'da Paylaş
+                </a>
+            </div>
+        `;
+    });
+    
+    linksHtml += `
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <button id="closeLinksModal" style="
+                background: #657786;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+            ">Kapat</button>
+        </div>
+    `;
+    
+    modalContent.innerHTML = linksHtml;
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // Close button event
+    modal.querySelector('#closeLinksModal').addEventListener('click', () => {
+        modal.remove();
+    });
+    
+    // Click outside to close
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
     });
 }
 
@@ -1052,78 +1432,6 @@ function updateProgressUI() {
         });
 }
 
-// Reddedilen makaleler fonksiyonları
-function convertRejectedToTweet(articleUrl, articleTitle) {
-    if (!articleUrl || !articleTitle) {
-        showToast('Makale bilgileri eksik!', 'error');
-        return;
-    }
-    
-    showToast('Tweet oluşturuluyor...', 'info');
-    
-    fetch('/api/share_rejected_tweet', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            article_url: articleUrl,
-            article_title: articleTitle,
-            tweet_text: articleTitle
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showToast('Tweet başarıyla bekleyen listesine eklendi!', 'success');
-            setTimeout(() => location.reload(), 1000);
-    } else {
-            showToast(`Hata: ${data.error}`, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Share rejected tweet error:', error);
-        showToast('Tweet paylaşılırken hata oluştu!', 'error');
-    });
-}
-
-function removeFromRejected(articleUrl) {
-    if (!articleUrl) {
-        showToast('Makale URL\'si bulunamadı!', 'error');
-        return;
-    }
-    
-    showConfirmDialog(
-        'Bu makaleyi reddedilen listesinden kalıcı olarak kaldırmak istediğinizden emin misiniz?',
-        () => {
-            fetch('/api/remove_from_rejected', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-                    article_url: articleUrl
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-                    showToast('Makale reddedilen listesinden kaldırıldı!', 'success');
-                    setTimeout(() => location.reload(), 1000);
-        } else {
-                    showToast(`Hata: ${data.error}`, 'error');
-        }
-    })
-    .catch(error => {
-                console.error('Remove from rejected error:', error);
-                showToast('Makale kaldırılırken hata oluştu!', 'error');
-            });
-        },
-        null,
-        'Kalıcı Silme',
-        'danger'
-    );
-}
 
 // Pending tweets bölümünü dinamik olarak yenile
 function refreshPendingTweets() {
@@ -1360,133 +1668,9 @@ function getToastTitle(type) {
     }
 }
 
-// Reddedilen Makaleler Toplu İşlem Fonksiyonları
-function updateRejectedButtons() {
-    const checkboxes = document.querySelectorAll('.rejected-checkbox:checked');
-    const selectedCount = checkboxes.length;
-    const selectedCountElement = document.getElementById('selected-rejected-count');
-    const bulkConvertBtn = document.getElementById('bulk-convert-btn');
-    const bulkRemoveBtn = document.getElementById('bulk-remove-btn');
-    
-    if (selectedCountElement) {
-        selectedCountElement.textContent = selectedCount;
-    }
-    
-    if (bulkConvertBtn) {
-        bulkConvertBtn.disabled = selectedCount === 0;
-    }
-    
-    if (bulkRemoveBtn) {
-        bulkRemoveBtn.disabled = selectedCount === 0;
-    }
-}
-
-function toggleSelectAllRejected() {
-    const selectAllCheckbox = document.getElementById('select-all-rejected');
-    const rejectedCheckboxes = document.querySelectorAll('.rejected-checkbox');
-    
-    if (selectAllCheckbox && rejectedCheckboxes.length > 0) {
-        rejectedCheckboxes.forEach(checkbox => {
-            checkbox.checked = selectAllCheckbox.checked;
-        });
-        updateRejectedButtons();
-    }
-}
-
-function bulkConvertRejected() {
-    const selectedCheckboxes = document.querySelectorAll('.rejected-checkbox:checked');
-    const selectedUrls = Array.from(selectedCheckboxes).map(cb => cb.value);
-    
-    if (selectedUrls.length === 0) {
-        showToast('Lütfen en az bir makale seçin', 'warning');
-        return;
-    }
-    
-    showConfirmDialog(
-        `${selectedUrls.length} reddedilen makaleyi tweet'e çevirmek istediğinizden emin misiniz?`,
-        () => {
-            // Toplu dönüştürme işlemi - tek API çağrısı
-            showToast('Makaleler tweet\'e çevriliyor...', 'info');
-            
-            // Tüm URL'leri tek seferde gönder
-            fetch('/api/bulk_convert_rejected', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-                    urls: selectedUrls
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-                    showToast(`${data.converted_count} makale başarıyla tweet'e çevrildi`, 'success');
-                    setTimeout(() => window.location.reload(), 1500);
-        } else {
-            showToast(`Hata: ${data.error}`, 'error');
-        }
-    })
-    .catch(error => {
-                showToast('İşlem sırasında hata oluştu', 'error');
-                console.error('Error:', error);
-            });
-        },
-        null,
-        'Toplu Dönüştürme',
-        'info'
-    );
-}
-
-function bulkRemoveRejected() {
-    const selectedCheckboxes = document.querySelectorAll('.rejected-checkbox:checked');
-    const selectedUrls = Array.from(selectedCheckboxes).map(cb => cb.value);
-    
-    if (selectedUrls.length === 0) {
-        showToast('Lütfen en az bir makale seçin', 'warning');
-        return;
-    }
-    
-    showConfirmDialog(
-        `${selectedUrls.length} reddedilen makaleyi kalıcı olarak silmek istediğinizden emin misiniz?\n\n⚠️ Bu işlem geri alınamaz!`,
-        () => {
-            // Toplu silme işlemi - tek API çağrısı
-            showToast('Makaleler siliniyor...', 'info');
-            
-            // Tüm URL'leri tek seferde gönder
-            fetch('/api/bulk_remove_rejected', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                    urls: selectedUrls
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                    showToast(`${data.removed_count} makale başarıyla silindi`, 'success');
-                    setTimeout(() => window.location.reload(), 1500);
-            } else {
-                    showToast(`Hata: ${data.error}`, 'error');
-            }
-        })
-        .catch(error => {
-                showToast('İşlem sırasında hata oluştu', 'error');
-                console.error('Error:', error);
-            });
-        },
-        null,
-        'Toplu Silme',
-        'danger'
-    );
-}
-
 // Sayfa yüklendiğinde çalışacak kodlar
 document.addEventListener('DOMContentLoaded', function() {
     updateBulkButtons();
-    updateRejectedButtons();
 });
 </script>
 {% endblock %}

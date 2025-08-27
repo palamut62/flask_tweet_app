@@ -35,7 +35,7 @@
       "description": "TechCrunch genel RSS feed",
       "enabled": true,
       "added_date": "2025-06-18T14:00:00",
-      "last_checked": "2025-08-26T17:30:40.919737",
+      "last_checked": "2025-08-27T17:00:32.337702",
       "article_count": 5,
       "success_rate": 100
     },
@@ -46,7 +46,7 @@
       "description": "The Verge genel RSS feed",
       "enabled": true,
       "added_date": "2025-06-18T14:00:00",
-      "last_checked": "2025-08-26T17:30:41.650762",
+      "last_checked": "2025-08-27T17:00:33.979755",
       "article_count": 5,
       "success_rate": 100
     },
@@ -57,8 +57,8 @@
       "description": "VentureBeat AI RSS feed",
       "enabled": true,
       "added_date": "2025-06-18T14:00:00",
-      "last_checked": "2025-08-26T17:30:42.299233",
-      "article_count": 1,
+      "last_checked": "2025-08-27T17:00:34.406857",
+      "article_count": 4,
       "success_rate": 100
     }
   ]

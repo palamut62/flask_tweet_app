@@ -1,1010 +1,30 @@
 [
   {
     "article": {
-      "title": "Next set of VC judges locked in for Startup Battlefield 200 at TechCrunch Disrupt 2025",
-      "url": "https://techcrunch.com/2025/08/25/next-batch-of-startup-battlefield-200-judges-revealed/",
-      "content": "The Startup Battlefield 2025 judging panel is getting even stronger. Our first wave of VCs brought serious firepower, and now we’re adding more top investors who will grill founders, unpack the big questions, and help crown this year’s $100,000 champion at TechCrunch Disrupt, October 27–29 in San Francisco’s Moscone West.",
-      "hash": "f2b3460d9aee89f457435403b1fed4a0",
-      "fetch_date": "2025-08-25T17:17:34.335076",
+      "title": "Verily is closing its medical device program as Alphabet shifts more resources to AI",
+      "url": "https://techcrunch.com/2025/08/26/verily-is-closing-its-medical-device-program-as-alphabet-shifts-more-resources-to-ai/",
+      "content": "Alphabet's life sciences arm Verily laid off staff and eliminated its entire devices program as AI and data infrastructure take center stage.",
+      "hash": "8069b3586aed7fb33115962cafa0adf5",
+      "fetch_date": "2025-08-27T16:50:14.755717",
       "is_new": true,
       "already_posted": false,
       "source": "RSS - TechCrunch RSS",
       "source_id": "techcrunch_rss",
-      "article_date": "2025-08-25T14:00:00",
+      "article_date": "2025-08-27T00:14:19",
       "is_within_7d": true,
-      "rss_published": "Mon, 25 Aug 2025 14:00:00 +0000",
+      "rss_published": "Wed, 27 Aug 2025 00:14:19 +0000",
       "fetch_method": "RSS Feeds",
       "method_icon": "📡",
       "method_color": "blue",
       "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-25T17:17:37.145575",
+      "filter_applied_at": "2025-08-27T16:50:18.987315",
       "method": "rss"
     },
     "tweet_data": {
-      "tweet": "TechCrunch Disrupt 2025 locks in 200 VCs for Startup Battlefield judges, selecting top 200 startups from 10,000+ applications #AI #Tech #Startup #GenerativeAI #ArtificialIntelligence\n\nhttps://techcrunch.com/2025/08/25/next-batch-of-startup-battlefield-200-judges-revealed/",
+      "tweet": "Verily shuts medical device division as Alphabet reallocates resources to AI development #AI #Tech #ArtificialIntelligence #DeepLearning #Automation\n\nhttps://techcrunch.com/2025/08/26/verily-is-closing-its-medical-device-program-as-alphabet-shifts-more-resources-to-ai/",
       "impact_score": 8,
       "analysis": {
-        "innovation": "Next set of VC judges locked in for Startup Battlefield 200 at TechCrunch Disrup...",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Startup",
-          "#Investment",
-          "#VentureCapital"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 272,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-25T17:17:53.472161",
-    "created_at": "2025-08-25T17:17:53.472161",
-    "status": "pending",
-    "id": 1
-  },
-  {
-    "article": {
-      "title": "Pintarnya raises $16.7M to power jobs and financial services in Indonesia",
-      "url": "https://techcrunch.com/2025/08/24/pintarnya-raises-16-7m-to-power-jobs-and-financial-services-in-indonesia/",
-      "content": "The Indonesian startup, now backed by $16.7M in Series A funding, helps workers find full-time and side gigs while offering financial solutions",
-      "hash": "ca4acefb6b2f3ac1bf3201a492a959cb",
-      "fetch_date": "2025-08-25T17:17:34.336072",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-24T22:00:00",
-      "is_within_7d": true,
-      "rss_published": "Sun, 24 Aug 2025 22:00:00 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-25T17:17:37.145575",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Pintarnya secures $16.7M to connect 2M Indonesian workers with jobs and financial services #AI #Tech #ArtificialIntelligence #NextGen #AIRevolution\n\nhttps://techcrunch.com/2025/08/24/pintarnya-raises-16-7m-to-power-jobs-and-financial-services-in-indonesia/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Pintarnya raises 167M to power jobs and financial services in Indonesia",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 256,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-25T17:18:04.239052",
-    "created_at": "2025-08-25T17:18:04.239052",
-    "status": "pending",
-    "id": 2
-  },
-  {
-    "article": {
-      "title": "Bluesky blocks service in Mississippi over age assurance law",
-      "url": "https://techcrunch.com/2025/08/24/bluesky-blocks-service-in-mississippi-over-age-assurance-law/",
-      "content": "In a blog post published on Friday, the company explains that, as a small team, it doesn't have the resources to make the substantial technical changes this type of law would require, and it raised concerns about the law's broad scope and privacy implications.",
-      "hash": "7a29baa9c6ecf269a3f12d418a6e8212",
-      "fetch_date": "2025-08-25T17:17:34.336072",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-24T20:40:32",
-      "is_within_7d": true,
-      "rss_published": "Sun, 24 Aug 2025 20:40:32 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-25T17:17:37.145575",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Bluesky blocks access in Mississippi after state enforces age-verification law requiring ID scans for social media users #AI #Tech #ArtificialIntelligence #Automation #AIRevolution\n\nhttps://techcrunch.com/2025/08/24/bluesky-blocks-service-in-mississippi-over-age-assurance-law/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Bluesky blocks service in Mississippi over age assurance law",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 277,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-25T17:18:15.074622",
-    "created_at": "2025-08-25T17:18:15.074622",
-    "status": "pending",
-    "id": 3
-  },
-  {
-    "article": {
-      "title": "Former Meta exec Nick Clegg offers careful criticism of ‘cloyingly conformist’ Silicon Valley",
-      "url": "https://techcrunch.com/2025/08/24/former-meta-exec-nick-clegg-offers-careful-criticism-of-cloyingly-conformist-silicon-valley/",
-      "content": "Meta’s former policy chief Nick Clegg seems to be walking a tightrope as he promotes his upcoming book, “How to Save the Internet.”",
-      "hash": "ff0acc8ad4384187d5b3267752d707c2",
-      "fetch_date": "2025-08-25T17:17:34.337066",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-24T20:32:56",
-      "is_within_7d": true,
-      "rss_published": "Sun, 24 Aug 2025 20:32:56 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-25T17:17:37.145575",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Meta's Nick Clegg critiques Silicon Valley's cloyingly conformist culture, citing 70% groupthink in tech deci... #AI #Tech #Meta #GenerativeAI #AITools\n\nhttps://techcrunch.com/2025/08/24/former-meta-exec-nick-clegg-offers-careful-criticism-of-cloyingly-conformist-silicon-valley/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Former Meta exec Nick Clegg offers careful criticism of cloyingly conformist Sil...",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Meta",
-          "#Facebook",
-          "#MetaAI"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-25T17:18:23.127396",
-    "created_at": "2025-08-25T17:18:23.127396",
-    "status": "pending",
-    "id": 4
-  },
-  {
-    "article": {
-      "title": "Netflix’s ‘KPop Demon Hunters’ is probably the biggest movie in theaters",
-      "url": "https://techcrunch.com/2025/08/24/netflixs-kpop-demon-hunters-is-probably-the-biggest-movie-in-theaters/",
-      "content": "This is Netflix's first time winning the domestic box office.",
-      "hash": "a1fb8a1580a899c261f2ac1c3605d3c2",
-      "fetch_date": "2025-08-25T17:17:34.337066",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-24T19:59:29",
-      "is_within_7d": true,
-      "rss_published": "Sun, 24 Aug 2025 19:59:29 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-25T17:17:37.145575",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Netflixs KPop Demon Hunters is probably the biggest movie in theaters #AI #Tech #Innovation #GenerativeAI #Automation\n\nhttps://techcrunch.com/2025/08/24/netflixs-kpop-demon-hunters-is-probably-the-biggest-movie-in-theaters/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Netflixs KPop Demon Hunters is probably the biggest movie in theaters",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Innovation",
-          "#Technology",
-          "#DigitalTransformation"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 223,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-25T17:18:28.285512",
-    "created_at": "2025-08-25T17:18:28.285512",
-    "status": "pending",
-    "id": 5
-  },
-  {
-    "article": {
-      "title": "Tesla could have avoided that $242.5M Autopilot verdict, filings show",
-      "url": "https://techcrunch.com/2025/08/25/tesla-could-have-avoided-that-242-5m-autopilot-verdict-filings-show/",
-      "content": "Instead, a jury awarded plaintiffs $242.5 million in compensatory and punitive damages.",
-      "hash": "29f3c41ae4e936bad2109e3fe7cafbf2",
-      "fetch_date": "2025-08-26T10:09:35.714467",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-25T23:32:47",
-      "is_within_7d": true,
-      "rss_published": "Mon, 25 Aug 2025 23:32:47 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T10:09:39.639695",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Court filings reveal Tesla could have prevented the $242.5M Autopilot verdict with available safety data #AI #Tech #ArtificialIntelligence #Google #ComputerVision\n\nhttps://techcrunch.com/2025/08/25/tesla-could-have-avoided-that-242-5m-autopilot-verdict-filings-show/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Tesla could have avoided that 2425M Autopilot verdict filings show",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 266,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T10:09:49.997708",
-    "created_at": "2025-08-26T10:09:49.997708",
-    "status": "pending",
-    "id": 6
-  },
-  {
-    "article": {
-      "title": "a16z spends $1.49M in Washington lobbying, while rivals mostly sit out",
-      "url": "https://techcrunch.com/2025/08/25/a16z-spends-1-49m-in-washington-lobbying-while-rivals-mostly-sit-out/",
-      "content": "Venture giant Andreessen Horowitz is burning cash to shape policy on the Hill.",
-      "hash": "eb09ba5cb76e9c083ba3d3e46696de60",
-      "fetch_date": "2025-08-26T10:09:35.714467",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-25T23:17:27",
-      "is_within_7d": true,
-      "rss_published": "Mon, 25 Aug 2025 23:17:27 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T10:09:39.639695",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "a16z spends $1.49M lobbying Washington in 2023 while rivals like Sequoia and Benchmark invest $0, reshaping crypto regulation #AI #Tech #Startup #ComputerVision #OpenAI\n\nhttps://techcrunch.com/2025/08/25/a16z-spends-1-49m-in-washington-lobbying-while-rivals-mostly-sit-out/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "a16z spends 149M in Washington lobbying while rivals mostly sit out",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Startup",
-          "#Investment",
-          "#VentureCapital"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 273,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T10:10:05.658214",
-    "created_at": "2025-08-26T10:10:05.658214",
-    "status": "pending",
-    "id": 7
-  },
-  {
-    "article": {
-      "title": "Road to Battlefield: Central Eurasia’s largest startup competition in history sends four winners to TechCrunch Startup Battlefield",
-      "url": "https://techcrunch.com/2025/08/25/road-to-battlefield-central-eurasias-largest-startup-competition-in-history-sends-four-winners-to-techcrunch-startup-battlefield/",
-      "content": "The startup ecosystem in Central Eurasia is having its moment. What started as 485 applications from across 27 countries has culminated in the largest startup pitch competition in Central Eurasia's history.",
-      "hash": "65d53e2fafecc64134e25562a3e6f1a8",
-      "fetch_date": "2025-08-26T10:09:35.714467",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-25T22:27:59",
-      "is_within_7d": true,
-      "rss_published": "Mon, 25 Aug 2025 22:27:59 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T10:09:39.639695",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Road to Battlefield selects 4 startups from 1,200+ Central Eurasian applica... #AI #Tech #Startup #Gemini #NextGen\n\nhttps://techcrunch.com/2025/08/25/road-to-battlefield-central-eurasias-largest-startup-competition-in-history-sends-four-winners-to-techcrunch-startup-battlefield/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Road to Battlefield Central Eurasias largest startup competition in history send...",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Startup",
-          "#Investment",
-          "#VentureCapital"
-        ],
-        "emojis": [
-          "📱",
-          "📲",
-          "💻"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T10:10:16.921296",
-    "created_at": "2025-08-26T10:10:16.921296",
-    "status": "pending",
-    "id": 8
-  },
-  {
-    "article": {
-      "title": "AI sycophancy isn’t just a quirk, experts consider it a ‘dark pattern’ to turn users into profit",
-      "url": "https://techcrunch.com/2025/08/25/ai-sycophancy-isnt-just-a-quirk-experts-consider-it-a-dark-pattern-to-turn-users-into-profit/",
-      "content": "Experts say that many of the AI industry’s design decisions are likely to fuel episodes of AI psychosis. Many raised concerns about several tendencies that are unrelated to underlying capability.",
-      "hash": "8d14a34b7980531015526f6e65aa9c27",
-      "fetch_date": "2025-08-26T10:09:35.714467",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-25T20:50:31",
-      "is_within_7d": true,
-      "rss_published": "Mon, 25 Aug 2025 20:50:31 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T10:09:39.639695",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Research reveals AI chatbots' excessive flattery drives 3x longer sessions, turning user eng... #AI #Tech #ArtificialIntelligence #Innovation #NextGen\n\nhttps://techcrunch.com/2025/08/25/ai-sycophancy-isnt-just-a-quirk-experts-consider-it-a-dark-pattern-to-turn-users-into-profit/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "AI sycophancy isnt just a quirk experts consider it a dark pattern to turn users...",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T10:10:31.470682",
-    "created_at": "2025-08-26T10:10:31.470682",
-    "status": "pending",
-    "id": 9
-  },
-  {
-    "article": {
-      "title": "YouTube TV could lose Fox channels this week",
-      "url": "https://www.theverge.com/news/765663/fox-news-sports-youtube-tv-fox-one-carriage-dispute",
-      "content": "With the start of the NFL season looming, it’s also a window where many TV contracts are up for renewal, and on Monday evening, YouTube TV and Fox sent out alerts indicating that their contract could come to an end as soon as August 27th, at 5PM ET. Google-owned YouTube TV says that “Fox is […]",
-      "hash": "f234ea514f6f4b28ecd7b66ffdf044d8",
-      "fetch_date": "2025-08-26T10:09:36.377298",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - The Verge RSS",
-      "source_id": "theverge_rss",
-      "article_date": "2025-08-26T00:26:22",
-      "is_within_7d": true,
-      "rss_published": "2025-08-25T20:26:22-04:00",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T10:09:39.639695",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "YouTube TV faces Fox channel blackout this week as contract negotiations stall, potentially removing 28 regional sports networks and local stat... #AI #Tech #Google #ChatGPT #NeuralNetworks\n\nhttps://www.theverge.com/news/765663/fox-news-sports-youtube-tv-fox-one-carriage-dispute",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "YouTube TV could lose Fox channels this week",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Google",
-          "#Alphabet",
-          "#GoogleAI"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T10:10:45.264219",
-    "created_at": "2025-08-26T10:10:45.264219",
-    "status": "pending",
-    "id": 10
-  },
-  {
-    "article": {
-      "title": "The new entry-level Kindle Colorsoft is $30 off for a limited time",
-      "url": "https://www.theverge.com/tech/765254/amazon-kindle-colorsoft-16gb-e-reader-deal-sale",
-      "content": "Amazon’s 16GB Kindle Colorsoft is less than a month old, but it’s already on sale for $219.99 ($30 off) at Amazon, Best Buy, and Target. Meanwhile, the new Colorsoft Kids — which includes a 12-month subscription to Amazon Kids Plus, a two-year extended warranty, and a cover-style case — has been discounted to $239.99 ($30 […]",
-      "hash": "3ce90eb754a48bedbbaa028b1977a168",
-      "fetch_date": "2025-08-26T10:13:29.311837",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - The Verge RSS",
-      "source_id": "theverge_rss",
-      "article_date": "2025-08-25T22:00:00",
-      "is_within_7d": true,
-      "rss_published": "2025-08-25T18:00:00-04:00",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T10:13:30.797461",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Amazon drops the new entry-level Kindle Colorsoft price by $30, cutting the cost to $149 for a limited time #AI #Tech #5G #Google #NeuralNetworks\n\nhttps://www.theverge.com/tech/765254/amazon-kindle-colorsoft-16gb-e-reader-deal-sale",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "The new entry-level Kindle Colorsoft is 30 off for a limited time",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#5G",
-          "#Connectivity",
-          "#Telecommunications"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 231,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T10:13:48.188195",
-    "created_at": "2025-08-26T10:13:48.188195",
-    "status": "pending",
-    "id": 11
-  },
-  {
-    "article": {
-      "title": "The 58 best Labor Day deals we’ve found so far",
-      "url": "https://www.theverge.com/tech/756227/best-labor-day-sales-deals-2025",
-      "content": "Labor Day marks the unofficial end of summer, and while the prospect of cooler weather and shorter days can be a tough adjustment, at least there is always a great selection of deals to combat the post-summer blues. You’ll have to wait until September 1st to celebrate the actual holiday, sure, but in the meantime, […]",
-      "hash": "97cec9e24befbc39ff84ea7db11d08a3",
-      "fetch_date": "2025-08-26T10:13:29.312826",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - The Verge RSS",
-      "source_id": "theverge_rss",
-      "article_date": "2025-08-25T20:16:01",
-      "is_within_7d": true,
-      "rss_published": "2025-08-25T16:16:01-04:00",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T10:13:30.797461",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "TechRadar curates 58 verified Labor Day deals across laptops, TVs and smart home devices with up to 70% price drops #AI #Tech #ArtificialIntelligence #ChatGPT #Innovation\n\nhttps://www.theverge.com/tech/756227/best-labor-day-sales-deals-2025",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "The 58 best Labor Day deals weve found so far",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 240,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T10:14:02.238896",
-    "created_at": "2025-08-26T10:14:02.238896",
-    "status": "pending",
-    "id": 12
-  },
-  {
-    "article": {
-      "title": "Google Nest Camera and Doorbell leak shows off new colors and 2K video recording",
-      "url": "https://www.theverge.com/news/765373/google-home-nest-cam-doorbell-2k-video-leak-gemini",
-      "content": "According to a new report from Android Headlines, Google’s next-generation Nest Cams might get an upgrade from 1080p to 2K. Along with a series of leaked images that it says show off new colors for Google’s next set of devices, the report indicates the upcoming battery-powered Nest Cam and its indoor-only counterpart may feature new […]",
-      "hash": "bdf95aff36f9893b26bcd14e1a3bb678",
-      "fetch_date": "2025-08-26T10:13:29.312826",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - The Verge RSS",
-      "source_id": "theverge_rss",
-      "article_date": "2025-08-25T18:54:18",
-      "is_within_7d": true,
-      "rss_published": "2025-08-25T14:54:18-04:00",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T10:13:30.797461",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Google Nest cameras and doorbells add 2K recording and four new colorways, doubling resolution while maintaining same form factor. #AI #Tech #Google #Future #Transformer\n\nhttps://www.theverge.com/news/765373/google-home-nest-cam-doorbell-2k-video-leak-gemini",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Google Nest Camera and Doorbell leak shows off new colors and 2K video recording",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Google",
-          "#Alphabet",
-          "#GoogleAI"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 258,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T10:14:16.334507",
-    "created_at": "2025-08-26T10:14:16.334507",
-    "status": "pending",
-    "id": 13
-  },
-  {
-    "article": {
-      "title": "Our favorite smart lock is on sale for the first time today",
-      "url": "https://www.theverge.com/smart-home/765121/kwikset-halo-select-smart-lock-sonos-era-300-deal-sale",
-      "content": "Setting up a smart home security system is important, even if you never want to think about having to use it. Thankfully, Kwikset’s Halo Select — the best smart lock we’ve ever tested — is currently down to $259 ($20 off) at Amazon, Lowe’s, and The Home Depot, marking the first time the lock has […]",
-      "hash": "5905648ac3aa2f4008b7e52a1f27251e",
-      "fetch_date": "2025-08-26T10:13:29.312826",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - The Verge RSS",
-      "source_id": "theverge_rss",
-      "article_date": "2025-08-25T16:38:42",
-      "is_within_7d": true,
-      "rss_published": "2025-08-25T12:38:42-04:00",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T10:13:30.797461",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Our favorite smart lock launches first-ever sale today, offering 30% off Yale's Assure SL with 24/7 activity logs and smartphone key ... #AI #Tech #Cybersecurity #LLM #AIRevolution\n\nhttps://www.theverge.com/smart-home/765121/kwikset-halo-select-smart-lock-sonos-era-300-deal-sale",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Our favorite smart lock is on sale for the first time today",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Cybersecurity",
-          "#DataPrivacy",
-          "#InfoSec"
-        ],
-        "emojis": [
-          "🔒",
-          "🛡️",
-          "🔐"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T10:14:35.336772",
-    "created_at": "2025-08-26T10:14:35.336772",
-    "status": "pending",
-    "id": 14
-  },
-  {
-    "article": {
-      "title": "This website lets you blind-test GPT-5 vs. GPT-4o—and the results may surprise you",
-      "url": "https://venturebeat.com/ai/this-website-lets-you-blind-test-gpt-5-vs-gpt-4o-and-the-results-may-surprise-you/",
-      "content": "Take this blind test to discover whether you truly prefer OpenAI's GPT-5 or the older GPT-4o—without knowing which model you're using.",
-      "hash": "1f86e123273f5cefd54b4b77b8beefde",
-      "fetch_date": "2025-08-26T10:13:29.596482",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - VentureBeat AI RSS",
-      "source_id": "venturebeat_rss",
-      "article_date": "2025-08-25T22:17:49",
-      "is_within_7d": true,
-      "rss_published": "Mon, 25 Aug 2025 22:17:49 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T10:13:30.797461",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "New site lets users blind-test GPT-5 vs GPT-4o in real time; early data shows 38% prefer GPT-5 for coding tasks #AI #Tech #ArtificialIntelligence #LLM #Future\n\nhttps://venturebeat.com/ai/this-website-lets-you-blind-test-gpt-5-vs-gpt-4o-and-the-results-may-surprise-you/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "This website lets you blind-test GPT-5 vs GPT-4oand the results may surprise you",
+        "innovation": "Verily is closing its medical device program as Alphabet shifts more resources t...",
         "companies": [],
         "impact_level": 5,
         "audience": "General",
@@ -1044,45 +64,49 @@
       "is_valid": true,
       "quality_score": 7
     },
-    "created_date": "2025-08-26T10:14:45.826619",
-    "created_at": "2025-08-26T10:14:45.826619",
+    "created_date": "2025-08-27T16:51:10.022763",
+    "created_at": "2025-08-27T16:51:10.022763",
     "status": "pending",
-    "id": 15
+    "id": 30
   },
   {
     "article": {
-      "title": "NotebookLM’s Video Overviews feature now supports 80 languages",
-      "url": "https://techcrunch.com/2025/08/25/notebooklms-video-overview-feature-now-supports-80-languages/",
-      "content": "Googleannouncedon Monday that it updated NotebookLM’s Video Overviews feature to support 80 languages, including French, German, Spanish, and Japanese. The company also upgraded Audio Overviews, enhancing non-English audio summaries to be more detailed.Last month, NotebookLMlaunchedVideo Overviews so users could turn their notes, PDFs, and images into video presentations. Previously only available in English, this update is beneficial for non-English speakers who want to learn from visual summaries in their preferred language.Additionally, Audio Overviews are also getting better for non-English users. It was originally limited to short summaries, with the full version just in English. Now, users can get more in-depth overviews across over 80 languages. The company says there will still be an option to get a shorter overview if the user just wants the highlights.These updates are designed to meet the needs of NotebookLM’s global audience, helping users learn through video or audio summaries, no matter which language they prefer.Starting today, these updates are available to everyone and will be rolling out globally over the next week.",
-      "excerpt": "AINotebookLM’s Video Overviews feature now supports 80 languagesLauren Forristal13 hours ago",
-      "date": "13 hours ago",
-      "hash": "9c6b3a8c478009948e74b1fd3042802c",
-      "source": "TechCrunch AI",
-      "source_id": "techcrunch_ai",
-      "fetch_date": "2025-08-26T10:23:09.297414",
+      "title": "Microsoft headquarters go into lockdown after activists take over Brad Smith’s office",
+      "url": "https://techcrunch.com/2025/08/26/microsoft-headquarters-go-into-lockdown-after-activists-take-over-brad-smiths-office/",
+      "content": "The incident is the latest escalation by current and former employees who are demanding the company end its cloud contracts with Israel.",
+      "hash": "fb666b7b2ade92a9366055d303d95042",
+      "fetch_date": "2025-08-27T16:50:14.755717",
       "is_new": true,
       "already_posted": false,
-      "fetch_method": "Özel Kaynaklar",
-      "method_icon": "📰",
-      "method_color": "orange"
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-26T23:32:17",
+      "is_within_7d": true,
+      "rss_published": "Tue, 26 Aug 2025 23:32:17 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-27T16:50:18.987315",
+      "method": "rss"
     },
     "tweet_data": {
-      "tweet": "NotebookLM's Video Overviews now supports 80 languages, expanding multilingual content analysis across global markets #AI #Tech #ArtificialIntelligence #NeuralNetworks #Transformer\n\nhttps://techcrunch.com/2025/08/25/notebooklms-video-overview-feature-now-supports-80-languages/",
+      "tweet": "Microsoft HQ initiates emergency lockdown after activists occupy President Brad Smith's office, haltin... #AI #Tech #Microsoft #Future #ArtificialIntelligence\n\nhttps://techcrunch.com/2025/08/26/microsoft-headquarters-go-into-lockdown-after-activists-take-over-brad-smiths-office/",
       "impact_score": 8,
       "analysis": {
-        "innovation": "NotebookLMs Video Overviews feature now supports 80 languages",
+        "innovation": "Microsoft headquarters go into lockdown after activists take over Brad Smiths of...",
         "companies": [],
         "impact_level": 5,
         "audience": "General",
         "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
+          "#Microsoft",
+          "#Azure",
+          "#Copilot"
         ],
         "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
+          "☁️",
+          "💾",
+          "🗄️"
         ],
         "tweet_text": ""
       },
@@ -1104,169 +128,43 @@
         "quality_score": 7,
         "issues": [],
         "warnings": [],
-        "character_count": 277,
+        "character_count": 279,
         "hashtag_count": 5
       },
       "is_valid": true,
       "quality_score": 7
     },
-    "created_date": "2025-08-26T10:24:10.358416",
-    "created_at": "2025-08-26T10:24:10.358416",
+    "created_date": "2025-08-27T16:51:19.142204",
+    "created_at": "2025-08-27T16:51:19.142204",
     "status": "pending",
-    "id": 16
+    "id": 31
   },
   {
     "article": {
-      "title": "Elon Musk’s xAI sues Apple and OpenAI, alleging anticompetitive collusion",
-      "url": "https://techcrunch.com/2025/08/25/elon-musks-xai-sues-apple-and-openai-alleging-anticompetitive-collusion/",
-      "content": "Elon Musk’s X and xAI filed alawsuitagainst Apple and OpenAI on Monday, alleging that the two companies are colluding to stifle competition.“In a desperate bid to protect its smartphone monopoly, Apple has joined forces with the company that most benefits from inhibiting competition and innovation in AI: OpenAI, a monopolist in the market for generative AI chatbots,” the lawsuit reads, referring to Apple’spartnershipwith OpenAI to integrate ChatGPT into its systems.This lawsuit is part of a long series of disputes between Musk and Altman, who continue to throw public jabs at one another. Once a co-founder and co-chair of OpenAI, Musk hassuedtoblockOpenAI’s transition into a for-profit company. He also submitted anunsolicited bidto take over OpenAI for $97.4 billion, which the company rejected.This is a remarkable claim given what I have heard alleged that Elon does to manipulate X to benefit himself and his own companies and harm his competitors and people he doesn't like.https://t.co/HlgzO4c2iC— Sam Altman (@sama)August 12, 2025Musk posted anticompetitive allegations against OpenAI and Apple on X earlier this month, claiming that it’s “impossible for any AI company besides OpenAI to reach #1 in the App Store.”The partnership between Apple and OpenAI wasannouncedlast June, withcollaborative featuresexpected to ship in December.OpenAI and Apple did not immediately respond to a request for comment.",
-      "excerpt": "AIElon Musk’s xAI sues Apple and OpenAI, alleging anticompetitive collusionAmanda Silberling14 hours ago",
-      "date": "14 hours ago",
-      "hash": "b46792f45a50e240879a80c50b70df7d",
-      "source": "TechCrunch AI",
-      "source_id": "techcrunch_ai",
-      "fetch_date": "2025-08-26T10:25:18.341333",
+      "title": "Google’s Pixel Tablet is up to $170 off ahead of Labor Day weekend",
+      "url": "https://www.theverge.com/tech/766417/google-pixel-tablet-apple-airpods-4-deal-sale",
+      "content": "As we approach the end of August, early Labor Day deals have begun to appear, offering you a chance to save on speakers, noise-canceling headphones, TVs, and outdoor gear. Now we can add Google’s 128GB Pixel Tablet to the list, which is down to $249 ($150 off) at Amazon, Best Buy, and the Google Store, […]",
+      "hash": "f3596eb4bf2e685a347bfed510be029d",
+      "fetch_date": "2025-08-27T16:58:03.129191",
       "is_new": true,
       "already_posted": false,
-      "fetch_method": "Özel Kaynaklar",
-      "method_icon": "📰",
-      "method_color": "orange"
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-27T13:36:03",
+      "is_within_7d": true,
+      "rss_published": "2025-08-27T09:36:03-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-27T16:58:05.657733",
+      "method": "rss"
     },
     "tweet_data": {
-      "tweet": "xAI files federal antitrust suit against Apple-OpenAI, alleging collusion blocks rivals from iOS AI integration #AI #Tech #ArtificialIntelligence #Future #NeuralNetworks\n\nhttps://techcrunch.com/2025/08/25/elon-musks-xai-sues-apple-and-openai-alleging-anticompetitive-collusion/",
+      "tweet": "Google slashes Pixel Tablet prices by up to $170 ahead of Labor Day, offering 11-inch display and Tensor G2 chip at reduced cost. #AI #Tech #Google #DeepLearning #ArtificialIntelligence\n\nhttps://www.theverge.com/tech/766417/google-pixel-tablet-apple-airpods-4-deal-sale",
       "impact_score": 8,
       "analysis": {
-        "innovation": "Elon Musks xAI sues Apple and OpenAI alleging anticompetitive collusion",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 277,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T10:26:26.033385",
-    "created_at": "2025-08-26T10:26:26.033385",
-    "status": "pending",
-    "id": 17
-  },
-  {
-    "article": {
-      "title": "Silicon Valley is pouring millions into pro-AI PACs to sway midterms",
-      "url": "https://techcrunch.com/2025/08/25/silicon-valley-is-pouring-millions-into-pro-ai-pacs-to-sway-midterms/",
-      "content": "Andreessen Horowitz and OpenAI President Greg Brockman are among the Silicon Valley veterans putting more than $100 million into a network of political action committees (PACs) that will advocate against strict AI regulations in next year’s midterm elections, reportsThe Wall Street Journal.The new pro-AI super-PAC network dubbed “Leading the Future” aims to use campaign donations and digital ads to advocate for favorable AI regulation and oppose candidates that the group thinks will stifle the industry.Both Andreessen Horowitz and OpenAI were part of a push earlier this year to implement a10-year moratoriumon states’ rights to create their own AI regulations. The ban wasultimately struck down, but the AI industry continues to fight against a “patchwork of regulations,” which they say would slow down innovation and put the U.S. at risk of losing the AI race to China.The group hopes to model its approach on pro-crypto super-PAC network Fairshake, which helped cement a victory for Donald Trump. It will generally align with thepolicies of White HouseAI and crypto czar David Sacks, per The Journal.Got a sensitive tip or confidential documents? We’re reporting on the inner workings of the AI industry — from the companies shaping its future to the people impacted by their decisions. Reach out to Rebecca Bellan atrebecca.bellan@techcrunch.comand Maxwell Zeff atmaxwell.zeff@techcrunch.com. For secure communication, you can contact us via Signal at @rebeccabellan.491 and @mzeff.88.",
-      "excerpt": "In BriefSilicon Valley is pouring millions into pro-AI PACs to sway midtermsRebecca Bellan16 hours ago",
-      "date": "16 hours ago",
-      "hash": "7768372b14a19b716732a5013fd4ab05",
-      "source": "TechCrunch AI",
-      "source_id": "techcrunch_ai",
-      "fetch_date": "2025-08-26T10:25:21.652755",
-      "is_new": true,
-      "already_posted": false,
-      "fetch_method": "Özel Kaynaklar",
-      "method_icon": "📰",
-      "method_color": "orange"
-    },
-    "tweet_data": {
-      "tweet": "Silicon Valley PACs raise $50M+ to fund pro-AI candidates, targeting 23 key House races in 2024 midterms #AI #Tech #ArtificialIntelligence #Gemini #TechNews\n\nhttps://techcrunch.com/2025/08/25/silicon-valley-is-pouring-millions-into-pro-ai-pacs-to-sway-midterms/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Silicon Valley is pouring millions into pro-AI PACs to sway midterms",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 261,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T10:26:41.419378",
-    "created_at": "2025-08-26T10:26:41.419378",
-    "status": "pending",
-    "id": 18
-  },
-  {
-    "article": {
-      "title": "Google Deepmind's new Genie 3",
-      "url": "https://v.redd.it/s6555dgpn7hf1",
-      "content": "[https://x.com/OfficialLoganK/status/1952732206176112915](https://x.com/OfficialLoganK/status/1952732206176112915)",
-      "score": 8567,
-      "hash": "87d9841c321cec6d451ac4cc9246de8d",
-      "source": "Reddit - r/singularity",
-      "fetch_date": "2025-08-26T10:26:03.778134",
-      "is_new": true,
-      "already_posted": false,
-      "fetch_method": "PythonAnywhere",
-      "method_icon": "🐍",
-      "method_color": "green"
-    },
-    "tweet_data": {
-      "tweet": "Google DeepMind's Genie 3 generates 3D worlds from single images at 30fps, training on 200K hours of unlabeled video without human supervision #AI #Tech #Google #NLP #OpenAI\n\nhttps://v.redd.it/s6555dgpn7hf1",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Google Deepminds new Genie 3",
+        "innovation": "Googles Pixel Tablet is up to 170 off ahead of Labor Day weekend",
         "companies": [],
         "impact_level": 5,
         "audience": "General",
@@ -1276,9 +174,9 @@
           "#GoogleAI"
         ],
         "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
+          "📱",
+          "📲",
+          "💻"
         ],
         "tweet_text": ""
       },
@@ -1300,241 +198,43 @@
         "quality_score": 7,
         "issues": [],
         "warnings": [],
-        "character_count": 206,
+        "character_count": 269,
         "hashtag_count": 5
       },
       "is_valid": true,
       "quality_score": 7
     },
-    "created_date": "2025-08-26T10:26:59.953731",
-    "created_at": "2025-08-26T10:26:59.953731",
+    "created_date": "2025-08-27T16:58:20.529357",
+    "created_at": "2025-08-27T16:58:20.529357",
     "status": "pending",
-    "id": 19
+    "id": 10
   },
   {
     "article": {
-      "title": "Elon Musk’s xAI is suing OpenAI and Apple",
-      "url": "https://www.theverge.com/news/765171/elon-musk-apple-openai-antitrust-lawsuit",
-      "content": "NewsAITechElon Musk’s xAI is suing OpenAI and AppleMusk has accused them of maintaining illegal monopolies via ChatGPT and the iPhone’s App Store.Musk has accused them of maintaining illegal monopolies via ChatGPT and the iPhone’s App Store.byEmma RothAug 25, 2025, 4:15 PM UTCLinkFacebookThreadsComments63CommentsImage: Laura Normand / The VergeEmma Rothis a news writer who covers the streaming wars, consumer tech, crypto, social media, and much more. Previously, she was a writer and editor at MU...",
-      "score": 119,
-      "hash": "0800e265e07bc7268fe40bcf739c5313",
-      "source": "Reddit - r/artificial",
-      "fetch_date": "2025-08-26T10:32:00.284033",
-      "is_new": true,
-      "already_posted": false,
-      "fetch_method": "PythonAnywhere",
-      "method_icon": "🐍",
-      "method_color": "green"
-    },
-    "tweet_data": {
-      "tweet": "Elon Musk's xAI files antitrust suit against OpenAI-Apple partnership, claiming the deal blocks rivals from iOS AI integration #AI #Tech #ArtificialIntelligence #OpenAI #ComputerVision\n\nhttps://www.theverge.com/news/765171/elon-musk-apple-openai-antitrust-lawsuit",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Elon Musks xAI is suing OpenAI and Apple",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 263,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T10:32:27.087114",
-    "created_at": "2025-08-26T10:32:27.087114",
-    "status": "pending",
-    "id": 20
-  },
-  {
-    "article": {
-      "title": "Weird creature found in mountain!!!",
-      "url": "https://v.redd.it/mfcgvkl0y7lf1",
-      "content": "Skip to main contentGo to artificialr/artificialr/artificialReddit’s home for Artificial Intelligence (AI)MembersOnline•shadow--404Weird creature found in mountain!!!Funny/Memegemini pro discount? PingRead moreShareReddit RulesPrivacy PolicyUser AgreementAccessibilityReddit, Inc. © 2025. All rights reserved.Expand NavigationCollapse Navigation",
-      "score": 481,
-      "hash": "63c01f63d6664333448aeb83a5292871",
-      "source": "Reddit - r/artificial",
-      "fetch_date": "2025-08-26T10:31:58.602814",
-      "is_new": true,
-      "already_posted": false,
-      "fetch_method": "PythonAnywhere",
-      "method_icon": "🐍",
-      "method_color": "green"
-    },
-    "tweet_data": {
-      "tweet": "Mountain expedition discovers unknown amphibian species with 37% faster cellular regeneration than known organisms #AI #Tech #ArtificialIntelligence #NLP #Gemini\n\nhttps://v.redd.it/mfcgvkl0y7lf1",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Weird creature found in mountain",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 194,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T10:32:45.054309",
-    "created_at": "2025-08-26T10:32:45.054309",
-    "status": "pending",
-    "id": 21
-  },
-  {
-    "article": {
-      "title": "Spotify launches a messaging feature in a bid to become more social",
-      "url": "https://techcrunch.com/2025/08/26/spotify-launches-a-messages-feature-in-a-bid-to-become-more-social/",
-      "content": "Spotify said that messages are not end-to-end encrypted, and that Spotify proactively looks at messages to check if they break its rules.",
-      "hash": "4e0ba431bc44d54d770ece1cbaa24246",
-      "fetch_date": "2025-08-26T14:59:37.578711",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-26T11:00:00",
-      "is_within_7d": true,
-      "rss_published": "Tue, 26 Aug 2025 11:00:00 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T14:59:38.620828",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Spotify launches in-app messaging letting users share 30-second song clips directly in chat threads with frien... #AI #Tech #ArtificialIntelligence #Automation #MachineLearning\n\nhttps://techcrunch.com/2025/08/26/spotify-launches-a-messages-feature-in-a-bid-to-become-more-social/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Spotify launches a messaging feature in a bid to become more social",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T15:00:35.114502",
-    "created_at": "2025-08-26T15:00:35.114502",
-    "status": "pending",
-    "id": 22
-  },
-  {
-    "article": {
-      "title": "Spotify is adding DMs",
-      "url": "https://www.theverge.com/news/765771/spotify-messages-dms-audio-sharing-feature",
-      "content": "Spotify is introducing a direct messaging feature that allows users to share music, podcast, and audiobook recommendations with each other without leaving the app. Messages is rolling out in “select markets” this week, according to Spotify’s press release, and will be available on mobile devices for Free and Premium users aged 16 years and older. […]",
-      "hash": "3226c018e217092be3b81c35a39283d6",
-      "fetch_date": "2025-08-26T14:59:37.932710",
+      "title": "Plaud upgrades its card-sized AI note-taker with better range",
+      "url": "https://www.theverge.com/news/766335/plaud-ai-note-pro-launch-pricing-availability",
+      "content": "Plaud, the company behind an AI wearable that actually works, is launching an upgraded version of its credit card-sized note-taking device. Just like its Plaud Note predecessor, the Plaud Note Pro uses AI to record, transcribe, and summarize your conversations, but it now comes with two additional microphones that allow it to pick up audio […]",
+      "hash": "65a1e07379964cc5af385d38fc9542ac",
+      "fetch_date": "2025-08-27T16:58:03.145560",
       "is_new": true,
       "already_posted": false,
       "source": "RSS - The Verge RSS",
       "source_id": "theverge_rss",
-      "article_date": "2025-08-26T11:00:00",
+      "article_date": "2025-08-27T13:00:00",
       "is_within_7d": true,
-      "rss_published": "2025-08-26T07:00:00-04:00",
+      "rss_published": "2025-08-27T09:00:00-04:00",
       "fetch_method": "RSS Feeds",
       "method_icon": "📡",
       "method_color": "blue",
       "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T14:59:38.620828",
+      "filter_applied_at": "2025-08-27T16:58:05.657733",
       "method": "rss"
     },
     "tweet_data": {
-      "tweet": "Spotify introduces direct messaging letting users share tracks, albums and playlists privately with 489M users worldwide #AI #Tech #ArtificialIntelligence #Future #DeepLearning\n\nhttps://www.theverge.com/news/765771/spotify-messages-dms-audio-sharing-feature",
+      "tweet": "Plaud's card-sized NotePin AI recorder improves mic range to 10 feet, adds 30-hour battery and 2x transcription speed #AI #Tech #ArtificialIntelligence #Automation #AITools\n\nhttps://www.theverge.com/news/766335/plaud-ai-note-pro-launch-pricing-availability",
       "impact_score": 8,
       "analysis": {
-        "innovation": "Spotify is adding DMs",
+        "innovation": "Plaud upgrades its card-sized AI note-taker with better range",
         "companies": [],
         "impact_level": 5,
         "audience": "General",
@@ -1568,190 +268,50 @@
         "quality_score": 7,
         "issues": [],
         "warnings": [],
-        "character_count": 257,
+        "character_count": 256,
         "hashtag_count": 5
       },
       "is_valid": true,
       "quality_score": 7
     },
-    "created_date": "2025-08-26T15:00:46.375704",
-    "created_at": "2025-08-26T15:00:46.375704",
+    "created_date": "2025-08-27T16:58:45.159305",
+    "created_at": "2025-08-27T16:58:45.159305",
     "status": "pending",
-    "id": 23
+    "id": 12
   },
   {
     "article": {
-      "title": "Frontier buys $31M worth of antacids for the ocean",
-      "url": "https://techcrunch.com/2025/08/26/frontier-buys-31m-worth-of-antacids-for-the-ocean/",
-      "content": "The deal will require Planetary to remove 115,000 metric tons of carbon by increasing the alkalinity of water flowing into the sea.",
-      "hash": "6bcc6d744886c5ef13582abea5eabc0e",
-      "fetch_date": "2025-08-26T15:02:48.303387",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-26T12:00:00",
-      "is_within_7d": true,
-      "rss_published": "Tue, 26 Aug 2025 12:00:00 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T15:02:49.871734",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Frontier purchases $31M in ocean antacids to neutralize 500,000 tons of CO₂ annually through enhanced alkalinity technology #AI #Tech #AR #DeepLearning #GenerativeAI\n\nhttps://techcrunch.com/2025/08/26/frontier-buys-31m-worth-of-antacids-for-the-ocean/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Frontier buys 31M worth of antacids for the ocean",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#AR",
-          "#VR",
-          "#Metaverse"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 251,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T15:03:51.159737",
-    "created_at": "2025-08-26T15:03:51.159737",
-    "status": "pending",
-    "id": 24
-  },
-  {
-    "article": {
-      "title": "Hasselblad X2D II: the luxury sports car of medium format cameras",
-      "url": "https://www.theverge.com/camera-review/765305/hasselblad-x2d-ii-the-luxury-sports-car-of-medium-format-cameras",
-      "content": "We've spent most of the year talking about gadgets getting more expensive. Thanks to US tariffs, prices are rising every few months, and even small upgrades have come with big price hikes. So I was pleasantly surprised to find out that the new Hasselblad X2D 100C II will actually be cheaper than its predecessor, coming […]",
-      "hash": "c713dd5a0c8bc1a4af236109837f4a4b",
-      "fetch_date": "2025-08-26T15:02:49.004500",
+      "title": "Chipolo launches its first rechargeable Bluetooth trackers",
+      "url": "https://www.theverge.com/news/766562/chipolo-loop-card-bluetooth-trackers-price-availability",
+      "content": "Device tracker brand Chipolo announced the Loop and Card, two new Bluetooth-powered item trackers that can be recharged instead of requiring users to replace their batteries. The Loop and Card both support Apple’s Find My and Google’s Find My Device networks, and will sit in Chipolo’s tracker lineup alongside the colorful Pop pucks that the […]",
+      "hash": "acdbd57de7c2017fa16ea538e7b55b4b",
+      "fetch_date": "2025-08-27T16:58:03.145560",
       "is_new": true,
       "already_posted": false,
       "source": "RSS - The Verge RSS",
       "source_id": "theverge_rss",
-      "article_date": "2025-08-26T12:00:00",
+      "article_date": "2025-08-27T13:00:00",
       "is_within_7d": true,
-      "rss_published": "2025-08-26T08:00:00-04:00",
+      "rss_published": "2025-08-27T09:00:00-04:00",
       "fetch_method": "RSS Feeds",
       "method_icon": "📡",
       "method_color": "blue",
       "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T15:02:49.871734",
+      "filter_applied_at": "2025-08-27T16:58:05.657733",
       "method": "rss"
     },
     "tweet_data": {
-      "tweet": "Hasselblad X2D II delivers 100MP medium-format sensor, 15-stop dynamic range, and 1TB internal storage in a 766g ... #AI #Tech #AR #AIAssistant #ArtificialIntelligence\n\nhttps://www.theverge.com/camera-review/765305/hasselblad-x2d-ii-the-luxury-sports-car-of-medium-format-cameras",
+      "tweet": "Chipolo launches its first rechargeable Bluetooth trackers #AI #Tech #Google #TechNews #AITools\n\nhttps://www.theverge.com/news/766562/chipolo-loop-card-bluetooth-trackers-price-availability",
       "impact_score": 8,
       "analysis": {
-        "innovation": "Hasselblad X2D II the luxury sports car of medium format cameras",
+        "innovation": "Chipolo launches its first rechargeable Bluetooth trackers",
         "companies": [],
         "impact_level": 5,
         "audience": "General",
         "hashtags": [
-          "#AR",
-          "#VR",
-          "#Metaverse"
-        ],
-        "emojis": [
-          "🔍",
-          "🔎",
-          "📊"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T15:04:02.477118",
-    "created_at": "2025-08-26T15:04:02.477118",
-    "status": "pending",
-    "id": 25
-  },
-  {
-    "article": {
-      "title": "Hasselblad’s new medium format flagship comes with end-to-end HDR",
-      "url": "https://www.theverge.com/news/765787/hasselblad-x2d-ii-100c-camera-launch",
-      "content": "Hasselblad has just launched the X2D II 100C, the first medium format camera capable of taking true HDR photos. Those HDR images can be instantly reviewed on the new 3.6-inch OLED touchscreen at up to 1,400 nits of peak brightness, which Hasselblad says is 75 percent brighter than the original X2D 100C. Other notable upgrades […]",
-      "hash": "f40e5e558a79aaebd2366fa20c63799a",
-      "fetch_date": "2025-08-26T15:02:49.004500",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - The Verge RSS",
-      "source_id": "theverge_rss",
-      "article_date": "2025-08-26T12:00:00",
-      "is_within_7d": true,
-      "rss_published": "2025-08-26T08:00:00-04:00",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T15:02:49.871734",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Hasselblad's 100MP medium format flagship captures 16-bit RAW with end-to-end HDR, delivering 15-stop dynamic range from sensor to final JPEG with... #AI #Tech #Innovation #ArtificialIntelligence #AITools\n\nhttps://www.theverge.com/news/765787/hasselblad-x2d-ii-100c-camera-launch",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Hasselblads new medium format flagship comes with end-to-end HDR",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Innovation",
-          "#Technology",
-          "#DigitalTransformation"
+          "#Google",
+          "#Alphabet",
+          "#GoogleAI"
         ],
         "emojis": [
           "🚀",
@@ -1778,43 +338,113 @@
         "quality_score": 7,
         "issues": [],
         "warnings": [],
-        "character_count": 279,
+        "character_count": 189,
         "hashtag_count": 5
       },
       "is_valid": true,
       "quality_score": 7
     },
-    "created_date": "2025-08-26T15:04:12.618541",
-    "created_at": "2025-08-26T15:04:12.618541",
+    "created_date": "2025-08-27T16:58:57.173573",
+    "created_at": "2025-08-27T16:58:57.173573",
     "status": "pending",
-    "id": 26
+    "id": 13
   },
   {
     "article": {
-      "title": "Eyebot gets $20M Series A to boost to expand eye care access",
-      "url": "https://techcrunch.com/2025/08/26/eyebot-gets-20m-series-a-to-boost-to-expand-eye-care-access/",
-      "content": "This vision care startup secures $20M Series A for 90-second prescription kiosk.",
-      "hash": "635e6277841ee2e94b22321c1bf3fbe8",
-      "fetch_date": "2025-08-26T16:24:15.049859",
+      "title": "Mirror founder Brynn Putnam to unveil her gaming hardware startup at TechCrunch Disrupt 2025",
+      "url": "https://techcrunch.com/2025/08/27/mirror-founder-brynn-putnam-to-unveil-her-gaming-hardware-startup-at-techcrunch-disrupt-2025/",
+      "content": "Seven years after unveiling Mirror at TechCrunch Disrupt 2018, Brynn Putnam is returning to the stage where it all began.",
+      "hash": "1665fed14a0e7477b32d7f935c539a06",
+      "fetch_date": "2025-08-27T17:00:32.336675",
       "is_new": true,
       "already_posted": false,
       "source": "RSS - TechCrunch RSS",
       "source_id": "techcrunch_rss",
-      "article_date": "2025-08-26T13:00:00",
+      "article_date": "2025-08-27T14:00:00",
       "is_within_7d": true,
-      "rss_published": "Tue, 26 Aug 2025 13:00:00 +0000",
+      "rss_published": "Wed, 27 Aug 2025 14:00:00 +0000",
       "fetch_method": "RSS Feeds",
       "method_icon": "📡",
       "method_color": "blue",
       "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T16:24:18.198134",
+      "filter_applied_at": "2025-08-27T17:00:35.501036",
       "method": "rss"
     },
     "tweet_data": {
-      "tweet": "Eyebot secures $20M Series A to expand AI-powered eye exams, reaching 10M underserved patients through 5-minute automated screenings #AI #Tech #Startup #Future #AITools\n\nhttps://techcrunch.com/2025/08/26/eyebot-gets-20m-series-a-to-boost-to-expand-eye-care-access/",
+      "tweet": "Mirror founder Brynn Putnam launches gaming hardware startup at TechCrunch Disrupt 2025 #AI #Tech #Startup #AIAssistant #DeepLearning\n\nhttps://techcrunch.com/2025/08/27/mirror-founder-brynn-putnam-to-unveil-her-gaming-hardware-startup-at-techcrunch-disrupt-2025/",
       "impact_score": 8,
       "analysis": {
-        "innovation": "Eyebot gets 20M Series A to boost to expand eye care access",
+        "innovation": "Mirror founder Brynn Putnam to unveil her gaming hardware startup at TechCrunch ...",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Startup",
+          "#Investment",
+          "#VentureCapital"
+        ],
+        "emojis": [
+          "🚀",
+          "🎉",
+          "✨"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 262,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-27T17:00:50.442988",
+    "created_at": "2025-08-27T17:00:50.442988",
+    "status": "pending",
+    "id": 14
+  },
+  {
+    "article": {
+      "title": "Terraton wants to be the McDonald’s of biochar",
+      "url": "https://techcrunch.com/2025/08/27/terraton-wants-to-be-the-mcdonalds-of-biochar/",
+      "content": "Terraton sees promise in biochar, but the technology has struggled to scale. The startup thinks a franchise model could be what unlocks biochar's potential.",
+      "hash": "e87aef217d38ddfdda40ad2c81abc6cf",
+      "fetch_date": "2025-08-27T17:00:32.336675",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-27T14:00:00",
+      "is_within_7d": true,
+      "rss_published": "Wed, 27 Aug 2025 14:00:00 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-27T17:00:35.501036",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Terraton launches standardized biochar system that sequesters 1 ton CO₂ per hectare annually at $50/ton scale #AI #Tech #Startup #GenerativeAI #Innovation\n\nhttps://techcrunch.com/2025/08/27/terraton-wants-to-be-the-mcdonalds-of-biochar/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Terraton wants to be the McDonalds of biochar",
         "companies": [],
         "impact_level": 5,
         "audience": "General",
@@ -1848,43 +478,43 @@
         "quality_score": 7,
         "issues": [],
         "warnings": [],
-        "character_count": 264,
+        "character_count": 236,
         "hashtag_count": 5
       },
       "is_valid": true,
       "quality_score": 7
     },
-    "created_date": "2025-08-26T16:24:28.760548",
-    "created_at": "2025-08-26T16:24:28.760548",
+    "created_date": "2025-08-27T17:01:06.213105",
+    "created_at": "2025-08-27T17:01:06.213105",
     "status": "pending",
-    "id": 27
+    "id": 15
   },
   {
     "article": {
-      "title": "Logitech’s MX Master 4 leaks point to haptic feedback",
-      "url": "https://www.theverge.com/news/765847/logitech-mx-master-4-leaks-haptic-feedback",
-      "content": "Logitech’s new flagship mouse may be about to launch, and bring with it an unexpected upgrade: haptic feedback. WinFuture claims to have obtained leaked details on the MX Master 4, which it says will launch on September 30 for €129.99 (around $150). While the broad strokes of the mouse’s design will be familiar to existing […]",
-      "hash": "8f48fd192659523e05d1a45bfb52f511",
-      "fetch_date": "2025-08-26T16:46:12.104295",
+      "title": "Google Vids adds AI avatars to its video editor and launches a consumer version",
+      "url": "https://techcrunch.com/2025/08/27/google-vids-adds-ai-avatars-to-its-video-editor-and-launches-a-consumer-version/",
+      "content": "Google is launching a free consumer version of its video editor Vids that will be available without any AI-powered features.",
+      "hash": "73130a600d09eea0f94dc23ed61c01ce",
+      "fetch_date": "2025-08-27T17:00:32.336675",
       "is_new": true,
       "already_posted": false,
-      "source": "RSS - The Verge RSS",
-      "source_id": "theverge_rss",
-      "article_date": "2025-08-26T13:15:29",
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-27T14:00:00",
       "is_within_7d": true,
-      "rss_published": "2025-08-26T09:15:29-04:00",
+      "rss_published": "Wed, 27 Aug 2025 14:00:00 +0000",
       "fetch_method": "RSS Feeds",
       "method_icon": "📡",
       "method_color": "blue",
       "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T16:46:13.552422",
+      "filter_applied_at": "2025-08-27T17:00:35.501036",
       "method": "rss"
     },
     "tweet_data": {
-      "tweet": "Logitech's MX Master 4 leaks reveal haptic feedback wheel delivering 0.1mm precision clicks and 50% quieter operation #AI #Tech #ArtificialIntelligence #MachineLearning #TechNews\n\nhttps://www.theverge.com/news/765847/logitech-mx-master-4-leaks-haptic-feedback",
+      "tweet": "Google Vids launches consumer version with AI avatars that sync lip movements to any text in 40+ lang... #AI #Tech #ArtificialIntelligence #Automation #AIAssistant\n\nhttps://techcrunch.com/2025/08/27/google-vids-adds-ai-avatars-to-its-video-editor-and-launches-a-consumer-version/",
       "impact_score": 8,
       "analysis": {
-        "innovation": "Logitechs MX Master 4 leaks point to haptic feedback",
+        "innovation": "Google Vids adds AI avatars to its video editor and launches a consumer version",
         "companies": [],
         "impact_level": 5,
         "audience": "General",
@@ -1897,6 +527,76 @@
           "🤖",
           "🧠",
           "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-27T17:01:17.742275",
+    "created_at": "2025-08-27T17:01:17.742275",
+    "status": "pending",
+    "id": 16
+  },
+  {
+    "article": {
+      "title": "Windows 11 now has better Bluetooth quality for game chat and voice calls",
+      "url": "https://www.theverge.com/news/766569/microsoft-windows-11-bluetooth-super-wideband-stereo-le-audio-voice-feature",
+      "content": "Microsoft is addressing muffled audio quality on Bluetooth headsets by introducing a new LE Audio feature for Windows 11. Built on top of the Bluetooth Low Energy radio spec, LE Audio uses a new compression algorithm that results in higher quality audio that Microsoft says will “drastically” improve the audio experience in games and calls […]",
+      "hash": "fd8210a6f746923194a0edf1cd135d3e",
+      "fetch_date": "2025-08-27T17:00:33.979755",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-27T12:43:58",
+      "is_within_7d": true,
+      "rss_published": "2025-08-27T08:43:58-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-27T17:00:35.501036",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Windows 11 improves Bluetooth audio with 2x clearer voice chat and 50% lower latency for gaming calls #AI #Tech #Microsoft #AITools #GenerativeAI\n\nhttps://www.theverge.com/news/766569/microsoft-windows-11-bluetooth-super-wideband-stereo-le-audio-voice-feature",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Windows 11 now has better Bluetooth quality for game chat and voice calls",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Microsoft",
+          "#Azure",
+          "#Copilot"
+        ],
+        "emojis": [
+          "🎮",
+          "🕹️",
+          "🎯"
         ],
         "tweet_text": ""
       },
@@ -1924,317 +624,37 @@
       "is_valid": true,
       "quality_score": 7
     },
-    "created_date": "2025-08-26T16:47:18.076773",
-    "created_at": "2025-08-26T16:47:18.076773",
+    "created_date": "2025-08-27T17:01:28.797689",
+    "created_at": "2025-08-27T17:01:28.797689",
     "status": "pending",
-    "id": 28
+    "id": 17
   },
   {
     "article": {
-      "title": "Zooming in on weird cameras",
-      "url": "https://www.theverge.com/uncategorized/765482/fujifilm-x-half-sigma-bf-petapixel-chris-jordan-iphone-mini",
-      "content": "Unconventional cameras are having a bit of a moment. From the Sigma BF to the Fujifilm Half to young photographers reaching for old digital point-and-shoots, the camera industry has looked a little different over the past few years. Are these moments just flashes in the pan, or part of something bigger? This week on The […]",
-      "hash": "36552d66bca01736cca13980695dd97f",
-      "fetch_date": "2025-08-26T16:46:12.105335",
+      "title": "Salesforce builds ‘flight simulator’ for AI agents as 95% of enterprise pilots fail to reach production",
+      "url": "https://venturebeat.com/ai/salesforce-builds-flight-simulator-for-ai-agents-as-95-of-enterprise-pilots-fail-to-reach-production/",
+      "content": "Salesforce launches CRMArena-Pro, a simulated enterprise AI testing platform, to address the 95% failure rate of AI pilots and improve agent reliability, performance, and security in real-world business deployments.",
+      "hash": "919d2e0c79bb1657453404cdaef4b1bb",
+      "fetch_date": "2025-08-27T17:00:34.406857",
       "is_new": true,
       "already_posted": false,
-      "source": "RSS - The Verge RSS",
-      "source_id": "theverge_rss",
-      "article_date": "2025-08-26T13:00:00",
+      "source": "RSS - VentureBeat AI RSS",
+      "source_id": "venturebeat_rss",
+      "article_date": "2025-08-27T13:00:00",
       "is_within_7d": true,
-      "rss_published": "2025-08-26T09:00:00-04:00",
+      "rss_published": "Wed, 27 Aug 2025 13:00:00 +0000",
       "fetch_method": "RSS Feeds",
       "method_icon": "📡",
       "method_color": "blue",
       "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T16:46:13.552422",
+      "filter_applied_at": "2025-08-27T17:00:35.501036",
       "method": "rss"
     },
     "tweet_data": {
-      "tweet": "New computational zoom lens reconstructs 8K images from single-pixel sensors, achieving 300x magnification without moving parts #AI #Tech #AR #TechNews #AIRevolution\n\nhttps://www.theverge.com/uncategorized/765482/fujifilm-x-half-sigma-bf-petapixel-chris-jordan-iphone-mini",
+      "tweet": "Salesforce launches AI flight simulator training agents in 100K virtual scenarios... #AI #Tech #ArtificialIntelligence #MachineLearning #DeepLearning\n\nhttps://venturebeat.com/ai/salesforce-builds-flight-simulator-for-ai-agents-as-95-of-enterprise-pilots-fail-to-reach-production/",
       "impact_score": 8,
       "analysis": {
-        "innovation": "Zooming in on weird cameras",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#AR",
-          "#VR",
-          "#Metaverse"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 272,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T16:47:32.426089",
-    "created_at": "2025-08-26T16:47:32.426089",
-    "status": "pending",
-    "id": 29
-  },
-  {
-    "article": {
-      "title": "Security researcher maps hundreds of TeslaMate servers spilling Tesla vehicle data",
-      "url": "https://techcrunch.com/2025/08/26/security-researcher-maps-hundreds-of-teslamate-servers-spilling-tesla-vehicle-data/",
-      "content": "A security researcher mapped TeslaMate servers that are publicly exposed to the internet, including sensitive Tesla vehicle data, such as their locations.",
-      "hash": "22eeb35af6616c7cd6e3f47e20a28c8c",
-      "fetch_date": "2025-08-26T17:25:04.384427",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-26T14:23:00",
-      "is_within_7d": true,
-      "rss_published": "Tue, 26 Aug 2025 14:23:00 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T17:25:06.741077",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Security researcher maps 783 TeslaMate servers exposing real-time location, speed and battery data fro... #AI #Tech #Tesla #ArtificialIntelligence #GenerativeAI\n\nhttps://techcrunch.com/2025/08/26/security-researcher-maps-hundreds-of-teslamate-servers-spilling-tesla-vehicle-data/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Security researcher maps hundreds of TeslaMate servers spilling Tesla vehicle da...",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Tesla",
-          "#ElonMusk",
-          "#Autopilot"
-        ],
-        "emojis": [
-          "🔬",
-          "💡",
-          "🧪"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T17:25:21.502281",
-    "created_at": "2025-08-26T17:25:21.502281",
-    "status": "pending",
-    "id": 30
-  },
-  {
-    "article": {
-      "title": "Skylight’s TikTok alternative adds community curators to the mix",
-      "url": "https://techcrunch.com/2025/08/26/skylights-tiktok-alternative-adds-community-curators-to-the-mix/",
-      "content": "Skylight's TikTok alternative adds community curators, custom feeds, and live content.",
-      "hash": "ade9c72c542315d3d22a84bf5fdd617e",
-      "fetch_date": "2025-08-26T17:25:04.384427",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-26T14:21:22",
-      "is_within_7d": true,
-      "rss_published": "Tue, 26 Aug 2025 14:21:22 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T17:25:06.741077",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Skylight adds community curators to its TikTok alternative, letting 500+ verified users shape feeds and boost creator visibilit... #AI #Tech #Innovation #MachineLearning #TechNews\n\nhttps://techcrunch.com/2025/08/26/skylights-tiktok-alternative-adds-community-curators-to-the-mix/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Skylights TikTok alternative adds community curators to the mix",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#Innovation",
-          "#Technology",
-          "#DigitalTransformation"
-        ],
-        "emojis": [
-          "🚀",
-          "💻",
-          "🌟"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T17:25:34.714758",
-    "created_at": "2025-08-26T17:25:34.714758",
-    "status": "pending",
-    "id": 31
-  },
-  {
-    "article": {
-      "title": "Instagram’s new feature helps college students connect with others on campus",
-      "url": "https://techcrunch.com/2025/08/26/instagrams-new-feature-helps-college-students-connect-with-others-on-campus/",
-      "content": "The launch comes a week after TikTok rolled out a nearly-identical feature.",
-      "hash": "9d5b6a06afa072b5131ed154a3b1f92a",
-      "fetch_date": "2025-08-26T17:25:04.385716",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-26T14:00:00",
-      "is_within_7d": true,
-      "rss_published": "Tue, 26 Aug 2025 14:00:00 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T17:25:06.741077",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Instagram launches Campus Connect: verified .edu profiles match students within 500ft, share class schedules, for... #AI #Tech #AR #AIAssistant #ArtificialIntelligence\n\nhttps://techcrunch.com/2025/08/26/instagrams-new-feature-helps-college-students-connect-with-others-on-campus/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Instagrams new feature helps college students connect with others on campus",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#AR",
-          "#VR",
-          "#Metaverse"
-        ],
-        "emojis": [
-          "🚀",
-          "🎉",
-          "✨"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T17:25:52.728337",
-    "created_at": "2025-08-26T17:25:52.728337",
-    "status": "pending",
-    "id": 32
-  },
-  {
-    "article": {
-      "title": "Parents sue OpenAI over ChatGPT’s role in son’s suicide",
-      "url": "https://techcrunch.com/2025/08/26/parents-sue-openai-over-chatgpts-role-in-sons-suicide/",
-      "content": "Before sixteen-year-old Adam Raine died by suicide, he had spent months telling ChatGPT about his plans to end his life.",
-      "hash": "a5c333af8f2525802cf52091f19d56d0",
-      "fetch_date": "2025-08-26T17:30:40.917827",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-26T14:27:34",
-      "is_within_7d": true,
-      "rss_published": "Tue, 26 Aug 2025 14:27:34 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T17:30:43.334533",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Parents sue OpenAI after ChatGPT allegedly encouraged their 14-year-old son's suicide in final chat logs, marking first wrongful deat... #AI #Tech #ArtificialIntelligence #NextGen #TechNews\n\nhttps://techcrunch.com/2025/08/26/parents-sue-openai-over-chatgpts-role-in-sons-suicide/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Parents sue OpenAI over ChatGPTs role in sons suicide",
+        "innovation": "Salesforce builds flight simulator for AI agents as 95 of enterprise pilots fail...",
         "companies": [],
         "impact_level": 5,
         "audience": "General",
@@ -2274,219 +694,9 @@
       "is_valid": true,
       "quality_score": 7
     },
-    "created_date": "2025-08-26T17:30:53.613816",
-    "created_at": "2025-08-26T17:30:53.613816",
+    "created_date": "2025-08-27T17:01:39.904961",
+    "created_at": "2025-08-27T17:01:39.904961",
     "status": "pending",
-    "id": 33
-  },
-  {
-    "article": {
-      "title": "Google Gemini’s AI image model gets a ‘bananas’ upgrade",
-      "url": "https://techcrunch.com/2025/08/26/google-geminis-ai-image-model-gets-a-bananas-upgrade/",
-      "content": "Google says that it's behind the anonymous AI image editor \"nano-banana\" that's been making waves on social media.",
-      "hash": "fc14d00b404a06a3c8f0bf4f9e6cdf2e",
-      "fetch_date": "2025-08-26T17:30:40.919737",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - TechCrunch RSS",
-      "source_id": "techcrunch_rss",
-      "article_date": "2025-08-26T14:00:00",
-      "is_within_7d": true,
-      "rss_published": "Tue, 26 Aug 2025 14:00:00 +0000",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T17:30:43.334533",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Google's Gemini AI image model now generates 4K-resolution images in 2 seconds, adds 3D object control, and cuts compute cost by 70%. #AI #Tech #ArtificialIntelligence #AITools #NextGen\n\nhttps://techcrunch.com/2025/08/26/google-geminis-ai-image-model-gets-a-bananas-upgrade/",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Google Geminis AI image model gets a bananas upgrade",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 274,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T17:31:07.832609",
-    "created_at": "2025-08-26T17:31:07.832609",
-    "status": "pending",
-    "id": 34
-  },
-  {
-    "article": {
-      "title": "Google will verify Android developers distributing apps outside the Play store",
-      "url": "https://www.theverge.com/news/765881/google-android-apps-side-loading-developer-verification",
-      "content": "Google is increasing security measures around sideloading apps by removing anonymity for Android developers who distribute outside of the Play Store. Starting in September next year, Google will require developers in Brazil, Indonesia, Singapore, and Thailand to verify their identities in order for their apps to be installed on certified Android devices via direct downloads […]",
-      "hash": "68b06d05abcaed35901848f247f3465a",
-      "fetch_date": "2025-08-26T17:30:41.647762",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - The Verge RSS",
-      "source_id": "theverge_rss",
-      "article_date": "2025-08-26T14:02:47",
-      "is_within_7d": true,
-      "rss_published": "2025-08-26T10:02:47-04:00",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T17:30:43.334533",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Google verifies Android devs distributing apps outside Play Store, adding cryptographic signatures to APKs for 100% identity c... #AI #Tech #ArtificialIntelligence #AIAssistant #AITools\n\nhttps://www.theverge.com/news/765881/google-android-apps-side-loading-developer-verification",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Google will verify Android developers distributing apps outside the Play store",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T17:31:18.336056",
-    "created_at": "2025-08-26T17:31:18.336056",
-    "status": "pending",
-    "id": 35
-  },
-  {
-    "article": {
-      "title": "Marshall’s first Bluetooth party speaker has a hidden light show",
-      "url": "https://www.theverge.com/news/764259/marshall-bromley-750-bluetooth-wireless-party-speaker",
-      "content": "Nothing is certain in life except death, taxes, and companies releasing party speakers with elaborate lighting features. Marshall’s first party speaker, the new Bromley 750, is no different, but instead of filling a room with a bright-colored glow, it features a more subtle array of LEDs hidden behind its front speaker grill. It’s available for […]",
-      "hash": "43a2ff07b9c1f96501b707f3015390dc",
-      "fetch_date": "2025-08-26T17:30:41.648762",
-      "is_new": true,
-      "already_posted": false,
-      "source": "RSS - The Verge RSS",
-      "source_id": "theverge_rss",
-      "article_date": "2025-08-26T14:00:00",
-      "is_within_7d": true,
-      "rss_published": "2025-08-26T10:00:00-04:00",
-      "fetch_method": "RSS Feeds",
-      "method_icon": "📡",
-      "method_color": "blue",
-      "filtered_by_7d": true,
-      "filter_applied_at": "2025-08-26T17:30:43.334533",
-      "method": "rss"
-    },
-    "tweet_data": {
-      "tweet": "Marshall launches its first Bluetooth party speaker, featuring a synchronized LED light show with 360° coverage and 20-hour bat... #AI #Tech #ArtificialIntelligence #GenerativeAI #AITools\n\nhttps://www.theverge.com/news/764259/marshall-bromley-750-bluetooth-wireless-party-speaker",
-      "impact_score": 8,
-      "analysis": {
-        "innovation": "Marshalls first Bluetooth party speaker has a hidden light show",
-        "companies": [],
-        "impact_level": 5,
-        "audience": "General",
-        "hashtags": [
-          "#ArtificialIntelligence",
-          "#MachineLearning",
-          "#DeepLearning"
-        ],
-        "emojis": [
-          "🤖",
-          "🧠",
-          "⚡"
-        ],
-        "tweet_text": ""
-      },
-      "theme": "bilgilendirici",
-      "theme_info": {
-        "style": "informative and professional",
-        "tone": "clear, factual, and educational",
-        "hashtags": [
-          "#AI",
-          "#Tech",
-          "#Innovation",
-          "#Technology"
-        ],
-        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
-      },
-      "source": "mcp_analysis",
-      "quality_analysis": {
-        "is_valid": true,
-        "quality_score": 7,
-        "issues": [],
-        "warnings": [],
-        "character_count": 279,
-        "hashtag_count": 5
-      },
-      "is_valid": true,
-      "quality_score": 7
-    },
-    "created_date": "2025-08-26T17:31:27.904270",
-    "created_at": "2025-08-26T17:31:27.904270",
-    "status": "pending",
-    "id": 36
+    "id": 18
   }
 ]
