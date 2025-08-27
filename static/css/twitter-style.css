@@ -843,12 +843,14 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     background-color: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(12px) !important;
     border-bottom: 1px solid var(--twitter-border) !important;
-    padding: 16px 16px !important;
+    padding: 20px 24px !important;
     z-index: 1000 !important;
     flex-shrink: 0 !important;
     margin: 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    border-radius: 16px 16px 0 0;
+    margin-bottom: 1rem;
 }
 
 .feed-content {
@@ -882,6 +884,21 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     font-size: 14px;
     color: var(--twitter-text-secondary);
     margin: 4px 0 0 0;
+}
+
+.feed-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.feed-header-left {
+    flex: 1;
+}
+
+.feed-header-right {
+    flex-shrink: 0;
 }
 
 /* Flash Messages Container */
@@ -4897,32 +4914,33 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     overflow: hidden;
     width: 100%;
     max-width: 100%;
+    margin-bottom: 2rem;
 }
 
 .settings-card-header {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 2rem;
+    padding: 1.5rem 2rem;
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
 }
 
 .settings-card-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 16px;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     backdrop-filter: blur(10px);
 }
 
 .settings-card-title {
-    font-size: 1.2rem;
-    font-weight: 700;
+    font-size: 1.1rem;
+    font-weight: 600;
     margin: 0;
 }
 
@@ -4934,13 +4952,13 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 }
 
 .settings-form {
-    padding: 1rem;
+    padding: 1.5rem;
 }
 
 /* Desktop için form padding */
 @media (min-width: 768px) {
     .settings-form {
-        padding: 1.5rem;
+        padding: 2rem;
     }
 }
 
@@ -4966,6 +4984,17 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.settings-section-title::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 2px;
 }
 
 /* Desktop için section başlıkları */
@@ -8613,6 +8642,9 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     scrollbar-width: none !important;
     scrollbar-color: transparent transparent !important;
     -ms-overflow-style: none !important;
+    padding: 20px !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
 }
 
 /* Webkit scrollbar styling for all page containers */
