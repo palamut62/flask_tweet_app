@@ -698,5 +698,355 @@
     "created_at": "2025-08-27T17:01:39.904961",
     "status": "pending",
     "id": 18
+  },
+  {
+    "article": {
+      "title": "Hyundai is working with a startup on plant-based leather that smells like the real thing",
+      "url": "https://techcrunch.com/2025/08/27/hyundai-is-working-with-a-startup-on-plant-based-leather-that-smells-like-the-real-thing/",
+      "content": "Uncaged Innovations is working with Hyundai to develop alternatives to leather with a fraction of the environmental impact.",
+      "hash": "17936d24e3d5f342f2da602b77e06641",
+      "fetch_date": "2025-08-27T17:11:47.902395",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-27T13:10:00",
+      "is_within_7d": true,
+      "rss_published": "Wed, 27 Aug 2025 13:10:00 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-27T17:11:50.616406",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Hyundai partners with startup to develop plant-based leather that replicates cowhide... #ArtificialIntelligence #MachineLearning #Future #AIRevolution #AI\n\nhttps://techcrunch.com/2025/08/27/hyundai-is-working-with-a-startup-on-plant-based-leather-that-smells-like-the-real-thing/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Hyundai is working with a startup on plant-based leather that smells like the re...",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#Startup"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-27T17:12:11.019837",
+    "created_at": "2025-08-27T17:12:11.019837",
+    "status": "pending",
+    "id": 11
+  },
+  {
+    "article": {
+      "title": "SpaceX notches major wins during 10th Starship test",
+      "url": "https://techcrunch.com/2025/08/26/spacex-notches-major-wins-during-tenth-starship-test/",
+      "content": "This test marks a material advancement for the Starship program, which SpaceX wants to eventually use to send humans and cargo to Mars.",
+      "hash": "16a3ef52ed79b96b3c5766a9f77dbb82",
+      "fetch_date": "2025-08-27T17:11:47.902395",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-27T01:25:37",
+      "is_within_7d": true,
+      "rss_published": "Wed, 27 Aug 2025 01:25:37 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-27T17:11:50.616406",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "SpaceX's Starship IFT-10 achieves 90% soft-landing success, catches Super Heavy booster for 2nd time, doubling prior flight duration #AR #VR #AIAssistant #MachineLearning #AI\n\nhttps://techcrunch.com/2025/08/26/spacex-notches-major-wins-during-tenth-starship-test/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "SpaceX notches major wins during 10th Starship test",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#AR",
+          "#VR",
+          "#Innovation"
+        ],
+        "emojis": [
+          "🚀",
+          "💻",
+          "🌟"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 263,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-27T17:12:21.977639",
+    "created_at": "2025-08-27T17:12:21.977639",
+    "status": "pending",
+    "id": 12
+  },
+  {
+    "article": {
+      "title": "Google will now let everyone use its AI-powered video editor Vids",
+      "url": "https://www.theverge.com/news/766557/google-vids-ai-avatar-gemini-image-to-video",
+      "content": "Google is rolling out a basic version of Vids to everyone. Until now, the AI-powered video editor has only been available to Google Workspace or AI plan subscribers, but now users can broadly access the app with templates, stock media, and a “subset of AI capabilities,” product director Vishnu Sivaji tells The Verge. Launched last […]",
+      "hash": "b9fd0e1e59e54a5556af56b4fe6ce920",
+      "fetch_date": "2025-08-27T17:11:48.538199",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-27T14:04:40",
+      "is_within_7d": true,
+      "rss_published": "2025-08-27T10:04:40-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-27T17:11:50.616406",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Google opens AI video editor Vids to all Workspace users, adding auto-storyboarding, script generation, and 60-language subtitle support #Google #GoogleAI #DeepLearning #MachineLearning #AI\n\nhttps://www.theverge.com/news/766557/google-vids-ai-avatar-gemini-image-to-video",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Google will now let everyone use its AI-powered video editor Vids",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Google",
+          "#GoogleAI",
+          "#ArtificialIntelligence"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 271,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-27T17:12:32.131505",
+    "created_at": "2025-08-27T17:12:32.131505",
+    "status": "pending",
+    "id": 13
+  },
+  {
+    "article": {
+      "title": "The Verge’s favorite pet gear for 2025",
+      "url": "https://www.theverge.com/tech/765085/pet-gadgets-dog-cat-fish-favorites",
+      "content": "Every once in a while, Slack conversations among The Verge’s staff are interrupted by photos of incredibly cute dogs, cats, and other pets. (We even have an occasional discussion about smart home editor Jennifer Pattison Tuohy’s chickens.) Naturally, anyone who has a pet wants the best for them — and that includes carriers, feeders, and automatic […]",
+      "hash": "5e9b3420da4c5d71d25a774abedb3951",
+      "fetch_date": "2025-08-27T17:11:48.542707",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - The Verge RSS",
+      "source_id": "theverge_rss",
+      "article_date": "2025-08-27T13:00:00",
+      "is_within_7d": true,
+      "rss_published": "2025-08-27T09:00:00-04:00",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-27T17:11:50.616406",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "The Verge's 2025 pet gear picks include Whistle's smart collar that tracks heart rate 24/7 and Petcube's AI camera detecting illness symptoms 3 days before vis... #AR #VR #Future #ArtificialIntelligence #AI\n\nhttps://www.theverge.com/tech/765085/pet-gadgets-dog-cat-fish-favorites",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "The Verges favorite pet gear for 2025",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#AR",
+          "#VR",
+          "#Innovation"
+        ],
+        "emojis": [
+          "🚀",
+          "💻",
+          "🌟"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-27T17:12:53.452438",
+    "created_at": "2025-08-27T17:12:53.452438",
+    "status": "pending",
+    "id": 14
+  },
+  {
+    "article": {
+      "title": "How procedural memory can cut the cost and complexity of AI agents",
+      "url": "https://venturebeat.com/ai/how-procedural-memory-can-cut-the-cost-and-complexity-of-ai-agents/",
+      "content": "Memp takes inspiration from human cognition to give LLM agents \"procedural memory\" that can adapt to new tasks and environments.",
+      "hash": "eeeba5f113f16c8f2d55a264dcd9614d",
+      "fetch_date": "2025-08-27T17:11:49.160271",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - VentureBeat AI RSS",
+      "source_id": "venturebeat_rss",
+      "article_date": "2025-08-26T23:37:23",
+      "is_within_7d": true,
+      "rss_published": "Tue, 26 Aug 2025 23:37:23 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-27T17:11:50.616406",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "How procedural memory can cut the cost and complexity of AI agents #ArtificialIntelligence #MachineLearning #AIAssistant #AI #Innovation\n\nhttps://venturebeat.com/ai/how-procedural-memory-can-cut-the-cost-and-complexity-of-ai-agents/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "How procedural memory can cut the cost and complexity of AI agents",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#Innovation"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 232,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-27T17:13:01.078059",
+    "created_at": "2025-08-27T17:13:01.078059",
+    "status": "pending",
+    "id": 15
   }
 ]

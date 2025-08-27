@@ -4922,20 +4922,21 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     align-items: center;
     gap: 1rem;
     padding: 1.5rem 2rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
+    background: #f8f9fa;
+    color: #333;
+    border-bottom: 1px solid #e1e8ed;
 }
 
 .settings-card-icon {
     width: 50px;
     height: 50px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.2);
+    background: #667eea;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.25rem;
-    backdrop-filter: blur(10px);
 }
 
 .settings-card-title {
@@ -5224,7 +5225,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 
 /* Method card renkleri */
 .settings-method-blue {
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    background: #f8fafc;
     border-color: #93c5fd;
 }
 
@@ -5250,7 +5251,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 }
 
 .settings-method-green {
-    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    background: #f8fafc;
     border-color: #86efac;
 }
 
@@ -5276,7 +5277,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 }
 
 .settings-method-purple {
-    background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+    background: #f8fafc;
     border-color: #c4b5fd;
 }
 
@@ -5302,7 +5303,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 }
 
 .settings-method-orange {
-    background: linear-gradient(135deg, #fff7ed, #fed7aa);
+    background: #f8fafc;
     border-color: #fdba74;
 }
 
@@ -5331,7 +5332,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    background: #fffbeb;
     border: 1px solid #fbbf24;
     border-radius: 12px;
     padding: 1.5rem;
@@ -5386,17 +5387,17 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 }
 
 .settings-status-success {
-    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    background: #f0fdf4;
     border-color: #86efac;
 }
 
 .settings-status-warning {
-    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    background: #fffbeb;
     border-color: #fbbf24;
 }
 
 .settings-status-error {
-    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+    background: #fef2f2;
     border-color: #fca5a5;
 }
 
@@ -5716,7 +5717,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 }
 
 .settings-api-card {
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 16px;
     padding: 1.5rem;
