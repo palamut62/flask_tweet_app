@@ -1600,10 +1600,16 @@
             function openMobileMenu() {
                 console.log('🔥 Opening mobile menu...');
                 
-                // Change icon to X
+                // Change icon to X and move button to right
                 const mobileMenuIcon = document.getElementById('mobileMenuIcon');
+                const mobileMenuToggle = document.getElementById('mobileMenuToggle').parentElement;
+                
                 if (mobileMenuIcon) {
                     mobileMenuIcon.className = 'fas fa-times';
+                }
+                
+                if (mobileMenuToggle) {
+                    mobileMenuToggle.classList.add('sidebar-open');
                 }
                 
                 if (twitterSidebar) {
@@ -1719,10 +1725,16 @@
             function closeMobileMenu() {
                 console.log('🔒 Closing mobile menu...');
                 
-                // Change icon back to hamburger
+                // Change icon back to hamburger and move button to left
                 const mobileMenuIcon = document.getElementById('mobileMenuIcon');
+                const mobileMenuToggle = document.getElementById('mobileMenuToggle').parentElement;
+                
                 if (mobileMenuIcon) {
                     mobileMenuIcon.className = 'fas fa-bars';
+                }
+                
+                if (mobileMenuToggle) {
+                    mobileMenuToggle.classList.remove('sidebar-open');
                 }
                 
                 if (twitterSidebar) {
@@ -1811,6 +1823,13 @@
                     closeMobileMenu();
                 });
             });
+            
+            // Ensure button starts in correct position
+            const initialToggle = document.querySelector('.mobile-menu-toggle');
+            if (initialToggle) {
+                initialToggle.classList.remove('sidebar-open'); // Ensure it starts on the left
+                console.log('📍 Toggle button initialized on left position');
+            }
             
             // Close menu on window resize (if screen becomes larger)
             window.addEventListener('resize', function() {

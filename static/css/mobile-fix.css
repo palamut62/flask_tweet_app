@@ -263,15 +263,28 @@
         min-height: unset !important;
     }
     
-    /* Mobile menu butonu - Optimized positioning */
+    /* Mobile menu butonu - Dynamic positioning */
     .mobile-menu-toggle {
         display: block !important;
         position: fixed !important;
         top: 15px !important;
-        right: 15px !important; /* Moved to right to avoid sidebar conflict */
+        left: 15px !important; /* Start on left when sidebar closed */
         z-index: 999999 !important; /* Much higher z-index to stay above sidebar */
         width: 50px !important;
         height: 50px !important;
+        transition: left 0.3s ease !important; /* Smooth horizontal movement */
+    }
+    
+    /* Toggle button position when sidebar is open */
+    .mobile-menu-toggle.sidebar-open {
+        left: calc(85% - 40px) !important; /* Position inside sidebar's right area */
+    }
+    
+    /* Optimize for different screen sizes */
+    @media screen and (min-width: 400px) and (max-width: 768px) {
+        .mobile-menu-toggle.sidebar-open {
+            left: calc(85% - 35px) !important; /* Better positioning for medium screens */
+        }
     }
     
     .mobile-menu-btn {
@@ -287,7 +300,7 @@
         font-size: 20px !important;
         cursor: pointer !important;
         box-shadow: 0 2px 12px rgba(29, 161, 242, 0.3) !important;
-        transition: all 0.3s ease !important; /* Smooth transition for icon change */
+        transition: all 0.2s ease !important; /* Smooth transition for hover/active states */
         backdrop-filter: blur(10px) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
@@ -480,7 +493,11 @@
 @media screen and (max-width: 480px) {
     .mobile-menu-toggle {
         top: 10px !important;
-        right: 10px !important;
+        left: 10px !important;
+    }
+    
+    .mobile-menu-toggle.sidebar-open {
+        left: calc(85% - 35px) !important; /* Position inside sidebar for smaller screens */
     }
     
     .mobile-menu-btn {
