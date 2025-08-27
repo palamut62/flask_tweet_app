@@ -7302,6 +7302,111 @@ def get_password_status():
         terminal_log(f"❌ Şifre durum kontrolü hatası: {e}", "error")
         return jsonify({"success": False, "error": str(e)})
 
+# =============================================================================
+# BULK MANUAL SHARE API ENDPOINTS
+# =============================================================================
+
+@app.route('/api/get_tweets_for_manual_share', methods=['POST'])
+@login_required
+def get_tweets_for_manual_share():
+    """Toplu manuel paylaşım için tweet verilerini getir"""
+    try:
+        data = request.get_json()
+        tweet_ids = data.get('tweet_ids', [])
+        
+        if not tweet_ids:
+            return jsonify({"success": False, "error": "Tweet ID listesi gerekli"})
+        
+        if len(tweet_ids) > 10:
+            return jsonify({"success": False, "error": "Maksimum 10 tweet seçilebilir"})
+        
+        # Bekleyen tweet'leri yükle
+        pending_tweets = load_json("pending_tweets.json", [])
+        
+        # İstenen tweet'leri bul
+        selected_tweets = []
+        for tweet in pending_tweets:
+            if str(tweet.get('id', '')) in tweet_ids:
+                selected_tweets.append({
+                    'id': tweet.get('id'),
+                    'content': tweet.get('content', ''),
+                    'title': tweet.get('article', {}).get('title', '') if tweet.get('article') else ''
+                })
+        
+        if not selected_tweets:
+            return jsonify({"success": False, "error": "Seçilen tweet'ler bulunamadı"})
+        
+        terminal_log(f"✅ {len(selected_tweets)} tweet manuel paylaşım için hazırlandı", "info")
+        
+        return jsonify({
+            "success": True,
+            "tweets": selected_tweets,
+            "count": len(selected_tweets)
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Manuel paylaşım tweet verisi alma hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/mark_tweets_as_posted', methods=['POST'])
+@login_required
+def mark_tweets_as_posted():
+    """Tweetleri manuel olarak paylaşıldı olarak işaretle"""
+    try:
+        data = request.get_json()
+        tweet_ids = data.get('tweet_ids', [])
+        
+        if not tweet_ids:
+            return jsonify({"success": False, "error": "Tweet ID listesi gerekli"})
+        
+        # Bekleyen tweet'leri yükle
+        pending_tweets = load_json("pending_tweets.json", [])
+        posted_articles = load_json("posted_articles.json", [])
+        
+        # İşaretlenecek tweet'leri bul ve taşı
+        tweets_to_move = []
+        remaining_tweets = []
+        
+        for tweet in pending_tweets:
+            if str(tweet.get('id', '')) in tweet_ids:
+                # Manuel paylaşım bilgilerini ekle
+                tweet_data = {
+                    'id': tweet.get('id'),
+                    'hash': tweet.get('id'),  # ID'yi hash olarak kullan
+                    'content': tweet.get('content', ''),
+                    'article': tweet.get('article', {}),
+                    'created_at': tweet.get('created_at', datetime.now().isoformat()),
+                    'posted_at': datetime.now().isoformat(),
+                    'manual_post': True,
+                    'manual_post_timestamp': datetime.now().isoformat(),
+                    'tweet_id': f"manual_{tweet.get('id')}",
+                    'url': f"https://twitter.com/intent/tweet?text={tweet.get('content', '')[:50]}...",
+                    'source_type': tweet.get('source_type', 'news')
+                }
+                tweets_to_move.append(tweet_data)
+            else:
+                remaining_tweets.append(tweet)
+        
+        if not tweets_to_move:
+            return jsonify({"success": False, "error": "İşaretlenecek tweet bulunamadı"})
+        
+        # Dosyaları güncelle
+        save_json("pending_tweets.json", remaining_tweets)
+        posted_articles.extend(tweets_to_move)
+        save_json("posted_articles.json", posted_articles)
+        
+        terminal_log(f"✅ {len(tweets_to_move)} tweet manuel paylaşım olarak işaretlendi", "info")
+        
+        return jsonify({
+            "success": True,
+            "message": f"{len(tweets_to_move)} tweet paylaşıldı olarak işaretlendi",
+            "moved_count": len(tweets_to_move)
+        })
+        
+    except Exception as e:
+        terminal_log(f"❌ Tweet işaretleme hatası: {e}", "error")
+        return jsonify({"success": False, "error": str(e)})
+
 if __name__ == '__main__':
     # Sadece local development için çalıştır
     # PythonAnywhere'de WSGI kullanılır

@@ -280,9 +280,12 @@
                     <i class="fas fa-tasks text-primary me-2"></i>
                     <h5 class="mb-0 text-primary">Toplu İşlemler</h5>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 flex-wrap">
                     <button onclick="bulkApproveTweets()" class="btn-minimal btn-minimal-success btn-minimal-sm" id="bulk-approve-btn" disabled>
                         <i class="fas fa-check-double"></i> Toplu Onayla
+                    </button>
+                    <button onclick="bulkManualShare()" class="btn-minimal btn-minimal-primary btn-minimal-sm" id="bulk-manual-btn" disabled>
+                        <i class="fas fa-external-link-alt"></i> Toplu Manuel Paylaş
                     </button>
                     <button onclick="bulkRejectTweets()" class="btn-minimal btn-minimal-danger btn-minimal-sm" id="bulk-reject-btn" disabled>
                         <i class="fas fa-times-circle"></i> Toplu Reddet
@@ -614,14 +617,17 @@ document.addEventListener('DOMContentLoaded', function() {
 function updateBulkButtons() {
     const checkboxes = document.querySelectorAll('.tweet-select-checkbox:checked');
     const bulkApproveBtn = document.getElementById('bulk-approve-btn');
+    const bulkManualBtn = document.getElementById('bulk-manual-btn');
     const bulkRejectBtn = document.getElementById('bulk-reject-btn');
     const selectedCount = document.getElementById('selected-count');
     
     if (checkboxes.length > 0) {
         bulkApproveBtn.disabled = false;
+        bulkManualBtn.disabled = false;
         bulkRejectBtn.disabled = false;
         } else {
         bulkApproveBtn.disabled = true;
+        bulkManualBtn.disabled = true;
         bulkRejectBtn.disabled = true;
     }
     
@@ -648,6 +654,29 @@ function bulkApproveTweets() {
     );
 }
 
+function bulkManualShare() {
+    const checkboxes = document.querySelectorAll('.tweet-select-checkbox:checked');
+    const tweetIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (tweetIds.length === 0) {
+        showToast('Lütfen en az bir tweet seçin!', 'warning');
+        return;
+    }
+    
+    if (tweetIds.length > 10) {
+        showToast('Aynı anda maksimum 10 tweet paylaşabilirsiniz!', 'warning');
+        return;
+    }
+    
+    showConfirmDialog(
+        `${tweetIds.length} tweet'i manuel olarak paylaşmak için her biri için ayrı Twitter sayfası açılacak.\n\n⚠️ Bu işlem ${tweetIds.length} yeni sekmede Twitter compose sayfası açacak.\n\nDevam etmek istediğinizden emin misiniz?`,
+        () => bulkManualShareTweets(tweetIds),
+        null,
+        'Toplu Manuel Paylaşım',
+        'info'
+    );
+}
+
 function bulkRejectTweets() {
     const checkboxes = document.querySelectorAll('.tweet-select-checkbox:checked');
     const tweetIds = Array.from(checkboxes).map(cb => cb.value);
@@ -664,6 +693,103 @@ function bulkRejectTweets() {
         'Toplu Reddetme',
         'danger'
     );
+}
+
+function bulkManualShareTweets(tweetIds) {
+    const button = document.getElementById('bulk-manual-btn');
+    const originalText = button.innerHTML;
+    
+    // Loading state
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Açılıyor...';
+    button.disabled = true;
+    
+    showToast(`${tweetIds.length} Twitter sayfası açılıyor...`, 'info');
+    
+    // Get tweet data and open tabs
+    fetch('/api/get_tweets_for_manual_share', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ tweet_ids: tweetIds })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.tweets) {
+            // Open tabs with delay to avoid popup blocking
+            let delay = 0;
+            const DELAY_BETWEEN_TABS = 500; // 500ms delay between tabs
+            
+            data.tweets.forEach((tweet, index) => {
+                setTimeout(() => {
+                    const tweetText = encodeURIComponent(tweet.content || 'Tweet metni bulunamadı');
+                    const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
+                    
+                    // Open in new tab
+                    window.open(twitterUrl, '_blank');
+                    
+                    // Show progress
+                    if (index < data.tweets.length - 1) {
+                        showToast(`${index + 1}/${data.tweets.length} Twitter sayfası açıldı...`, 'info');
+                    } else {
+                        showToast(`Tüm ${data.tweets.length} Twitter sayfası açıldı! Her birini manuel olarak paylaşabilirsiniz.`, 'success');
+                    }
+                }, delay);
+                delay += DELAY_BETWEEN_TABS;
+            });
+            
+            // Show final instruction after all tabs are opened
+            setTimeout(() => {
+                showConfirmDialog(
+                    `${data.tweets.length} Twitter compose sayfası açıldı.\n\n📝 Her sayfada tweet metni otomatik dolduruldu.\n✅ Her sayfada "Tweet" butonuna tıklayarak paylaşabilirsiniz.\n\n🔄 Paylaştığınız tweetleri "paylaşıldı" olarak işaretlemek ister misiniz?`,
+                    () => markTweetsAsPosted(tweetIds),
+                    null,
+                    'Tweetler Hazır',
+                    'success'
+                );
+            }, delay + 1000);
+            
+        } else {
+            showToast(`Hata: ${data.error || 'Tweet verileri alınamadı'}`, 'error');
+        }
+        
+        // Restore button
+        button.innerHTML = originalText;
+        button.disabled = false;
+    })
+    .catch(error => {
+        console.error('Bulk manual share error:', error);
+        showToast('Tweet verileri alınırken hata oluştu!', 'error');
+        
+        // Restore button
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
+function markTweetsAsPosted(tweetIds) {
+    fetch('/api/mark_tweets_as_posted', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ tweet_ids: tweetIds })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(`${tweetIds.length} tweet "paylaşıldı" olarak işaretlendi!`, 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast(`Hata: ${data.error || 'İşaretleme başarısız'}`, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Mark as posted error:', error);
+        showToast('İşaretleme sırasında hata oluştu!', 'error');
+    });
 }
 
 function bulkProcessTweets(tweetIds, action) {
