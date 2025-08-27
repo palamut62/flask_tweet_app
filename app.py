@@ -17,6 +17,7 @@ from email.mime.multipart import MIMEMultipart
 from bs4 import BeautifulSoup 
 import hashlib
 import uuid
+import secrets
 
 # .env dosyasını yükle
 load_dotenv()
