@@ -49,8 +49,7 @@ from utils import (
 
 # GitHub modülü kaldırıldı
 
-# Security manager import
-from security_manager import SecurityManager
+# Security manager import - SQLite kullanacağız
 
 # Version Information
 APP_VERSION = "1.4.2"
