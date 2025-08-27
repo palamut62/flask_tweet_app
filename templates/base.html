@@ -1617,7 +1617,7 @@
                         max-width: 320px !important;
                         height: 100vh !important;
                         background: white !important;
-                        z-index: 9999 !important;
+                        z-index: 99998 !important;
                         border-right: 1px solid #ccc !important;
                         box-shadow: 2px 0 10px rgba(0,0,0,0.3) !important;
                         overflow-y: auto !important;
@@ -1704,7 +1704,7 @@
                         width: 100% !important;
                         height: 100% !important;
                         background: rgba(0, 0, 0, 0.6) !important;
-                        z-index: 9998 !important;
+                        z-index: 99997 !important;
                         display: block !important;
                         opacity: 1 !important;
                     `;
@@ -1735,7 +1735,7 @@
                         width: 280px !important;
                         height: 100vh !important;
                         background: white !important;
-                        z-index: 9999 !important;
+                        z-index: 99998 !important;
                         transform: translateX(-100%) !important;
                     `;
                     twitterSidebar.classList.remove('mobile-open');
@@ -1750,7 +1750,7 @@
                         width: 100% !important;
                         height: 100% !important;
                         background: rgba(0, 0, 0, 0.6) !important;
-                        z-index: 9998 !important;
+                        z-index: 99997 !important;
                         display: none !important;
                         opacity: 0 !important;
                     `;
@@ -1786,13 +1786,12 @@
                 console.log('❌ Mobile toggle button not found!');
             }
             
+            // Close button is now disabled - functionality moved to toggle button
             if (mobileCloseBtn) {
-                mobileCloseBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('❌ Close button clicked!');
-                    closeMobileMenu();
-                });
-                console.log('✅ Close button listener added');
+                // Remove any existing event listeners by cloning and replacing
+                const newCloseBtn = mobileCloseBtn.cloneNode(true);
+                mobileCloseBtn.parentNode.replaceChild(newCloseBtn, mobileCloseBtn);
+                console.log('❌ Close button disabled');
             }
             
             if (mobileOverlay) {

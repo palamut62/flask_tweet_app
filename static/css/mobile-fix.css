@@ -82,7 +82,7 @@
         max-width: 320px !important;
         height: 100vh !important;
         background: white !important;
-        z-index: 9999 !important;
+        z-index: 99998 !important; /* Lower than toggle button */
         transition: all 0.3s ease !important;
         transform: translateX(-100%) !important;
         overflow-y: auto !important;
@@ -220,33 +220,17 @@
         overflow: visible !important;
     }
     
-    /* Close button styling */
+    /* Close button completely hidden on mobile */
     .twitter-sidebar .mobile-close-btn {
-        display: block !important;
-        position: absolute !important;
-        top: 15px !important;
-        right: 15px !important;
-        z-index: 10 !important;
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
     }
     
     .twitter-sidebar .close-btn {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        width: 35px !important;
-        height: 35px !important;
-        background: #f5f5f5 !important;
-        border: 1px solid #ddd !important;
-        border-radius: 50% !important;
-        cursor: pointer !important;
-        font-size: 16px !important;
-        color: #666 !important;
-        transition: all 0.2s ease !important;
-    }
-    
-    .twitter-sidebar .close-btn:hover {
-        background: #e0e0e0 !important;
-        color: #333 !important;
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
     }
     
     /* Footer section */
@@ -285,7 +269,7 @@
         position: fixed !important;
         top: 15px !important;
         right: 15px !important; /* Moved to right to avoid sidebar conflict */
-        z-index: 99999 !important;
+        z-index: 999999 !important; /* Much higher z-index to stay above sidebar */
         width: 50px !important;
         height: 50px !important;
     }
@@ -439,7 +423,7 @@
         width: 100% !important;
         height: 100% !important;
         background: rgba(0, 0, 0, 0.6) !important;
-        z-index: 9998 !important;
+        z-index: 99997 !important; /* Below sidebar but above main content */
         display: none !important;
         transition: opacity 0.3s ease !important;
     }
