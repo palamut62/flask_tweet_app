@@ -1048,5 +1048,281 @@
     "created_at": "2025-08-27T17:13:01.078059",
     "status": "pending",
     "id": 15
+  },
+  {
+    "article": {
+      "title": "Plaud launches a new AI hardware notetaker, the $179 Note Pro",
+      "url": "https://techcrunch.com/2025/08/27/plaud-launches-a-new-ai-hardware-notetaker-the-179-note-pro/",
+      "content": "Plaud.ai launches its new Plaud Note Pro hardware notetaker with better mics and recording range.",
+      "hash": "6c7a7bf19ac4046c02e6eaab74fa178a",
+      "fetch_date": "2025-08-27T17:18:14.270471",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - TechCrunch RSS",
+      "source_id": "techcrunch_rss",
+      "article_date": "2025-08-27T14:13:02",
+      "is_within_7d": true,
+      "rss_published": "Wed, 27 Aug 2025 14:13:02 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-27T17:18:15.917743",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Plaud launches $179 Note Pro AI notetaker with 50-hour battery, 32GB storage, and real-time transcription in 1... #ArtificialIntelligence #MachineLearning #AIAssistant #AI #Innovation\n\nhttps://techcrunch.com/2025/08/27/plaud-launches-a-new-ai-hardware-notetaker-the-179-note-pro/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Plaud launches a new AI hardware notetaker the 179 Note Pro",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#Innovation"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-27T17:18:36.260850",
+    "created_at": "2025-08-27T17:18:36.260850",
+    "status": "pending",
+    "id": 16
+  },
+  {
+    "article": {
+      "title": "Anthropic launches Claude for Chrome in limited beta, but prompt injection attacks remain a major concern",
+      "url": "https://venturebeat.com/ai/anthropic-launches-claude-for-chrome-in-limited-beta-but-prompt-injection-attacks-remain-a-major-concern/",
+      "content": "Anthropic launches a limited pilot of Claude for Chrome, allowing its AI to control web browsers while raising critical concerns about security and prompt injection attacks.",
+      "hash": "3ce4c7f6131509503e64117dc627ab73",
+      "fetch_date": "2025-08-27T17:18:15.211086",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - VentureBeat AI RSS",
+      "source_id": "venturebeat_rss",
+      "article_date": "2025-08-26T22:22:13",
+      "is_within_7d": true,
+      "rss_published": "Tue, 26 Aug 2025 22:22:13 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-27T17:18:15.919070",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Anthropic launches Claude for Chrome in limited beta, giving users AI assistance directly in ... #Anthropic #Claude #NextGen #MachineLearning #AI\n\nhttps://venturebeat.com/ai/anthropic-launches-claude-for-chrome-in-limited-beta-but-prompt-injection-attacks-remain-a-major-concern/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Anthropic launches Claude for Chrome in limited beta but prompt injection attack...",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#Anthropic",
+          "#Claude",
+          "#ArtificialIntelligence"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-27T17:18:50.513319",
+    "created_at": "2025-08-27T17:18:50.513319",
+    "status": "pending",
+    "id": 17
+  },
+  {
+    "article": {
+      "title": "Enterprise leaders say recipe for AI agents is matching them to existing processes — not the other way around",
+      "url": "https://venturebeat.com/ai/enterprise-leaders-say-recipe-for-ai-agents-is-matching-them-to-existing-processes-not-the-other-way-around/",
+      "content": "Global enterprises Block and GlaxoSmithKline (GSK) are exploring AI agent proof of concepts in financial services and drug discovery.",
+      "hash": "06c7a91f2752f75edba9d8109b97dadc",
+      "fetch_date": "2025-08-27T17:18:15.211086",
+      "is_new": true,
+      "already_posted": false,
+      "source": "RSS - VentureBeat AI RSS",
+      "source_id": "venturebeat_rss",
+      "article_date": "2025-08-26T20:46:19",
+      "is_within_7d": true,
+      "rss_published": "Tue, 26 Aug 2025 20:46:19 +0000",
+      "fetch_method": "RSS Feeds",
+      "method_icon": "📡",
+      "method_color": "blue",
+      "filtered_by_7d": true,
+      "filter_applied_at": "2025-08-27T17:18:15.919070",
+      "method": "rss"
+    },
+    "tweet_data": {
+      "tweet": "Enterprise leaders report 87% success rate when AI agents integrate ... #ArtificialIntelligence #MachineLearning #AIRevolution #AI #Innovation\n\nhttps://venturebeat.com/ai/enterprise-leaders-say-recipe-for-ai-agents-is-matching-them-to-existing-processes-not-the-other-way-around/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Enterprise leaders say recipe for AI agents is matching them to existing process...",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#ArtificialIntelligence",
+          "#MachineLearning",
+          "#Innovation"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-27T17:19:05.387268",
+    "created_at": "2025-08-27T17:19:05.387268",
+    "status": "pending",
+    "id": 18
+  },
+  {
+    "article": {
+      "title": "Assort Health nabs $50M to automate patient phone calls, sources say",
+      "url": "https://techcrunch.com/2025/08/26/assort-health-nabs-50m-to-automate-patient-phone-calls-sources-say/",
+      "content": "Assort Health, a startup that uses AI to automate patient communication for specialty healthcare practices, has raised about $50 million in a Series B round at a valuation of $750 million, according to three sources familiar with the deal. The latest round, which comes just four months after the company raised its$22 million Series A, was led by Lightspeed Venture Partners, these sources said.The company’s AI voice agents are designed to take over high-volume, repetitive tasks like scheduling, cancellations, and frequently asked questions normally managed by front desk staff, allowing human staff to focus on more complex or sensitive patient interactions.Assort Health is one of several startups that recently raised new funding to use AI to alleviate patient phone call volume for medical offices.Just last week, EliseAI, which automates customer services for real estate and healthcare office front desks, announced that it secured a$250 million Series Eled by Andreessen Horowitz, valuing the company at $2.2 billion. Hello Patient, another AI-powered assistant for medical offices, raised a$20 million Series Aearlier this month at a $100 million valuation led by Scale Venture Partners, according to a person familiar with the deal.The healthcare industry is increasingly embracing AI solutions, as seen in the growing adoption of medical scribes from companies like Abridge and Ambience Healthcare. Investors are now betting that patient communication will be the next major area for AI implementation.Since Assort Health serves small and medium specialty care offices that often have long wait times, fast responses by an AI agent may help these offices lose fewer patients to competing practices.While Assort Health’s annual recurring revenue (ARR) is only a little more than $3 million, the company is growing quickly, according to two sources. The startup initially focused on orthopedic and physical care offices but has recently expanded its offerings to other specialties, includ",
+      "excerpt": "Biotech & HealthAssort Health nabs $50M to automate patient phone calls, sources sayMarina Temkin13 hours ago",
+      "date": "13 hours ago",
+      "hash": "1c5865d40a54a9fd3aabc13a4ae50dd0",
+      "source": "TechCrunch AI",
+      "source_id": "techcrunch_ai",
+      "fetch_date": "2025-08-27T17:18:18.880670",
+      "is_new": true,
+      "already_posted": false,
+      "fetch_method": "Özel Kaynaklar",
+      "method_icon": "📰",
+      "method_color": "orange"
+    },
+    "tweet_data": {
+      "tweet": "Assort Health secures $50M to automate patient calls, handling 80% of scheduling requests and reducing hol... #50million #ArtificialIntelligence #GenerativeAI #AIRevolution #AI\n\nhttps://techcrunch.com/2025/08/26/assort-health-nabs-50m-to-automate-patient-phone-calls-sources-say/",
+      "impact_score": 8,
+      "analysis": {
+        "innovation": "Assort Health nabs 50M to automate patient phone calls sources say",
+        "companies": [],
+        "impact_level": 5,
+        "audience": "General",
+        "hashtags": [
+          "#50million",
+          "#ArtificialIntelligence",
+          "#MachineLearning"
+        ],
+        "emojis": [
+          "🤖",
+          "🧠",
+          "⚡"
+        ],
+        "tweet_text": ""
+      },
+      "theme": "bilgilendirici",
+      "theme_info": {
+        "style": "informative and professional",
+        "tone": "clear, factual, and educational",
+        "hashtags": [
+          "#AI",
+          "#Tech",
+          "#Innovation",
+          "#Technology"
+        ],
+        "example": "OpenAI's new model achieves 95% accuracy in medical diagnosis"
+      },
+      "source": "mcp_analysis",
+      "quality_analysis": {
+        "is_valid": true,
+        "quality_score": 7,
+        "issues": [],
+        "warnings": [],
+        "character_count": 279,
+        "hashtag_count": 5
+      },
+      "is_valid": true,
+      "quality_score": 7
+    },
+    "created_date": "2025-08-27T17:19:17.691733",
+    "created_at": "2025-08-27T17:19:17.691733",
+    "status": "pending",
+    "id": 19
   }
 ]

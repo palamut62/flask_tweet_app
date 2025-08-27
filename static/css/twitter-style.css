@@ -4911,10 +4911,13 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     background: white;
     border-radius: 16px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    overflow: visible;
     width: 100%;
     max-width: 100%;
     margin-bottom: 2rem;
+    height: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .settings-card-header {
@@ -4954,12 +4957,20 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 
 .settings-form {
     padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 /* Desktop için form padding */
 @media (min-width: 768px) {
     .settings-form {
         padding: 2rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
     }
 }
 
@@ -5153,6 +5164,9 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     padding: 1.5rem;
     border: 1px solid;
     transition: all 0.3s ease;
+    height: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .settings-method-card:hover {
@@ -5183,6 +5197,7 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    flex: 1;
 }
 
 .settings-checkbox-wrapper {
@@ -5725,6 +5740,10 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .settings-api-card::before {
