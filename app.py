@@ -66,16 +66,14 @@ VERSION_CHANGELOG = {
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 
-# Security Manager instance - SQLite kullan
+# Security Manager instance - JSON kullan (basit ve güvenilir)
 try:
-    from sqlite_security_manager import SQLiteSecurityManager
-    security_manager = SQLiteSecurityManager()
-    print("✅ SQLite SecurityManager kullanılıyor")
-except ImportError as e:
-    print(f"⚠️ SQLite SecurityManager yüklenemedi: {e}")
     from security_manager import SecurityManager
     security_manager = SecurityManager()
-    print("⚠️ JSON SecurityManager kullanılıyor")
+    print("✅ JSON SecurityManager kullanılıyor")
+except ImportError as e:
+    print(f"❌ SecurityManager yüklenemedi: {e}")
+    security_manager = None
 
 # Markdown filter for Jinja2 templates
 import re
