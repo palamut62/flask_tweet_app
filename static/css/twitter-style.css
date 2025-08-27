@@ -865,10 +865,17 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 }
 
 .feed-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--twitter-text);
     margin: 0;
+}
+
+/* Desktop için ana başlık */
+@media (min-width: 768px) {
+    .feed-title {
+        font-size: 20px;
+    }
 }
 
 .feed-subtitle {
@@ -4914,17 +4921,38 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 }
 
 .settings-card-title {
-    font-size: 1.75rem;
+    font-size: 1.2rem;
     font-weight: 700;
     margin: 0;
 }
 
+/* Desktop için ayarlar */
+@media (min-width: 768px) {
+    .settings-card-title {
+        font-size: 1.4rem;
+    }
+}
+
 .settings-form {
-    padding: 2rem;
+    padding: 1rem;
+}
+
+/* Desktop için form padding */
+@media (min-width: 768px) {
+    .settings-form {
+        padding: 1.5rem;
+    }
 }
 
 .settings-section {
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Desktop için section margin */
+@media (min-width: 768px) {
+    .settings-section {
+        margin-bottom: 2rem;
+    }
 }
 
 .settings-section:last-child {
@@ -4932,12 +4960,20 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
 }
 
 .settings-section-title {
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #111827;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Desktop için section başlıkları */
+@media (min-width: 768px) {
+    .settings-section-title {
+        font-size: 1.1rem;
+        margin-bottom: 1.2rem;
+    }
 }
 
 .settings-controls-grid {
