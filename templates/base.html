@@ -652,7 +652,7 @@
         <!-- Mobile Menu Toggle Button - Always visible on mobile -->
         <div class="mobile-menu-toggle" style="display: none;">
             <button id="mobileMenuToggle" class="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
+                <i id="mobileMenuIcon" class="fas fa-bars"></i>
             </button>
         </div>
         
@@ -899,8 +899,8 @@
                     </a>
                 </div>
 
-                <!-- Mobile Close Button -->
-                <div class="mobile-close-btn">
+                <!-- Mobile Close Button - Hidden, functionality moved to toggle -->
+                <div class="mobile-close-btn" style="display: none;">
                     <button id="mobileCloseBtn" class="close-btn">
                         <i class="fas fa-times"></i>
                     </button>
@@ -1600,6 +1600,12 @@
             function openMobileMenu() {
                 console.log('🔥 Opening mobile menu...');
                 
+                // Change icon to X
+                const mobileMenuIcon = document.getElementById('mobileMenuIcon');
+                if (mobileMenuIcon) {
+                    mobileMenuIcon.className = 'fas fa-times';
+                }
+                
                 if (twitterSidebar) {
                     // Force show and animate sidebar
                     twitterSidebar.style.cssText = `
@@ -1713,6 +1719,12 @@
             function closeMobileMenu() {
                 console.log('🔒 Closing mobile menu...');
                 
+                // Change icon back to hamburger
+                const mobileMenuIcon = document.getElementById('mobileMenuIcon');
+                if (mobileMenuIcon) {
+                    mobileMenuIcon.className = 'fas fa-bars';
+                }
+                
                 if (twitterSidebar) {
                     // Hide sidebar
                     twitterSidebar.style.cssText = `
@@ -1750,12 +1762,24 @@
                 console.log('✅ Mobile menu closed!');
             }
             
+            // Toggle function to handle open/close based on current state
+            function toggleMobileMenu() {
+                const mobileMenuIcon = document.getElementById('mobileMenuIcon');
+                const isOpen = twitterSidebar && twitterSidebar.classList.contains('mobile-open');
+                
+                if (isOpen) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
+                }
+            }
+            
             // Event listeners with better error handling
             if (mobileMenuToggle) {
                 mobileMenuToggle.addEventListener('click', function(e) {
                     e.preventDefault();
                     console.log('🔘 Menu toggle clicked!');
-                    openMobileMenu();
+                    toggleMobileMenu();
                 });
                 console.log('✅ Toggle button listener added');
             } else {

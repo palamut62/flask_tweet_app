@@ -279,55 +279,62 @@
         min-height: unset !important;
     }
     
-    /* Mobile menu butonu - En üstte */
+    /* Mobile menu butonu - Optimized positioning */
     .mobile-menu-toggle {
         display: block !important;
         position: fixed !important;
-        top: 10px !important;
-        left: 10px !important;
+        top: 15px !important;
+        right: 15px !important; /* Moved to right to avoid sidebar conflict */
         z-index: 99999 !important;
-        width: 60px !important;
-        height: 60px !important;
+        width: 50px !important;
+        height: 50px !important;
     }
     
     .mobile-menu-btn {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        width: 60px !important;
-        height: 60px !important;
+        width: 50px !important;
+        height: 50px !important;
         background: #1DA1F2 !important;
         color: white !important;
         border: none !important;
-        border-radius: 50% !important;
-        font-size: 24px !important;
+        border-radius: 12px !important; /* Rounded rectangle instead of circle */
+        font-size: 20px !important;
         cursor: pointer !important;
-        box-shadow: 0 4px 20px rgba(29, 161, 242, 0.5) !important;
-        transition: transform 0.2s ease !important;
+        box-shadow: 0 2px 12px rgba(29, 161, 242, 0.3) !important;
+        transition: all 0.3s ease !important; /* Smooth transition for icon change */
+        backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
     
     .mobile-menu-btn:hover,
     .mobile-menu-btn:active,
     .mobile-menu-btn:focus {
-        transform: scale(1.1) !important;
+        transform: scale(1.05) !important;
         background: #0d8bd9 !important;
-        box-shadow: 0 6px 25px rgba(29, 161, 242, 0.7) !important;
+        box-shadow: 0 4px 16px rgba(29, 161, 242, 0.4) !important;
     }
     
     .mobile-menu-btn:active {
-        transform: scale(0.95) !important;
+        transform: scale(0.98) !important;
     }
     
-    /* Feed area - Menu butonunun altında */
+    /* Icon transition for smooth change */
+    .mobile-menu-btn i {
+        transition: transform 0.2s ease !important;
+    }
+    
+    /* Feed area - Adjusted padding for right-positioned button */
     .twitter-feed {
         display: block !important;
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
-        padding: 80px 10px 20px 10px !important; /* Top padding for menu button */
+        padding: 20px 15px 20px 15px !important; /* Normal padding, button doesn't interfere */
         background: white !important;
         overflow: visible !important;
-        min-height: calc(100vh - 80px) !important;
+        min-height: calc(100vh - 40px) !important;
     }
     
     /* Feed header */
@@ -488,18 +495,18 @@
 /* Çok küçük ekranlar için (480px ve altı) */
 @media screen and (max-width: 480px) {
     .mobile-menu-toggle {
-        top: 5px !important;
-        left: 5px !important;
+        top: 10px !important;
+        right: 10px !important;
     }
     
     .mobile-menu-btn {
-        width: 50px !important;
-        height: 50px !important;
-        font-size: 20px !important;
+        width: 45px !important;
+        height: 45px !important;
+        font-size: 18px !important;
     }
     
     .twitter-feed {
-        padding: 70px 5px 15px 5px !important;
+        padding: 15px 10px 15px 10px !important;
     }
     
     .feed-header {
