@@ -298,6 +298,32 @@ html body .twitter-layout > .twitter-main::-webkit-scrollbar {
     margin-left: 4px;
 }
 
+/* Article Date Info */
+.article-date-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--twitter-text-secondary);
+}
+
+.article-date-info i {
+    font-size: 11px;
+    color: var(--twitter-blue);
+}
+
+.article-date {
+    font-weight: 500;
+    color: var(--twitter-text-secondary);
+}
+
+.article-time {
+    color: var(--twitter-text-secondary);
+    opacity: 0.8;
+    font-size: 11px;
+}
+
 .tweet-content {
     color: var(--twitter-text);
     font-size: 15px;

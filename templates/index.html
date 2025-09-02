@@ -341,6 +341,17 @@
                             <span class="tweet-time">• {{ tweet.created_at[:10] if tweet.created_at else 'Yeni' }}</span>
                         </div>
                         
+                        <!-- Article Date -->
+                        {% if tweet.article and tweet.article.article_date %}
+                        <div class="article-date-info">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span class="article-date">Makale: {{ tweet.article.article_date[:10] }}</span>
+                            {% if tweet.article.rss_published %}
+                            <span class="article-time" title="{{ tweet.article.rss_published }}">{{ tweet.article.article_date[11:16] if tweet.article.article_date|length > 16 else '' }}</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
                         <!-- Kalite Kontrol Göstergesi -->
                         {% if tweet.tweet_data and tweet.tweet_data.quality_analysis %}
                             <div class="mt-1">
@@ -406,6 +417,14 @@
                         <span>Önizleme</span>
                     </div>
                     
+                <!-- Makaleyi Oku -->
+                {% if tweet.article and tweet.article.url %}
+                <a href="{{ tweet.article.url }}" target="_blank" class="btn-minimal btn-minimal-info btn-minimal-xs" title="Orijinal makaleyi okumak için tıklayın">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>Makaleyi Oku</span>
+                </a>
+                {% endif %}
+                
                 <!-- Onayla -->
                 <button class="btn-minimal btn-minimal-success btn-minimal-xs" onclick="postTweet('{{ tweet.id }}')" {{ 'disabled' if is_invalid_tweet }}>
                     <i class="fas fa-check"></i>
@@ -414,7 +433,7 @@
                 
                 <!-- Manuel Paylaş -->
                 <button class="btn-minimal btn-minimal-primary btn-minimal-xs" onclick="manualPostTweet('{{ tweet.id }}')" {{ 'disabled' if is_invalid_tweet }}>
-                    <i class="fas fa-external-link-alt"></i>
+                    <i class="fas fa-share"></i>
                     <span>Manuel Paylaş</span>
                         </button>
                 

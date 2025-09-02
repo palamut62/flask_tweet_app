@@ -156,6 +156,30 @@
     box-shadow: var(--minimal-shadow-md);
 }
 
+/* Info Button */
+.btn-minimal-info {
+    background-color: #0891b2;
+    border-color: #0891b2;
+    color: white;
+}
+
+.btn-minimal-info:hover:not(:disabled) {
+    background-color: #0e7490;
+    border-color: #0e7490;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--minimal-shadow-md);
+}
+
+.btn-minimal-info:focus {
+    box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+}
+
+.btn-minimal-info:active {
+    transform: translateY(0);
+    box-shadow: var(--minimal-shadow-sm);
+}
+
 /* Secondary Button */
 .btn-minimal-secondary {
     background-color: white;

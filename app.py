@@ -71,7 +71,7 @@ app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 try:
     from security_manager import SecurityManager
     security_manager = SecurityManager()
-    print("✅ JSON SecurityManager kullanılıyor")
+    print("JSON SecurityManager kullaniliyor")
 except ImportError as e:
     print(f"❌ SecurityManager yüklenemedi: {e}")
     security_manager = None
