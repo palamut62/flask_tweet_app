@@ -306,7 +306,19 @@
                                    name="rss_url" 
                                    required 
                                    placeholder="https://example.com/feed.xml"
+                                   onchange="onRssUrlChange()"
                                    class="form-control">
+                            <div class="form-actions">
+                                <button type="button" 
+                                        id="testRssBtn"
+                                        onclick="testRssUrl()"
+                                        class="btn btn-secondary"
+                                        title="RSS feed'i test et">
+                                    <i class="fas fa-vial"></i>
+                                    RSS Test Et
+                                </button>
+                            </div>
+                            <div id="rssTestResult" class="form-result hidden"></div>
                         </div>
                         
                         <div class="form-group">
@@ -1539,6 +1551,77 @@ document.getElementById('url').addEventListener('input', function() {
     resultDiv.classList.add('hidden');
 });
 
+// RSS URL fonksiyonları
+function onRssUrlChange() {
+    const url = document.getElementById('rss_url').value.trim();
+    const testBtn = document.getElementById('testRssBtn');
+    const resultDiv = document.getElementById('rssTestResult');
+    
+    if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+        testBtn.disabled = false;
+        testBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        testBtn.disabled = true;
+        testBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    
+    // Test sonucunu temizle
+    resultDiv.classList.add('hidden');
+}
+
+function testRssUrl() {
+    const urlInput = document.getElementById('rss_url');
+    const testBtn = document.getElementById('testRssBtn');
+    const resultDiv = document.getElementById('rssTestResult');
+    
+    const url = urlInput.value.trim();
+    
+    if (!url) {
+        showRssTestResult('RSS URL gerekli', 'error');
+        return;
+    }
+    
+    // Test butonunu disable et
+    testBtn.disabled = true;
+    testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Test Ediliyor...';
+    
+    fetch('/test_rss_url', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({url: url})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const feedInfo = data.feed_info;
+            const message = `✅ RSS geçerli: ${feedInfo.entry_count} makale bulundu. Feed: ${feedInfo.title || 'Bilinmeyen'}`;
+            showRssTestResult(message, 'success');
+        } else {
+            showRssTestResult(`❌ ${data.message}`, 'error');
+        }
+        
+        // Test butonunu tekrar aktif et
+        testBtn.disabled = false;
+        testBtn.innerHTML = '<i class="fas fa-vial"></i> RSS Test Et';
+    })
+    .catch(error => {
+        showRssTestResult(`❌ Test hatası: ${error}`, 'error');
+        
+        // Test butonunu tekrar aktif et
+        testBtn.disabled = false;
+        testBtn.innerHTML = '<i class="fas fa-vial"></i> RSS Test Et';
+    });
+}
+
+function showRssTestResult(message, type) {
+    const resultDiv = document.getElementById('rssTestResult');
+    resultDiv.className = `form-result ${type}`;
+    resultDiv.textContent = message;
+    resultDiv.classList.remove('hidden');
+}
+
 // Form sıfırlama
 function resetForm() {
     document.getElementById('addSourceForm').reset();
@@ -1581,6 +1664,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlInput = document.getElementById('url');
     if (urlInput) {
         urlInput.addEventListener('input', onUrlChange);
+    }
+    
+    // RSS URL değişikliklerini dinle
+    const rssUrlInput = document.getElementById('rss_url');
+    if (rssUrlInput) {
+        rssUrlInput.addEventListener('input', onRssUrlChange);
+    }
+    
+    // RSS test butonunu başlangıçta devre dışı bırak
+    const rssTestBtn = document.getElementById('testRssBtn');
+    if (rssTestBtn) {
+        rssTestBtn.disabled = true;
+        rssTestBtn.classList.add('opacity-50', 'cursor-not-allowed');
     }
     
     // Global değişkenleri başlat

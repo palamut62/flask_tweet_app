@@ -4281,6 +4281,25 @@ def toggle_news_source_route():
     
     return redirect(url_for('news_sources'))
 
+@app.route('/test_rss_url', methods=['POST'])
+@login_required
+def test_rss_url_route():
+    """RSS URL'sini test et (ekleme öncesi)"""
+    try:
+        from utils import validate_rss_source
+        
+        data = request.get_json()
+        url = data.get('url', '').strip()
+        
+        if not url:
+            return jsonify({"success": False, "message": "URL gerekli"})
+        
+        result = validate_rss_source(url)
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Test hatası: {str(e)}"})
+
 @app.route('/test_news_source', methods=['POST'])
 @login_required
 def test_news_source_route():

@@ -37,7 +37,8 @@
       "added_date": "2025-06-18T14:00:00",
       "last_checked": "2025-08-27T17:24:00.586119",
       "article_count": 5,
-      "success_rate": 100
+      "success_rate": 100,
+      "type": "rss"
     },
     {
       "id": "theverge_rss",
@@ -48,7 +49,8 @@
       "added_date": "2025-06-18T14:00:00",
       "last_checked": "2025-08-27T17:24:01.624454",
       "article_count": 5,
-      "success_rate": 100
+      "success_rate": 100,
+      "type": "rss"
     },
     {
       "id": "venturebeat_rss",
@@ -59,7 +61,44 @@
       "added_date": "2025-06-18T14:00:00",
       "last_checked": "2025-08-27T17:24:02.151107",
       "article_count": 4,
-      "success_rate": 100
+      "success_rate": 100,
+      "type": "rss"
+    },
+    {
+      "id": "ainews_rss",
+      "name": "AI News RSS",
+      "url": "https://artificialintelligence-news.com/feed/",
+      "description": "AI odaklı haber kaynağı",
+      "enabled": true,
+      "added_date": "2025-09-02T00:00:00",
+      "last_checked": null,
+      "article_count": 0,
+      "success_rate": 100,
+      "type": "rss"
+    },
+    {
+      "id": "mittr_ai_rss",
+      "name": "MIT Technology Review AI",
+      "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed/",
+      "description": "MIT Technology Review AI bölümü",
+      "enabled": true,
+      "added_date": "2025-09-02T00:00:00",
+      "last_checked": null,
+      "article_count": 0,
+      "success_rate": 100,
+      "type": "rss"
+    },
+    {
+      "id": "decoder_rss",
+      "name": "The Decoder AI News",
+      "url": "https://the-decoder.com/feed/",
+      "description": "AI ve teknoloji haberleri",
+      "enabled": true,
+      "added_date": "2025-09-02T00:00:00",
+      "last_checked": null,
+      "article_count": 0,
+      "success_rate": 100,
+      "type": "rss"
     }
   ]
 }

@@ -20,6 +20,15 @@ from email.mime.multipart import MIMEMultipart
 import time
 import re
 from difflib import SequenceMatcher
+from email.utils import parsedate_to_datetime
+
+# RSS parsing için güvenli import
+try:
+    import feedparser
+    FEEDPARSER_AVAILABLE = True
+except ImportError:
+    FEEDPARSER_AVAILABLE = False
+    feedparser = None
 # emoji kütüphanesi yerine regex kullanacağız
 
 # .env dosyasını yükle
@@ -4891,6 +4900,25 @@ def add_rss_source(name, url, description=""):
         if not url.startswith(('http://', 'https://')):
             url = 'https://' + url
         
+        # RSS feed'i test et
+        if FEEDPARSER_AVAILABLE:
+            try:
+                safe_print(f"🔍 RSS feed test ediliyor: {url}")
+                test_feed = feedparser.parse(url)
+                
+                if hasattr(test_feed, 'bozo') and test_feed.bozo:
+                    safe_print(f"⚠️ RSS format uyarısı: {getattr(test_feed, 'bozo_exception', 'Format sorunu')}")
+                
+                if not test_feed.entries:
+                    return {"success": False, "message": "❌ RSS feed'de makale bulunamadı"}
+                
+                safe_print(f"✅ RSS feed test başarılı: {len(test_feed.entries)} makale bulundu")
+                
+            except Exception as test_error:
+                return {"success": False, "message": f"❌ RSS feed test hatası: {test_error}"}
+        else:
+            safe_print(f"⚠️ feedparser mevcut değil, RSS testi atlanıyor")
+        
         # Aynı URL var mı kontrol et
         for rss_source in config["rss_sources"]:
             if rss_source["url"] == url:
@@ -7021,14 +7049,20 @@ def fetch_articles_with_rss_only():
                 safe_print(f"🔍 RSS çekiliyor: {rss_source['name']}")
                 
                 # RSS feed'i parse et
-                try:
-                    import feedparser
-                    feed = feedparser.parse(rss_source['url'])
-                except ImportError as import_error:
-                    safe_print(f"❌ feedparser kütüphanesi yüklü değil: {import_error}")
+                if not FEEDPARSER_AVAILABLE:
+                    safe_print(f"❌ feedparser kütüphanesi yüklü değil: {rss_source['name']} atlanıyor")
+                    rss_source["success_rate"] = max(0, rss_source.get("success_rate", 100) - 20)
+                    rss_source["last_checked"] = datetime.now().isoformat()
                     continue
+                
+                try:
+                    feed = feedparser.parse(rss_source['url'])
+                    if hasattr(feed, 'bozo') and feed.bozo:
+                        safe_print(f"⚠️ RSS feed format uyarısı ({rss_source['name']}): {getattr(feed, 'bozo_exception', 'Bilinmeyen format sorunu')}")
                 except Exception as feed_error:
                     safe_print(f"❌ RSS feed parse hatası ({rss_source['name']}): {feed_error}")
+                    rss_source["success_rate"] = max(0, rss_source.get("success_rate", 100) - 30)
+                    rss_source["last_checked"] = datetime.now().isoformat()
                     continue
                 
                 if not feed.entries:
@@ -7055,22 +7089,26 @@ def fetch_articles_with_rss_only():
                         entry_date = None
                         date_str = ""
                         
-                        # RSS entry'den tarih al
+                        # RSS entry'den tarih al - Gelişmiş hata yakalama
                         if hasattr(entry, 'published_parsed') and entry.published_parsed:
                             try:
-                                import time
                                 entry_date = datetime(*entry.published_parsed[:6])
-                                date_str = entry.published
-                            except:
-                                pass
+                                date_str = getattr(entry, 'published', '')
+                            except (ValueError, TypeError, OverflowError) as date_error:
+                                safe_print(f"⚠️ RSS tarih parse hatası (published_parsed): {date_error}")
+                                entry_date = None
+                                date_str = ""
                         elif hasattr(entry, 'published'):
                             try:
-                                # RFC 2822 formatını parse et
-                                from email.utils import parsedate_to_datetime
                                 entry_date = parsedate_to_datetime(entry.published)
                                 date_str = entry.published
-                            except:
-                                pass
+                            except (ValueError, TypeError) as date_error:
+                                safe_print(f"⚠️ RSS tarih parse hatası (published): {date_error}")
+                                entry_date = None
+                                date_str = ""
+                        else:
+                            entry_date = None
+                            date_str = ""
                         
                         # 24 saat kontrolü
                         if entry_date:
@@ -7155,11 +7193,20 @@ def fetch_articles_with_rss_only():
                 rss_source["success_rate"] = max(0, rss_source.get("success_rate", 100) - 30)
                 rss_source["last_checked"] = datetime.now().isoformat()
         
-        # Güncellenmiş config'i kaydet
+        # Güncellenmiş config'i kaydet - Gelişmiş hata yakalama
         try:
-            save_json(NEWS_SOURCES_FILE, config)
+            config["settings"]["last_updated"] = datetime.now().isoformat()
+            save_news_sources(config)
+            safe_print(f"💾 RSS kaynak istatistikleri kaydedildi")
         except Exception as save_error:
-            safe_print(f"⚠️ RSS kaynakları kaydetme hatası: {save_error}")
+            safe_print(f"❌ RSS kaynakları kaydetme hatası: {save_error}")
+            # Backup kaydetmeyi dene
+            try:
+                backup_file = f"news_sources_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+                save_json(backup_file, config)
+                safe_print(f"💾 Backup kaydedildi: {backup_file}")
+            except Exception as backup_error:
+                safe_print(f"❌ Backup kaydetme de başarısız: {backup_error}")
         
         print(f"📊 RSS ile toplam {len(all_articles)} yeni makale bulundu (Son 7 gün filtreli)")
         
@@ -7182,6 +7229,34 @@ def fetch_articles_with_rss_only():
     except Exception as e:
         safe_print(f"[HATA] RSS haber çekme genel hatası: {e}")
         return []
+
+def validate_rss_source(url, timeout=10):
+    """RSS kaynağını doğrula ve temel bilgileri döndür"""
+    try:
+        if not FEEDPARSER_AVAILABLE:
+            return {"success": False, "message": "feedparser mevcut değil"}
+        
+        feed = feedparser.parse(url)
+        
+        if hasattr(feed, 'bozo') and feed.bozo:
+            bozo_msg = str(getattr(feed, 'bozo_exception', 'Format sorunu'))
+            if 'not well-formed' in bozo_msg.lower():
+                return {"success": False, "message": f"XML format hatası: {bozo_msg}"}
+        
+        if not feed.entries:
+            return {"success": False, "message": "RSS feed'de makale bulunamadı"}
+        
+        feed_info = {
+            "title": getattr(feed.feed, 'title', 'Bilinmeyen'),
+            "description": getattr(feed.feed, 'description', ''),
+            "entry_count": len(feed.entries),
+            "last_updated": getattr(feed.feed, 'updated', 'Bilinmeyen')
+        }
+        
+        return {"success": True, "feed_info": feed_info}
+        
+    except Exception as e:
+        return {"success": False, "message": f"RSS doğrulama hatası: {e}"}
 
 def fetch_articles_hybrid_mcp_rss():
     """Hibrit sistem: MCP + RSS fallback ile haber çekme"""
