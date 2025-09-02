@@ -7013,7 +7013,7 @@ def fetch_articles_with_rss_only():
         posted_urls = [article.get('url', '') for article in posted_articles]
         posted_hashes = [article.get('hash', '') for article in posted_articles]
         
-        # Son 7 gün içinde paylaşılan makaleleri de kontrol et
+        # Son 24 saat içinde paylaşılan makaleleri de kontrol et
         recent_posted_urls = []
         recent_posted_hashes = []
         
@@ -7162,10 +7162,10 @@ def fetch_articles_with_rss_only():
                                 "method_icon": "📡",
                                 "method_color": "green"
                             })
-                            print(f"🆕 RSS ile yeni makale (7g içinde): {title[:50]}...")
+                            print(f"🆕 RSS ile yeni makale (24h içinde): {title[:50]}...")
                         else:
                             if article_hash in recent_posted_hashes:
-                                print(f"⏰ Son 7 günde paylaşılmış: {title[:50]}...")
+                                print(f"⏰ Son 24 saatte paylaşılmış: {title[:50]}...")
                             else:
                                 safe_print(f"✅ Makale zaten paylaşılmış: {title[:50]}...")
                         
@@ -7208,16 +7208,17 @@ def fetch_articles_with_rss_only():
             except Exception as backup_error:
                 safe_print(f"❌ Backup kaydetme de başarısız: {backup_error}")
         
-        print(f"📊 RSS ile toplam {len(all_articles)} yeni makale bulundu (Son 7 gün filtreli)")
+        print(f"📊 RSS ile toplam {len(all_articles)} yeni makale bulundu (Son 24 saat filtreli)")
         
         # Duplikat filtreleme uygula
         if all_articles:
             all_articles = filter_duplicate_articles(all_articles)
             safe_print(f"🔄 Duplikat filtreleme sonrası: {len(all_articles)} benzersiz makale")
         
-        # 7 gün içindeki makaleleri işaretle
+        # 24 saat içindeki makaleleri işaretle
         for article in all_articles:
-            article['filtered_by_7d'] = True
+            article['filtered_by_7d'] = True  # Backward compatibility
+            article['filtered_by_24h'] = True
             article['filter_applied_at'] = datetime.now().isoformat()
             article['method'] = 'rss'
         
